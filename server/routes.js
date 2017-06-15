@@ -20,22 +20,43 @@
 
 'use strict';
 
-var config = require('./config/environment');
+var fs = require('fs');
 var path = require('path');
 
+var clientConfig = fs.existsSync('./server/clientConfig.json') ? require('./clientConfig.json') : {key:'value'};
+var serverConfig = require('./config/environment');
+
 module.exports = function(app) {
-  app.get('/config/?', function(req, res) {
+  app.get('/serverConfig/?', function(req, res) {
     res.status(200).send({
-      appVersion: config.appVersion,
+      appVersion: serverConfig.appVersion,
       username: req.headers.user ? req.headers.user : 'username',
-      configEndpoint: config.configEndpoint,
-      configPassword: config.configPassword,
-      configUsername: config.configUsername,
-      esHost: config.esHost,
-      esIndex: config.esIndex,
-      esType: config.esType,
-      searchEndpoint: config.searchEndpoint
+      configEndpoint: serverConfig.configEndpoint,
+      configPassword: serverConfig.configPassword,
+      configUsername: serverConfig.configUsername,
+      esHost: serverConfig.esHost,
+      esIndex: serverConfig.esIndex,
+      esType: serverConfig.esType,
+      searchEndpoint: serverConfig.searchEndpoint
     });
+  });
+
+  app.get('/clientConfigEntities/?', function(req, res) {
+    res.status(200).send(clientConfig.entities || {});
+  });
+
+  app.get('/clientConfigFields/?', function(req, res) {
+    res.status(200).send(clientConfig.fields || {});
+  });
+
+  app.post('/saveClientConfig', function(req, res) {
+    if(req.body) {
+      clientConfig = req.body;
+      fs.writeFile('./server/clientConfig.json', JSON.stringify(req.body, null, 2), function(err) {
+        console.log(err);
+      });
+    }
+    res.status(200).send();
   });
 
   app.route('/*').get(function(req, res) {

@@ -54,32 +54,56 @@ limitations under the License.
     <iron-ajax
       auto
       handle-as="json"
-      url="/config"
+      url="/serverConfig"
       last-response="{{serverConfig}}">
     </iron-ajax>
 
     <transform-functions config="[[serverConfig]]" transforms="{{transforms}}"></transform-functions>
 
-    <json-combine
-      data-in1="[[serverConfig.configUsername]]"
-      data-in2="[[serverConfig.configPassword]]"
-      data-out="{{configHeader}}"
-      combine-function="[[createAuthHeader]]">
-    </json-combine>
-
     <iron-ajax
-      auto="[[exists(configHeader)]]"
+      auto
       handle-as="json"
-      headers="[[configHeader]]"
-      url="[[serverConfig.configEndpoint]]"
-      with-credentials
-      loading="{{clientConfigLoading}}"
-      last-error="{{clientConfigError}}"
-      last-response="{{clientConfig}}">
+      url="/clientConfigFields"
+      last-response="{{clientConfigFields}}">
     </iron-ajax>
 
+    <template is="dom-if" if="[[noData(clientConfigFields)]]">
+      <json-combine
+        data-in1="[[serverConfig.configUsername]]"
+        data-in2="[[serverConfig.configPassword]]"
+        data-out="{{configHeader}}"
+        combine-function="[[createAuthHeader]]">
+      </json-combine>
+
+      <iron-ajax
+        auto="[[exists(configHeader)]]"
+        handle-as="json"
+        headers="[[configHeader]]"
+        url="[[serverConfig.configEndpoint]]"
+        with-credentials
+        loading="{{clientConfigLoading}}"
+        last-error="{{clientConfigError}}"
+        last-response="{{clientConfig}}">
+      </iron-ajax>
+
+      <iron-ajax
+        auto="[[exists(clientConfig)]]"
+        body="[[clientConfig]]"
+        content-type="application/json"
+        method="POST"
+        url="/saveClientConfig">
+      </iron-ajax>
+
+      <json-combine
+        data-in1="[[clientConfig]]"
+        data-in2="{}"
+        data-out="{{clientConfigFields}}"
+        combine-function="[[getFields]]">
+      </json-combine>
+    </template>
+
     <json-combine
-      data-in1="[[clientConfig]]"
+      data-in1="[[clientConfigFields]]"
       data-in2="{}"
       data-out="{{searchFields}}"
       combine-function="[[transforms.config.searchFields]]">
@@ -152,10 +176,10 @@ limitations under the License.
 
       <!-- Search toolbar -->
       <paper-toolbar id="navbar">
-        <img class="bottom" src="images/dig-logo-original.png" alt="">
+        <img class="bottom" src="images/dig-logo.png" alt="">
         <div class="bottom drawer-spacer"></div>
 
-        <div class="white-input-container bottom flex">
+        <div class="bottom flex">
           <search-fields-dialog
             date-config="[[dateConfig]]"
             search-fields-config="[[searchFieldsDialogConfig]]"
@@ -247,7 +271,7 @@ limitations under the License.
             <loading-spinner show type="Configuration"></loading-spinner>
           </template>
 
-          <template is="dom-if" if="[[clientConfig]]">
+          <template is="dom-if" if="[[!noData(clientConfigFields)]]">
             <div id="searchTitle" class="layout horizontal">
               <template is="dom-if" if="[[!searchError]]">
                 <div class="layout horizontal flex">
@@ -288,11 +312,12 @@ limitations under the License.
   </template>
 
   <!-- Need to include dependencies here for IE -->
+  <script src="bower_components/lodash/dist/lodash.js"></script>
   <script src="behaviors/filter-behavior.js"></script>
 
   <script>
     (function(document) {
-      /* globals DigBehaviors */
+      /* globals _, DigBehaviors */
       var app = document.querySelector('#app');
 
       app.createAuthHeader = function(username, password) {
@@ -310,8 +335,16 @@ limitations under the License.
         return string === 'date';
       };
 
-      app.exists = function(input) {
-        return typeof input !== 'undefined';
+      app.exists = function(object) {
+        return typeof object !== 'undefined';
+      };
+
+      app.getFields = function(object) {
+        return object.fields || {};
+      };
+
+      app.noData = function(object) {
+        return _.isEmpty(object);
       };
 
       app.noSearchParameters = function() {

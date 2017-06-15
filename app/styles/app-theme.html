@@ -99,12 +99,9 @@ limitations under the License.
     overflow: hidden;
   }
 
-  .white-input-container {
-    margin-left: 20px;
-    /* paper-input */
-    --paper-input-container-color: #dddddd;
-    --paper-input-container-input-color: #ffffff;
-    --paper-input-container-focus-color: #ffffff;
+  search-fields-dialog {
+    /* Center with result-list.  10px right navbar padding + 40px per navbar icon. */
+    margin-left: 50px;
   }
 
   a {
@@ -192,7 +189,10 @@ limitations under the License.
   /* Toolbar mixin */
   #navbar {
     --paper-toolbar-background: var(--dark-primary-color);
-    --paper-toolbar-height: 80px;
+    --paper-toolbar-height: 60px;
+    --paper-toolbar-content: {
+      padding: 0 10px;
+    }
   }
 
   #navbar modal-icon {
@@ -212,25 +212,14 @@ limitations under the License.
 
   #navbar paper-button {
     --paper-button: {
-      margin: 20px 0 0;
       min-width: initial;
       padding: 8px;
     }
   }
 
-  #navbar paper-icon-button {
-    --paper-icon-button: {
-      margin: 20px 0 0;
-    }
-  }
-
-  #navbar load-user-info {
-    margin-top: 20px;
-  }
-
   /* Spacer to match drawer width */
   #navbar .drawer-spacer {
-    width: 200px;
+    width: 220px;
   }
 
   /* Decreasing z-index for leaflet controls so that they

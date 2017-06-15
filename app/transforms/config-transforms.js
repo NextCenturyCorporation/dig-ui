@@ -76,8 +76,7 @@ var configTransforms = (function(_, commonTransforms) {
       return dateConfig;
     },
 
-    searchFields: function(config) {
-      var fields = config.fields;
+    searchFields: function(fields) {
       return _.keys(fields || {}).filter(function(id) {
         return !!fields[id].type;
       }).map(function(id) {

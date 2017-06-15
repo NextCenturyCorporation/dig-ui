@@ -253,14 +253,17 @@ gulp.task('clean', function() {
 
 // Watch files for changes & reload
 gulp.task('serve', ['lint', 'styles', 'elements', 'nodemon'], function() {
-  var configProxyOptions = url.parse('http://localhost:9000/config');
-  configProxyOptions.route = '/config';
+  var serverConfigProxyOptions = url.parse('http://localhost:9000/serverConfig');
+  serverConfigProxyOptions.route = '/serverConfig';
 
-  var downloadProxyOptions = url.parse('http://localhost:9000/download');
-  downloadProxyOptions.route = '/download';
+  var clientConfigEntitiesProxyOptions = url.parse('http://localhost:9000/clientConfigEntities');
+  clientConfigEntitiesProxyOptions.route = '/clientConfigEntities';
 
-  var uploadProxyOptions = url.parse('http://localhost:9000/upload');
-  uploadProxyOptions.route = '/upload';
+  var clientConfigFieldsProxyOptions = url.parse('http://localhost:9000/clientConfigFields');
+  clientConfigFieldsProxyOptions.route = '/clientConfigFields';
+
+  var saveClientConfigProxyOptions = url.parse('http://localhost:9000/saveClientConfig');
+  saveClientConfigProxyOptions.route = '/saveClientConfig';
 
   browserSync({
     port: 5009,
@@ -280,7 +283,13 @@ gulp.task('serve', ['lint', 'styles', 'elements', 'nodemon'], function() {
     // https: true,
     server: {
       baseDir: ['.tmp', 'app'],
-      middleware: [proxy(configProxyOptions), proxy(downloadProxyOptions), proxy(uploadProxyOptions), historyApiFallback()]
+      middleware: [
+        proxy(serverConfigProxyOptions),
+        proxy(clientConfigEntitiesProxyOptions),
+        proxy(clientConfigFieldsProxyOptions),
+        proxy(saveClientConfigProxyOptions),
+        historyApiFallback()
+      ]
     }
   });
 
@@ -293,14 +302,17 @@ gulp.task('serve', ['lint', 'styles', 'elements', 'nodemon'], function() {
 
 // Build and serve the output from the dist build
 gulp.task('serve:dist', ['default', 'nodemon'], function() {
-  var configProxyOptions = url.parse('http://localhost:9000/config');
-  configProxyOptions.route = '/config';
+  var serverConfigProxyOptions = url.parse('http://localhost:9000/serverConfig');
+  serverConfigProxyOptions.route = '/serverConfig';
 
-  var downloadProxyOptions = url.parse('http://localhost:9000/download');
-  downloadProxyOptions.route = '/download';
+  var clientConfigEntitiesProxyOptions = url.parse('http://localhost:9000/clientConfigEntities');
+  clientConfigEntitiesProxyOptions.route = '/clientConfigEntities';
 
-  var uploadProxyOptions = url.parse('http://localhost:9000/upload');
-  uploadProxyOptions.route = '/upload';
+  var clientConfigFieldsProxyOptions = url.parse('http://localhost:9000/clientConfigFields');
+  clientConfigFieldsProxyOptions.route = '/clientConfigFields';
+
+  var saveClientConfigProxyOptions = url.parse('http://localhost:9000/saveClientConfig');
+  saveClientConfigProxyOptions.route = '/saveClientConfig';
 
   browserSync({
     port: 5001,
@@ -319,7 +331,13 @@ gulp.task('serve:dist', ['default', 'nodemon'], function() {
     //       will present a certificate warning in the browser.
     // https: true,
     server: dist(),
-    middleware: [proxy(configProxyOptions), proxy(downloadProxyOptions), proxy(uploadProxyOptions), historyApiFallback()]
+    middleware: [
+      proxy(serverConfigProxyOptions),
+      proxy(clientConfigEntitiesProxyOptions),
+      proxy(clientConfigFieldsProxyOptions),
+      proxy(saveClientConfigProxyOptions),
+      historyApiFallback()
+    ]
   });
 });
 
