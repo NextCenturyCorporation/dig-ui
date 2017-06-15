@@ -1,0 +1,120 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/styled-dialog/styled-dialog.html">
+<link rel="import" href="../../styles/info-styles.html">
+<link rel="import" href="../lodash.html">
+
+<dom-module id="info-search">
+  <template>
+    <style include="iron-flex"></style>
+    <style include="info-styles"></style>
+
+    <style>
+      :host {
+        display: block;
+        margin-left: 10px;
+      }
+
+      .normal-bold {
+        font-weight: bold;
+      }
+    </style>
+
+    <div class="link" on-tap="open">
+      <iron-icon icon="icons:help"></iron-icon>
+      <span>[[_header]]</span>
+    </div>
+
+    <styled-dialog id="dialog" header="[[_header]]">
+      <div class="styled-dialog-bold">Search Terms</div>
+      <div class="styled-dialog-text">Each search result must contain <span class="normal-bold">one or more</span> of the entered search terms in either its title or its content.</div>
+      <div class="styled-dialog-text normal-bold">[[_termText]]</div>
+      <div class="styled-dialog-text">Searches ignore all punctuation used in the terms except periods.</div>
+      <div class="styled-dialog-text">Selecting additional search terms generates a greater number of results.</div>
+
+      <div></div>
+
+      <div class="styled-dialog-bold">Ranking</div>
+      <div class="styled-dialog-text">Search results that contain multiple keywords or the same keyword multiple times are ranked higher.</div>
+    </styled-dialog>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    /* globals _ */
+    Polymer({
+      is: 'info-search',
+
+      properties: {
+        searchParameters: {
+          type: Object
+        },
+
+        _termText: {
+          computed: '_computeTermText(searchParameters.*)',
+          type: String
+        },
+
+        _header: {
+          type: String,
+          value: 'How are search results found?'
+        }
+      },
+
+      /**
+       * Returns the search term text.
+       */
+      _computeTermText: function() {
+        var self = this;
+        var facets = [];
+
+        _.keys(this.searchParameters).forEach(function(id) {
+          if(!_.isEmpty(self.searchParameters[id])) {
+            _.keys(self.searchParameters[id]).forEach(function(term) {
+              if(self.searchParameters[id][term].enabled) {
+                facets.push(id + '=' + self.searchParameters[id][term].text);
+              }
+            });
+          }
+        });
+
+        return facets.length ? facets.join(' OR ') : 'No Search Terms';
+      },
+
+      /**
+       * Closes the dialog.
+       */
+      close: function() {
+        this.$$('#dialog').close();
+      },
+
+      /**
+       * Opens the dialog.
+       */
+      open: function() {
+        this.$$('#dialog').open();
+      }
+    });
+  })();
+  </script>
+</dom-module>

@@ -1,0 +1,340 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!doctype html>
+
+<html lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>DIG</title>
+
+  <link rel="icon" href="favicon.ico"/>
+
+  <!-- build:css styles/main.css -->
+  <!-- Must link leaflet css (https://github.com/leaflet-extras/leaflet-map/issues/46) -->
+  <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild-->
+
+  <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
+  <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <!-- endbuild -->
+
+  <script src="scripts/google-analytics.js"></script>
+  
+  <!-- will be replaced with elements/elements.vulcanized.html -->
+  <link rel="import" href="elements/elements.html">
+  <!-- endreplace-->
+
+  <link rel="import" href="styles/entity-styles.html">
+  <style is="custom-style" include="entity-styles"></style>
+</head>
+
+<body unresolved class="fullbleed layout vertical">
+  <span id="browser-sync-binding"></span>
+
+  <template is="dom-bind" id="app">
+    <iron-ajax
+      auto
+      handle-as="json"
+      url="/config"
+      last-response="{{serverConfig}}">
+    </iron-ajax>
+
+    <client-config config="[[serverConfig]]" transforms="{{transforms}}"></client-config>
+
+    <json-combine
+      data-in1="[[serverConfig.configUsername]]"
+      data-in2="[[serverConfig.configPassword]]"
+      data-out="{{configHeader}}"
+      combine-function="[[createAuthHeader]]">
+    </json-combine>
+
+    <iron-ajax
+      auto="[[exists(configHeader)]]"
+      handle-as="json"
+      headers="[[configHeader]]"
+      url="[[serverConfig.configEndpoint]]"
+      with-credentials
+      loading="{{pageConfigLoading}}"
+      last-error="{{pageConfigError}}"
+      last-response="{{pageConfig}}">
+    </iron-ajax>
+
+    <json-combine
+      data-in1="[[pageConfig]]"
+      data-in2="{}"
+      data-out="{{searchFields}}"
+      combine-function="[[transforms.config.searchFields]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{dateConfig}}"
+      combine-function="[[transforms.config.dateConfig]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{searchFieldsDialogConfig}}"
+      combine-function="[[transforms.config.searchFieldsDialogConfig]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{searchParameters}}"
+      combine-function="[[transforms.config.searchParameters]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{searchKeys}}"
+      combine-function="[[transforms.config.searchKeys]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[dateConfig]]"
+      data-in2="{}"
+      data-out="{{searchQuery}}"
+      combine-function="[[transforms.search.createSearchQuery]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[dateConfig]]"
+      data-in2="{}"
+      data-out="{{facetsQuery}}"
+      combine-function="[[transforms.search.createFacetsQuery]]">
+    </json-combine>
+
+    <query-transformer
+      error="{{searchError}}"
+      loading="{{searchLoading}}"
+      page="{{resultPage}}"
+      page-size="25"
+      process-request="[[processRequest]]"
+      result-function="[[transforms.search.searchResults]]"
+      results="{{searchResults}}"
+      total="{{resultsTotalCount}}"
+      search-parameters="[[searchParameters]]"
+      search-function="[[searchQuery]]"
+      url="[[serverConfig.searchEndpoint]]">
+    </query-transformer>
+
+    <json-combine
+      data-in1="[[searchResults]]"
+      data-in2="[[searchFields]]"
+      data-out="{{results}}"
+      combine-function="[[transforms.entity.documents]]">
+    </json-combine>
+
+    <paper-header-panel class="flex" mode="waterfall">
+
+      <!-- Search toolbar -->
+      <paper-toolbar id="navbar">
+        <img class="bottom" src="images/dig-logo-original.png" alt="">
+        <div class="bottom drawer-spacer"></div>
+
+        <div class="white-input-container bottom flex">
+          <search-fields-dialog
+            date-config="[[dateConfig]]"
+            search-fields-config="[[searchFieldsDialogConfig]]"
+            search-parameters="{{searchParameters}}"
+            process-request="{{processRequest}}">
+          </search-fields-dialog>
+        </div>
+
+        <a class="bottom" href="." style="color: #ffffff;">
+          <paper-icon-button icon="clear" title="Reset Page"></paper-icon-button>
+        </a>
+      </paper-toolbar>
+
+      <paper-drawer-panel drawer-width="320px">
+
+        <!-- Sidebar on left side -->
+        <paper-header-panel drawer>
+          <template is="dom-if" if="[[searchParameters]]">
+            <paper-toolbar class="drawer-header">
+              <div class="layout vertical">
+                <template is="dom-if" if="[[!noSearchParameters(searchParameters.*)]]">
+                  <div class="selected-facets-header">Search Terms</div>
+                </template>
+
+                <template is="dom-if" if="[[noSearchParameters(searchParameters.*)]]">
+                  <div class="selected-facets-header">No Search Terms</div>
+                </template>
+
+                <div class="layout horizontal wrap">
+                  <template is="dom-repeat" items="[[searchKeys]]">
+                    <selected-facets-display facet-key="[[item]]" facets="{{searchParameters}}"></selected-facets-display>
+                  </template>
+                </div>
+              </div>
+            </paper-toolbar>
+
+            <iron-pages attr-for-selected="data-type" selected="documents">
+              <div data-type="documents">
+                <div class="layout horizontal facet expand-collapse-all" title="Toggle All Facets" on-tap="toggleAllFacetLists">
+                  <span class="flex">Facets</span>
+                  <span>[[getToggleAllFacetsText(facetListsExpanded)]]</span>
+                  <iron-icon icon="[[getToggleAllFacetsIcon(facetListsExpanded)]]"></iron-icon>
+                </div>
+
+                <info-facets></info-facets>
+
+                <template is="dom-repeat" items="[[searchFields]]">
+                  <template is="dom-if" if="[[item.facets]]">
+                    <template is="dom-if" if="[[equalsDate(item.type)]]">
+                      <date-range-facet
+                        class="facet"
+                        date-start-key="[[item.dateProperties.start.key]]"
+                        date-start-title="[[item.dateProperties.start.title]]"
+                        date-start-prefix-label="[[item.dateProperties.start.title]]"
+                        date-start-identifier="[[item.dateProperties.start.dateIdentifier]]"
+                        date-end-key="[[item.dateProperties.end.key]]"
+                        date-end-title="[[item.dateProperties.end.title]]"
+                        date-end-prefix-label="[[item.dateProperties.end.title]]"
+                        date-end-identifier="[[item.dateProperties.end.dateIdentifier]]"
+                        search-parameters-property="[[item.key]]"
+                        search-parameters="{{searchParameters}}">
+                      </date-range-facet>
+                    </template>
+
+                    <template is="dom-if" if="[[!equalsDate(item.type)]]">
+                      <facet-list
+                        class="facet"
+                        query-url="[[serverConfig.searchEndpoint]]"
+                        name="[[item.key]]"
+                        title="[[item.title]]"
+                        target="_blank"
+                        result-function="[[item.aggregationTransform]]"
+                        search-function="[[facetsQuery]]"
+                        search-parameters-property="[[item.key]]"
+                        search-parameters="{{searchParameters}}"
+                        process-request="{{processRequest}}">
+                      </facet-list>
+                    </template>
+                  </template>
+                </template>
+              </div>
+            </iron-pages>
+          </template>
+        </paper-header-panel>
+
+        <!-- Main content on right side -->
+        <paper-header-panel main id="searchPanel">
+          <div id="searchTitle" class="layout horizontal">
+            <template is="dom-if" if="[[pageConfigLoading]]">
+              <loading-spinner show type="Configuration"></loading-spinner>
+            </template>
+
+            <template is="dom-if" if="[[!searchError]]">
+              <div class="layout horizontal flex">
+                <div class="paper-font-title">[[resultListHeader]]</div>
+
+                <template is="dom-if" if="[[resultsTotalCount]]">
+                  <info-search search-parameters="[[searchParameters]]"></info-search>
+                </template>
+              </div>
+            </template>
+
+            <template is="dom-if" if="[[searchError]]">
+              <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
+              <div class="paper-font-title flex">
+                [[searchErrorMessage]]
+              </div>
+            </template>
+          </div>
+
+          <result-list
+            id="searchResults"
+            new-tab
+            text-property="title"
+            query-results="[[results]]"
+            total-results="[[resultsTotalCount]]"
+            page="{{resultPage}}"
+            page-size="25"
+            loading="[[searchLoading]]"
+            header="{{resultListHeader}}">
+          </result-list>
+        </paper-header-panel>
+
+      </paper-drawer-panel>
+
+    </paper-header-panel>
+
+  </template>
+
+  <!-- Need to include dependencies here for IE -->
+  <script src="behaviors/filter-behavior.js"></script>
+
+  <script>
+    (function(document) {
+      /* globals DigBehaviors */
+      var app = document.querySelector('#app');
+
+      app.createAuthHeader = function(username, password) {
+        if(username && password) {
+          return {
+            'Authorization': 'Basic ' + btoa(username + ':' + password)
+          };
+        }
+        return {};
+      };
+
+      app.facetListsExpanded = true;
+
+      app.equalsDate = function(string) {
+        return string === 'date';
+      };
+
+      app.exists = function(input) {
+        return typeof input !== 'undefined';
+      };
+
+      app.noSearchParameters = function() {
+        return DigBehaviors.FilterBehavior.areAllFacetsDisabled(this.searchParameters);
+      };
+
+      app.toggleAllFacetLists = function() {
+        app.facetListsExpanded = !app.facetListsExpanded;
+        // All facet lists should have the class 'facet'
+        var allFacetListNames = document.querySelectorAll('.facet');
+
+        for(var i = 0, length = allFacetListNames.length; i < length; i++) {
+          allFacetListNames[i].opened = app.facetListsExpanded;
+        }
+      };
+
+      app.getToggleAllFacetsText = function() {
+        return (app.facetListsExpanded ? 'Collapse' : 'Expand') + ' All';
+      };
+
+      app.getToggleAllFacetsIcon = function() {
+        return (app.facetListsExpanded ? 'icons:expand-less' : 'icons:expand-more');
+      };
+    })(document);
+  </script>
+</body>
+
+</html>
