@@ -58,7 +58,7 @@ limitations under the License.
       last-response="{{serverConfig}}">
     </iron-ajax>
 
-    <client-config config="[[serverConfig]]" transforms="{{transforms}}"></client-config>
+    <transform-functions config="[[serverConfig]]" transforms="{{transforms}}"></transform-functions>
 
     <json-combine
       data-in1="[[serverConfig.configUsername]]"
@@ -73,13 +73,13 @@ limitations under the License.
       headers="[[configHeader]]"
       url="[[serverConfig.configEndpoint]]"
       with-credentials
-      loading="{{pageConfigLoading}}"
-      last-error="{{pageConfigError}}"
-      last-response="{{pageConfig}}">
+      loading="{{clientConfigLoading}}"
+      last-error="{{clientConfigError}}"
+      last-response="{{clientConfig}}">
     </iron-ajax>
 
     <json-combine
-      data-in1="[[pageConfig]]"
+      data-in1="[[clientConfig]]"
       data-in2="{}"
       data-out="{{searchFields}}"
       combine-function="[[transforms.config.searchFields]]">
@@ -243,40 +243,42 @@ limitations under the License.
 
         <!-- Main content on right side -->
         <paper-header-panel main id="searchPanel">
-          <div id="searchTitle" class="layout horizontal">
-            <template is="dom-if" if="[[pageConfigLoading]]">
-              <loading-spinner show type="Configuration"></loading-spinner>
-            </template>
+          <template is="dom-if" if="[[clientConfigLoading]]">
+            <loading-spinner show type="Configuration"></loading-spinner>
+          </template>
 
-            <template is="dom-if" if="[[!searchError]]">
-              <div class="layout horizontal flex">
-                <div class="paper-font-title">[[resultListHeader]]</div>
+          <template is="dom-if" if="[[clientConfig]]">
+            <div id="searchTitle" class="layout horizontal">
+              <template is="dom-if" if="[[!searchError]]">
+                <div class="layout horizontal flex">
+                  <div class="paper-font-title">[[resultListHeader]]</div>
 
-                <template is="dom-if" if="[[resultsTotalCount]]">
-                  <info-search search-parameters="[[searchParameters]]"></info-search>
-                </template>
-              </div>
-            </template>
+                  <template is="dom-if" if="[[resultsTotalCount]]">
+                    <info-search search-parameters="[[searchParameters]]"></info-search>
+                  </template>
+                </div>
+              </template>
 
-            <template is="dom-if" if="[[searchError]]">
-              <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
-              <div class="paper-font-title flex">
-                [[searchErrorMessage]]
-              </div>
-            </template>
-          </div>
+              <template is="dom-if" if="[[searchError]]">
+                <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
+                <div class="paper-font-title flex">
+                  [[searchErrorMessage]]
+                </div>
+              </template>
+            </div>
 
-          <result-list
-            id="searchResults"
-            new-tab
-            text-property="title"
-            query-results="[[results]]"
-            total-results="[[resultsTotalCount]]"
-            page="{{resultPage}}"
-            page-size="25"
-            loading="[[searchLoading]]"
-            header="{{resultListHeader}}">
-          </result-list>
+            <result-list
+              id="searchResults"
+              new-tab
+              text-property="title"
+              query-results="[[results]]"
+              total-results="[[resultsTotalCount]]"
+              page="{{resultPage}}"
+              page-size="25"
+              loading="[[searchLoading]]"
+              header="{{resultListHeader}}">
+            </result-list>
+          </template>
         </paper-header-panel>
 
       </paper-drawer-panel>
