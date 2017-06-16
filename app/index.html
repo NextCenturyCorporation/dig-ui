@@ -191,6 +191,27 @@ limitations under the License.
         <a class="bottom" href="." style="color: #ffffff;">
           <paper-icon-button icon="clear" title="Reset Page"></paper-icon-button>
         </a>
+
+        <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+
+        <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="60">
+          <div class="dropdown-content">
+            <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
+              <iron-icon icon="refresh" item-icon></iron-icon>
+              Reload the DIG Configuration
+            </paper-icon-item>
+
+            <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+              <iron-icon icon="open-in-new" item-icon></iron-icon>
+              Open a DIG Search Page in a New Tab
+            </paper-icon-item>
+
+            <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+              <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
+              Contact Support (dig-support@nextcentury.com)
+            </paper-icon-item>
+          </div>
+        </iron-dropdown>
       </paper-toolbar>
 
       <paper-drawer-panel drawer-width="320px">
@@ -329,8 +350,6 @@ limitations under the License.
         return {};
       };
 
-      app.facetListsExpanded = true;
-
       app.equalsDate = function(string) {
         return string === 'date';
       };
@@ -351,6 +370,9 @@ limitations under the License.
         return DigBehaviors.FilterBehavior.areAllFacetsDisabled(this.searchParameters);
       };
 
+      /************ FACETS ************/
+      app.facetListsExpanded = true;
+
       app.toggleAllFacetLists = function() {
         app.facetListsExpanded = !app.facetListsExpanded;
         // All facet lists should have the class 'facet'
@@ -368,6 +390,29 @@ limitations under the License.
       app.getToggleAllFacetsIcon = function() {
         return (app.facetListsExpanded ? 'icons:expand-less' : 'icons:expand-more');
       };
+      /********************************/
+
+      /************* MENU *************/
+      app.toggleMenu = function() {
+        if(this.$.menuDropdown.style.display === 'none') {
+          this.$.menuDropdown.open();
+        } else {
+          this.$.menuDropdown.close();
+        }
+      };
+
+      app.reloadClientConfig = function() {
+        app.set('clientConfigFields', {});
+      };
+
+      app.openNewTab = function() {
+        window.open('.');
+      };
+
+      app.emailSupport = function() {
+        window.open('mailto:dig-support@nextcentury.com');
+      };
+      /********************************/
     })(document);
   </script>
 </body>
