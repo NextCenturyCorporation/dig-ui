@@ -156,8 +156,15 @@ limitations under the License.
     <json-combine
       data-in1="[[params.id]]"
       data-in2="[[params.type]]"
-      data-out="{{formattedId}}"
+      data-out="{{pageEntityId}}"
       combine-function="[[transforms.config.formatId]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[params.id]]"
+      data-in2="[[params.type]]"
+      data-out="{{pageEntityName}}"
+      combine-function="[[transforms.config.formatName]]">
     </json-combine>
 
     <json-combine
@@ -195,10 +202,10 @@ limitations under the License.
 
     <build-and-run-query
       fields="[[entityPageConfig.field]]"
-      values="[[params.id]]"
+      values="[[pageEntityId]]"
       client="[[esClient]]"
       index-name="[[serverConfig.esIndex]]"
-      index-types="[[config.esType]]"
+      index-types="[[serverConfig.esType]]"
       aggregations="[]"
       filters="[[filterList]]"
       page="{{documentPage}}"
@@ -238,7 +245,7 @@ limitations under the License.
             <div class="page-name">
               <template is="dom-if" if="[[entityPageConfig]]">
                 <div class="paper-font-headline">
-                  [[entityPageConfig.title]]: <span>[[formattedId]]</span>
+                  [[entityPageConfig.title]]: <span>[[pageEntityName]]</span>
                 </div>
               </template>
               <template is="dom-if" if="[[documentsTotal]]">
@@ -294,17 +301,17 @@ limitations under the License.
                     selected-property="[[item.key]]"
                     selected="{{filterCollection}}"
                     query-field="[[entityPageConfig.field]]"
-                    query-value="[[params.id]]"
+                    query-value="[[pageEntityId]]"
                     client="[[esClient]]"
                     index-name="[[serverConfig.esIndex]]"
                     index-types="[[serverConfig.esType]]"
                     filter-list="[[filterList]]"
-                    transform-config="[[createExtractionsConfig(item, entityPageConfig, params.id)]]"
+                    transform-config="[[createExtractionsConfig(item, entityPageConfig, pageEntityId)]]"
                     transform-function="[[transforms.entity.extractions]]"
                     data="{{mapData}}"
                     header-data-name="[[item.title]]"
                     header-counts-name="Results"
-                    header-entity-name="[[formattedId]]"
+                    header-entity-name="[[pageEntityName]]"
                     show-checkboxes>
                   </aggregation-query-and-display>
                 </section-and-map>
@@ -326,23 +333,23 @@ limitations under the License.
                     selected-property="[[item.key]]"
                     selected="{{filterCollection}}"
                     query-field="[[entityPageConfig.field]]"
-                    query-value="[[params.id]]"
+                    query-value="[[pageEntityId]]"
                     client="[[esClient]]"
                     index-name="[[serverConfig.esIndex]]"
                     index-types="[[serverConfig.esType]]"
                     filter-list="[[filterList]]"
-                    transform-config="[[createExtractionsConfig(item, entityPageConfig, params.id)]]"
+                    transform-config="[[createExtractionsConfig(item, entityPageConfig, pageEntityId)]]"
                     transform-function="[[transforms.entity.extractions]]"
                     data="{{item.aggregationData}}"
                     header-data-name="[[item.title]]"
                     header-counts-name="Results"
-                    header-entity-name="[[formattedId]]"
+                    header-entity-name="[[pageEntityName]]"
                     show-checkboxes
                     show-double-bar-chart="[[showDoubleBarChart(item)]]">
                   </aggregation-query-and-display>
 
                   <template is="dom-if" if="[[item.aggregationData.length]]">
-                    <info-aggregations entity="[[formattedId]]" type="[[item.title]]"></info-aggregations>
+                    <info-aggregations entity="[[pageEntityName]]" type="[[item.title]]"></info-aggregations>
                   </template>
                 </section-and-title>
               </template>
@@ -362,13 +369,13 @@ limitations under the License.
                     filter-list="[]"
                     header-data-name="[[item.title]]"
                     header-counts-name="Results"
-                    header-entity-name="[[formattedId]]"
+                    header-entity-name="[[pageEntityName]]"
                     image-id-property="source"
                     index-name="[[serverConfig.esIndex]]"
                     index-types="[[serverConfig.esType]]"
                     query-fields="[[entityPageConfig.field]]"
-                    query-values="[[params.id]]"
-                    transform-config="[[createExtractionsConfig(item, entityPageConfig, params.id)]]"
+                    query-values="[[pageEntityId]]"
+                    transform-config="[[createExtractionsConfig(item, entityPageConfig, pageEntityId)]]"
                     transform-function="[[transforms.entity.extractions]]"
                     small-image-style-class="[[getBlurStyleClass(blurImages)]]"
                     large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
@@ -400,23 +407,23 @@ limitations under the License.
                     selected-property="[[item.key]]"
                     selected="{{filterCollection}}"
                     query-field="[[entityPageConfig.field]]"
-                    query-value="[[params.id]]"
+                    query-value="[[pageEntityId]]"
                     client="[[esClient]]"
                     index-name="[[serverConfig.esIndex]]"
                     index-types="[[serverConfig.esType]]"
                     filter-list="[[filterList]]"
-                    transform-config="[[createExtractionsConfig(item, entityPageConfig, params.id)]]"
+                    transform-config="[[createExtractionsConfig(item, entityPageConfig, pageEntityId)]]"
                     transform-function="[[transforms.entity.extractions]]"
                     data="{{item.aggregationData}}"
                     header-data-name="[[item.title]]"
                     header-counts-name="Results"
-                    header-entity-name="[[formattedId]]"
+                    header-entity-name="[[pageEntityName]]"
                     show-checkboxes
                     show-double-bar-chart="[[showDoubleBarChart(item)]]">
                   </aggregation-query-and-display>
 
                   <template is="dom-if" if="[[item.aggregationData.length]]">
-                    <info-aggregations entity="[[formattedId]]" type="[[item.title]]"></info-aggregations>
+                    <info-aggregations entity="[[pageEntityName]]" type="[[item.title]]"></info-aggregations>
                   </template>
                 </section-and-title>
               </template>
@@ -446,7 +453,7 @@ limitations under the License.
                 <build-and-run-query
                   type="terms"
                   fields="[[entityPageConfig.field]]"
-                  values="[[params.id]]"
+                  values="[[pageEntityId]]"
                   client="[[esClient]]"
                   index-name="[[serverConfig.esIndex]]"
                   index-types="[[serverConfig.esType]]"
@@ -455,7 +462,7 @@ limitations under the License.
                   page-size="0"
                   source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
                   source-exclude='["knowledge_graph.*.provenance"]'
-                  transform-config="[[createHistogramConfig(item.date, item.entity, entityPageConfig, params.id)]]"
+                  transform-config="[[createHistogramConfig(item.date, item.entity, entityPageConfig, pageEntityId)]]"
                   transform-function="[[transforms.entity.histogram]]"
                   error="{{histogramError}}"
                   loading="{{histogramLoading}}"

@@ -54,13 +54,6 @@ var commonTransforms = (function(_, moment) {
       }
       return '/entity.html?id=' + key + '&type=' + type;
     }
-
-    // TODO: for when we are ready to show image entity pages
-    /*if(key && link === 'image') {
-      var linkId = decodeURIComponent(key.substring(key.lastIndexOf('/') + 1));
-      return '/image.html?id=' + linkId;
-    }*/
-
     return undefined;
   }
 
@@ -167,6 +160,9 @@ var commonTransforms = (function(_, moment) {
    * Returns the ID for the facets data with the given key and type.
    */
   function getFacetsDataId(key, type) {
+    if(type === 'email') {
+      return decodeURIComponent(key);
+    }
     if(type === 'hyphenated') {
       // Formatted text-key1:value1-key2:value2-key3:value3...
       var keySplit = key.split('-');
@@ -210,16 +206,10 @@ var commonTransforms = (function(_, moment) {
    * Returns the ID for the extraction data with the given key, value, and type.
    */
   function getExtractionDataId(key, value, type) {
-    if(type === 'hyphenated') {
-      // Formatted text-key1:value1-key2:value2-key3:value3...
-      var keySplit = key.split('-');
-      return keySplit.length ? keySplit[0] : '';
+    if(type === 'email') {
+      return decodeURIComponent(key || value);
     }
-    if(type === 'username') {
-      // Formatted <website> <username>
-      return key.indexOf(' ') ? key.substring(key.indexOf(' ') + 1) : key;
-    }
-    return key;
+    return key || value;
   }
 
   /**

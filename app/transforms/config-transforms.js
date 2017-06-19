@@ -117,6 +117,10 @@ var configTransforms = (function(_, commonTransforms) {
     },
 
     formatId: function(id, type) {
+      return commonTransforms.getExtractionDataId(id, id, type);
+    },
+
+    formatName: function(id, type) {
       return commonTransforms.getExtractionDataText(id, id, type);
     },
 
