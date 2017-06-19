@@ -75,9 +75,7 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
 
   function getExtractionsFromResult(result, path, config) {
     var data = _.get(result, path, []);
-    // TODO Don't slice the extraction list once the data can support it.
-    return getExtractionsFromList(data, config).slice(0, 10);
-    //return getExtractionsFromList(data, config);
+    return getExtractionsFromList(data, config);
   }
 
   function getHighlightedText(result, paths) {
@@ -145,11 +143,12 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
     }
     return {
       data: data,
+      key: config.key,
       name: config.titlePlural
     };
   }
 
-  function getDocumentObject(result, searchFields, highlightMapping) {
+  function getDocumentObject(result, searchFields, documentPage, highlightMapping) {
     var id = _.get(result, '_source.doc_id');
     var url = _.get(result, '_source.url');
 
@@ -171,6 +170,7 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
       link: commonTransforms.getLink(id, 'entity', 'document'),
       styleClass: '',
       cached: commonTransforms.getLink(id, 'cached'),
+      esData: esDataEndpoint,
       // TODO
       title: getSingleStringFromResult(result, '_source.content_extraction.title', 'text') || 'No Title',
       description: getSingleStringFromResult(result, '_source.content_extraction.content_strict', 'text') || 'No Description',
@@ -183,21 +183,27 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
     documentObject.headerExtractions = searchFields.filter(function(object) {
       return object.result === 'header';
     }).map(function(object) {
-      return getHighlightedExtractionObjectFromResult(result, object, highlightMapping);
+      var extractionObject = getHighlightedExtractionObjectFromResult(result, object, highlightMapping);
+      // TODO Don't truncate the extractions once the data can support it.
+      if(!documentPage) {
+        extractionObject.data = extractionObject.data.slice(0, 10);
+      }
+      return extractionObject;
     });
 
     var domainExtraction = getExtraction({
       key: domain,
     }, {
       color: 'light green',
-      key: 'website',
+      key: '_domain',
       icon: 'av:web',
       type: 'url'
     });
 
     documentObject.headerExtractions.splice(0, 0, {
-      name: 'Website',
-      data: [domainExtraction]
+      data: [domainExtraction],
+      key: '_domain',
+      name: 'Website'
     });
 
     documentObject.detailExtractions = searchFields.filter(function(object) {
@@ -312,7 +318,7 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
   return {
     document: function(data, searchFields) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
-        return getDocumentObject(data.hits.hits[0], searchFields);
+        return getDocumentObject(data.hits.hits[0], searchFields, true);
       }
       return {};
     },
@@ -321,7 +327,7 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
         return data.hits.hits.map(function(result) {
           // Data returned by the searchResults function from the searchTransforms will have a "fields" property.
-          return getDocumentObject(result, searchFields, data.fields);
+          return getDocumentObject(result, searchFields, false, data.fields);
         });
       }
       return [];
@@ -333,7 +339,7 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
 
       if(data && data.aggregations && data.aggregations[config.entity.key] && data.aggregations[config.entity.key][config.entity.key]) {
         extractions = getExtractionsFromList(data.aggregations[config.entity.key][config.entity.key].buckets || [], config.entity).filter(function(extraction) {
-          var result = config.id ? extraction.id !== config.id : true;
+          var result = config.id && config.page && config.page.type == config.entity.type ? extraction.id !== config.id : true;
           sayOther = sayOther || !result;
           return result;
         });

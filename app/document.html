@@ -1,0 +1,556 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!doctype html>
+
+<html lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>DIG</title>
+
+  <link rel="icon" href="favicon.ico"/>
+
+  <!-- build:css styles/main.css -->
+  <!-- Must link leaflet css (https://github.com/leaflet-extras/leaflet-map/issues/46) -->
+  <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild-->
+
+  <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
+  <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <!-- endbuild -->
+
+  <script src="scripts/google-analytics.js"></script>
+  
+  <!-- will be replaced with elements/elements.vulcanized.html -->
+  <link rel="import" href="elements/elements.html">
+  <!-- endreplace-->
+
+  <link rel="import" href="styles/entity-styles.html">
+  <link rel="import" href="styles/entity-page-styles.html">
+  <style is="custom-style" include="entity-styles"></style>
+  <style is="custom-style" include="entity-page-styles"></style>
+</head>
+
+<body unresolved class="fullbleed layout vertical">
+  <span id="browser-sync-binding"></span>
+
+  <template is="dom-bind" id="app">
+    <iron-ajax
+      auto
+      handle-as="json"
+      url="/serverConfig"
+      last-response="{{serverConfig}}">
+    </iron-ajax>
+
+    <transform-functions config="[[serverConfig]]" transforms="{{transforms}}"></transform-functions>
+
+    <iron-ajax
+      auto
+      handle-as="json"
+      url="/clientConfigFields"
+      last-response="{{clientConfigFields}}">
+    </iron-ajax>
+
+    <template is="dom-if" if="[[noData(clientConfigFields)]]">
+      <json-combine
+        data-in1="[[serverConfig.configUsername]]"
+        data-in2="[[serverConfig.configPassword]]"
+        data-out="{{configHeader}}"
+        combine-function="[[createAuthHeader]]">
+      </json-combine>
+
+      <iron-ajax
+        auto="[[exists(configHeader)]]"
+        handle-as="json"
+        headers="[[configHeader]]"
+        url="[[serverConfig.configEndpoint]]"
+        with-credentials
+        loading="{{clientConfigLoading}}"
+        last-error="{{clientConfigError}}"
+        last-response="{{clientConfig}}">
+      </iron-ajax>
+
+      <iron-ajax
+        auto="[[exists(clientConfig)]]"
+        body="[[clientConfig]]"
+        content-type="application/json"
+        method="POST"
+        url="/saveClientConfig">
+      </iron-ajax>
+
+      <json-combine
+        data-in1="[[clientConfig]]"
+        data-in2="{}"
+        data-out="{{clientConfigFields}}"
+        combine-function="[[getFields]]">
+      </json-combine>
+    </template>
+
+    <json-combine
+      data-in1="[[clientConfigFields]]"
+      data-in2="{}"
+      data-out="{{searchFields}}"
+      combine-function="[[transforms.config.searchFields]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[document]]"
+      data-in2="[[searchFields]]"
+      data-out="{{documentInfo}}"
+      combine-function="[[transforms.config.documentInfo]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{sortField}}"
+      combine-function="[[transforms.config.sortField]]">
+    </json-combine>
+
+    <elastic-client
+      config="[[serverConfig.esHost]]"
+      client="{{esClient}}">
+    </elastic-client>
+
+    <!-- Document Query -->
+
+    <build-and-run-query
+      fields='"doc_id"'
+      values="[[params.id]]"
+      client="[[esClient]]"
+      index-name="[[serverConfig.esIndex]]"
+      index-types="[[serverConfig.esType]]"
+      aggregations="[]"
+      filters="[]"
+      page-size="1"
+      properties-ready="{{processRequest}}"
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+      source-exclude='["knowledge_graph.*.provenance"]'
+      transform-config="[[searchFields]]"
+      transform-function="[[transforms.entity.document]]"
+      error="{{documentError}}"
+      loading="{{documentLoading}}"
+      results="{{document}}">
+    </build-and-run-query>
+
+    <elastic-client-filter-builder
+      not
+      type="term"
+      field="doc_id"
+      values="[[document.id]]"
+      ejs-filter="{{notThisDocFilter}}">
+    </elastic-client-filter-builder>
+
+    <!-- Revisions Query -->
+
+    <elastic-client-query-builder
+      type="term"
+      fields='"url.raw"'
+      values="[[document.url]]"
+      ejs-query="{{revisionsQuery}}">
+    </elastic-client-query-builder>
+
+    <elastic-client-search
+      client="[[esClient]]"
+      index="[[serverConfig.esIndex]]"
+      elastic-types="[[serverConfig.esType]]"
+      query="[[revisionsQuery]]"
+      aggregations="[]"
+      filters="[[buildArray(notThisDocFilter)]]"
+      page="{{revisionPageNumber}}"
+      page-size="25"
+      sort-field="[[sortField]]"
+      sort-order="desc"
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+      source-exclude='["knowledge_graph.*.provenance"]'
+      loading="{{revisionsLoading}}"
+      last-error="{{revisionsError}}"
+      results="{{revisionsResults}}"
+      result-count="{{revisionsTotal}}">
+    </elastic-client-search>
+
+    <json-combine
+      data-in1="[[revisionsResults]]"
+      data-in2="[[searchFields]]"
+      data-out="{{revisions}}"
+      combine-function="[[transforms.entity.documents]]">
+    </json-combine>
+
+    <!-- More Like This Query -->
+
+    <elastic-client-query-builder
+      type="mlt"
+      mlt-config='{"minTermFreq":1,"minDocFreq":1,"maxQueryTerms":100,"minimumShouldMatch":"75%"}'
+      fields='["content_extraction.content_strict.text", "content_extraction.title.text", "knowledge_graph"]'
+      values="[[buildMoreLikeThisValue(document.title, document.description)]]"
+      ejs-query="{{moreLikeThisQuery}}">
+    </elastic-client-query-builder>
+
+    <elastic-client-search
+      client="[[esClient]]"
+      index="[[serverConfig.esIndex]]"
+      elastic-types="[[serverConfig.esType]]"
+      query="[[moreLikeThisQuery]]"
+      aggregations="[]"
+      filters="[[buildArray(notThisDocFilter)]]"
+      page="{{moreLikeThisPageNumber}}"
+      page-size="25"
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+      source-exclude='["knowledge_graph.*.provenance"]'
+      loading="{{moreLikeThisLoading}}"
+      last-error="{{moreLikeThisError}}"
+      results="{{moreLikeThisResults}}"
+      result-count="{{moreLikeThisTotal}}">
+    </elastic-client-search>
+
+    <json-combine
+      data-in1="[[moreLikeThisResults]]"
+      data-in2="[[searchFields]]"
+      data-out="{{moreLikeThisDocuments}}"
+      combine-function="[[transforms.entity.documents]]">
+    </json-combine>
+
+    <!-- Main Content -->
+    <div class="entity">
+
+      <paper-header-panel class="flex" mode="waterfall-tall">
+        <template is="dom-if" if="[[!document.id]]">
+          <loading-spinner show type="Page"></loading-spinner>
+        </template>
+
+        <template is="dom-if" if="[[document.id]]">
+          <!-- Entity header -->
+          <div class="paper-header layout horizontal">
+
+            <!-- Entity title -->
+            <div class="layout horizontal center flex">
+              <div class="iron-icon-huge entity-grey">
+                <iron-icon icon="icons:assignment"></iron-icon>
+              </div>
+              <div class="page-name">
+                <div class="paper-font-headline">
+                  [[document.title]]
+                </div>
+              </div>
+            </div>
+
+            <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+
+            <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
+              <div class="dropdown-content">
+                <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
+                  <iron-icon icon="refresh" item-icon></iron-icon>
+                  Reload the DIG Configuration
+                </paper-icon-item>
+
+                <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+                  <iron-icon icon="open-in-new" item-icon></iron-icon>
+                  Open a DIG Search Page in a New Tab
+                </paper-icon-item>
+
+                <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+                  <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
+                  Contact Support (dig-support@nextcentury.com)
+                </paper-icon-item>
+              </div>
+            </iron-dropdown>
+          </div>
+
+          <!-- Entity body -->
+          <div class="entity-page">
+
+            <div class="content">
+
+              <!-- Left Pane -->
+              <div class="flex layout vertical">
+                <template is="dom-repeat" items="[[documentInfo]]">
+                  <template is="dom-if" if="[[isLocation(item.config.type)]]">
+                    <section-and-map
+                      show-copy
+                      icon="[[item.config.icon]]"
+                      style-class="[[item.config.styleClass]]"
+                      text-property="textAndCount"
+                      transform-config="[[getSectionTitleTransformConfig(item.config)]]"
+                      transform-function="[[getSectionTitleTransformFunction]]"
+                      data="[[item.data]]">
+
+                      <detail-subsection
+                        entity-id="[[document.id]]"
+                        icon-style-class-property="styleClass"
+                        extractions="[[item.data]]">
+                      </detail-subsection>
+                    </section-and-map>
+                  </template>
+
+                  <template is="dom-if" if="[[isImage(item.config.type)]]">
+                    <section-and-title
+                      icon="[[item.config.icon]]"
+                      style-class="[[item.config.styleClass]]"
+                      transform-config="[[getSectionTitleTransformConfig(item.config, imageData.length)]]"
+                      transform-function="[[getSectionTitleTransformFunction]]"
+                      data="[[item.data]]">
+
+                      <image-gallery
+                        small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                        large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                        images="[[item.data]]">
+                      </image-gallery>
+                    </section-and-title>
+                  </template>
+
+                  <template is="dom-if" if="[[isOther(item.config.type)]]">
+                    <section-and-title
+                      show-copy
+                      icon="[[item.config.icon]]"
+                      style-class="[[item.config.styleClass]]"
+                      transform-config="[[getSectionTitleTransformConfig(item.config)]]"
+                      transform-function="[[getSectionTitleTransformFunction]]"
+                      data="[[item.data]]">
+
+                      <detail-subsection
+                        entity-id="[[document.id]]"
+                        icon-style-class-property="styleClass"
+                        extractions="[[item.data]]">
+                      </detail-subsection>
+                    </section-and-title>
+                  </template>
+                </template>
+
+                <section-container>
+                  <section-title
+                    icon="icons:assignment"
+                    style-class="entity-grey"
+                    section-title="[[revisionsHeader]]">
+
+                    <!-- TODO Export Button -->
+                  </section-title>
+
+                  <template is="dom-if" if="[[revisionsError]]">
+                    <elastic-error error="[[revisionsError]]" message="{{revisionsErrorMessage}}"></elastic-error>
+                    <div>[[revisionsErrorMessage]]</div>
+                  </template>
+
+                  <template is="dom-if" if="[[revisionsTotal]]">
+                    <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
+                    <info-revisions></info-revisions>
+                  </template>
+
+                  <result-list
+                    text-property="title"
+                    query-results="[[revisions]]"
+                    total-results="{{revisionsTotal}}"
+                    page="{{revisionPageNumber}}"
+                    page-size="25"
+                    loading="[[revisionsLoading]]"
+                    pretty-name="Revisions"
+                    pretty-name-singular="Revision"
+                    header="{{revisionsHeader}}">
+                  </result-list>
+                </section-container>
+              </div>
+
+              <!-- Right Pane -->
+              <div class="flex layout vertical">
+                <section-and-title
+                  icon="icons:assignment"
+                  style-class="entity-grey"
+                  section-title="Details">
+
+                  <detail-subsection
+                    entity-id="[[document.id]]"
+                    link="[[document.url]]"
+                    header="Webpage"
+                    header-style-class="entity-light-green"
+                    detail="[[document.url]]">
+                  </detail-subsection>
+
+                  <template is="dom-if" if="[[document.esData]]">
+                    <detail-subsection
+                      entity-id="[[document.id]]"
+                      link="[[document.esData]]"
+                      detail="Open Raw Elasticsearch Document">
+                    </detail-subsection>
+                  </template>
+
+                  <template is="dom-if" if="[[document.cached]]">
+                    <detail-subsection
+                      entity-id="[[document.id]]"
+                      link="[[document.cached]]"
+                      detail="Open Cached Webpage">
+                    </detail-subsection>
+                  </template>
+
+                  <detail-subsection
+                    entity-id="[[document.id]]"
+                    header="Description"
+                    detail="[[document.description]]">
+                  </detail-subsection>
+                </section-and-title>
+
+                <section-container>
+                  <section-title
+                    icon="icons:assignment"
+                    style-class="entity-grey"
+                    section-title="[[moreLikeThisHeader]]">
+
+
+                    <!-- TODO Export Button -->
+                  </section-title>
+
+                  <template is="dom-if" if="[[moreLikeThisError]]">
+                    <elastic-error error="[[moreLikeThisError]]" message="{{moreLikeThisErrorMessage}}"></elastic-error>
+                    <div>[[moreLikeThisErrorMessage]]</div>
+                  </template>
+
+                  <template is="dom-if" if="[[moreLikeThisTotal]]">
+                    <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
+                    <info-similar-documents></info-similar-documents>
+                  </template>
+
+                  <result-list
+                    text-property="title"
+                    query-results="[[moreLikeThisDocuments]]"
+                    total-results="{{moreLikeThisTotal}}"
+                    page="{{moreLikeThisPageNumber}}"
+                    page-size="25"
+                    loading="[[moreLikeThisLoading]]"
+                    pretty-name="Similar Results"
+                    pretty-name-singular="Similar Result"
+                    header="{{moreLikeThisHeader}}">
+                  </result-list>
+                </section-container>
+              </div>
+            </div>
+          </div>
+        </template>
+      </paper-header-panel>
+    </div>
+  </template>
+
+  <!-- Need to include dependencies here for IE -->
+  <script src="bower_components/lodash/dist/lodash.js"></script>
+  <script src="bower_components/array-behavior/array-behavior.js"></script>
+  <script src="behaviors/browser-behavior.js"></script>
+  <script src="behaviors/filter-behavior.js"></script>
+
+  <script>
+  (function(document) {
+    /* globals _, DigBehaviors */
+    var app = document.querySelector('#app');
+
+    app.blurImages = true;
+
+    app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
+
+    app.buildArray = DigBehaviors.ArrayBehavior.buildArray;
+
+    app.buildMoreLikeThisValue = function(title, content) {
+      // Remove special characters.
+      return (title + ' ' + content).replace(/[^\w\s]/gi, '');
+    };
+
+    app.createAuthHeader = function(username, password) {
+      if(username && password) {
+        return {
+          'Authorization': 'Basic ' + btoa(username + ':' + password)
+        };
+      }
+      return {};
+    };
+
+    app.exists = function(object) {
+      return typeof object !== 'undefined';
+    };
+
+    app.getFields = function(object) {
+      return object.fields || {};
+    };
+
+    app.isImage = function(type) {
+      return type === 'image';
+    };
+
+    app.isLocation = function(type) {
+      return type === 'location';
+    };
+
+    app.isOther = function(type) {
+      return !app.isImage(type) && !app.isLocation(type);
+    };
+
+    app.noData = function(object) {
+      return _.isEmpty(object);
+    };
+
+    /************* MENU *************/
+    app.toggleMenu = function() {
+      if(this.$.menuDropdown.style.display === 'none') {
+        this.$.menuDropdown.open();
+      } else {
+        this.$.menuDropdown.close();
+      }
+    };
+
+    app.reloadClientConfig = function() {
+      app.set('clientConfigFields', {});
+    };
+
+    app.openNewTab = function() {
+      window.open('.');
+    };
+
+    app.emailSupport = function() {
+      window.open('mailto:dig-support@nextcentury.com');
+    };
+    /********************************/
+
+    /******** VISUALIZATIONS ********/
+    app.getSectionTitleTransformConfig = function(searchFieldsObject, totalCount) {
+      return {
+        name: searchFieldsObject.title,
+        namePlural: searchFieldsObject.titlePlural,
+        sayOther: false,
+        totalCount: totalCount
+      };
+    };
+
+    app.getSectionTitleTransformFunction = function(size, config) {
+      var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      var totalCountString = config.totalCount && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
+      return sizeString + totalCountString + (config.sayOther ? ' Other ' : ' ') + (size === 1 ? config.name : config.namePlural);
+    };
+
+    app.createExtractionsConfig = function(entityConfig, id) {
+      return {
+        entity: entityConfig,
+        id: id
+      };
+    };
+
+    app.getBlurStyleClass = function(blur, large) {
+      return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+    };
+    /********************************/
+  })(document);
+  </script>
+</body>
+
+</html>

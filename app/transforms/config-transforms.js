@@ -93,6 +93,34 @@ var configTransforms = (function(_, commonTransforms) {
       });
     },
 
+    documentInfo: function(document, searchFields) {
+      var searchKeys = searchFields.map(function(searchFieldsObject) {
+        return searchFieldsObject.key;
+      });
+
+      var headerExtractions = (document.headerExtractions || []).filter(function(extraction) {
+        return extraction.key !== '_domain';
+      }).map(function(extraction) {
+        var index = searchKeys.indexOf(extraction.key);
+        var config = index >= 0 ? searchFields[index] : {};
+        return {
+          config: config,
+          data: extraction.data
+        };
+      });
+
+      var detailExtractions = (document.detailExtractions || []).map(function(extraction) {
+        var index = searchKeys.indexOf(extraction.key);
+        var config = index >= 0 ? searchFields[index] : {};
+        return {
+          config: config,
+          data: extraction.data
+        };
+      });
+
+      return headerExtractions.concat(detailExtractions);
+    },
+
     entityPageConfig: function(searchFields, key) {
       var index = _.findIndex(searchFields, function(searchFieldsObject) {
         return searchFieldsObject.key === key;
