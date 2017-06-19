@@ -42,7 +42,7 @@ limitations under the License.
         }
       },
 
-      _initializeTransforms: function() {
+      _initializeTransforms: function(serverConfig) {
         /* globals _, moment, commonTransforms, configTransforms, entityTransforms, searchTransforms, imageTransforms */
 
         var util = commonTransforms(_, moment);
@@ -50,7 +50,7 @@ limitations under the License.
         var transforms = {};
 
         transforms.config = configTransforms(_, util);
-        transforms.entity = entityTransforms(_, util);
+        transforms.entity = entityTransforms(_, util, serverConfig);
         transforms.search = searchTransforms(_);
         transforms.image = imageTransforms(_, util);
 

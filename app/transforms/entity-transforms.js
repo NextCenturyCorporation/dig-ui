@@ -17,7 +17,7 @@
 /* exported entityTransforms */
 /* jshint camelcase:false */
 
-var entityTransforms = (function(_, commonTransforms) {
+var entityTransforms = (function(_, commonTransforms, serverConfig) {
   function getSingleStringFromResult(result, path, property) {
     var data = _.get(result, path, []);
 
@@ -159,6 +159,7 @@ var entityTransforms = (function(_, commonTransforms) {
 
     var rank = _.get(result, '_score');
     var domain = _.get(result, '_source.tld');
+    var esDataEndpoint = (serverConfig && serverConfig.esDataEndpoint ? (serverConfig.esDataEndpoint + id) : undefined);
 
     var documentObject = {
       id: id,
@@ -204,6 +205,14 @@ var entityTransforms = (function(_, commonTransforms) {
     }).map(function(object) {
       return getHighlightedExtractionObjectFromResult(result, object, highlightMapping);
     });
+
+    if(esDataEndpoint) {
+      documentObject.details.push({
+        name: 'Raw ES Document',
+        link: esDataEndpoint,
+        text: 'Open'
+      });
+    }
 
     documentObject.details.push({
       name: 'Url',
