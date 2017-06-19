@@ -75,7 +75,6 @@ var imageTransforms = (function(_, commonTransforms) {
     },
 
     externalImageLink: function(id) {
-      console.log(commonTransforms.getLink(id, 'image'));
       return commonTransforms.getLink(id, 'image');
     }
   };
