@@ -30,7 +30,7 @@ var entityTransforms = (function(_, commonTransforms) {
     return data ? data[property] : undefined;
   }
 
-  function getExtraction(item, config, confidence) {
+  function getExtraction(item, config, index, confidence) {
     /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
     var count = item.doc_count;
     /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
@@ -41,7 +41,7 @@ var entityTransforms = (function(_, commonTransforms) {
       icon: config.icon,
       link: commonTransforms.getLink(item.key, config.link, config.key),
       styleClass: commonTransforms.getStyleClass(config.color),
-      text: commonTransforms.getExtractionDataText(item.key, item.value, config.type),
+      text: commonTransforms.getExtractionDataText(item.key, item.value, config.type, (index || 0)),
       type: config.key
     };
     if(config.type !== 'url') {
@@ -56,27 +56,28 @@ var entityTransforms = (function(_, commonTransforms) {
       extraction.latitude = locationData.latitude;
       extraction.longitude = locationData.longitude;
       extraction.text = locationData.text;
-      extraction.textAndCount = locationData.text + (extraction.count ? (' (' + extraction.count + ')') : '');
       extraction.textAndCountry = locationData.text + (locationData.country ? (', ' + locationData.country) : '');
     }
     if(config.type === 'image') {
-      extraction.source = item.value;
+      extraction.source = item.key;
     }
+    extraction.textAndCount = extraction.text + (extraction.count ? (' (' + extraction.count + ')') : '');
     return extraction;
   }
 
   function getExtractionsFromList(extractionList, config) {
-    var extractionData = extractionList.map(function(item) {
+    var extractionData = extractionList.map(function(item, index) {
       var confidence = _.isUndefined(item.confidence) ? undefined : (Math.round(Math.min(item.confidence, 1) * 10000.0) / 100.0);
-      return getExtraction(item, config, confidence);
+      return getExtraction(item, config, index, confidence);
     });
-    var filterFunction = commonTransforms.getExtractionFilterFunction(config.type);
-    return (filterFunction ? extractionData.filter(filterFunction) : extractionData);
+    return extractionData.filter(commonTransforms.getExtractionFilterFunction(config.type));
   }
 
   function getExtractionsFromResult(result, path, config) {
     var data = _.get(result, path, []);
-    return getExtractionsFromList(data, config);
+    // TODO Don't slice the extraction list once the data can support it.
+    return getExtractionsFromList(data, config).slice(0, 10);
+    //return getExtractionsFromList(data, config);
   }
 
   function getHighlightedText(result, paths) {
@@ -229,6 +230,76 @@ var entityTransforms = (function(_, commonTransforms) {
     return documentObject;
   }
 
+  function createDateObjectFromBucket(dateBucket, config) {
+    return {
+      date: commonTransforms.getFormattedDate(dateBucket.key),
+      icon: config.date.icon,
+      styleClass: config.date.styleClass,
+      data: dateBucket[config.entity.key].buckets.map(function(entityBucket, index) {
+        return getExtraction(entityBucket, config.entity, index);
+      }).filter(commonTransforms.getExtractionFilterFunction(config.entity.type))
+    };
+  }
+
+  function createUnidentifiedEntityObject(config, count) {
+    var text = 'Unidentified ' + config.titlePlural;
+    return {
+      count: count,
+      icon: config.icon,
+      styleClass: commonTransforms.getStyleClass(config.color),
+      text: text,
+      textAndCount: text + ' (' + (count) + ')',
+      type: config.key
+    };
+  }
+
+  function createSubtitle(data) {
+    var subtitle = data.map(function(entityObject) {
+      return entityObject.textAndCount;
+    });
+    return subtitle.length ? subtitle[0].text + (subtitle.length > 1 ? (' and ' + (subtitle.length - 1) + ' more') : '') : '';
+  }
+
+  function createDateHistogram(buckets, config) {
+    return buckets.reduce(function(histogram, dateBucket) {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var count = dateBucket.doc_count;
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      if(count) {
+        var dateObject = createDateObjectFromBucket(dateBucket, config);
+
+        var sum = dateObject.data.reduce(function(sum, entityObject) {
+          return sum + entityObject.count;
+        }, 0);
+
+        if(sum < count) {
+          dateObject.data.push(createUnidentifiedEntityObject(count - sum));
+        }
+
+        if(config.entity.key === config.page.key) {
+          // Filter out the items that do not match the ID for the entity page (only once the unknown item is created).
+          dateObject.data = dateObject.data.filter(function(entityObject) {
+            return entityObject.id === config.id;
+          });
+        }
+
+        // The data list may be empty if none match the ID for the entity page.
+        if(!dateObject.data.length) {
+          return;
+        }
+
+        dateObject.subtitle = createSubtitle(dateObject.data);
+        histogram.push(dateObject);
+      }
+
+      return histogram;
+    }, []).sort(function(a, b) {
+      // Sort oldest first.
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+  }
+
   return {
     document: function(data, searchFields) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
@@ -245,6 +316,28 @@ var entityTransforms = (function(_, commonTransforms) {
         });
       }
       return [];
+    },
+
+    extractions: function(data, config) {
+      var extractions = [];
+      var sayOther = false;
+
+      if(data && data.aggregations && data.aggregations[config.entity.key] && data.aggregations[config.entity.key][config.entity.key]) {
+        extractions = getExtractionsFromList(data.aggregations[config.entity.key][config.entity.key].buckets || [], config.entity).filter(function(extraction) {
+          var result = config.id ? extraction.id !== config.id : true;
+          sayOther = sayOther || !result;
+          return result;
+        });
+      }
+
+      return extractions;
+    },
+
+    histogram: function(data, config) {
+      if(data && data.aggregations && data.aggregations[config.date.key] && data.aggregations[config.date.key][config.date.key]) {
+        return createDateHistogram(data.aggregations[config.date.key][config.date.key].buckets, config);
+      }
+      return {};
     }
   };
 });

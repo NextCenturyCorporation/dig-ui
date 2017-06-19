@@ -1,0 +1,225 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<dom-module id="entity-page-styles">
+  <template>
+    <style>
+
+      .entity {
+        height: 100%;
+        @apply(--layout-horizontal);
+      }
+
+      .entity-page {
+        @apply(--layout-vertical);
+      }
+
+      /* Entity page header */
+
+      .paper-header {
+        padding: 0 20px;
+        transition: height 0.2s;
+      }
+
+      .paper-font-caption {
+        color: var(--disabled-text-color);
+        text-transform: uppercase;
+      }
+
+      .paper-header .paper-font-headline {
+        font-weight: 500;
+        transition: all 0.2s;
+        word-break: break-word;
+      }
+
+      .paper-header .paper-font-subhead {
+        transition: font-size 0.2s;
+      }
+
+      .paper-header .page-name {
+        padding: 15px;
+        transition: padding 0.2s;
+      }
+
+      .paper-header .paper-font-subhead {
+        color: var(--secondary-text-color);
+      }
+
+      .iron-icon-big iron-icon {
+        /* Same height as paper-font-title */
+        --iron-icon-height: 28px;
+        --iron-icon-width: 28px;
+      }
+
+      .iron-icon-huge iron-icon {
+        /* Same height as paper-font-headline */
+        --iron-icon-height: 32px;
+        --iron-icon-width: 32px;
+        min-width: 32px;
+      }
+
+      .image-section {
+        --section-container-padding: 0;
+      }
+
+      .image-section iron-image {
+        --iron-image-height: auto;
+        --iron-image-width: auto;
+        padding: 0;
+        margin: 0;
+      }
+
+      .image-section iron-image ::content img {
+        max-height: 400px;
+      }
+
+      /* Other */
+
+      time {
+        margin-left: 5px;
+      }
+
+      result-list {
+        icon-label {
+         --extraction-text: {
+            max-width: 115px;
+            white-space: nowrap;
+          }
+        }
+      }
+
+      .note {
+        font-style: italic;
+        color: var(--secondary-text-color);
+        font-size: 14px;
+        line-height: 20px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+
+      image-query-and-display {
+        --image-query-and-display-max-height: 800px;
+      }
+
+      .info-link {
+        color: var(--secondary-text-color);
+        cursor: pointer;
+        line-height: 30px;
+      }
+
+      .info-link:hover {
+        color: var(--primary-text-color);
+      }
+
+      .info-link iron-icon {
+        --iron-icon-height: 20px;
+        --iron-icon-width: 20px;
+        padding-bottom: 4px;
+      }
+
+      .info-link span {
+        font-size: 14px;
+        font-style: italic;
+        text-decoration: underline;
+      }
+
+      /* Material Design Adaptive Breakpoints */
+      /*
+        Below you'll find CSS media queries based on the breakpoint guidance
+        published by the Material Design team. You can choose to use, customise
+        or remove these breakpoints based on your needs.
+
+        http://www.google.com/design/spec/layout/adaptive-ui.html#adaptive-ui-breakpoints
+       */
+
+      /* mobile-small */
+      @media all and (min-width: 0) and (max-width: 360px) and (orientation: portrait) { }
+      /* mobile-large */
+      @media all and (min-width: 361px) and (orientation: portrait) { }
+      /* mobile-small-landscape */
+      @media all and (min-width: 0) and (max-width: 480px) and (orientation: landscape) { }
+      /* mobile-large-landscape */
+      @media all and (min-width: 481px) and (orientation: landscape) { }
+      /* tablet-small-landscape */
+      @media all and (min-width: 600px) and (max-width: 960px) and (orientation: landscape) { }
+      /* tablet-large-landscape */
+      @media all and (min-width: 961px) and (orientation: landscape) { }
+      /* tablet-small */
+      @media all and (min-width: 600px) and (orientation: portrait) { }
+      /* tablet-large */
+      @media all and (min-width: 601px) and (max-width: 840px) and (orientation : portrait) { }
+      /* desktop-x-small-landscape */
+      @media all and (min-width: 0) and (max-width: 480px) and (orientation: landscape) {
+        .content {
+          @apply(--layout-vertical);
+        }
+        .paper-header .page-name {
+          @apply(--layout-flex);
+        }
+      }
+      /* desktop-x-small */
+      @media all and (min-width: 0) and (max-width: 480px) and (max-aspect-ratio: 4/3) {
+        .content {
+          @apply(--layout-vertical);
+        }
+        .paper-header .page-name {
+          @apply(--layout-flex);
+        }
+      }
+      /* desktop-small-landscape */
+      @media all and (min-width: 481px) and (max-width: 840px) and (orientation: landscape) {
+        .content {
+          @apply(--layout-vertical);
+        }
+        .paper-header .page-name {
+          @apply(--layout-flex);
+        }
+      }
+      /* desktop-small */
+      @media all and (min-width: 481px) and (max-width: 840px) and (max-aspect-ratio: 4/3) {
+        .content {
+          @apply(--layout-vertical);
+        }
+        .paper-header .page-name {
+          @apply(--layout-flex);
+        }
+      }
+      /* desktop-medium-landscape */
+      @media all and (min-width: 841px) and (max-width: 1280px) and (orientation: landscape) {
+        .content {
+          @apply(--layout-vertical);
+        }
+        .paper-header .page-name {
+          @apply(--layout-flex);
+        }
+      }
+      /* desktop-medium */
+      @media all and (min-width: 841px) and (max-width: 1280px) and (max-aspect-ratio: 4/3) {
+        .content {
+          @apply(--layout-vertical);
+        }
+        .paper-header .page-name {
+          @apply(--layout-flex);
+        }
+      }
+      /* desktop-large */
+      @media all and (min-width: 1281px) and (max-width: 1600px) { }
+      /* desktop-xlarge */
+      @media all and (min-width: 1601px) and (max-width: 1920px) { }
+
+    </style>
+  </template>
+</dom-module>

@@ -45,6 +45,9 @@ var commonTransforms = (function(_, moment) {
    * Returns the link for the given key.
    */
   function getLink(key, link, type) {
+    if(type === 'document') {
+      return '/document.html?id=' + key;
+    }
     if(key && link === 'entity') {
       if(type === 'email') {
         return '/entity.html?id=' + encodeURIComponent(key) + '&type=' + type;
@@ -213,9 +216,9 @@ var commonTransforms = (function(_, moment) {
   }
 
   /**
-   * Returns the text for the extraction data with the given key, value, and type.
+   * Returns the text for the extraction data with the given key, value, type, and index.
    */
-  function getExtractionDataText(key, value, type) {
+  function getExtractionDataText(key, value, type, index) {
     if(type === 'date') {
       return getFormattedDate(value || key);
     }
@@ -224,6 +227,9 @@ var commonTransforms = (function(_, moment) {
     }
     if(type === 'hyphenated') {
       return getTextFromHyphenatedKey(key) || value;
+    }
+    if(type === 'image') {
+      return 'Image #' + (index + 1);
     }
     if(type === 'location') {
       return getLocationDataFromKey(key).text || value;
@@ -246,9 +252,12 @@ var commonTransforms = (function(_, moment) {
    */
   function getExtractionFilterFunction(type) {
     if(type === 'location') {
+      // TODO Filter out bad locations once the data can support it.
       //return isGoodLocation;
     }
-    return null;
+    return function() {
+      return true;
+    };
   }
 
   /**
@@ -278,10 +287,10 @@ var commonTransforms = (function(_, moment) {
     },
 
     /**
-     * Returns the text for the extraction data with the given key, value, and type.
+     * Returns the text for the extraction data with the given key, value, type, and index.
      */
-    getExtractionDataText: function(key, value, type) {
-      return getExtractionDataText(key, value, type);
+    getExtractionDataText: function(key, value, type, index) {
+      return getExtractionDataText(key, value, type, index);
     },
 
     /**

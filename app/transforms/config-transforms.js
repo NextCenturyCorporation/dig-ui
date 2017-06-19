@@ -42,20 +42,20 @@ var configTransforms = (function(_, commonTransforms) {
     return [];
   }
 
-  function createAggregationTransform(searchFieldsObject) {
+  function createAggregationTransform(link, type) {
     return function(response, key) {
       var aggregations = findAggregationsInResponse(response, key);
       return aggregations.reduce(function(data, bucket) {
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var count = bucket.doc_count;
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
-        var id = commonTransforms.getAggregatedDataId(bucket.key, searchFieldsObject.type);
+        var id = commonTransforms.getAggregatedDataId(bucket.key, type);
         if(id) {
           data.push({
             count: count,
             id: id,
-            link: commonTransforms.getLink(bucket.key, searchFieldsObject.link, searchFieldsObject.type),
-            text: commonTransforms.getAggregatedDataText(bucket.key, searchFieldsObject.type)
+            link: commonTransforms.getLink(bucket.key, link, type),
+            text: commonTransforms.getAggregatedDataText(bucket.key, type)
           });
         }
         return data;
@@ -64,6 +64,15 @@ var configTransforms = (function(_, commonTransforms) {
   }
 
   return {
+    aggregationFields: function(searchFields) {
+      return searchFields.filter(function(searchFieldsObject) {
+        // Dates will be shown in the histograms, images in the galleries, and locations in the maps.
+        return searchFieldsObject.type !== 'date' && searchFieldsObject.type !== 'image' && searchFieldsObject.type !== 'location';
+      }).map(function(searchFieldsObject) {
+        return _.cloneDeep(searchFieldsObject);
+      });
+    },
+
     dateConfig: function(searchFields) {
       var dateConfig = {};
       searchFields.forEach(function(searchFieldsObject) {
@@ -76,6 +85,73 @@ var configTransforms = (function(_, commonTransforms) {
       return dateConfig;
     },
 
+    dateFields: function(searchFields) {
+      return searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.type === 'date';
+      }).map(function(searchFieldsObject) {
+        return _.cloneDeep(searchFieldsObject);
+      });
+    },
+
+    entityPageConfig: function(searchFields, key) {
+      var index = _.findIndex(searchFields, function(searchFieldsObject) {
+        return searchFieldsObject.key === key;
+      });
+      return index >= 0 ? searchFields[index] : {};
+    },
+
+    filterCollection: function(searchFields) {
+      return searchFields.reduce(function(filterCollection, searchFieldsObject) {
+        filterCollection[searchFieldsObject.key] = [];
+        return filterCollection;
+      }, {});
+    },
+
+    filtersBuilderConfig: function(searchFields) {
+      return searchFields.reduce(function(filtersBuilderConfig, searchFieldsObject) {
+        filtersBuilderConfig[searchFieldsObject.key] = {
+          field: searchFieldsObject.field
+        };
+        return filtersBuilderConfig;
+      }, {});
+    },
+
+    histogramFields: function(searchFields) {
+      var entityFields = searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.link === 'entity';
+      });
+      var dateFields = searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.type === 'date';
+      });
+      var histogramFields = dateFields.reduce(function(fields, dateFieldsObject) {
+        return fields.concat(entityFields.map(function(entityFieldsObject) {
+          return {
+            date: dateFieldsObject,
+            entity: entityFieldsObject
+          };
+        }));
+      }, []);
+      return histogramFields.map(function(searchFieldsObject) {
+        return _.cloneDeep(searchFieldsObject);
+      });
+    },
+
+    imageFields: function(searchFields) {
+      return searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.type === 'image';
+      }).map(function(searchFieldsObject) {
+        return _.cloneDeep(searchFieldsObject);
+      });
+    },
+
+    mapFields: function(searchFields) {
+      return searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.type === 'location';
+      }).map(function(searchFieldsObject) {
+        return _.cloneDeep(searchFieldsObject);
+      });
+    },
+
     searchFields: function(fields) {
       return _.keys(fields || {}).filter(function(id) {
         return !!fields[id].type;
@@ -83,8 +159,6 @@ var configTransforms = (function(_, commonTransforms) {
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var searchFieldsObject = {
           key: id,
-          // The aggregation transform function.
-          aggregationTransform: createAggregationTransform(fields[id]),
           // Material design color.
           color: fields[id].color || 'grey',
           // Whether to show in the facets.
@@ -103,13 +177,19 @@ var configTransforms = (function(_, commonTransforms) {
           title: fields[id].screen_label || 'Extraction',
           // The plural pretty name to show.
           titlePlural: fields[id].screen_label_plural || 'Extractions',
-          // Either date, email, hyphenated, location, phone, string, or username.
+          // Either date, email, hyphenated, image, location, phone, string, or username.
           type: fields[id].type
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
+        // The facet aggregation transform function.
+        searchFieldsObject.aggregationTransform = createAggregationTransform(searchFieldsObject.link, searchFieldsObject.type);
+        // Add style class (e.g. 'entity-grey').
+        searchFieldsObject.styleClass = commonTransforms.getStyleClass(searchFieldsObject.color);
+
         // Properties for the date facets.
         searchFieldsObject.dateProperties = fields[id].type === 'date' ? createDateProperties(searchFieldsObject) : {};
+
         return searchFieldsObject;
       }).sort(function(a, b) {
         if(a.type === 'date' && b.type !== 'date') {
@@ -169,6 +249,13 @@ var configTransforms = (function(_, commonTransforms) {
         searchParameters[searchFieldsObject.key] = {};
         return searchParameters;
       }, {});
+    },
+
+    sortField: function(searchFields) {
+      var index = _.findIndex(searchFields, function(searchFieldsObject) {
+        return searchFieldsObject.type === 'date';
+      });
+      return index >= 0 ? searchFields[index].field : '';
     }
   };
 });

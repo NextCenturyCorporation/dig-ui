@@ -37,7 +37,7 @@ module.exports = {
     configEndpoint: process.env.CONFIG_ENDPOINT,
     configPassword: process.env.CONFIG_PASSWORD || '',
     configUsername: process.env.CONFIG_USERNAME || '',
-    esHost: process.env.ES_HOST || 'http://localhost:9200',
+    esHost: JSON.parse(process.env.ES_HOST || '{"host":"http://localhost:9200"}'),
     esIndex: process.env.ES_INDEX,
     esType: process.env.ES_TYPE,
     searchEndpoint: process.env.SEARCH_ENDPOINT
