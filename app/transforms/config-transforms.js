@@ -116,6 +116,10 @@ var configTransforms = (function(_, commonTransforms) {
       }, {});
     },
 
+    formatId: function(id, type) {
+      return commonTransforms.getExtractionDataText(id, id, type);
+    },
+
     histogramFields: function(searchFields) {
       var entityFields = searchFields.filter(function(searchFieldsObject) {
         return searchFieldsObject.link === 'entity';
