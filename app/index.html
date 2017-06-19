@@ -263,7 +263,7 @@ limitations under the License.
 
                 <template is="dom-repeat" items="[[searchFields]]">
                   <template is="dom-if" if="[[item.facets]]">
-                    <template is="dom-if" if="[[equalsDate(item.type)]]">
+                    <template is="dom-if" if="[[equals(item.type, 'date')]]">
                       <date-range-facet
                         class="facet"
                         date-start-key="[[item.dateProperties.start.key]]"
@@ -279,7 +279,7 @@ limitations under the License.
                       </date-range-facet>
                     </template>
 
-                    <template is="dom-if" if="[[!equalsDate(item.type)]]">
+                    <template is="dom-if" if="[[!equals(item.type, 'date')]]">
                       <facet-list
                         class="facet"
                         query-url="[[serverConfig.searchEndpoint]]"
@@ -368,8 +368,8 @@ limitations under the License.
         return {};
       };
 
-      app.equalsDate = function(string) {
-        return string === 'date';
+      app.equals = function(a, b,) {
+        return a === b;
       };
 
       app.exists = function(object) {

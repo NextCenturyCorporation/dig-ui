@@ -121,13 +121,6 @@ var configTransforms = (function(_, commonTransforms) {
       return headerExtractions.concat(detailExtractions);
     },
 
-    entityPageConfig: function(searchFields, key) {
-      var index = _.findIndex(searchFields, function(searchFieldsObject) {
-        return searchFieldsObject.key === key;
-      });
-      return index >= 0 ? searchFields[index] : {};
-    },
-
     filterCollection: function(searchFields) {
       return searchFields.reduce(function(filterCollection, searchFieldsObject) {
         filterCollection[searchFieldsObject.key] = [];
@@ -186,6 +179,13 @@ var configTransforms = (function(_, commonTransforms) {
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
+    },
+
+    pageConfig: function(searchFields, key) {
+      var index = _.findIndex(searchFields, function(searchFieldsObject) {
+        return searchFieldsObject.key === key;
+      });
+      return index >= 0 ? searchFields[index] : {};
     },
 
     searchFields: function(fields) {

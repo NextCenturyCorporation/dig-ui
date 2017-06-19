@@ -527,7 +527,6 @@ limitations under the License.
       return {
         name: searchFieldsObject.title,
         namePlural: searchFieldsObject.titlePlural,
-        sayOther: false,
         totalCount: totalCount
       };
     };
@@ -535,7 +534,7 @@ limitations under the License.
     app.getSectionTitleTransformFunction = function(size, config) {
       var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       var totalCountString = config.totalCount && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
-      return sizeString + totalCountString + (config.sayOther ? ' Other ' : ' ') + (size === 1 ? config.name : config.namePlural);
+      return sizeString + totalCountString + (size === 1 ? config.name : config.namePlural);
     };
 
     app.createExtractionsConfig = function(entityConfig, id) {

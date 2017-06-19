@@ -134,13 +134,6 @@ limitations under the License.
 
     <json-combine
       data-in1="[[searchFields]]"
-      data-in2="[[params.type]]"
-      data-out="{{entityPageConfig}}"
-      combine-function="[[transforms.config.entityPageConfig]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[searchFields]]"
       data-in2="{}"
       data-out="{{filterCollection}}"
       combine-function="[[transforms.config.filterCollection]]">
@@ -156,14 +149,14 @@ limitations under the License.
     <json-combine
       data-in1="[[params.id]]"
       data-in2="[[params.type]]"
-      data-out="{{pageEntityId}}"
+      data-out="{{pageId}}"
       combine-function="[[transforms.config.formatId]]">
     </json-combine>
 
     <json-combine
       data-in1="[[params.id]]"
       data-in2="[[params.type]]"
-      data-out="{{pageEntityName}}"
+      data-out="{{pageName}}"
       combine-function="[[transforms.config.formatName]]">
     </json-combine>
 
@@ -190,6 +183,13 @@ limitations under the License.
 
     <json-combine
       data-in1="[[searchFields]]"
+      data-in2="[[params.type]]"
+      data-out="{{pageConfig}}"
+      combine-function="[[transforms.config.pageConfig]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
       data-in2="{}"
       data-out="{{sortField}}"
       combine-function="[[transforms.config.sortField]]">
@@ -201,8 +201,8 @@ limitations under the License.
     </elastic-client>
 
     <build-and-run-query
-      fields="[[entityPageConfig.field]]"
-      values="[[pageEntityId]]"
+      fields="[[pageConfig.field]]"
+      values="[[pageId]]"
       client="[[esClient]]"
       index-name="[[serverConfig.esIndex]]"
       index-types="[[serverConfig.esType]]"
@@ -233,305 +233,308 @@ limitations under the License.
     <div class="entity">
 
       <paper-header-panel class="flex" mode="waterfall-tall">
+        <template is="dom-if" if="[[!document.id]]">
+          <loading-spinner show type="Page"></loading-spinner>
+        </template>
 
-        <!-- Entity header -->
-        <div class="paper-header layout horizontal">
+        <template is="dom-if" if="[[pageConfig]]">
+          <!-- Entity header -->
+          <div class="paper-header layout horizontal">
 
-          <!-- Entity title -->
-          <div class="layout horizontal center flex">
-            <div class$="iron-icon-huge [[entityPageConfig.styleClass]]">
-              <iron-icon icon="[[entityPageConfig.icon]]"></iron-icon>
-            </div>
-            <div class="page-name">
-              <template is="dom-if" if="[[entityPageConfig]]">
+            <!-- Entity title -->
+            <div class="layout horizontal center flex">
+              <div class$="iron-icon-huge [[pageConfig.styleClass]]">
+                <iron-icon icon="[[pageConfig.icon]]"></iron-icon>
+              </div>
+              <div class="page-name">
                 <div class="paper-font-headline">
-                  [[entityPageConfig.title]]: <span>[[pageEntityName]]</span>
+                  [[pageConfig.title]]: <span>[[pageName]]</span>
                 </div>
-              </template>
-              <template is="dom-if" if="[[documentsTotal]]">
-                <div class="paper-font-subhead">
-                  [[documentsTotal]] Total Results
-                </div>
-              </template>
-            </div>
-          </div>
-
-          <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
-
-          <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
-            <div class="dropdown-content">
-              <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
-                <iron-icon icon="refresh" item-icon></iron-icon>
-                Reload the DIG Configuration
-              </paper-icon-item>
-
-              <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-                <iron-icon icon="open-in-new" item-icon></iron-icon>
-                Open a DIG Search Page in a New Tab
-              </paper-icon-item>
-
-              <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
-                <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
-                Contact Support (dig-support@nextcentury.com)
-              </paper-icon-item>
-            </div>
-          </iron-dropdown>
-        </div>
-
-        <!-- Entity body -->
-        <div class="entity-page">
-
-          <div class="content">
-
-            <!-- Left Pane -->
-            <div class="flex layout vertical">
-              <template is="dom-repeat" items="[[mapFields]]">
-                <section-and-map
-                  show-copy
-                  icon="[[item.icon]]"
-                  style-class="[[item.styleClass]]"
-                  text-property="textAndCount"
-                  transform-config="[[getSectionTitleTransformConfig(entityPageConfig, item)]]"
-                  transform-function="[[getSectionTitleTransformFunction]]"
-                  data="[[mapData]]">
-
-                  <aggregation-query-and-display
-                    aggregation-name="[[item.key]]"
-                    aggregation-field="[[item.field]]"
-                    selected-property="[[item.key]]"
-                    selected="{{filterCollection}}"
-                    query-field="[[entityPageConfig.field]]"
-                    query-value="[[pageEntityId]]"
-                    client="[[esClient]]"
-                    index-name="[[serverConfig.esIndex]]"
-                    index-types="[[serverConfig.esType]]"
-                    filter-list="[[filterList]]"
-                    transform-config="[[createExtractionsConfig(item, entityPageConfig, pageEntityId)]]"
-                    transform-function="[[transforms.entity.extractions]]"
-                    data="{{mapData}}"
-                    header-data-name="[[item.title]]"
-                    header-counts-name="Results"
-                    header-entity-name="[[pageEntityName]]"
-                    show-checkboxes>
-                  </aggregation-query-and-display>
-                </section-and-map>
-              </template>
-
-              <template is="dom-repeat" items="[[aggregationFields]]">
-                <section-and-title
-                  show-copy
-                  copy-type="[[item.titlePlural]]"
-                  icon="[[item.icon]]"
-                  style-class="[[item.styleClass]]"
-                  transform-config="[[getSectionTitleTransformConfig(entityPageConfig, item)]]"
-                  transform-function="[[getSectionTitleTransformFunction]]"
-                  data="[[item.aggregationData]]">
-
-                  <aggregation-query-and-display
-                    aggregation-name="[[item.key]]"
-                    aggregation-field="[[item.field]]"
-                    selected-property="[[item.key]]"
-                    selected="{{filterCollection}}"
-                    query-field="[[entityPageConfig.field]]"
-                    query-value="[[pageEntityId]]"
-                    client="[[esClient]]"
-                    index-name="[[serverConfig.esIndex]]"
-                    index-types="[[serverConfig.esType]]"
-                    filter-list="[[filterList]]"
-                    transform-config="[[createExtractionsConfig(item, entityPageConfig, pageEntityId)]]"
-                    transform-function="[[transforms.entity.extractions]]"
-                    data="{{item.aggregationData}}"
-                    header-data-name="[[item.title]]"
-                    header-counts-name="Results"
-                    header-entity-name="[[pageEntityName]]"
-                    show-checkboxes
-                    show-double-bar-chart="[[showDoubleBarChart(item)]]">
-                  </aggregation-query-and-display>
-
-                  <template is="dom-if" if="[[item.aggregationData.length]]">
-                    <info-aggregations entity="[[pageEntityName]]" type="[[item.title]]"></info-aggregations>
-                  </template>
-                </section-and-title>
-              </template>
-
-              <template is="dom-repeat" items="[[imageFields]]">
-                <section-and-title
-                  icon="[[item.icon]]"
-                  style-class="[[item.styleClass]]"
-                  transform-config="[[getSectionTitleTransformConfig(entityPageConfig, item, imageData.length)]]"
-                  transform-function="[[getSectionTitleTransformFunction]]"
-                  data="[[loadedImageData]]">
-
-                  <image-query-and-display
-                    aggregation-field="url.raw"
-                    aggregation-name="image"
-                    client="[[esClient]]"
-                    filter-list="[]"
-                    header-data-name="[[item.title]]"
-                    header-counts-name="Results"
-                    header-entity-name="[[pageEntityName]]"
-                    image-id-property="source"
-                    index-name="[[serverConfig.esIndex]]"
-                    index-types="[[serverConfig.esType]]"
-                    query-fields="[[entityPageConfig.field]]"
-                    query-values="[[pageEntityId]]"
-                    transform-config="[[createExtractionsConfig(item, entityPageConfig, pageEntityId)]]"
-                    transform-function="[[transforms.entity.extractions]]"
-                    small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-                    large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                    images="{{imageData}}"
-                    loaded-images="{{loadedImageData}}"
-                    selected-property="[[item.key]]"
-                    selected="{{filterCollection}}">
-                  </image-query-and-display>
-                </section-and-title>
-              </template>
-            </div>
-
-            <!-- Right Pane -->
-            <div class="flex layout vertical">
-              <!-- TODO Temporary until histograms work -->
-              <template is="dom-repeat" items="[[dateFields]]">
-                <section-and-title
-                  show-copy
-                  copy-type="[[item.titlePlural]]"
-                  icon="[[item.icon]]"
-                  style-class="[[item.styleClass]]"
-                  transform-config="[[getSectionTitleTransformConfig(entityPageConfig, item)]]"
-                  transform-function="[[getSectionTitleTransformFunction]]"
-                  data="[[item.aggregationData]]">
-
-                  <aggregation-query-and-display
-                    aggregation-name="[[item.key]]"
-                    aggregation-field="[[item.field]]"
-                    selected-property="[[item.key]]"
-                    selected="{{filterCollection}}"
-                    query-field="[[entityPageConfig.field]]"
-                    query-value="[[pageEntityId]]"
-                    client="[[esClient]]"
-                    index-name="[[serverConfig.esIndex]]"
-                    index-types="[[serverConfig.esType]]"
-                    filter-list="[[filterList]]"
-                    transform-config="[[createExtractionsConfig(item, entityPageConfig, pageEntityId)]]"
-                    transform-function="[[transforms.entity.extractions]]"
-                    data="{{item.aggregationData}}"
-                    header-data-name="[[item.title]]"
-                    header-counts-name="Results"
-                    header-entity-name="[[pageEntityName]]"
-                    show-checkboxes
-                    show-double-bar-chart="[[showDoubleBarChart(item)]]">
-                  </aggregation-query-and-display>
-
-                  <template is="dom-if" if="[[item.aggregationData.length]]">
-                    <info-aggregations entity="[[pageEntityName]]" type="[[item.title]]"></info-aggregations>
-                  </template>
-                </section-and-title>
-              </template>
-
-              <!--
-              <template is="dom-repeat" items="[[histogramFields]]">
-                <elastic-client-aggregation-builder
-                  name="[[item.entity.key]]"
-                  type="terms"
-                  count="0"
-                  order="_term"
-                  direction="asc"
-                  field="[[item.entity.field]]"
-                  ejs-aggregation="{{entityAggregation}}">
-                </elastic-client-aggregation-builder>
-
-                <elastic-client-aggregation-builder
-                  name="[[item.date.key]]"
-                  type="date_histogram"
-                  count="0"
-                  field="[[item.date.field]]"
-                  interval="week"
-                  nested-aggregations="[[buildArray(entityAggregation)]]"
-                  ejs-aggregation="{{dateAggregation}}">
-                </elastic-client-aggregation-builder>
-
-                <build-and-run-query
-                  type="terms"
-                  fields="[[entityPageConfig.field]]"
-                  values="[[pageEntityId]]"
-                  client="[[esClient]]"
-                  index-name="[[serverConfig.esIndex]]"
-                  index-types="[[serverConfig.esType]]"
-                  aggregations="[[buildArray(dateAggregation)]]"
-                  filters="[[filterList]]"
-                  page-size="0"
-                  source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-                  source-exclude='["knowledge_graph.*.provenance"]'
-                  transform-config="[[createHistogramConfig(item.date, item.entity, entityPageConfig, pageEntityId)]]"
-                  transform-function="[[transforms.entity.histogram]]"
-                  error="{{histogramError}}"
-                  loading="{{histogramLoading}}"
-                  results="{{histogramResults}}">
-                </build-and-run-query>
-
-                <section-and-title
-                  error="[[histogramError]]"
-                  icon="editor:insert-chart"
-                  section-title="[[item.entity.title]] Bar Timeline">
-
-                  <template is="dom-if" if="[[!documents.length]]">
-                    <div>No Results</div>
-                  </template>
-
-                  <template is="dom-if" if="[[!histogramLoading]]">
-                    <template is="dom-if" if="[[!histogramResults.length]]">
-                      <div>No [[item.date.titlePlural]] and/or [[item.entity.titlePlural]]</div>
-                    </template>
-                  </template>
-
-                  <zoomable-bar-chart timeline
-                    selected-property="[[item.date.key]]"
-                    selected="{{filterCollection}}"
-                    bar-property="date"
-                    label-property="text"
-                    stack-property="data"
-                    interval="week"
-                    data="[[histogramResults]]"
-                    default-label="Unidentified [[item.entity.titlePlural]]"
-                    source="Results"
-                    loading="[[histogramLoading]]"
-                    display-filter-text>
-                  </zoomable-bar-chart>
-                </section-and-title>
-              </template>
-              -->
-
-              <section-container>
-                <section-title
-                  icon="icons:assignment"
-                  style-class="entity-grey"
-                  section-title="[[documentsHeader]]">
-
-                  <!-- TODO Export Button -->
-                </section-title>
-
-                <template is="dom-if" if="[[documentsError]]">
-                  <elastic-error error="[[documentsError]]" message="{{documentsErrorMessage}}"></elastic-error>
-                  <div>[[documentsErrorMessage]]</div>
-                </template>
-
                 <template is="dom-if" if="[[documentsTotal]]">
-                  <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
+                  <div class="paper-font-subhead">
+                    [[documentsTotal]] Total Results
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+
+            <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
+              <div class="dropdown-content">
+                <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
+                  <iron-icon icon="refresh" item-icon></iron-icon>
+                  Reload the DIG Configuration
+                </paper-icon-item>
+
+                <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+                  <iron-icon icon="open-in-new" item-icon></iron-icon>
+                  Open a DIG Search Page in a New Tab
+                </paper-icon-item>
+
+                <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+                  <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
+                  Contact Support (dig-support@nextcentury.com)
+                </paper-icon-item>
+              </div>
+            </iron-dropdown>
+          </div>
+
+          <!-- Entity body -->
+          <div class="entity-page">
+
+            <div class="content">
+
+              <!-- Left Pane -->
+              <div class="flex layout vertical">
+                <template is="dom-repeat" items="[[mapFields]]">
+                  <section-and-map
+                    show-copy
+                    icon="[[item.icon]]"
+                    style-class="[[item.styleClass]]"
+                    text-property="textAndCount"
+                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
+                    transform-function="[[getSectionTitleTransformFunction]]"
+                    data="[[mapData]]">
+
+                    <aggregation-query-and-display
+                      aggregation-name="[[item.key]]"
+                      aggregation-field="[[item.field]]"
+                      selected-property="[[item.key]]"
+                      selected="{{filterCollection}}"
+                      query-field="[[pageConfig.field]]"
+                      query-value="[[pageId]]"
+                      client="[[esClient]]"
+                      index-name="[[serverConfig.esIndex]]"
+                      index-types="[[serverConfig.esType]]"
+                      filter-list="[[filterList]]"
+                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
+                      transform-function="[[transforms.entity.extractions]]"
+                      data="{{mapData}}"
+                      header-data-name="[[item.title]]"
+                      header-counts-name="Results"
+                      header-entity-name="[[pageName]]"
+                      show-checkboxes>
+                    </aggregation-query-and-display>
+                  </section-and-map>
                 </template>
 
-                <result-list
-                  text-property="title"
-                  query-results="[[documents]]"
-                  total-results="{{documentsTotal}}"
-                  page="{{documentPage}}"
-                  page-size="25"
-                  loading="[[documentsLoading]]"
-                  header="{{documentsHeader}}">
-                </result-list>
-              </section-container>
+                <template is="dom-repeat" items="[[aggregationFields]]">
+                  <section-and-title
+                    show-copy
+                    copy-type="[[item.titlePlural]]"
+                    icon="[[item.icon]]"
+                    style-class="[[item.styleClass]]"
+                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
+                    transform-function="[[getSectionTitleTransformFunction]]"
+                    data="[[item.aggregationData]]">
+
+                    <aggregation-query-and-display
+                      aggregation-name="[[item.key]]"
+                      aggregation-field="[[item.field]]"
+                      selected-property="[[item.key]]"
+                      selected="{{filterCollection}}"
+                      query-field="[[pageConfig.field]]"
+                      query-value="[[pageId]]"
+                      client="[[esClient]]"
+                      index-name="[[serverConfig.esIndex]]"
+                      index-types="[[serverConfig.esType]]"
+                      filter-list="[[filterList]]"
+                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
+                      transform-function="[[transforms.entity.extractions]]"
+                      data="{{item.aggregationData}}"
+                      header-data-name="[[item.title]]"
+                      header-counts-name="Results"
+                      header-entity-name="[[pageName]]"
+                      show-checkboxes
+                      show-double-bar-chart="[[showDoubleBarChart(item)]]">
+                    </aggregation-query-and-display>
+
+                    <template is="dom-if" if="[[item.aggregationData.length]]">
+                      <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
+                    </template>
+                  </section-and-title>
+                </template>
+
+                <template is="dom-repeat" items="[[imageFields]]">
+                  <section-and-title
+                    icon="[[item.icon]]"
+                    style-class="[[item.styleClass]]"
+                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item, imageData.length)]]"
+                    transform-function="[[getSectionTitleTransformFunction]]"
+                    data="[[loadedImageData]]">
+
+                    <image-query-and-display
+                      aggregation-field="[[item.field]]"
+                      aggregation-name="[[item.key]]"
+                      client="[[esClient]]"
+                      filter-list="[]"
+                      header-data-name="[[item.title]]"
+                      header-counts-name="Results"
+                      header-entity-name="[[pageName]]"
+                      image-id-property="source"
+                      index-name="[[serverConfig.esIndex]]"
+                      index-types="[[serverConfig.esType]]"
+                      query-fields="[[pageConfig.field]]"
+                      query-values="[[pageId]]"
+                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
+                      transform-function="[[transforms.entity.extractions]]"
+                      small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                      large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                      images="{{imageData}}"
+                      loaded-images="{{loadedImageData}}"
+                      selected-property="[[item.key]]"
+                      selected="{{filterCollection}}">
+                    </image-query-and-display>
+                  </section-and-title>
+                </template>
+              </div>
+
+              <!-- Right Pane -->
+              <div class="flex layout vertical">
+                <!-- TODO Temporary until histograms work -->
+                <template is="dom-repeat" items="[[dateFields]]">
+                  <section-and-title
+                    show-copy
+                    copy-type="[[item.titlePlural]]"
+                    icon="[[item.icon]]"
+                    style-class="[[item.styleClass]]"
+                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
+                    transform-function="[[getSectionTitleTransformFunction]]"
+                    data="[[item.aggregationData]]">
+
+                    <aggregation-query-and-display
+                      aggregation-name="[[item.key]]"
+                      aggregation-field="[[item.field]]"
+                      selected-property="[[item.key]]"
+                      selected="{{filterCollection}}"
+                      query-field="[[pageConfig.field]]"
+                      query-value="[[pageId]]"
+                      client="[[esClient]]"
+                      index-name="[[serverConfig.esIndex]]"
+                      index-types="[[serverConfig.esType]]"
+                      filter-list="[[filterList]]"
+                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
+                      transform-function="[[transforms.entity.extractions]]"
+                      data="{{item.aggregationData}}"
+                      header-data-name="[[item.title]]"
+                      header-counts-name="Results"
+                      header-entity-name="[[pageName]]"
+                      show-checkboxes
+                      show-double-bar-chart="[[showDoubleBarChart(item)]]">
+                    </aggregation-query-and-display>
+
+                    <template is="dom-if" if="[[item.aggregationData.length]]">
+                      <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
+                    </template>
+                  </section-and-title>
+                </template>
+
+                <!--
+                <template is="dom-repeat" items="[[histogramFields]]">
+                  <elastic-client-aggregation-builder
+                    name="[[item.entity.key]]"
+                    type="terms"
+                    count="0"
+                    order="_term"
+                    direction="asc"
+                    field="[[item.entity.field]]"
+                    ejs-aggregation="{{entityAggregation}}">
+                  </elastic-client-aggregation-builder>
+
+                  <elastic-client-aggregation-builder
+                    name="[[item.date.key]]"
+                    type="date_histogram"
+                    count="0"
+                    field="[[item.date.field]]"
+                    interval="week"
+                    nested-aggregations="[[buildArray(entityAggregation)]]"
+                    ejs-aggregation="{{dateAggregation}}">
+                  </elastic-client-aggregation-builder>
+
+                  <build-and-run-query
+                    type="terms"
+                    fields="[[pageConfig.field]]"
+                    values="[[pageId]]"
+                    client="[[esClient]]"
+                    index-name="[[serverConfig.esIndex]]"
+                    index-types="[[serverConfig.esType]]"
+                    aggregations="[[buildArray(dateAggregation)]]"
+                    filters="[[filterList]]"
+                    page-size="0"
+                    source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+                    source-exclude='["knowledge_graph.*.provenance"]'
+                    transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
+                    transform-function="[[transforms.entity.histogram]]"
+                    error="{{histogramError}}"
+                    loading="{{histogramLoading}}"
+                    results="{{histogramResults}}">
+                  </build-and-run-query>
+
+                  <section-and-title
+                    error="[[histogramError]]"
+                    icon="editor:insert-chart"
+                    section-title="[[item.entity.title]] Bar Timeline">
+
+                    <template is="dom-if" if="[[!documents.length]]">
+                      <div>No Results</div>
+                    </template>
+
+                    <template is="dom-if" if="[[!histogramLoading]]">
+                      <template is="dom-if" if="[[!histogramResults.length]]">
+                        <div>No [[item.date.titlePlural]] and/or [[item.entity.titlePlural]]</div>
+                      </template>
+                    </template>
+
+                    <zoomable-bar-chart timeline
+                      selected-property="[[item.date.key]]"
+                      selected="{{filterCollection}}"
+                      bar-property="date"
+                      label-property="text"
+                      stack-property="data"
+                      interval="week"
+                      data="[[histogramResults]]"
+                      default-label="Unidentified [[item.entity.titlePlural]]"
+                      source="Results"
+                      loading="[[histogramLoading]]"
+                      display-filter-text>
+                    </zoomable-bar-chart>
+                  </section-and-title>
+                </template>
+                -->
+
+                <section-container>
+                  <section-title
+                    icon="icons:assignment"
+                    style-class="entity-grey"
+                    section-title="[[documentsHeader]]">
+
+                    <!-- TODO Export Button -->
+                  </section-title>
+
+                  <template is="dom-if" if="[[documentsError]]">
+                    <elastic-error error="[[documentsError]]" message="{{documentsErrorMessage}}"></elastic-error>
+                    <div>[[documentsErrorMessage]]</div>
+                  </template>
+
+                  <template is="dom-if" if="[[documentsTotal]]">
+                    <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
+                  </template>
+
+                  <result-list
+                    text-property="title"
+                    query-results="[[documents]]"
+                    total-results="{{documentsTotal}}"
+                    page="{{documentPage}}"
+                    page-size="25"
+                    loading="[[documentsLoading]]"
+                    header="{{documentsHeader}}">
+                  </result-list>
+                </section-container>
+              </div>
             </div>
           </div>
-        </div>
+        </template>
       </paper-header-panel>
     </div>
   </template>
@@ -602,11 +605,11 @@ limitations under the License.
     /********************************/
 
     /******** VISUALIZATIONS ********/
-    app.getSectionTitleTransformConfig = function(entityPageConfig, searchFieldsObject, totalCount) {
+    app.getSectionTitleTransformConfig = function(pageConfig, searchFieldsObject, totalCount) {
       return {
         name: searchFieldsObject.title,
         namePlural: searchFieldsObject.titlePlural,
-        sayOther: (entityPageConfig && entityPageConfig.key === searchFieldsObject.key),
+        sayOther: (pageConfig && pageConfig.key === searchFieldsObject.key),
         totalCount: totalCount
       };
     };
@@ -617,19 +620,19 @@ limitations under the License.
       return sizeString + totalCountString + (config.sayOther ? ' Other ' : ' ') + (size === 1 ? config.name : config.namePlural);
     };
 
-    app.createExtractionsConfig = function(entityConfig, entityPageConfig, id) {
+    app.createExtractionsConfig = function(entityConfig, pageConfig, id) {
       return {
         entity: entityConfig,
-        page: entityPageConfig,
+        page: pageConfig,
         id: id
       };
     };
 
-    app.createHistogramConfig = function(dateConfig, entityConfig, entityPageConfig, id) {
+    app.createHistogramConfig = function(dateConfig, entityConfig, pageConfig, id) {
       return {
         date: dateConfig,
         entity: entityConfig,
-        page: entityPageConfig,
+        page: pageConfig,
         id: id
       };
     };
