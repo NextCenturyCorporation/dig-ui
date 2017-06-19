@@ -22,6 +22,7 @@ limitations under the License.
 <script src="../../transforms/config-transforms.js" type="text/javascript"></script>
 <script src="../../transforms/entity-transforms.js" type="text/javascript"></script>
 <script src="../../transforms/search-transforms.js" type="text/javascript"></script>
+<script src="../../transforms/image-transforms.js" type="text/javascript"></script>
 
 <script>
   (function() {
@@ -42,7 +43,7 @@ limitations under the License.
       },
 
       _initializeTransforms: function() {
-        /* globals _, moment, commonTransforms, configTransforms, entityTransforms, searchTransforms */
+        /* globals _, moment, commonTransforms, configTransforms, entityTransforms, searchTransforms, imageTransforms */
 
         var util = commonTransforms(_, moment);
 
@@ -51,6 +52,7 @@ limitations under the License.
         transforms.config = configTransforms(_, util);
         transforms.entity = entityTransforms(_, util);
         transforms.search = searchTransforms(_);
+        transforms.image = imageTransforms(_, util);
 
         return transforms;
       }

@@ -192,6 +192,15 @@ limitations under the License.
           <paper-icon-button icon="clear" title="Reset Page"></paper-icon-button>
         </a>
 
+        <similar-image-search id="similarImageSearchDialog"
+          logger="[[logger]]"
+          blur="[[blurImages]]"
+          image-service-auth="[[serverConfig.imageServiceAuth]]"
+          image-service-host="[[serverConfig.imageServiceHost]]"
+          link-function="[[transforms.image.externalImageLink]]">
+        </similar-image-search>
+        <!-- TODO: add logger, update transform when we're ready to link to image entity pages -->
+
         <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
         <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="60">
@@ -199,6 +208,11 @@ limitations under the License.
             <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
               <iron-icon icon="refresh" item-icon></iron-icon>
               Reload the DIG Configuration
+            </paper-icon-item>
+
+            <paper-icon-item title="Search on an Image URL or Uploaded Image" on-tap="openSimilarImageSearchDialog">
+              <iron-icon icon="image:compare" item-icon></iron-icon>
+              Similar Image Search
             </paper-icon-item>
 
             <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
@@ -391,7 +405,14 @@ limitations under the License.
         return (app.facetListsExpanded ? 'icons:expand-less' : 'icons:expand-more');
       };
       /********************************/
+      /************ MENU OPTIONS ************/
 
+      app.openSimilarImageSearchDialog = function() {
+        this.$.menuDropdown.close();
+        this.$.similarImageSearchDialog.open();
+      };
+
+      /********************************/
       /************* MENU *************/
       app.toggleMenu = function() {
         if(this.$.menuDropdown.style.display === 'none') {
