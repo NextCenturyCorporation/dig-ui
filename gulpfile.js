@@ -265,6 +265,9 @@ gulp.task('serve', ['lint', 'styles', 'elements', 'nodemon'], function() {
   var saveClientConfigProxyOptions = url.parse('http://localhost:9000/saveClientConfig');
   saveClientConfigProxyOptions.route = '/saveClientConfig';
 
+  var uploadProxyOptions = url.parse('http://localhost:9000/upload');
+  uploadProxyOptions.route = '/upload';
+
   browserSync({
     port: 5009,
     notify: false,
@@ -288,6 +291,7 @@ gulp.task('serve', ['lint', 'styles', 'elements', 'nodemon'], function() {
         proxy(clientConfigEntitiesProxyOptions),
         proxy(clientConfigFieldsProxyOptions),
         proxy(saveClientConfigProxyOptions),
+        proxy(uploadProxyOptions),
         historyApiFallback()
       ]
     }
@@ -314,6 +318,9 @@ gulp.task('serve:dist', ['default', 'nodemon'], function() {
   var saveClientConfigProxyOptions = url.parse('http://localhost:9000/saveClientConfig');
   saveClientConfigProxyOptions.route = '/saveClientConfig';
 
+  var uploadProxyOptions = url.parse('http://localhost:9000/upload');
+  uploadProxyOptions.route = '/upload';
+
   browserSync({
     port: 5001,
     notify: false,
@@ -336,6 +343,7 @@ gulp.task('serve:dist', ['default', 'nodemon'], function() {
       proxy(clientConfigEntitiesProxyOptions),
       proxy(clientConfigFieldsProxyOptions),
       proxy(saveClientConfigProxyOptions),
+      proxy(uploadProxyOptions),
       historyApiFallback()
     ]
   });

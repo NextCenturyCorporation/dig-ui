@@ -25,6 +25,11 @@ var path = require('path');
 
 var clientConfig = fs.existsSync('./server/clientConfig.json') ? require('./clientConfig.json') : {key:'value'};
 var serverConfig = require('./config/environment');
+var multer = require('multer');
+var storage = multer.memoryStorage();
+var upload = multer({
+  storage: storage
+});
 
 module.exports = function(app) {
   app.get('/serverConfig/?', function(req, res) {
@@ -37,6 +42,8 @@ module.exports = function(app) {
       esHost: serverConfig.esHost,
       esIndex: serverConfig.esIndex,
       esType: serverConfig.esType,
+      imageServiceAuth: serverConfig.imageServiceAuth,
+      imageServiceHost: serverConfig.imageServiceHost,
       searchEndpoint: serverConfig.searchEndpoint
     });
   });
@@ -57,6 +64,10 @@ module.exports = function(app) {
       });
     }
     res.status(200).send();
+  });
+
+  app.post('/uploadImage', upload.array('file'), function(req, res) {
+      res.status(200).send({mimeType: req.files[0].mimetype, base64: req.files[0].buffer.toString('base64')});
   });
 
   app.route('/*').get(function(req, res) {

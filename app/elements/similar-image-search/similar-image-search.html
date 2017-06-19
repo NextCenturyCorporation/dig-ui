@@ -1,0 +1,958 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/button-action/button-action.html">
+<link rel="import" href="../../bower_components/file-upload/file-upload.html">
+<link rel="import" href="../../bower_components/image-gallery/image-gallery.html">
+<link rel="import" href="../../bower_components/image-thumbnail/image-thumbnail.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/moment-element/moment-with-locales-import.html">
+<link rel="import" href="../../bower_components/paginated-image-gallery/paginated-image-gallery.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../bower_components/styled-dialog/styled-dialog.html">
+<link rel="import" href="../lodash.html">
+
+<dom-module id="similar-image-search">
+  <template>
+    <style include="iron-flex iron-flex-alignment"></style>
+
+    <style>
+      :host {
+        display: block;
+      }
+
+      /* Apply DIG Element button styling to the file upload button. */
+      file-upload ::content paper-button {
+        @apply(--shadow-elevation-4dp);
+        font-size: 14px;
+        line-height: 20px;
+        margin: 0;
+        padding: 5px 10px;
+      }
+
+      /* Apply DIG Element button styling to the file upload button. */
+      file-upload ::content paper-button:hover {
+        @apply(--shadow-elevation-8dp);
+      }
+
+      file-upload ::content #UploadBorder {
+        margin: 10px;
+      }
+
+      file-upload ::content .name {
+        @apply(--layout-horizontal);
+      }
+
+      file-upload ::content .name > span {
+        @apply(--layout-flex);
+        line-height: 22px;
+      }
+
+      file-upload ::content .name > .commands {
+        float: none;
+        margin-left: 5px;
+      }
+
+      file-upload ::content paper-progress {
+        width: 100%;
+      }
+
+      .file-list {
+        /* Size of 10 paper-checkbox elements. */
+        max-height: 340px;
+        overflow: auto;
+      }
+
+      .file-list paper-checkbox {
+        --paper-checkbox-label: {
+          line-height: 24px;
+          padding: 0;
+          vertical-align: top;
+        }
+        --paper-checkbox-ink-size: 34px;
+        --paper-checkbox-margin: 2px 10px 0 5px;
+        --paper-checkbox-vertical-align: top;
+      }
+
+      .selectable-text {
+        cursor: pointer;
+        display: block;
+        line-height: 24px;
+        padding: 5px;
+      }
+
+      .selected {
+        background-color: var(--primary-background-color);
+      }
+
+      .hovering,
+      .selectable-text:hover {
+        background-color: yellow;
+      }
+
+      image-gallery.selectable-images {
+        --image-hovering-color: yellow;
+        --image-selected-color: var(--primary-background-color);
+      }
+
+      paginated-image-gallery {
+        /* Size of 4 rows. */
+        --paginated-image-gallery-max-height: 640px;
+      }
+
+      .vertical-divider {
+        margin: 0 10px;
+      }
+
+      .previous-searches {
+        width: 300px;
+      }
+
+      .add-padding {
+        padding: 10px;
+      }
+    </style>
+
+    <styled-dialog id="similarImageSearchDialog" header="Upload Images or Enter Image Links" fill>
+      <div class="styled-dialog-note">Enter or paste image links in the text box.  Multiple links may be separated by spaces or new lines.</div>
+
+      <div class="layout horizontal">
+        <paper-textarea class="flex styled-dialog-right-space" label="Enter or Paste Image Links" value="{{_urlInput}}" no-label-float></paper-textarea>
+
+        <button-action disabled="[[!_urlInput]]" text="Add Links" click-listener="[[_createAddUrlListener()]]"></button-action>
+      </div>
+
+      <div class="styled-dialog-note">Upload image files by clicking the Upload Images button and selecting one or more files or by dropping one or more files into the drop box.</div>
+
+      <div class="layout horizontal center">
+        <file-upload
+          id="fileUpload"
+          accept="image/*"
+          droppable
+          method="POST"
+          multi
+          raised
+          target="/uploadImage"
+          on-error="_setUploadErrorMessage"
+          on-success="_saveUploadedInputImage">Upload Images...
+        </file-upload>
+
+        <span class="styled-dialog-text">[[_error]]</span>
+      </div>
+
+      <div class="styled-dialog-divider"></div>
+
+      <div class="styled-dialog-bold styled-dialog-tall">Your Uploaded Images and Links</div>
+
+      <template is="dom-if" if="[[_images.length]]">
+        <div class="styled-dialog-note">Click on an image in the list to remove it from or add it to your search.</div>
+      </template>
+
+      <template is="dom-if" if="[[!_images.length]]">
+        <div class="styled-dialog-text">None</div>
+      </template>
+
+      <template is="dom-if" if="[[_images.length]]">
+        <div class="layout horizontal">
+          <div class="styled-dialog-text styled-dialog-tall styled-dialog-right-space">[[_getSelectedImagesText(_selectedImageIds.length)]]</div>
+
+          <button-action class="styled-dialog-tall styled-dialog-right-space"
+            disabled="[[loading]]"
+            text="Select All"
+            click-listener="[[_createSelectListener(1)]]">
+          </button-action>
+
+          <button-action class="styled-dialog-tall styled-dialog-right-space"
+            disabled="[[loading]]"
+            text="Deselect All"
+            click-listener="[[_createSelectListener(0)]]">
+          </button-action>
+        </div>
+
+        <div class="file-list">
+          <template is="dom-repeat" items="[[_images]]" as="image">
+            <paper-checkbox class$="styled-dialog-text selectable-text [[_ifIsInListThenReturn(_selectedImageIds, image.id, 'selected')]] [[_ifIsInListThenReturn(_hoveringImageIds, image.id, 'hovering')]]"
+              disabled="[[loading]]"
+              title$="[[_getInputImageTitle(index, image.name)]]"
+              on-change="_updateSelectedImageIds"
+              on-mouseover="_hoverStart"
+              on-mouseout="_hoverEnd"
+              checked="{{image.selected}}">
+
+              [[_getInputImageLabel(index, image.name)]]
+            </paper-checkbox>
+          </template>
+        </div>
+
+        <image-gallery class="selectable-images"
+          images="[[_images]]"
+          image-source-property="data"
+          hovering="{{_hoveringImageIds}}"
+          selected="[[_selectedImageIds]]"
+          blur="[[blur]]">
+        </image-gallery>
+
+        <div class="styled-dialog-note">Click a Search button to search on the selected images.  Search for near-duplicates if you want to find exact or near-exact matches.  Search for all similar images if you want to find additional matches.  The search on each image will take a few seconds to complete.</div>
+      </template>
+
+      <div class="layout horizontal center-justified">
+        <button-action class="styled-dialog-tall styled-dialog-right-space"
+          disabled="[[!_enableSearch(loading, _selectedImageIds.length)]]"
+          text="Search for Near-Duplicate Images"
+          click-listener="[[_createSearchListener(1)]]">
+        </button-action>
+
+        <button-action class="styled-dialog-tall"
+          disabled="[[!_enableSearch(loading, _selectedImageIds.length)]]"
+          text="Search for All Similar Images"
+          click-listener="[[_createSearchListener(0)]]">
+        </button-action>
+      </div>
+
+      <loading-spinner show="[[loading]]" type="[[_getLoadingSpinnerText(_images, _queryIndex, _selectedImageIds)]]"></loading-spinner>
+
+      <iron-ajax
+        id="xhr"
+        handle-as="json"
+        with-credentials="true"
+        loading="{{loading}}"
+        on-response="_handleImageServiceResponse">
+      </iron-ajax>
+
+      <div class="styled-dialog-divider"></div>
+
+      <div class="styled-dialog-bold styled-dialog-tall">Your Similar Image Results</div>
+
+      <template is="dom-if" if="[[_results.length]]">
+        <div class="styled-dialog-note">Click on a result in the list to view its similar images.  You can view one result while the others are loading.</div>
+
+        <div class="file-list">
+          <template is="dom-repeat" items="[[_results]]" as="result">
+            <div class$="layout horizontal styled-dialog-text selectable-text [[_ifAreEqualThenReturn(_selectedResultsIndex, index, 'selected')]]" on-tap="_selectImageResults">
+              <span class="flex-8">[[result.filename]]</span>
+              <span class="flex-2">[[_getImageResultsDetailText(result.resultsList.length, result.nearDuplicates)]]</span>
+              <span class="flex-2">[[result.date]]</span>
+            </div>
+          </template>
+        </div>
+
+        <iron-pages selected="[[_selectedResultsIndex]]">
+          <template is="dom-repeat" items="[[_results]]" as="result">
+            <div>
+              <div class="styled-dialog-bold styled-dialog-tall">Your Image</div>
+
+              <div class="layout horizontal center">
+                <image-gallery
+                  images="[[result.imageList]]"
+                  image-source-property="data"
+                  blur="[[blur]]">
+                </image-gallery>
+              </div>
+
+              <div class="styled-dialog-bold styled-dialog-tall">[[_getImageResultsHeaderText(result.resultsList.length, result.nearDuplicates)]]</div>
+
+              <paginated-image-gallery
+                blur="[[blur]]"
+                new-tab
+                load-type="Similar Images"
+                image-items="[[result.resultsList]]"
+                total-items="[[result.resultsList.length]]">
+              </paginated-image-gallery>
+            </div>
+          </template>
+        </iron-pages>
+      </template>
+
+      <template is="dom-if" if="[[!_results.length]]">
+        <div class="styled-dialog-text">None</div>
+      </template>
+
+      <div class="styled-dialog-note">
+        <strong>How does it work?</strong>
+        Near-duplicate and similar images are found by looking at features in the input image like hairstyle, physical characteristics, dress, environment, and pose.  Images that are more similar are ranked higher in the results.  To learn more, please visit <a href="http://www.ee.columbia.edu/ln/dvmm/memex/" target="_blank">this page</a>.</div>
+    </styled-dialog>
+
+    <styled-dialog id="errorDialog" modal>
+      <div class="layout vertical">
+        <div class="layout horizontal">
+          <span class="styled-dialog-bold styled-dialog-tall flex">The image service is configured incorrectly.  Please contact DIG support immediately.</span>
+          <paper-icon-button icon="clear" dialog-confirm title="Close"></paper-icon-button>
+        </div>
+      </div>
+    </styled-dialog>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      /* globals _, moment */
+      is: 'similar-image-search',
+
+      properties: {
+        /**
+         * Whether to blur the images.
+         */
+        blur: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Auth for the image service.
+         */
+        imageServiceAuth: {
+          type: String
+        },
+
+        /**
+         * Host for the image service.
+         */
+        imageServiceHost: {
+          type: String
+        },
+
+        /**
+         * The threshold for similar image results.
+         */
+        imageThreshold: {
+          type: Number,
+          value: 0.5
+        },
+
+        /**
+         * A function that, given an image ID, returns a link for that image.
+         */
+        linkFunction: {
+          type: Function
+        },
+
+        /**
+         * Whether the search request is running.
+        */
+        loading: {
+          notify: true,
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * The logger object with the 'log' property that is a function.
+         */
+        logger: {
+          type: Object
+        },
+
+        /**
+         * The file upload error message.
+         */
+        _error: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * The list of IDs from _images over which the user is hovering.
+         */
+        _hoveringImageIds: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * The list of image objects to show in the selectable list.
+         */
+        _images: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * Whether the search is on near-duplicate images.
+         */
+        _nearDuplicates: {
+          type: Object,
+          value: false
+        },
+
+        /**
+         * The next available input image ID.
+         */
+        _nextInputImageId: {
+          type: Number,
+          value: 1
+        },
+
+        /**
+         * The list of previous search objects.
+         */
+        _previousSearches: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * The index in _images of the current image service query input.
+         */
+        _queryIndex: {
+          type: Number,
+          value: -1
+        },
+
+        /**
+         * The list of images returned by the search request.
+         */
+        _results: {
+          type: Array,
+          notify: true,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * The list of IDs from _images that the user selected.
+         */
+        _selectedImageIds: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * The index in _results of the selected image results.
+         */
+        _selectedResultsIndex: {
+          type: Number,
+          value: 0
+        },
+
+        /**
+         * The image URL(s) entered by the user.
+         */
+        _urlInput: {
+          type: String,
+          value: ''
+        }
+      },
+
+      /**
+       * Creates and returns the listener for the Add URL button.
+       *
+       * @return {Object}
+       * @private
+       */
+      _createAddUrlListener: function() {
+        var self = this;
+        return {
+          onClick: function() {
+            if(self._urlInput) {
+              var urls = self._urlInput.replace(/\s/g, ' ').split(' ');
+              urls.forEach(function(url) {
+                if(url) {
+                  self._saveInputImage(url, url, 'Link');
+                }
+              });
+              self._updateSelectedImageIds();
+              self.set('_urlInput', '');
+            }
+          }
+        };
+      },
+
+      /**
+       * Creates and return an input image object with the given properties.
+       *
+       * @param {Number} id
+       * @param {String} data
+       * @param {String} name
+       * @param {String} type
+       * @param {Boolean} selected
+       * @return {Object}
+       * @private
+       */
+      _createInputImageObject: function(id, data, name, type, selected) {
+        return {
+          id: id,
+          data: data,
+          name: name,
+          selected: selected,
+          type: type
+        };
+      },
+
+      /**
+       * Creates and returns the listener for a Search button with the given near-duplicates setting.
+       *
+       * @param {Boolean} nearDuplicates
+       * @return {Object}
+       * @private
+       */
+      _createSearchListener: function(nearDuplicates) {
+        var self = this;
+        return {
+          onClick: function() {
+            if(self._selectedImageIds.length) {
+              self.set('_nearDuplicates', nearDuplicates);
+              self._createXhrRequest(0);
+            }
+          }
+        };
+      },
+
+      /**
+       * Creates and returns the listener for a Select/Deselect button with the given select setting.
+       *
+       * @param {Boolean} select
+       * @return {Object}
+       * @private
+       */
+      _createSelectListener: function(select) {
+        var self = this;
+        return {
+          onClick: function() {
+            self._selectOrDeselectImages(!!select);
+          }
+        };
+      },
+
+      /**
+       * Creates and returns the listener for the Show Image Results button for the given search object.
+       *
+       * @param {Object} search
+       * @return {Object}
+       * @private
+       */
+      _createShowImageResultsListener: function(search) {
+        var self = this;
+        return {
+          onClick: function() {
+            self.push('_results', {
+              date: search.date,
+              filename: search.filename,
+              imageList: search.imageList,
+              nearDuplicates: search.nearDuplicates,
+              resultsList: search.resultsList
+            });
+          }
+        };
+      },
+
+      /**
+       * Creates an XHR request using the given index from _selectedImageIds and sets the properties on the iron-ajax element and sends the XHR request to the image service.
+       *
+       * @param {Number} selectedImageIdIndex
+       * @private
+       */
+      _createXhrRequest: function(selectedImageIdIndex) {
+        var self = this;
+        this.set('_queryIndex', _.findIndex(this._images, function(image) {
+          return image.id === self._selectedImageIds[selectedImageIdIndex];
+        }));
+
+        if(this._queryIndex < 0 || this._queryIndex > this._images.length) {
+          return;
+        }
+
+        var inputImage = this._images[this._queryIndex];
+
+        if(inputImage.type === 'File') {
+          this.$.xhr.body = {
+            data: inputImage.data
+          };
+          if(!this._nearDuplicates) {
+            this.$.xhr.body.options = '{"near_dup":1,"near_dup_th":' + this.imageThreshold + '}';
+          }
+          this.$.xhr.params = {};
+          this.$.xhr.contentType = 'application/x-www-form-urlencoded';
+          this.$.xhr.method = 'POST';
+          this._sendXhrRequest('base64');
+        }
+
+        if(inputImage.type === 'Link') {
+          this.$.xhr.body = {};
+          this.$.xhr.params = {
+            data: inputImage.data
+          };
+          if(!this._nearDuplicates) {
+            this.$.xhr.params.options = '{"near_dup":1,"near_dup_th":' + this.imageThreshold + '}';
+          }
+          this.$.xhr.method = 'GET';
+          this._sendXhrRequest('url');
+        }
+
+        if(this.logger && this.logger.log) {
+          this.logger.log('SimilarImageSearch-' + inputImage.type,
+              'NearDuplicates=' + (this._nearDuplicates ? 'TRUE' : 'FALSE'),
+              (inputImage.type === 'Link' ? inputImage.data : ''));
+        }
+      },
+
+      /**
+       * Returns whether to enable the Search buttons.
+       *
+       * @param {Boolean} loading
+       * @param {Number} number
+       * @return {Boolean}
+       * @private
+       */
+      _enableSearch: function(loading, number) {
+        return !loading && number;
+      },
+
+      /**
+       * Returns the label text for an input image.
+       *
+       * @param {Number} index
+       * @param {String} name
+       * @return {String}
+       * @private
+       */
+      _getInputImageLabel: function(index, name) {
+        return '#' + (index + 1) + ':  ' + name;
+      },
+
+      /**
+       * Returns the title text for an input image.
+       *
+       * @param {Number} index
+       * @param {String} name
+       * @return {String}
+       * @private
+       */
+      _getInputImageTitle: function(index, name) {
+        return 'Click to Toggle Image #' + (index + 1) + ':  ' + name;
+      },
+
+      /**
+       * Returns the header text for the number of top similar image results.
+       *
+       * @param {Number} number
+       * @param {Boolean} nearDuplicates
+       * @return {String}
+       * @private
+       */
+      _getImageResultsHeaderText: function(number, nearDuplicates) {
+        return (number ? 'Top ' + number + ' ' : 'No ') + (nearDuplicates ? 'Near-Duplicate' : 'Similar') + ' Image' + (number === 1 ? '' : 's');
+      },
+
+      /**
+       * Returns the detail text for the number of top similar image results.
+       *
+       * @param {Number} number
+       * @param {Boolean} nearDuplicates
+       * @return {String}
+       * @private
+       */
+      _getImageResultsDetailText: function(number, nearDuplicates) {
+        return (number ? number + ' ' : 'No ') + (nearDuplicates ? 'Near-Duplicate' : 'Image') + (number === 1 ? '' : 's');
+      },
+
+      /**
+       * Returns the text for the loading spinner.
+       *
+       * @param {Array} images
+       * @param {Number} queryIndex
+       * @param {Array} selectedImageIds
+       * @return {String}
+       * @private
+       */
+      _getLoadingSpinnerText: function(images, queryIndex, selectedImageIds) {
+        if(queryIndex < 0) {
+          return '';
+        }
+        var id = images[queryIndex].id;
+        var number = selectedImageIds.length - _.findIndex(selectedImageIds, function(selectedId) {
+          return selectedId === id;
+        });
+        return (number + ' More Search Result' + (number === 1 ? '' : 's'));
+      },
+
+      /**
+       * Returns the auth in the given image service auth config.
+       *
+       * @param {Object} imageServiceAuth
+       * @return {String}
+       * @private
+       */
+      _getRequestAuth: function(imageServiceAuth) {
+        var auth = imageServiceAuth ? JSON.parse(imageServiceAuth) : {};
+        if(!auth.user || !auth.password) {
+          return '';
+        }
+        return 'Basic ' + btoa(auth.user + ':' + auth.password);
+      },
+
+      /**
+       * Returns the host in the given image service host config with the given type.
+       *
+       * @param {Object} imageServiceHost
+       * @param {String} type
+       * @return {String}
+       * @private
+       */
+      _getRequestHost: function(imageServiceHost, type) {
+        var host = imageServiceHost ? JSON.parse(imageServiceHost) : {};
+        return host[type];
+      },
+
+      /**
+       * Returns the text for the number of selected images.
+       *
+       * @param {Number} number
+       * @return {String}
+       * @private
+       */
+      _getSelectedImagesText: function(number) {
+        return (number ? number : 'No') + ' Image' + (number === 1 ? '' : 's') + ' Selected';
+      },
+
+      /**
+       * Handles the response from the image service by setting the image results and adding them to the list of previous searches.
+       *
+       * @event response
+       * @private
+       */
+      _handleImageServiceResponse: function(event) {
+        var self = this;
+        var response = event.detail.response;
+        if(response.images && response.images.length) {
+          /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+          var imageUrls = response.images[0].similar_images.cached_image_urls;
+          var imageIds = response.images[0].similar_images.sha1;
+          var imageDistances = response.images[0].similar_images.distance;
+          /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+          var endIndex = _.findIndex(imageDistances, function(distance) {
+            return _.toNumber(distance) > self.imageThreshold;
+          });
+
+          var imageResults = imageUrls.map(function(url, index) {
+            return {
+              link: ((self.linkFunction && index < imageIds.length) ? self.linkFunction(imageIds[index]) : ''),
+              source: url
+            };
+          }).slice(0, endIndex < 0 ? imageUrls.length : endIndex);
+
+          var result = {
+            date: moment.utc(new Date()).format('h:mm:ss A MMM D, YYYY'),
+            filename: self._images[self._queryIndex].name,
+            imageList: [self._images[self._queryIndex]],
+            nearDuplicates: self._nearDuplicates,
+            resultsList: imageResults
+          };
+
+          self.push('_results', result);
+
+          // Use self.splice to force the dom-repeat to redraw itself.  Add the latest search to the start of the list.
+          self.splice('_previousSearches', 0, 0, {
+            date: result.date,
+            filename: result.filename,
+            imageList: _.cloneDeep(result.imageList),
+            nearDuplicates: result.nearDuplicates,
+            resultsList: _.cloneDeep(result.resultsList)
+          });
+        }
+
+        var selectedImageIdIndex = _.findIndex(this._selectedImageIds, function(id) {
+          return id === self._images[self._queryIndex].id;
+        });
+
+        if(selectedImageIdIndex + 1 < this._selectedImageIds.length) {
+          this._createXhrRequest(selectedImageIdIndex + 1);
+        } else {
+          this._selectOrDeselectImages(false);
+        }
+      },
+
+      /**
+       * Clears the _hoveringImageIds.
+       *
+       * @event mouseout
+       * @private
+       */
+      _hoverEnd: function() {
+        this.set('_hoveringImageIds', []);
+      },
+
+      /**
+       * Sets the _hoveringImageIds.
+       *
+       * @event mouseover
+       * @private
+       */
+      _hoverStart: function(event) {
+        this.set('_hoveringImageIds', [event.model.image.id]);
+      },
+
+      /**
+       * Returns the third input if the first two inputs are equal.
+       *
+       * @param {Any} one
+       * @param {Any} two
+       * @param {Any} value
+       * @return {Any}
+       * @private
+       */
+      _ifAreEqualThenReturn: function(one, two, value) {
+        return one === two ? value : '';
+      },
+
+      /**
+       * Returns the third input if the given item is in the given list.
+       *
+       * @param {Array} list
+       * @param {Any} item
+       * @param {Any} value
+       * @return {Any}
+       * @private
+       */
+      _ifIsInListThenReturn: function(list, item, value) {
+        return list.indexOf(item) >= 0 ? value : '';
+      },
+
+      /**
+       * Saves a new input image with the given properties in the correct index in _images.
+       *
+       * @param {String} data
+       * @param {String} name
+       * @param {String} type
+       * @private
+       */
+      _saveInputImage: function(data, name, type) {
+        var id = this._nextInputImageId++;
+        var index = _.findIndex(this._images, function(image) {
+          return image.name >= name;
+        });
+        this.splice('_images', (index < 0 ? this._images.length : index), 0, this._createInputImageObject(id, data, name, type, true));
+      },
+
+      /**
+       * Saves the uploaded image to the list of input images.
+       *
+       * @event success
+       * @private
+       */
+      _saveUploadedInputImage: function(event) {
+        if(event.detail && event.detail.filename && event.detail.xhr && event.detail.xhr.response) {
+          var response = JSON.parse(event.detail.xhr.response);
+          if(response.mimeType.indexOf('image') !== 0) {
+            this.set('_error', 'Image Upload Failed (Not an Image File):  ' + event.detail.filename);
+            return;
+          }
+          this.set('_error', '');
+          var data = 'data:' + response.mimeType + ';base64,' + response.base64;
+          this._saveInputImage(data, event.detail.filename, 'File');
+        }
+        this._updateSelectedImageIds();
+        this.$$('#fileUpload').clear();
+      },
+
+      /**
+       * Sets the _selectedResultsIndex.
+       *
+       * @event tap
+       * @private
+       */
+      _selectImageResults: function(event) {
+        this.set('_selectedResultsIndex', event.model.index);
+      },
+
+      /**
+       * Selects or deselects each object in _images and updates _selectedImageIds.
+       *
+       * @param {Boolean} select
+       * @private
+       */
+      _selectOrDeselectImages: function(select) {
+        var self = this;
+        this._images.forEach(function(image, index) {
+          if(image.selected === select) {
+            return;
+          }
+          // Must recreate the image object in order to successfully notify the paper-checkbox of the change.
+          self.set('_images.' + index, self._createInputImageObject(image.id, image.data, image.name, image.type, select));
+        });
+        this._updateSelectedImageIds();
+      },
+
+      /**
+       * Sends the request to the image service for an image of the given type (link or file upload).
+       *
+       * @param {String} type
+       * @private
+       */
+      _sendXhrRequest: function(type) {
+        this.$.xhr.url = this._getRequestHost(this.imageServiceHost, type);
+        this.$.xhr.headers = this.$.xhr.headers || {};
+        this.$.xhr.headers.Authorization = this._getRequestAuth(this.imageServiceAuth);
+        if(this.$.xhr.headers.Authorization && this.$.xhr.url) {
+          this.$.xhr.generateRequest();
+        } else {
+          this.$$('#errorDialog').open();
+        }
+      },
+
+      /**
+       * Sets the upload error message.
+       *
+       * @event error
+       * @private
+       */
+      _setUploadErrorMessage: function(event) {
+        this.set('_error', 'Image Upload Failed (Unknown Error):  ' + event.detail.filename);
+      },
+
+      /**
+       * Updates the _selectedImageIds using the _images.
+       *
+       * @private
+       */
+      _updateSelectedImageIds: function() {
+        if(!this.loading) {
+          var selectedImageIds = [];
+          this._images.forEach(function(image) {
+            if(image.selected) {
+              selectedImageIds.push(image.id);
+            }
+          });
+          this.set('_selectedImageIds', selectedImageIds);
+        }
+      },
+
+      /**
+       * Opens the similar image search dialog.
+       */
+      open: function() {
+        this.$$('#similarImageSearchDialog').open();
+      }
+    });
+  })();
+  </script>
+</dom-module>

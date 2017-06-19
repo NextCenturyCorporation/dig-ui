@@ -40,5 +40,7 @@ module.exports = {
     esHost: process.env.ES_HOST || 'http://localhost:9200',
     esIndex: process.env.ES_INDEX,
     esType: process.env.ES_TYPE,
-    searchEndpoint: process.env.SEARCH_ENDPOINT
+    searchEndpoint: process.env.SEARCH_ENDPOINT,
+    imageServiceAuth: process.env.IMAGE_SERVICE_AUTH || '{"user": "", "password": ""}',
+    imageServiceHost: process.env.IMAGE_SERVICE_HOST || '{"url": "", "base64": ""}',
 };

@@ -51,6 +51,13 @@ var commonTransforms = (function(_, moment) {
       }
       return '/entity.html?id=' + key + '&type=' + type;
     }
+
+    // TODO: for when we are ready to show image entity pages
+    /*if(key && link === 'image') {
+      var linkId = decodeURIComponent(key.substring(key.lastIndexOf('/') + 1));
+      return '/image.html?id=' + linkId;
+    }*/
+
     return undefined;
   }
 
