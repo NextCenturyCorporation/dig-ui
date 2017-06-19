@@ -154,6 +154,13 @@ limitations under the License.
     </json-combine>
 
     <json-combine
+      data-in1="[[params.id]]"
+      data-in2="[[params.type]]"
+      data-out="{{formattedId}}"
+      combine-function="[[transforms.config.formatId]]">
+    </json-combine>
+
+    <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
       data-out="{{histogramFields}}"
@@ -231,7 +238,7 @@ limitations under the License.
             <div class="page-name">
               <template is="dom-if" if="[[entityPageConfig]]">
                 <div class="paper-font-headline">
-                  [[entityPageConfig.title]]: <span>[[params.id]]</span>
+                  [[entityPageConfig.title]]: <span>[[formattedId]]</span>
                 </div>
               </template>
               <template is="dom-if" if="[[documentsTotal]]">
@@ -297,6 +304,7 @@ limitations under the License.
                     data="{{mapData}}"
                     header-data-name="[[item.title]]"
                     header-counts-name="Results"
+                    header-entity-name="[[formattedId]]"
                     show-checkboxes>
                   </aggregation-query-and-display>
                 </section-and-map>
@@ -328,13 +336,13 @@ limitations under the License.
                     data="{{item.aggregationData}}"
                     header-data-name="[[item.title]]"
                     header-counts-name="Results"
-                    header-entity-name="[[params.id]]"
+                    header-entity-name="[[formattedId]]"
                     show-checkboxes
                     show-double-bar-chart="[[showDoubleBarChart(item)]]">
                   </aggregation-query-and-display>
 
                   <template is="dom-if" if="[[item.aggregationData.length]]">
-                    <info-aggregations entity="[[params.id]]" type="[[item.title]]"></info-aggregations>
+                    <info-aggregations entity="[[formattedId]]" type="[[item.title]]"></info-aggregations>
                   </template>
                 </section-and-title>
               </template>
@@ -354,7 +362,7 @@ limitations under the License.
                     filter-list="[]"
                     header-data-name="[[item.title]]"
                     header-counts-name="Results"
-                    header-entity-name="[[params.id]]"
+                    header-entity-name="[[formattedId]]"
                     image-id-property="source"
                     index-name="[[serverConfig.esIndex]]"
                     index-types="[[serverConfig.esType]]"
@@ -402,13 +410,13 @@ limitations under the License.
                     data="{{item.aggregationData}}"
                     header-data-name="[[item.title]]"
                     header-counts-name="Results"
-                    header-entity-name="[[params.id]]"
+                    header-entity-name="[[formattedId]]"
                     show-checkboxes
                     show-double-bar-chart="[[showDoubleBarChart(item)]]">
                   </aggregation-query-and-display>
 
                   <template is="dom-if" if="[[item.aggregationData.length]]">
-                    <info-aggregations entity="[[params.id]]" type="[[item.title]]"></info-aggregations>
+                    <info-aggregations entity="[[formattedId]]" type="[[item.title]]"></info-aggregations>
                   </template>
                 </section-and-title>
               </template>
@@ -543,6 +551,23 @@ limitations under the License.
       dates: DigBehaviors.FilterBehavior.getEntityPageFilterItems
     };
 
+    app.createAuthHeader = function(username, password) {
+      if(username && password) {
+        return {
+          'Authorization': 'Basic ' + btoa(username + ':' + password)
+        };
+      }
+      return {};
+    };
+
+    app.exists = function(object) {
+      return typeof object !== 'undefined';
+    };
+
+    app.getFields = function(object) {
+      return object.fields || {};
+    };
+
     app.noData = function(object) {
       return _.isEmpty(object);
     };
@@ -569,6 +594,7 @@ limitations under the License.
     };
     /********************************/
 
+    /******** VISUALIZATIONS ********/
     app.getSectionTitleTransformConfig = function(entityPageConfig, searchFieldsObject, totalCount) {
       return {
         name: searchFieldsObject.title,
@@ -608,6 +634,7 @@ limitations under the License.
     app.getBlurStyleClass = function(blur, large) {
       return (blur ? (large ? 'large-blur' : 'small-blur') : '');
     };
+    /********************************/
   })(document);
   </script>
 </body>
