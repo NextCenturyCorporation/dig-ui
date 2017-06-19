@@ -42,20 +42,20 @@ var configTransforms = (function(_, commonTransforms) {
     return [];
   }
 
-  function createAggregationTransform(link, type) {
+  function createFacetTransform(link, type) {
     return function(response, key) {
       var aggregations = findAggregationsInResponse(response, key);
       return aggregations.reduce(function(data, bucket) {
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var count = bucket.doc_count;
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
-        var id = commonTransforms.getAggregatedDataId(bucket.key, type);
+        var id = commonTransforms.getFacetsDataId(bucket.key, type);
         if(id) {
           data.push({
             count: count,
             id: id,
             link: commonTransforms.getLink(bucket.key, link, type),
-            text: commonTransforms.getAggregatedDataText(bucket.key, type)
+            text: commonTransforms.getFacetsDataText(bucket.key, type)
           });
         }
         return data;
@@ -183,7 +183,7 @@ var configTransforms = (function(_, commonTransforms) {
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
         // The facet aggregation transform function.
-        searchFieldsObject.aggregationTransform = createAggregationTransform(searchFieldsObject.link, searchFieldsObject.type);
+        searchFieldsObject.facetTransform = createFacetTransform(searchFieldsObject.link, searchFieldsObject.type);
         // Add style class (e.g. 'entity-grey').
         searchFieldsObject.styleClass = commonTransforms.getStyleClass(searchFieldsObject.color);
 

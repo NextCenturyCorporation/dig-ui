@@ -164,9 +164,9 @@ var commonTransforms = (function(_, moment) {
   }
 
   /**
-   * Returns the ID for the aggregated data with the given key and type.
+   * Returns the ID for the facets data with the given key and type.
    */
-  function getAggregatedDataId(key, type) {
+  function getFacetsDataId(key, type) {
     if(type === 'hyphenated') {
       // Formatted text-key1:value1-key2:value2-key3:value3...
       var keySplit = key.split('-');
@@ -185,9 +185,9 @@ var commonTransforms = (function(_, moment) {
   }
 
   /**
-   * Returns the text for the aggregated data with the given key and type.
+   * Returns the text for the facets data with the given key and type.
    */
-  function getAggregatedDataText(key, type) {
+  function getFacetsDataText(key, type) {
     if(type === 'date') {
       return getFormattedDate(key);
     }
@@ -273,17 +273,17 @@ var commonTransforms = (function(_, moment) {
   */
   return {
     /**
-     * Returns the ID for the aggregated data with the given key and type.
+     * Returns the ID for the facets data with the given key and type.
      */
-    getAggregatedDataId: function(key, type) {
-      return getAggregatedDataId(key, type);
+    getFacetsDataId: function(key, type) {
+      return getFacetsDataId(key, type);
     },
 
     /**
-     * Returns the text for the aggregated data with the given key and type.
+     * Returns the text for the facets data with the given key and type.
      */
-    getAggregatedDataText: function(key, type) {
-      return getAggregatedDataText(key, type);
+    getFacetsDataText: function(key, type) {
+      return getFacetsDataText(key, type);
     },
 
     /**
