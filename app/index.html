@@ -289,7 +289,7 @@ limitations under the License.
         <!-- Main content on right side -->
         <paper-header-panel main id="searchPanel">
           <template is="dom-if" if="[[clientConfigLoading]]">
-            <loading-spinner show type="Configuration"></loading-spinner>
+            <loading-spinner class="layout horizontal" style="margin: 10px 20px;" show type="Configuration"></loading-spinner>
           </template>
 
           <template is="dom-if" if="[[!noData(clientConfigFields)]]">
