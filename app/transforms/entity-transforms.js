@@ -339,7 +339,7 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
 
       if(data && data.aggregations && data.aggregations[config.entity.key] && data.aggregations[config.entity.key][config.entity.key]) {
         extractions = getExtractionsFromList(data.aggregations[config.entity.key][config.entity.key].buckets || [], config.entity).filter(function(extraction) {
-          var result = config.id && config.page && config.page.type == config.entity.type ? extraction.id !== config.id : true;
+          var result = config.id && config.page && config.page.type === config.entity.type ? extraction.id !== config.id : true;
           sayOther = sayOther || !result;
           return result;
         });
