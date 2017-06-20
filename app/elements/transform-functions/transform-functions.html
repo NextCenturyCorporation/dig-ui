@@ -22,37 +22,59 @@ limitations under the License.
 <script src="../../transforms/config-transforms.js" type="text/javascript"></script>
 <script src="../../transforms/entity-transforms.js" type="text/javascript"></script>
 <script src="../../transforms/search-transforms.js" type="text/javascript"></script>
-<script src="../../transforms/image-transforms.js" type="text/javascript"></script>
 
 <script>
   (function() {
     Polymer({
+      /* globals _, moment, commonTransforms, configTransforms, entityTransforms, searchTransforms */
       is: 'transform-functions',
 
       properties: {
-        config: {
+        clientConfig: {
+          type: Object
+        },
+
+        esConfig: {
+          computed: '_initializeEsConfig(clientConfig, serverConfig)',
+          notify: true,
+          readOnly: true,
+          type: Object
+        },
+
+        serverConfig: {
           type: Object
         },
 
         transforms: {
-          computed: '_initializeTransforms(config)',
+          computed: '_initializeTransforms(esConfig)',
           notify: true,
           readOnly: true,
           type: Object
         }
       },
 
-      _initializeTransforms: function(serverConfig) {
-        /* globals _, moment, commonTransforms, configTransforms, entityTransforms, searchTransforms, imageTransforms */
+      _initializeEsConfig: function(clientConfig, serverConfig) {
+        /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+        var esConfig = {
+          esIndex: (clientConfig.index ? clientConfig.index.full : '') || serverConfig.esIndex,
+          esType: clientConfig.root_name || serverConfig.esType
+        };
+        /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+        if(serverConfig.esDataEndpoint) {
+          var slash = serverConfig.esDataEndpoint.lastIndexOf('/') === (serverConfig.esDataEndpoint.length - 1) ? '' : '/';
+          esConfig.esDataEndpoint = serverConfig.esDataEndpoint + slash + esConfig.esIndex + '/' + esConfig.esType + '/';
+        }
+        return esConfig;
+      },
 
+      _initializeTransforms: function(esConfig) {
         var util = commonTransforms(_, moment);
 
         var transforms = {};
 
         transforms.config = configTransforms(_, util);
-        transforms.entity = entityTransforms(_, util, serverConfig);
+        transforms.entity = entityTransforms(_, util, esConfig);
         transforms.search = searchTransforms(_);
-        transforms.image = imageTransforms(_, util);
 
         return transforms;
       }

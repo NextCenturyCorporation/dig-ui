@@ -60,16 +60,21 @@ limitations under the License.
       last-response="{{serverConfig}}">
     </iron-ajax>
 
-    <transform-functions config="[[serverConfig]]" transforms="{{transforms}}"></transform-functions>
+    <transform-functions
+      client-config="[[clientConfig]]"
+      server-config="[[serverConfig]]"
+      es-config="{{esConfig}}"
+      transforms="{{transforms}}">
+    </transform-functions>
 
     <iron-ajax
       auto
       handle-as="json"
-      url="/clientConfigFields"
-      last-response="{{clientConfigFields}}">
+      url="/clientConfig"
+      last-response="{{clientConfig}}">
     </iron-ajax>
 
-    <template is="dom-if" if="[[noData(clientConfigFields)]]">
+    <template is="dom-if" if="[[noData(clientConfig)]]">
       <json-combine
         data-in1="[[serverConfig.configUsername]]"
         data-in2="[[serverConfig.configPassword]]"
@@ -95,14 +100,14 @@ limitations under the License.
         method="POST"
         url="/saveClientConfig">
       </iron-ajax>
-
-      <json-combine
-        data-in1="[[clientConfig]]"
-        data-in2="{}"
-        data-out="{{clientConfigFields}}"
-        combine-function="[[getFields]]">
-      </json-combine>
     </template>
+
+    <json-combine
+      data-in1="[[clientConfig]]"
+      data-in2="{}"
+      data-out="{{clientConfigFields}}"
+      combine-function="[[transforms.config.fields]]">
+    </json-combine>
 
     <json-combine
       data-in1="[[clientConfigFields]]"
@@ -204,8 +209,8 @@ limitations under the License.
       fields="[[pageConfig.field]]"
       values="[[pageId]]"
       client="[[esClient]]"
-      index-name="[[serverConfig.esIndex]]"
-      index-types="[[serverConfig.esType]]"
+      index-name="[[esConfig.esIndex]]"
+      index-types="[[esConfig.esType]]"
       aggregations="[]"
       filters="[[filterList]]"
       page="{{documentPage}}"
@@ -305,8 +310,8 @@ limitations under the License.
                       query-field="[[pageConfig.field]]"
                       query-value="[[pageId]]"
                       client="[[esClient]]"
-                      index-name="[[serverConfig.esIndex]]"
-                      index-types="[[serverConfig.esType]]"
+                      index-name="[[esConfig.esIndex]]"
+                      index-types="[[esConfig.esType]]"
                       filter-list="[[filterList]]"
                       transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
                       transform-function="[[transforms.entity.extractions]]"
@@ -337,8 +342,8 @@ limitations under the License.
                       query-field="[[pageConfig.field]]"
                       query-value="[[pageId]]"
                       client="[[esClient]]"
-                      index-name="[[serverConfig.esIndex]]"
-                      index-types="[[serverConfig.esType]]"
+                      index-name="[[esConfig.esIndex]]"
+                      index-types="[[esConfig.esType]]"
                       filter-list="[[filterList]]"
                       transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
                       transform-function="[[transforms.entity.extractions]]"
@@ -373,8 +378,8 @@ limitations under the License.
                       header-counts-name="Results"
                       header-entity-name="[[pageName]]"
                       image-id-property="source"
-                      index-name="[[serverConfig.esIndex]]"
-                      index-types="[[serverConfig.esType]]"
+                      index-name="[[esConfig.esIndex]]"
+                      index-types="[[esConfig.esType]]"
                       query-fields="[[pageConfig.field]]"
                       query-values="[[pageId]]"
                       transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
@@ -411,8 +416,8 @@ limitations under the License.
                       query-field="[[pageConfig.field]]"
                       query-value="[[pageId]]"
                       client="[[esClient]]"
-                      index-name="[[serverConfig.esIndex]]"
-                      index-types="[[serverConfig.esType]]"
+                      index-name="[[esConfig.esIndex]]"
+                      index-types="[[esConfig.esType]]"
                       filter-list="[[filterList]]"
                       transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
                       transform-function="[[transforms.entity.extractions]]"
@@ -457,8 +462,8 @@ limitations under the License.
                     fields="[[pageConfig.field]]"
                     values="[[pageId]]"
                     client="[[esClient]]"
-                    index-name="[[serverConfig.esIndex]]"
-                    index-types="[[serverConfig.esType]]"
+                    index-name="[[esConfig.esIndex]]"
+                    index-types="[[esConfig.esType]]"
                     aggregations="[[buildArray(dateAggregation)]]"
                     filters="[[filterList]]"
                     page-size="0"
@@ -592,7 +597,7 @@ limitations under the License.
     };
 
     app.reloadClientConfig = function() {
-      app.set('clientConfigFields', {});
+      app.set('clientConfig', {});
     };
 
     app.openNewTab = function() {

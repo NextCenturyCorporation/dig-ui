@@ -121,6 +121,10 @@ var configTransforms = (function(_, commonTransforms) {
       return headerExtractions.concat(detailExtractions);
     },
 
+    fields: function(clientConfig) {
+      return clientConfig.fields || {};
+    },
+
     filterCollection: function(searchFields) {
       return searchFields.reduce(function(filterCollection, searchFieldsObject) {
         filterCollection[searchFieldsObject.key] = [];

@@ -17,7 +17,7 @@
 /* exported entityTransforms */
 /* jshint camelcase:false */
 
-var entityTransforms = (function(_, commonTransforms, serverConfig) {
+var entityTransforms = (function(_, commonTransforms, esConfig) {
   function getSingleStringFromResult(result, path, property) {
     var data = _.get(result, path, []);
 
@@ -158,7 +158,7 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
 
     var rank = _.get(result, '_score');
     var domain = _.get(result, '_source.tld');
-    var esDataEndpoint = (serverConfig && serverConfig.esIndex && serverConfig.esType && serverConfig.esDataEndpoint ? (serverConfig.esDataEndpoint + serverConfig.esIndex + '/' + serverConfig.esType + '/' + id) : undefined);
+    var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
     var documentObject = {
       id: id,
@@ -334,6 +334,10 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
         });
       }
       return [];
+    },
+
+    externalImageLink: function(id) {
+      return commonTransforms.getLink(id, 'image');
     },
 
     extractions: function(data, config) {

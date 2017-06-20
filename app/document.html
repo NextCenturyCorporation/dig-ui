@@ -60,16 +60,21 @@ limitations under the License.
       last-response="{{serverConfig}}">
     </iron-ajax>
 
-    <transform-functions config="[[serverConfig]]" transforms="{{transforms}}"></transform-functions>
+    <transform-functions
+      client-config="[[clientConfig]]"
+      server-config="[[serverConfig]]"
+      es-config="{{esConfig}}"
+      transforms="{{transforms}}">
+    </transform-functions>
 
     <iron-ajax
       auto
       handle-as="json"
-      url="/clientConfigFields"
-      last-response="{{clientConfigFields}}">
+      url="/clientConfig"
+      last-response="{{clientConfig}}">
     </iron-ajax>
 
-    <template is="dom-if" if="[[noData(clientConfigFields)]]">
+    <template is="dom-if" if="[[noData(clientConfig)]]">
       <json-combine
         data-in1="[[serverConfig.configUsername]]"
         data-in2="[[serverConfig.configPassword]]"
@@ -95,14 +100,14 @@ limitations under the License.
         method="POST"
         url="/saveClientConfig">
       </iron-ajax>
-
-      <json-combine
-        data-in1="[[clientConfig]]"
-        data-in2="{}"
-        data-out="{{clientConfigFields}}"
-        combine-function="[[getFields]]">
-      </json-combine>
     </template>
+
+    <json-combine
+      data-in1="[[clientConfig]]"
+      data-in2="{}"
+      data-out="{{clientConfigFields}}"
+      combine-function="[[transforms.config.fields]]">
+    </json-combine>
 
     <json-combine
       data-in1="[[clientConfigFields]]"
@@ -136,8 +141,8 @@ limitations under the License.
       fields='"doc_id"'
       values="[[params.id]]"
       client="[[esClient]]"
-      index-name="[[serverConfig.esIndex]]"
-      index-types="[[serverConfig.esType]]"
+      index-name="[[esConfig.esIndex]]"
+      index-types="[[esConfig.esType]]"
       aggregations="[]"
       filters="[]"
       page-size="1"
@@ -170,8 +175,8 @@ limitations under the License.
 
     <elastic-client-search
       client="[[esClient]]"
-      index="[[serverConfig.esIndex]]"
-      elastic-types="[[serverConfig.esType]]"
+      index="[[esConfig.esIndex]]"
+      elastic-types="[[esConfig.esType]]"
       query="[[revisionsQuery]]"
       aggregations="[]"
       filters="[[buildArray(notThisDocFilter)]]"
@@ -206,8 +211,8 @@ limitations under the License.
 
     <elastic-client-search
       client="[[esClient]]"
-      index="[[serverConfig.esIndex]]"
-      elastic-types="[[serverConfig.esType]]"
+      index="[[esConfig.esIndex]]"
+      elastic-types="[[esConfig.esType]]"
       query="[[moreLikeThisQuery]]"
       aggregations="[]"
       filters="[[buildArray(notThisDocFilter)]]"
@@ -480,10 +485,6 @@ limitations under the License.
       return typeof object !== 'undefined';
     };
 
-    app.getFields = function(object) {
-      return object.fields || {};
-    };
-
     app.isImage = function(type) {
       return type === 'image';
     };
@@ -510,7 +511,7 @@ limitations under the License.
     };
 
     app.reloadClientConfig = function() {
-      app.set('clientConfigFields', {});
+      app.set('clientConfig', {});
     };
 
     app.openNewTab = function() {

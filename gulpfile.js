@@ -256,11 +256,8 @@ gulp.task('serve', ['lint', 'styles', 'elements', 'nodemon'], function() {
   var serverConfigProxyOptions = url.parse('http://localhost:9000/serverConfig');
   serverConfigProxyOptions.route = '/serverConfig';
 
-  var clientConfigEntitiesProxyOptions = url.parse('http://localhost:9000/clientConfigEntities');
-  clientConfigEntitiesProxyOptions.route = '/clientConfigEntities';
-
-  var clientConfigFieldsProxyOptions = url.parse('http://localhost:9000/clientConfigFields');
-  clientConfigFieldsProxyOptions.route = '/clientConfigFields';
+  var clientConfigProxyOptions = url.parse('http://localhost:9000/clientConfig');
+  clientConfigProxyOptions.route = '/clientConfig';
 
   var saveClientConfigProxyOptions = url.parse('http://localhost:9000/saveClientConfig');
   saveClientConfigProxyOptions.route = '/saveClientConfig';
@@ -288,8 +285,7 @@ gulp.task('serve', ['lint', 'styles', 'elements', 'nodemon'], function() {
       baseDir: ['.tmp', 'app'],
       middleware: [
         proxy(serverConfigProxyOptions),
-        proxy(clientConfigEntitiesProxyOptions),
-        proxy(clientConfigFieldsProxyOptions),
+        proxy(clientConfigProxyOptions),
         proxy(saveClientConfigProxyOptions),
         proxy(uploadProxyOptions),
         historyApiFallback()
@@ -309,11 +305,8 @@ gulp.task('serve:dist', ['default', 'nodemon'], function() {
   var serverConfigProxyOptions = url.parse('http://localhost:9000/serverConfig');
   serverConfigProxyOptions.route = '/serverConfig';
 
-  var clientConfigEntitiesProxyOptions = url.parse('http://localhost:9000/clientConfigEntities');
-  clientConfigEntitiesProxyOptions.route = '/clientConfigEntities';
-
-  var clientConfigFieldsProxyOptions = url.parse('http://localhost:9000/clientConfigFields');
-  clientConfigFieldsProxyOptions.route = '/clientConfigFields';
+  var clientConfigProxyOptions = url.parse('http://localhost:9000/clientConfig');
+  clientConfigProxyOptions.route = '/clientConfig';
 
   var saveClientConfigProxyOptions = url.parse('http://localhost:9000/saveClientConfig');
   saveClientConfigProxyOptions.route = '/saveClientConfig';
@@ -340,8 +333,7 @@ gulp.task('serve:dist', ['default', 'nodemon'], function() {
     server: dist(),
     middleware: [
       proxy(serverConfigProxyOptions),
-      proxy(clientConfigEntitiesProxyOptions),
-      proxy(clientConfigFieldsProxyOptions),
+      proxy(clientConfigProxyOptions),
       proxy(saveClientConfigProxyOptions),
       proxy(uploadProxyOptions),
       historyApiFallback()

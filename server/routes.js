@@ -49,12 +49,8 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/clientConfigEntities/?', function(req, res) {
-    res.status(200).send(clientConfig.entities || {});
-  });
-
-  app.get('/clientConfigFields/?', function(req, res) {
-    res.status(200).send(clientConfig.fields || {});
+  app.get('/clientConfig/?', function(req, res) {
+    res.status(200).send(clientConfig);
   });
 
   app.post('/saveClientConfig', function(req, res) {
