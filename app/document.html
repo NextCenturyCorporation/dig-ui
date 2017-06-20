@@ -386,7 +386,7 @@ limitations under the License.
                     <detail-subsection
                       entity-id="[[document.id]]"
                       link="[[document.esData]]"
-                      detail="Open Raw Elasticsearch Document">
+                      detail="Open Raw ES Document">
                     </detail-subsection>
                   </template>
 
@@ -534,7 +534,7 @@ limitations under the License.
     app.getSectionTitleTransformFunction = function(size, config) {
       var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       var totalCountString = config.totalCount && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
-      return sizeString + totalCountString + (size === 1 ? config.name : config.namePlural);
+      return sizeString + totalCountString + ' ' + (size === 1 ? config.name : config.namePlural);
     };
 
     app.createExtractionsConfig = function(entityConfig, id) {
