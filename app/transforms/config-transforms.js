@@ -141,8 +141,8 @@ var configTransforms = (function(_, commonTransforms) {
       }, {});
     },
 
-    formatId: function(id, type) {
-      return commonTransforms.getExtractionDataId(id, id, type);
+    formatId: function(id) {
+      return decodeURIComponent(id);
     },
 
     formatName: function(id, type) {
