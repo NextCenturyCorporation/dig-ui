@@ -58,17 +58,25 @@ limitations under the License.
       last-response="{{serverConfig}}">
     </iron-ajax>
 
+    <json-combine
+      data-in1="[[params]]"
+      data-in2="[[serverConfig]]"
+      data-out="{{domain}}"
+      combine-function="[[findDomain]]">
+    </json-combine>
+
     <transform-functions
       client-config="[[clientConfig]]"
+      domain="[[domain]]"
       server-config="[[serverConfig]]"
       es-config="{{esConfig}}"
       transforms="{{transforms}}">
     </transform-functions>
 
     <iron-ajax
-      auto
+      auto="[[exists(domain)]]"
       handle-as="json"
-      url="/clientConfig"
+      url="/clientConfig/[[domain]]"
       last-response="{{clientConfig}}">
     </iron-ajax>
 
@@ -84,7 +92,7 @@ limitations under the License.
         auto="[[exists(configHeader)]]"
         handle-as="json"
         headers="[[configHeader]]"
-        url="[[serverConfig.configEndpoint]]"
+        url="[[concat(serverConfig.configEndpoint, domain)]]"
         with-credentials
         loading="{{clientConfigLoading}}"
         last-error="{{clientConfigError}}"
@@ -96,7 +104,7 @@ limitations under the License.
         body="[[clientConfig]]"
         content-type="application/json"
         method="POST"
-        url="/saveClientConfig">
+        url="/saveClientConfig/[[domain]]">
       </iron-ajax>
     </template>
 
@@ -357,12 +365,15 @@ limitations under the License.
 
   <!-- Need to include dependencies here for IE -->
   <script src="bower_components/lodash/dist/lodash.js"></script>
+  <script src="behaviors/browser-behavior.js"></script>
   <script src="behaviors/filter-behavior.js"></script>
 
   <script>
     (function(document) {
       /* globals _, DigBehaviors */
       var app = document.querySelector('#app');
+
+      app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
 
       app.createAuthHeader = function(username, password) {
         if(username && password) {
@@ -373,12 +384,20 @@ limitations under the License.
         return {};
       };
 
+      app.concat = function(a, b) {
+        return a + b;
+      };
+
       app.equals = function(a, b) {
         return a === b;
       };
 
       app.exists = function(object) {
         return typeof object !== 'undefined';
+      };
+
+      app.findDomain = function(parameters, serverConfig) {
+        return parameters.domain || parameters.project || serverConfig.defaultProject;
       };
 
       app.noData = function(object) {

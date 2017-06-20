@@ -60,17 +60,25 @@ limitations under the License.
       last-response="{{serverConfig}}">
     </iron-ajax>
 
+    <json-combine
+      data-in1="[[params]]"
+      data-in2="[[serverConfig]]"
+      data-out="{{domain}}"
+      combine-function="[[findDomain]]">
+    </json-combine>
+
     <transform-functions
       client-config="[[clientConfig]]"
+      domain="[[domain]]"
       server-config="[[serverConfig]]"
       es-config="{{esConfig}}"
       transforms="{{transforms}}">
     </transform-functions>
 
     <iron-ajax
-      auto
+      auto="[[exists(domain)]]"
       handle-as="json"
-      url="/clientConfig"
+      url="/clientConfig/[[domain]]"
       last-response="{{clientConfig}}">
     </iron-ajax>
 
@@ -86,7 +94,7 @@ limitations under the License.
         auto="[[exists(configHeader)]]"
         handle-as="json"
         headers="[[configHeader]]"
-        url="[[serverConfig.configEndpoint]]"
+        url="[[concat(serverConfig.configEndpoint, domain)]]"
         with-credentials
         loading="{{clientConfigLoading}}"
         last-error="{{clientConfigError}}"
@@ -98,7 +106,7 @@ limitations under the License.
         body="[[clientConfig]]"
         content-type="application/json"
         method="POST"
-        url="/saveClientConfig">
+        url="/saveClientConfig/[[domain]]">
       </iron-ajax>
     </template>
 
@@ -567,6 +575,10 @@ limitations under the License.
       dates: DigBehaviors.FilterBehavior.getEntityPageFilterItems
     };
 
+    app.concat = function(a, b) {
+      return a + b;
+    };
+
     app.createAuthHeader = function(username, password) {
       if(username && password) {
         return {
@@ -580,8 +592,8 @@ limitations under the License.
       return typeof object !== 'undefined';
     };
 
-    app.getFields = function(object) {
-      return object.fields || {};
+    app.findDomain = function(parameters, serverConfig) {
+      return parameters.domain || parameters.project || serverConfig.defaultProject;
     };
 
     app.noData = function(object) {

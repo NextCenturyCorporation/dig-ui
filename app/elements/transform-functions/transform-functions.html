@@ -34,6 +34,10 @@ limitations under the License.
           type: Object
         },
 
+        domain: {
+          type: String
+        },
+
         esConfig: {
           computed: '_initializeEsConfig(clientConfig, serverConfig)',
           notify: true,
@@ -46,7 +50,7 @@ limitations under the License.
         },
 
         transforms: {
-          computed: '_initializeTransforms(esConfig)',
+          computed: '_initializeTransforms(domain, esConfig)',
           notify: true,
           readOnly: true,
           type: Object
@@ -67,8 +71,8 @@ limitations under the License.
         return esConfig;
       },
 
-      _initializeTransforms: function(esConfig) {
-        var util = commonTransforms(_, moment);
+      _initializeTransforms: function(domain, esConfig) {
+        var util = commonTransforms(_, moment, domain);
 
         var transforms = {};
 

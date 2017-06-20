@@ -23,7 +23,7 @@
 var fs = require('fs');
 var path = require('path');
 
-var clientConfig = fs.existsSync('./server/clientConfig.json') ? require('./clientConfig.json') : {key:'value'};
+var clientConfig = {};
 var serverConfig = require('./config/environment');
 var multer = require('multer');
 var storage = multer.memoryStorage();
@@ -39,6 +39,7 @@ module.exports = function(app) {
       configEndpoint: serverConfig.configEndpoint,
       configPassword: serverConfig.configPassword,
       configUsername: serverConfig.configUsername,
+      defaultProject: serverConfig.defaultProject,
       esHost: serverConfig.esHost,
       esIndex: serverConfig.esIndex,
       esType: serverConfig.esType,
@@ -49,14 +50,21 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/clientConfig/?', function(req, res) {
-    res.status(200).send(clientConfig);
+  app.get('/clientConfig/:domain', function(req, res) {
+    if(!req.params.domain) {
+      return res.status(200).send({});
+    }
+    if(!clientConfig[req.params.domain]) {
+      var filename = 'client-config-' + req.params.domain + '.json';
+      clientConfig[req.params.domain] = fs.existsSync('./server/' + filename) ? require('./' + filename) : {};
+    }
+    res.status(200).send(clientConfig[req.params.domain]);
   });
 
-  app.post('/saveClientConfig', function(req, res) {
-    if(req.body) {
-      clientConfig = req.body;
-      fs.writeFile('./server/clientConfig.json', JSON.stringify(req.body, null, 2), function(err) {
+  app.post('/saveClientConfig/:domain', function(req, res) {
+    if(req.params.domain && req.body) {
+      clientConfig[req.params.domain] = req.body;
+      fs.writeFile('./server/client-config-' + req.params.domain + '.json', JSON.stringify(req.body, null, 2), function(err) {
         console.log(err);
       });
     }
