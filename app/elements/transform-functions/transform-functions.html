@@ -60,7 +60,7 @@ limitations under the License.
       _initializeEsConfig: function(clientConfig, serverConfig) {
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var esConfig = {
-          esIndex: (clientConfig.index ? clientConfig.index.full : '') || serverConfig.esIndex,
+          esIndex: (clientConfig.index ? clientConfig.index.sample : '') || serverConfig.esIndex,
           esType: clientConfig.root_name || serverConfig.esType
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
