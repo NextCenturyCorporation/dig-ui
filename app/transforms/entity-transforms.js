@@ -18,8 +18,10 @@
 /* jshint camelcase:false */
 
 var entityTransforms = (function(_, commonTransforms, esConfig) {
-  function getSingleStringFromResult(result, path, property) {
-    var data = _.get(result, path, []);
+  function getSingleStringFromResult(result, path) {
+    var parentPath = path.substring(0, path.lastIndexOf('.'));
+    var property = path.substring(path.lastIndexOf('.') + 1, path.length);
+    var data = _.get(result, parentPath, []);
 
     if(data && _.isArray(data)) {
       return data.length ? data.map(function(item) {
@@ -160,6 +162,16 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var domain = _.get(result, '_source.tld');
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
+    var titleFieldObject = _.find(searchFields, function(object) {
+      return object.result === 'title';
+    });
+    var titleField = titleFieldObject ? titleFieldObject.field : '_source.content_extraction.title.text';
+
+    var descriptionFieldObject = _.find(searchFields, function(object) {
+      return object.result === 'description';
+    });
+    var descriptionField = descriptionFieldObject ? descriptionFieldObject.field : '_source.content_extraction.content_strict.text';
+
     var documentObject = {
       id: id,
       url: url,
@@ -172,9 +184,9 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       cached: commonTransforms.getLink(id, 'cached'),
       esData: esDataEndpoint,
       // TODO
-      title: getSingleStringFromResult(result, '_source.content_extraction.title', 'text') || 'No Title',
-      description: getSingleStringFromResult(result, '_source.content_extraction.content_strict', 'text') || 'No Description',
-      highlightedText: getHighlightedText(result, ['content_extraction.title.text']),
+      title: getSingleStringFromResult(result, titleField) || 'No Title',
+      description: getSingleStringFromResult(result, descriptionField) || 'No Description',
+      highlightedText: getHighlightedText(result, [titleField]),
       headerExtractions: [],
       detailExtractions: [],
       details: []
@@ -231,7 +243,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     documentObject.details.push({
       name: 'Description',
-      highlightedText: getHighlightedText(result, ['content_extraction.content_strict.text']),
+      highlightedText: getHighlightedText(result, [descriptionField]),
       text: documentObject.description
     });
 
