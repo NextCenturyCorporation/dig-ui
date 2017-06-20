@@ -158,7 +158,7 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
 
     var rank = _.get(result, '_score');
     var domain = _.get(result, '_source.tld');
-    var esDataEndpoint = (serverConfig && serverConfig.esDataEndpoint ? (serverConfig.esDataEndpoint + id) : undefined);
+    var esDataEndpoint = (serverConfig && serverConfig.esIndex && serverConfig.esType && serverConfig.esDataEndpoint ? (serverConfig.esDataEndpoint + serverConfig.esIndex + '/' + serverConfig.esType + '/' + id) : undefined);
 
     var documentObject = {
       id: id,
@@ -180,15 +180,18 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
       details: []
     };
 
-    documentObject.headerExtractions = searchFields.filter(function(object) {
-      return object.result === 'header';
-    }).map(function(object) {
-      var extractionObject = getHighlightedExtractionObjectFromResult(result, object, highlightMapping);
-      // TODO Don't truncate the extractions once the data can support it.
+    // TODO Don't truncate the extractions once the data can support it.
+    var truncateFunction = function(extractionObject) {
       if(!documentPage) {
         extractionObject.data = extractionObject.data.slice(0, 10);
       }
       return extractionObject;
+    };
+
+    documentObject.headerExtractions = searchFields.filter(function(object) {
+      return object.result === 'header';
+    }).map(function(object) {
+      return truncateFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
     });
 
     var domainExtraction = getExtraction({
@@ -209,7 +212,7 @@ var entityTransforms = (function(_, commonTransforms, serverConfig) {
     documentObject.detailExtractions = searchFields.filter(function(object) {
       return object.result === 'detail';
     }).map(function(object) {
-      return getHighlightedExtractionObjectFromResult(result, object, highlightMapping);
+      return truncateFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
     });
 
     if(esDataEndpoint) {
