@@ -300,7 +300,7 @@ limitations under the License.
                     text-property="textAndCount"
                     transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
                     transform-function="[[getSectionTitleTransformFunction]]"
-                    data="[[mapData]]">
+                    data="[[item.mapData]]">
 
                     <aggregation-query-and-display
                       aggregation-name="[[item.key]]"
@@ -315,11 +315,12 @@ limitations under the License.
                       filter-list="[[filterList]]"
                       transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
                       transform-function="[[transforms.entity.extractions]]"
-                      data="{{mapData}}"
+                      data="{{item.mapData}}"
                       header-data-name="[[item.title]]"
                       header-counts-name="Results"
                       header-entity-name="[[pageName]]"
-                      show-checkboxes>
+                      show-checkboxes
+                      show-double-bar-chart="[[showDoubleBarChart(item)]]">
                     </aggregation-query-and-display>
                   </section-and-map>
                 </template>
@@ -365,9 +366,9 @@ limitations under the License.
                   <section-and-title
                     icon="[[item.icon]]"
                     style-class="[[item.styleClass]]"
-                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item, imageData.length)]]"
+                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item, item.imageData.length)]]"
                     transform-function="[[getSectionTitleTransformFunction]]"
-                    data="[[loadedImageData]]">
+                    data="[[item.loadedImageData]]">
 
                     <image-query-and-display
                       aggregation-field="[[item.field]]"
@@ -386,8 +387,8 @@ limitations under the License.
                       transform-function="[[transforms.entity.extractions]]"
                       small-image-style-class="[[getBlurStyleClass(blurImages)]]"
                       large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                      images="{{imageData}}"
-                      loaded-images="{{loadedImageData}}"
+                      images="{{item.imageData}}"
+                      loaded-images="{{item.loadedImageData}}"
                       selected-property="[[item.key]]"
                       selected="{{filterCollection}}">
                     </image-query-and-display>
@@ -444,7 +445,7 @@ limitations under the License.
                     order="_term"
                     direction="asc"
                     field="[[item.entity.field]]"
-                    ejs-aggregation="{{entityAggregation}}">
+                    ejs-aggregation="{{item.entityAggregation}}">
                   </elastic-client-aggregation-builder>
 
                   <elastic-client-aggregation-builder
@@ -453,8 +454,8 @@ limitations under the License.
                     count="0"
                     field="[[item.date.field]]"
                     interval="week"
-                    nested-aggregations="[[buildArray(entityAggregation)]]"
-                    ejs-aggregation="{{dateAggregation}}">
+                    nested-aggregations="[[buildArray(item.entityAggregation)]]"
+                    ejs-aggregation="{{item.dateAggregation}}">
                   </elastic-client-aggregation-builder>
 
                   <build-and-run-query
@@ -464,20 +465,20 @@ limitations under the License.
                     client="[[esClient]]"
                     index-name="[[esConfig.esIndex]]"
                     index-types="[[esConfig.esType]]"
-                    aggregations="[[buildArray(dateAggregation)]]"
+                    aggregations="[[buildArray(item.dateAggregation)]]"
                     filters="[[filterList]]"
                     page-size="0"
                     source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
                     source-exclude='["knowledge_graph.*.provenance"]'
                     transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
                     transform-function="[[transforms.entity.histogram]]"
-                    error="{{histogramError}}"
-                    loading="{{histogramLoading}}"
-                    results="{{histogramResults}}">
+                    error="{{item.histogramError}}"
+                    loading="{{item.histogramLoading}}"
+                    results="{{item.histogramResults}}">
                   </build-and-run-query>
 
                   <section-and-title
-                    error="[[histogramError]]"
+                    error="[[item.histogramError]]"
                     icon="editor:insert-chart"
                     section-title="[[item.entity.title]] Bar Timeline">
 
@@ -485,8 +486,8 @@ limitations under the License.
                       <div>No Results</div>
                     </template>
 
-                    <template is="dom-if" if="[[!histogramLoading]]">
-                      <template is="dom-if" if="[[!histogramResults.length]]">
+                    <template is="dom-if" if="[[!item.histogramLoading]]">
+                      <template is="dom-if" if="[[!item.histogramResults.length]]">
                         <div>No [[item.date.titlePlural]] and/or [[item.entity.titlePlural]]</div>
                       </template>
                     </template>
@@ -498,10 +499,10 @@ limitations under the License.
                       label-property="text"
                       stack-property="data"
                       interval="week"
-                      data="[[histogramResults]]"
+                      data="[[item.histogramResults]]"
                       default-label="Unidentified [[item.entity.titlePlural]]"
                       source="Results"
-                      loading="[[histogramLoading]]"
+                      loading="[[item.histogramLoading]]"
                       display-filter-text>
                     </zoomable-bar-chart>
                   </section-and-title>
