@@ -1,0 +1,153 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/elastic-create/elastic-create.html">
+
+<script src="../../scripts/google-analytics.js"></script>
+
+<dom-module id="dig-logger">
+  <template>
+    <elastic-create
+      client="[[esClient]]"
+      index="[[esIndex]]"
+      elastic-type="[[esType]]"
+      body="[[_esLogBody]]"
+      results="{{_esLogResult}}">
+    </elastic-create>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'dig-logger',
+
+      properties: {
+        data: {
+          type: String
+        },
+
+        esClient: {
+          type: Object
+        },
+
+        esIndex: {
+          type: String
+        },
+
+        esType: {
+          type: String
+        },
+
+        logPageView: {
+          type: Boolean,
+          value: false
+        },
+
+        logger: {
+          notify: true,
+          type: Object,
+          value: function() {
+            var self = this;
+            return {
+              log: function(type, data) {
+                self.log(self.username, 'event', type, data);
+              }
+            };
+          }
+        },
+
+        type: {
+          type: String
+        },
+
+        username: {
+          type: String,
+        },
+
+        _esLogBody: {
+          type: Object
+        },
+
+        _esLogList: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        _esLogResult: {
+          type: Object
+        }
+      },
+
+      observers: [
+        '_logData(username, type, data)',
+        '_logPageView(username)',
+        '_setNextLogBody(_esLogResult)',
+        '_setThisLogBody(_esLogList.splices)'
+      ],
+
+      log: function(username, googleType, type, data) {
+        /* jshint ignore:start */
+        ga('set', 'dimension1', window.btoa(this.username));
+        ga('set', 'userId', window.btoa(this.username));
+        if(type) {
+          ga('send', googleType, type, data);
+        } else {
+          ga('send', googleType, data);
+        }
+        /* jshint ignore:end */
+
+        this.push('_esLogList', {
+          version: 'DIG_VERSION',
+          user: username,
+          type: type || '',
+          host: window.location.origin,
+          date: new Date(),
+          data: data || ''
+        });
+      },
+
+      _logData: function(username, type, data) {
+        this.log(username, 'event', type, data);
+      },
+
+      _logPageView: function(username) {
+        if(this.logPageView) {
+          this.log(username, 'pageview', 'PageView', window.location.pathname + window.location.search);
+        }
+      },
+
+      _setNextLogBody: function() {
+        if(this._esLogList.length) {
+          this.set('_esLogBody', this._esLogList.shift());
+        } else {
+          this.set('_esLogBody', undefined);
+        }
+      },
+
+      _setThisLogBody: function() {
+        if(!this._esLogBody) {
+          this._setNextLogBody();
+        }
+      }
+    });
+  })();
+  </script>
+</dom-module>
