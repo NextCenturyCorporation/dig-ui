@@ -138,6 +138,16 @@ limitations under the License.
       combine-function="[[transforms.config.sortField]]">
     </json-combine>
 
+     <!-- Logger for Pagination -->
+    <dig-logger
+      es-client="[[esclient]]"
+      es-index="[[config.logIndex]]"
+      es-type="[[config.logType]]"
+      type="Document-ShowResultPageNumber"
+      data="[[pageNum]]"
+      username="[[config.username]]">
+    </dig-logger>
+
     <elastic-client
       config="[[serverConfig.esHost]]"
       client="{{esClient}}">

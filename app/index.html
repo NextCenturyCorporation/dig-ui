@@ -185,6 +185,45 @@ limitations under the License.
       combine-function="[[transforms.entity.documents]]">
     </json-combine>
 
+    <!-- Logger for Pagination -->
+    <dig-logger
+      es-client="[[esclient]]"
+      es-index="[[config.logIndex]]"
+      es-type="[[config.logType]]"
+      type="Index-ShowResultPageNumber"
+      data="[[pageNum]]"
+      username="[[config.username]]">
+    </dig-logger>
+
+    <!-- logging: single top level object referenced for start and end dates
+         internal component logic figures out which date is which -->
+    <create-log-message
+      age-selected="[[searchParameters.age]]"
+      city-selected="[[searchParameters.city]]"
+      country-selected="[[searchParameters.country]]"
+      date-end-selected="[[searchParameters.postingDate]]"
+      date-start-selected="[[searchParameters.postingDate]]"
+      description-selected="[[searchParameters.description]]"
+      email-selected="[[searchParameters.email]]"
+      ethnicity-selected="[[searchParameters.ethnicity]]"
+      eye-selected="[[searchParameters.eyeColor]]"
+      gender-selected="[[searchParameters.gender]]"
+      hair-selected="[[searchParameters.hairColor]]"
+      height-selected="[[searchParameters.height]]"
+      image-selected="[[searchParameters.image]]"
+      name-selected="[[searchParameters.name]]"
+      phone-selected="[[searchParameters.phone]]"
+      price-selected="[[searchParameters.price]]"
+      region-selected="[[searchParameters.region]]"
+      review-selected="[[searchParameters.review]]"
+      services-selected="[[searchParameters.services]]"
+      social-selected="[[searchParameters.social]]"
+      title-selected="[[searchParameters.title]]"
+      website-selected="[[searchParameters.website]]"
+      weight-selected="[[searchParameters.weight]]"
+      log-message="{{logMessage}}">
+    </create-log-message>
+
     <paper-header-panel class="flex" mode="waterfall">
 
       <!-- Search toolbar -->

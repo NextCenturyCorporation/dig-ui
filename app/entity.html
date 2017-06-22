@@ -208,6 +208,45 @@ limitations under the License.
       combine-function="[[transforms.config.sortField]]">
     </json-combine>
 
+     <!-- Logger for Pagination -->
+    <dig-logger
+      es-client="[[esclient]]"
+      es-index="[[config.logIndex]]"
+      es-type="[[config.logType]]"
+      type="Entity-ShowResultPageNumber"
+      data="[[pageNum]]"
+      username="[[config.username]]">
+    </dig-logger>
+
+    <!-- logging: single top level object referenced for start and end dates
+         internal component logic figures out which date is which -->
+    <create-log-message
+      age-selected="[[filterCollection.age]]"
+      city-selected="[[filterCollection.city]]"
+      country-selected="[[filterCollection.country]]"
+      date-end-selected="[[filterCollection.postingDate]]"
+      date-start-selected="[[filterCollection.postingDate]]"
+      description-selected="[[filterCollection.description]]"
+      email-selected="[[filterCollection.email]]"
+      ethnicity-selected="[[filterCollection.ethnicity]]"
+      eye-selected="[[filterCollection.eyeColor]]"
+      gender-selected="[[filterCollection.gender]]"
+      hair-selected="[[filterCollection.hairColor]]"
+      height-selected="[[filterCollection.height]]"
+      image-selected="[[filterCollection.image]]"
+      name-selected="[[filterCollection.name]]"
+      phone-selected="[[filterCollection.phone]]"
+      price-selected="[[filterCollection.price]]"
+      region-selected="[[filterCollection.region]]"
+      review-selected="[[filterCollection.review]]"
+      services-selected="[[filterCollection.services]]"
+      social-selected="[[filterCollection.social]]"
+      title-selected="[[filterCollection.title]]"
+      website-selected="[[filterCollection.website]]"
+      weight-selected="[[filterCollection.weight]]"
+      log-message="{{logMessage}}">
+    </create-log-message>
+
     <elastic-client
       config="[[serverConfig.esHost]]"
       client="{{esClient}}">
