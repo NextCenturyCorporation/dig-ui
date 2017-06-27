@@ -178,7 +178,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       rank: rank ? rank.toFixed(2) : rank,
       domain: domain || 'No Domain',
       type: 'document',
-      icon: 'icons:assignment',
+      icon: '', // icon: 'icons:assignment', -- commenting out for now and leaving blank
       link: commonTransforms.getLink(id, 'entity', 'document'),
       styleClass: '',
       cached: commonTransforms.getLink(id, 'cached'),
