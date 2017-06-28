@@ -165,12 +165,38 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var titleFieldObject = _.find(searchFields, function(object) {
       return object.result === 'title';
     });
-    var titleField = titleFieldObject ? titleFieldObject.field : '_source.content_extraction.title.text';
+
+    var titleText;
+    var titleHighlight;
+
+    if(titleFieldObject && titleFieldObject.field) {
+      titleText = getSingleStringFromResult(result, titleFieldObject.field);
+      titleHighlight = getHighlightedText(result, [titleFieldObject.field]);
+    }
+
+    // if there's no titleFieldObject or the title cannot be found there, use an alternate field
+    if(!titleText) {
+      titleText = getSingleStringFromResult(result, '_source.content_extraction.title.text');
+      titleHighlight = getHighlightedText(result, ['_source.content_extraction.title.text']);
+    }
+
+    var descriptionText;
+    var descriptionHighlight;
 
     var descriptionFieldObject = _.find(searchFields, function(object) {
       return object.result === 'description';
     });
-    var descriptionField = descriptionFieldObject ? descriptionFieldObject.field : '_source.content_extraction.content_strict.text';
+
+    if(descriptionFieldObject && descriptionFieldObject.field) {
+      descriptionText = getSingleStringFromResult(result, descriptionFieldObject.field);
+      descriptionHighlight = getHighlightedText(result, [descriptionFieldObject.field]);
+    }
+
+    // if there's no descriptionFieldObject or the description cannot be found there, use an alternate field
+    if(!descriptionText) {
+      descriptionText = getSingleStringFromResult(result, '_source.content_extraction.content_strict.text');
+      descriptionHighlight = getHighlightedText(result, ['_source.content_extraction.content_strict.text']);
+    }
 
     var documentObject = {
       id: id,
@@ -184,9 +210,9 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       cached: commonTransforms.getLink(id, 'cached'),
       esData: esDataEndpoint,
       // TODO
-      title: getSingleStringFromResult(result, titleField) || 'No Title',
-      description: getSingleStringFromResult(result, descriptionField) || 'No Description',
-      highlightedText: getHighlightedText(result, [titleField]),
+      title: titleText || 'No Title',
+      description: descriptionText || 'No Description',
+      highlightedText: titleHighlight,
       headerExtractions: [],
       detailExtractions: [],
       details: []
@@ -243,7 +269,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     documentObject.details.push({
       name: 'Description',
-      highlightedText: getHighlightedText(result, [descriptionField]),
+      highlightedText: descriptionHighlight,
       text: documentObject.description
     });
 
