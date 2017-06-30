@@ -185,12 +185,22 @@ limitations under the License.
       combine-function="[[transforms.entity.documents]]">
     </json-combine>
 
+    <!-- Logger for Search Terms -->
+    <dig-logger
+      es-client="[[esclient]]"
+      es-index="[[config.logIndex]]"
+      es-type="[[config.logType]]"
+      type="UI-Search-SubmitSearch"
+      data="[[logMessage]]"
+      username="[[config.username]]">
+    </dig-logger>
+
     <!-- Logger for Pagination -->
     <dig-logger
       es-client="[[esclient]]"
       es-index="[[config.logIndex]]"
       es-type="[[config.logType]]"
-      type="Index-ShowResultPageNumber"
+      type="UI-Search-ShowResultPageNumber"
       data="[[pageNum]]"
       username="[[config.username]]">
     </dig-logger>

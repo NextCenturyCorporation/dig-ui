@@ -45,4 +45,6 @@ module.exports = {
     searchEndpoint: process.env.SEARCH_ENDPOINT,
     imageServiceAuth: process.env.IMAGE_SERVICE_AUTH || '{"user": "", "password": ""}',
     imageServiceHost: process.env.IMAGE_SERVICE_HOST || '{"url": "", "base64": ""}',
+    logIndex: process.env.LOG_INDEX || 'dig-logs',
+    logType: process.env.LOG_TYPE || 'log',
 };
