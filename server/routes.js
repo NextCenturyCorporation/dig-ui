@@ -46,7 +46,9 @@ module.exports = function(app) {
       esDataEndpoint: serverConfig.esDataEndpoint,
       imageServiceAuth: serverConfig.imageServiceAuth,
       imageServiceHost: serverConfig.imageServiceHost,
-      searchEndpoint: serverConfig.searchEndpoint
+      searchEndpoint: serverConfig.searchEndpoint,
+      logIndex: serverConfig.logIndex,
+      logType: serverConfig.logType
     });
   });
 

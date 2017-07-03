@@ -211,11 +211,11 @@ limitations under the License.
      <!-- Logger for Pagination -->
     <dig-logger
       es-client="[[esclient]]"
-      es-index="[[config.logIndex]]"
-      es-type="[[config.logType]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
       type="Entity-ShowResultPageNumber"
       data="[[pageNum]]"
-      username="[[config.username]]">
+      username="[[serverConfig.configUsername]]">
     </dig-logger>
 
     <!-- logging: single top level object referenced for start and end dates

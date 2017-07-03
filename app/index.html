@@ -188,21 +188,21 @@ limitations under the License.
     <!-- Logger for Search Terms -->
     <dig-logger
       es-client="[[esclient]]"
-      es-index="[[config.logIndex]]"
-      es-type="[[config.logType]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
       type="UI-Search-SubmitSearch"
       data="[[logMessage]]"
-      username="[[config.username]]">
+      username="[[serverConfig.configUsername]]">
     </dig-logger>
 
     <!-- Logger for Pagination -->
     <dig-logger
       es-client="[[esclient]]"
-      es-index="[[config.logIndex]]"
-      es-type="[[config.logType]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
       type="UI-Search-ShowResultPageNumber"
       data="[[pageNum]]"
-      username="[[config.username]]">
+      username="[[serverConfig.configUsername]]">
     </dig-logger>
 
     <!-- logging: single top level object referenced for start and end dates
