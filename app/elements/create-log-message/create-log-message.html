@@ -81,7 +81,7 @@ limitations under the License.
         priceSelected: {
           type: Object
         },
-        regionSelected: {
+        stateSelected: {
           type: Object
         },
         reviewSelected: {
@@ -126,10 +126,10 @@ limitations under the License.
         '_createLogMessage(nameSelected.*)',
         '_createLogMessage(phoneSelected.*)',
         '_createLogMessage(priceSelected.*)',
-        '_createLogMessage(regionSelected.*)',
         '_createLogMessage(reviewSelected.*)',
         '_createLogMessage(servicesSelected.*)',
         '_createLogMessage(socialSelected.*)',
+        '_createLogMessage(stateSelected.*)',
         '_createLogMessage(titleSelected.*)',
         '_createLogMessage(websiteSelected.*)',
         '_createLogMessage(weightSelected.*)'
@@ -154,10 +154,10 @@ limitations under the License.
           this._getSelectedString(this.nameSelected, 'name'),
           this._getSelectedString(this.phoneSelected, 'phone'),
           this._getSelectedString(this.priceSelected, 'price'),
-          this._getSelectedString(this.regionSelected, 'state_or_region'),
           this._getSelectedString(this.reviewSelected, 'review'),
           this._getSelectedString(this.servicesSelected, 'services'),
           this._getSelectedString(this.socialSelected, 'social'),
+          this._getSelectedString(this.stateSelected, 'state_or_region'),
           this._getSelectedString(this.titleSelected, 'title'),
           this._getSelectedString(this.websiteSelected, 'website'),
           this._getSelectedString(this.weightSelected, 'weight')

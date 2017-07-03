@@ -58,6 +58,13 @@ limitations under the License.
       last-response="{{serverConfig}}">
     </iron-ajax>
 
+    <!--initialize new elastic client connection to server
+    esclient can be used throughout the application lifecycle -->
+    <elastic-client
+      config="[[serverConfig.esHost]]"
+      client="{{esClient}}">
+    </elastic-client>
+
     <json-combine
       data-in1="[[params]]"
       data-in2="[[serverConfig]]"
@@ -187,7 +194,7 @@ limitations under the License.
 
     <!-- Logger for Search Terms -->
     <dig-logger
-      es-client="[[esclient]]"
+      es-client="[[esClient]]"
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
       type="UI-Search-SubmitSearch"
@@ -197,11 +204,11 @@ limitations under the License.
 
     <!-- Logger for Pagination -->
     <dig-logger
-      es-client="[[esclient]]"
+      es-client="[[esClient]]"
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
       type="UI-Search-ShowResultPageNumber"
-      data="[[pageNum]]"
+      data="resultPage"
       username="[[serverConfig.configUsername]]">
     </dig-logger>
 
@@ -224,10 +231,10 @@ limitations under the License.
       name-selected="[[searchParameters.name]]"
       phone-selected="[[searchParameters.phone]]"
       price-selected="[[searchParameters.price]]"
-      region-selected="[[searchParameters.region]]"
       review-selected="[[searchParameters.review]]"
       services-selected="[[searchParameters.services]]"
       social-selected="[[searchParameters.social]]"
+      state-selected="[[searchParameters.state]]"
       title-selected="[[searchParameters.title]]"
       website-selected="[[searchParameters.website]]"
       weight-selected="[[searchParameters.weight]]"

@@ -208,13 +208,28 @@ limitations under the License.
       combine-function="[[transforms.config.sortField]]">
     </json-combine>
 
+    <elastic-client
+      config="[[serverConfig.esHost]]"
+      client="{{esClient}}">
+    </elastic-client>
+
+     <!-- Logger for Filter Terms -->
+    <dig-logger
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
+      type="UI-Filter-SubmitSearch"
+      data="[[logMessage]]"
+      username="[[serverConfig.configUsername]]">
+    </dig-logger>
+
      <!-- Logger for Pagination -->
     <dig-logger
-      es-client="[[esclient]]"
+      es-client="[[esClient]]"
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
       type="Entity-ShowResultPageNumber"
-      data="[[pageNum]]"
+      data="[[documentPage]]"
       username="[[serverConfig.configUsername]]">
     </dig-logger>
 
@@ -246,11 +261,6 @@ limitations under the License.
       weight-selected="[[filterCollection.weight]]"
       log-message="{{logMessage}}">
     </create-log-message>
-
-    <elastic-client
-      config="[[serverConfig.esHost]]"
-      client="{{esClient}}">
-    </elastic-client>
 
     <build-and-run-query
       fields="[[pageConfig.field]]"
