@@ -22,6 +22,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/paper-styles/default-theme.html">
+<link rel="import" href="../confidence-marker/confidence-marker.html">
 
 <!--
 A Polymer Element showing a grid of extractions.
@@ -158,12 +159,9 @@ Custom property                            | Description                        
                   target="[[target]]"
                   text="[[_getProperty(extraction, dataTextProperty)]]">
                 </icon-label>
-                <template is="dom-if" if="[[_getProperty(extraction, dataConfidenceProperty)]]"
-                  <iron-icon icon="fa:circle"
-                    class$="confidence-icon [[_getConfidenceStyleClass(extraction, dataConfidenceProperty)]]"
-                    title$="[[_getConfidenceText(extraction, dataConfidenceProperty)]]">
-                  </iron-icon>
-                </template>
+                <confidence-marker
+                  extraction=[[extraction]]>
+                </confidence-marker> 
               </div>
             </template>
           </div>

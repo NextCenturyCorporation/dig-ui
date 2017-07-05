@@ -44,7 +44,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       link: commonTransforms.getLink(item.key, config.link, config.key),
       styleClass: commonTransforms.getStyleClass(config.color),
       text: commonTransforms.getExtractionDataText(item.key, item.value, config.type, (index || 0)),
-      type: config.key
+      type: config.key,
+      provenance: item.provenance
     };
     if(config.type !== 'url') {
       extraction.classifications = {
