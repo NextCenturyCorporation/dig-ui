@@ -33,7 +33,7 @@ limitations under the License.
         ageSelected: {
           type: Object
         },
-        citySelected: {
+        stringSelected: {
           type: Object
         },
         countrySelected: {
@@ -110,7 +110,7 @@ limitations under the License.
 
       observers: [
         '_createLogMessage(ageSelected.*)',
-        '_createLogMessage(citySelected.*)',
+        '_createLogMessage(stringSelected.*)',
         '_createLogMessage(countrySelected.*)',
         '_createLogMessage(dateEndSelected.*)',
         '_createLogMessage(dateStartSelected.*)',
@@ -138,7 +138,7 @@ limitations under the License.
       _createLogMessage: function() {
         var list = [
           this._getSelectedString(this.ageSelected, 'age'),
-          this._getSelectedString(this.citySelected, 'city'),
+          this._getSelectedString(this.stringSelected, 'string'),
           this._getSelectedString(this.countrySelected, 'country'),
           this._getSelectedString(this.dateEndSelected, 'date_end'),
           this._getSelectedString(this.dateStartSelected, 'date_start'),
