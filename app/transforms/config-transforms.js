@@ -253,22 +253,25 @@ var configTransforms = (function(_, commonTransforms) {
       var fields = [];
 
       searchFields.forEach(function(searchFieldsObject) {
-        if(searchFieldsObject.type === 'date') {
-          var dateProperties = createDateProperties(searchFieldsObject);
-          config.push({
-            name: searchFieldsObject.titlePlural,
-            type: 'date',
-            data: [
-              dateProperties.start,
-              dateProperties.end
-            ]
-          });
-        } else {
-          fields.push({
-            key: searchFieldsObject.key,
-            field: searchFieldsObject.field,
-            title: searchFieldsObject.title
-          });
+        // only add to search fields if search property is set to true
+        if(searchFieldsObject.search) {
+          if(searchFieldsObject.type === 'date') {
+            var dateProperties = createDateProperties(searchFieldsObject);
+            config.push({
+              name: searchFieldsObject.titlePlural,
+              type: 'date',
+              data: [
+                dateProperties.start,
+                dateProperties.end
+              ]
+            });
+          } else {
+            fields.push({
+              key: searchFieldsObject.key,
+              field: searchFieldsObject.field,
+              title: searchFieldsObject.title
+            });
+          }
         }
       });
 

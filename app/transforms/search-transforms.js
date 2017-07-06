@@ -51,8 +51,8 @@ var searchTransforms = (function(_) {
 
               template.filters[0].clauses.push({
                 constraint: searchParameters[type][term].date,
-                operator: term === 'dateStart' ? '>' : '<',
-                variable: '?date1'
+                operator: term.includes('start') ? '>' : '<',
+                variable: '?' + type + '1'
               });
             } else if(type) {
               if(!predicates[type]) {
