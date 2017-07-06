@@ -159,7 +159,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
 
     var rank = _.get(result, '_score');
-    var domain = _.get(result, '_source.tld');
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
     var titleFieldObject = _.find(searchFields, function(object) {
@@ -202,7 +201,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       id: id,
       url: url,
       rank: rank ? rank.toFixed(2) : rank,
-      domain: domain || 'No Domain',
       type: 'document',
       icon: '', // icon: 'icons:assignment', -- commenting out for now and leaving blank
       link: commonTransforms.getLink(id, 'entity', 'document'),
@@ -230,21 +228,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return object.result === 'header';
     }).map(function(object) {
       return truncateFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
-    });
-
-    var domainExtraction = getExtraction({
-      key: domain,
-    }, {
-      color: 'light green',
-      key: '_domain',
-      icon: 'av:web',
-      type: 'url'
-    });
-
-    documentObject.headerExtractions.splice(0, 0, {
-      data: [domainExtraction],
-      key: '_domain',
-      name: 'Website'
     });
 
     documentObject.detailExtractions = searchFields.filter(function(object) {
