@@ -42,17 +42,17 @@ var commonTransforms = (function(_, moment, domain) {
   }
 
   /**
-   * Returns the link for the given key.
+   * Returns the link for the given ID.
    */
-  function getLink(key, link, type) {
-    if(type === 'document') {
-      return '/document.html?domain=' + domain + '&id=' + key;
+  function getLink(itemId, linkType, fieldType, fieldId) {
+    if(linkType === 'document') {
+      return '/document.html?domain=' + domain + '&id=' + itemId;
     }
-    if(key && link === 'entity') {
-      if(type === 'email') {
-        return '/entity.html?domain=' + domain + '&id=' + encodeURIComponent(key) + '&type=' + type;
+    if(itemId && linkType === 'entity') {
+      if(fieldType === 'email') {
+        return '/entity.html?domain=' + domain + '&id=' + encodeURIComponent(itemId) + '&type=' + fieldId;
       }
-      return '/entity.html?domain=' + domain + '&id=' + key + '&type=' + type;
+      return '/entity.html?domain=' + domain + '&id=' + itemId + '&type=' + fieldId;
     }
     return undefined;
   }
@@ -312,10 +312,10 @@ var commonTransforms = (function(_, moment, domain) {
     },
 
     /**
-     * Returns the link for the given key.
+     * Returns the link for the given ID.
      */
-    getLink: function(key, link, type) {
-      return getLink(key, link, type);
+    getLink: function(itemId, linkType, fieldType, fieldId) {
+      return getLink(itemId, linkType, fieldType, fieldId);
     },
 
     /**

@@ -41,7 +41,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       count: count,
       id: commonTransforms.getExtractionDataId(item.key, item.value, config.type),
       icon: config.icon,
-      link: commonTransforms.getLink(item.key, config.link, config.key),
+      link: commonTransforms.getLink(item.key, config.link, config.type, config.key),
       styleClass: commonTransforms.getStyleClass(config.color),
       text: commonTransforms.getExtractionDataText(item.key, item.value, config.type, (index || 0)),
       type: config.key,
@@ -204,7 +204,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       rank: rank ? rank.toFixed(2) : rank,
       type: 'document',
       icon: '', // icon: 'icons:assignment', -- commenting out for now and leaving blank
-      link: commonTransforms.getLink(id, 'entity', 'document'),
+      link: commonTransforms.getLink(id, 'document'),
       styleClass: '',
       cached: commonTransforms.getLink(id, 'cached'),
       esData: esDataEndpoint,
