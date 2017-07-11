@@ -201,7 +201,7 @@ limitations under the License.
           </search-fields-dialog>
         </div>
 
-        <a class="bottom" href="." style="color: #ffffff;">
+        <a class="bottom" href="[[getURLWithProject(domain)]]" style="color: #ffffff;">
           <paper-icon-button icon="clear" title="Reset Page"></paper-icon-button>
         </a>
 
@@ -366,7 +366,7 @@ limitations under the License.
   <!-- Need to include dependencies here for IE -->
   <script src="bower_components/lodash/dist/lodash.js"></script>
   <script src="behaviors/browser-behavior.js"></script>
-  <script src="behaviors/filter-behavior.js"></script>
+  <script src="bower_components/filter-behavior/filter-behavior.js"></script>
 
   <script>
     (function(document) {
@@ -450,8 +450,12 @@ limitations under the License.
         app.set('clientConfig', {});
       };
 
+      app.getURLWithProject = function(domain) {
+        return './?project=' + domain;
+      };
+
       app.openNewTab = function() {
-        window.open('.');
+        window.open('./?project=' + app.domain);
       };
 
       app.emailSupport = function() {
