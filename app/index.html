@@ -201,7 +201,7 @@ limitations under the License.
           </search-fields-dialog>
         </div>
 
-        <a class="bottom" href="." style="color: #ffffff;">
+        <a class="bottom" href="[[getURLWithProject(domain)]]" style="color: #ffffff;">
           <paper-icon-button icon="clear" title="Reset Page"></paper-icon-button>
         </a>
 
@@ -450,8 +450,12 @@ limitations under the License.
         app.set('clientConfig', {});
       };
 
+      app.getURLWithProject = function(domain) {
+        return './?project=' + domain;
+      };
+
       app.openNewTab = function() {
-        window.open('.');
+        window.open('./?project=' + app.domain);
       };
 
       app.emailSupport = function() {
