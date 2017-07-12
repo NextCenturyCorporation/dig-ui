@@ -49,10 +49,7 @@ var commonTransforms = (function(_, moment, domain) {
       return '/document.html?domain=' + domain + '&id=' + itemId;
     }
     if(itemId && linkType === 'entity') {
-      if(fieldType === 'email') {
-        return '/entity.html?domain=' + domain + '&id=' + encodeURIComponent(itemId) + '&type=' + fieldId;
-      }
-      return '/entity.html?domain=' + domain + '&id=' + itemId + '&type=' + fieldId;
+      return '/entity.html?domain=' + domain + '&id=' + encodeURIComponent(itemId) + '&type=' + fieldId;
     }
     return undefined;
   }

@@ -193,7 +193,7 @@ var configTransforms = (function(_, commonTransforms) {
     },
 
     searchFields: function(fields) {
-      return _.keys(fields || {}).filter(function(id) {
+      var searchFields =  _.keys(fields || {}).filter(function(id) {
         return !!fields[id].type;
       }).map(function(id) {
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
@@ -227,58 +227,112 @@ var configTransforms = (function(_, commonTransforms) {
         // Add style class (e.g. 'entity-grey').
         searchFieldsObject.styleClass = commonTransforms.getStyleClass(searchFieldsObject.color);
 
+        searchFieldsObject.sort = {
+          sortId: 2,
+          sortType: 'extraction'
+        };
+        if(searchFieldsObject.type === 'date') {
+          searchFieldsObject.sort = {
+            sortId: 6,
+            sortType: 'date'
+          };
+        } else if(searchFieldsObject.link === 'entity') {
+          searchFieldsObject.sort = {
+            sortId: 1,
+            sortType: 'entity'
+          };
+        } else if(searchFieldsObject.result === 'title') {
+          searchFieldsObject.sort = {
+            sortId: 3,
+            sortType: 'document'
+          };
+        } else if(searchFieldsObject.result === 'description') {
+          searchFieldsObject.sort = {
+            sortId: 4,
+            sortType: 'document'
+          };
+        } else if(searchFieldsObject.result === 'tld' || searchFieldsObject.key === 'website') {
+          searchFieldsObject.sort = {
+            sortId: 5,
+            sortType: 'document'
+          };
+        }
+
         // Properties for the date facets.
         searchFieldsObject.dateProperties = fields[id].type === 'date' ? createDateProperties(searchFieldsObject) : {};
 
         return searchFieldsObject;
       }).sort(function(a, b) {
-        if(a.type === 'date' && b.type !== 'date') {
+        if(a.sort.sortId < b.sort.sortId) {
           return -1;
         }
-        if(a.type !== 'date' && b.type === 'date') {
+        if(a.sort.sortId > b.sort.sortId) {
           return 1;
         }
-        if(a.link === 'entity' && b.link !== 'entity') {
-          return -1;
-        }
-        if(a.link !== 'entity' && b.link === 'entity') {
-          return 1;
-        }
-        return a.titlePlural > b.titlePlural ? 1 : (a.titlePlural < b.titlePlural ? -1 : 0);
+        return a.title > b.title ? 1 : (a.title < b.title ? -1 : 0);
       });
+
+      console.log('searchFields', searchFields);
+      return searchFields;
     },
 
     searchFieldsDialogConfig: function(searchFields) {
       var config = [];
-      var fields = [];
 
-      searchFields.forEach(function(searchFieldsObject) {
-        // only add to search fields if search property is set to true
-        if(searchFieldsObject.search) {
-          if(searchFieldsObject.type === 'date') {
-            var dateProperties = createDateProperties(searchFieldsObject);
-            config.push({
-              name: searchFieldsObject.titlePlural,
-              type: 'date',
-              data: [
-                dateProperties.start,
-                dateProperties.end
-              ]
-            });
-          } else {
-            fields.push({
-              key: searchFieldsObject.key,
-              field: searchFieldsObject.field,
-              title: searchFieldsObject.title
-            });
-          }
-        }
+      searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'date';
+      }).forEach(function(searchFieldsObject) {
+        var dateProperties = createDateProperties(searchFieldsObject);
+        config.push({
+          name: searchFieldsObject.title,
+          type: 'date',
+          data: [
+            dateProperties.start,
+            dateProperties.end
+          ]
+        });
       });
 
-      return config.concat([{
-        name: 'Fields',
-        data: fields
-      }]);
+      config.push({
+        name: 'Entity',
+        data: searchFields.filter(function(searchFieldsObject) {
+          return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'entity';
+        }).map(function(searchFieldsObject) {
+          return {
+            key: searchFieldsObject.key,
+            field: searchFieldsObject.field,
+            title: searchFieldsObject.title
+          };
+        })
+      });
+
+      config.push({
+        name: 'Extraction',
+        data: searchFields.filter(function(searchFieldsObject) {
+          return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'extraction';
+        }).map(function(searchFieldsObject) {
+          return {
+            key: searchFieldsObject.key,
+            field: searchFieldsObject.field,
+            title: searchFieldsObject.title
+          };
+        })
+      });
+
+      config.push({
+        name: 'Document',
+        data: searchFields.filter(function(searchFieldsObject) {
+          return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'document';
+        }).map(function(searchFieldsObject) {
+          return {
+            key: searchFieldsObject.key,
+            field: searchFieldsObject.field,
+            title: searchFieldsObject.title
+          };
+        })
+      });
+
+      return config;
     },
 
     searchKeys: function(searchFields) {

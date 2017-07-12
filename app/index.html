@@ -276,22 +276,6 @@ limitations under the License.
 
                 <template is="dom-repeat" items="[[searchFields]]">
                   <template is="dom-if" if="[[item.facets]]">
-                    <template is="dom-if" if="[[equals(item.type, 'date')]]">
-                      <date-range-facet
-                        class="facet"
-                        date-start-key="[[item.dateProperties.start.key]]"
-                        date-start-title="[[item.dateProperties.start.title]]"
-                        date-start-prefix-label="[[item.dateProperties.start.title]]"
-                        date-start-identifier="[[item.dateProperties.start.dateIdentifier]]"
-                        date-end-key="[[item.dateProperties.end.key]]"
-                        date-end-title="[[item.dateProperties.end.title]]"
-                        date-end-prefix-label="[[item.dateProperties.end.title]]"
-                        date-end-identifier="[[item.dateProperties.end.dateIdentifier]]"
-                        search-parameters-property="[[item.key]]"
-                        search-parameters="{{searchParameters}}">
-                      </date-range-facet>
-                    </template>
-
                     <template is="dom-if" if="[[!equals(item.type, 'date')]]">
                       <facet-list
                         class="facet"
@@ -305,6 +289,23 @@ limitations under the License.
                         search-parameters="{{searchParameters}}"
                         process-request="{{processRequest}}">
                       </facet-list>
+                    </template>
+
+                    <template is="dom-if" if="[[equals(item.type, 'date')]]">
+                      <date-range-facet
+                        class="facet"
+                        header-title="[[item.title]]"
+                        date-start-key="[[item.dateProperties.start.key]]"
+                        date-start-title="[[item.dateProperties.start.title]]"
+                        date-start-prefix-label="[[item.dateProperties.start.title]]"
+                        date-start-identifier="[[item.dateProperties.start.dateIdentifier]]"
+                        date-end-key="[[item.dateProperties.end.key]]"
+                        date-end-title="[[item.dateProperties.end.title]]"
+                        date-end-prefix-label="[[item.dateProperties.end.title]]"
+                        date-end-identifier="[[item.dateProperties.end.dateIdentifier]]"
+                        search-parameters-property="[[item.key]]"
+                        search-parameters="{{searchParameters}}">
+                      </date-range-facet>
                     </template>
                   </template>
                 </template>
