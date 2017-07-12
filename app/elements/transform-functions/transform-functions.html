@@ -61,7 +61,8 @@ limitations under the License.
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var esConfig = {
           esIndex: (clientConfig.index ? clientConfig.index.sample : '') || serverConfig.esIndex,
-          esType: clientConfig.root_name || serverConfig.esType
+          esType: clientConfig.root_name || serverConfig.esType,
+          imagePrefix: 'http://memex-summer2017-domain1.s3.amazonaws.com/'
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
         if(serverConfig.esDataEndpoint) {

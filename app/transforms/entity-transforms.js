@@ -265,7 +265,16 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       });
     }
 
-    // TODO Images
+    // TODO Will the images be moved from _source.objects to _source.knowledge_graph?
+    var images = _.get(result, '_source.objects', []);
+    documentObject.images = images.map(function(image) {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var source = image.obj_stored_url;
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      return {
+        source: (esConfig ? esConfig.imagePrefix || '' : '') + source
+      };
+    });
 
     return documentObject;
   }
