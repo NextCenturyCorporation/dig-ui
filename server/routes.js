@@ -39,14 +39,12 @@ module.exports = function(app) {
       configEndpoint: serverConfig.configEndpoint,
       configPassword: serverConfig.configPassword,
       configUsername: serverConfig.configUsername,
+      databaseType: serverConfig.databaseType,
       defaultProject: serverConfig.defaultProject,
       esHost: serverConfig.esHost,
-      esIndex: serverConfig.esIndex,
-      esType: serverConfig.esType,
-      esDataEndpoint: serverConfig.esDataEndpoint,
       imageServiceAuth: serverConfig.imageServiceAuth,
       imageServiceHost: serverConfig.imageServiceHost,
-      searchEndpoint: serverConfig.searchEndpoint
+      searchConfig: serverConfig.searchConfig
     });
   });
 

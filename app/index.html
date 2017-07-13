@@ -175,7 +175,7 @@ limitations under the License.
       total="{{resultsTotalCount}}"
       search-parameters="[[searchParameters]]"
       search-function="[[searchQuery]]"
-      url="[[serverConfig.searchEndpoint]]">
+      url="[[esConfig.searchEndpoint]]">
     </query-transformer>
 
     <json-combine
@@ -279,7 +279,7 @@ limitations under the License.
                     <template is="dom-if" if="[[!equals(item.type, 'date')]]">
                       <facet-list
                         class="facet"
-                        query-url="[[serverConfig.searchEndpoint]]"
+                        query-url="[[esConfig.searchEndpoint]]"
                         name="[[item.key]]"
                         title="[[item.title]]"
                         target="_blank"
