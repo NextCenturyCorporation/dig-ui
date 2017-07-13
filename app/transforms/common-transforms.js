@@ -60,7 +60,8 @@ var commonTransforms = (function(_, moment, domain) {
   /**
    * Returns the location data from the given location key formatted as city:state:country:longitude:latitude.
    */
-  function getLocationDataFromKey(key) {
+  function getLocationDataFromKey(rawKey) {
+    var key = decodeURIComponent(rawKey);
     var keySplit = key ? key.split(':') : [];
 
     if(keySplit.length < 5) {
@@ -228,7 +229,7 @@ var commonTransforms = (function(_, moment, domain) {
     if(type === 'image') {
       return 'Image #' + (index + 1);
     }
-    if(type === 'location') {
+    if(type === 'city' || type === 'location') {
       return getLocationDataFromKey(key).text || value;
     }
     if(type === 'phone') {
