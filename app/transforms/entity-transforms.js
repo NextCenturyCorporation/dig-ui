@@ -270,13 +270,19 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function createDateObjectFromBucket(dateBucket, config) {
+    var newData = [];
+    if (dateBucket && dateBucket[config.entity.key] && dateBucket[config.entity.key].buckets) {
+      newData = dateBucket[config.entity.key].buckets.map(
+                  function(entityBucket, index) {
+                    return getExtraction(entityBucket, config.entity, index);
+                  }
+                ).filter(commonTransforms.getExtractionFilterFunction(config.entity.type))
+    }
     return {
       date: commonTransforms.getFormattedDate(dateBucket.key),
       icon: config.date.icon,
       styleClass: config.date.styleClass,
-      data: dateBucket[config.entity.key].buckets.map(function(entityBucket, index) {
-        return getExtraction(entityBucket, config.entity, index);
-      }).filter(commonTransforms.getExtractionFilterFunction(config.entity.type))
+      data: newData
     };
   }
 
@@ -324,12 +330,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         }
 
         // The data list may be empty if none match the ID for the entity page.
-        if(!dateObject.data.length) {
-          return;
+        if(dateObject.data.length) {
+          dateObject.subtitle = createSubtitle(dateObject.data);
+          histogram.push(dateObject);
         }
-
-        dateObject.subtitle = createSubtitle(dateObject.data);
-        histogram.push(dateObject);
       }
 
       return histogram;
