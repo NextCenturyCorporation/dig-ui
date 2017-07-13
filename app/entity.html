@@ -406,7 +406,6 @@ limitations under the License.
 
               <!-- Right Pane -->
               <div class="flex layout vertical">
-                <!-- TODO Temporary until histograms work -->
                 <template is="dom-repeat" items="[[dateFields]]">
                   <section-and-title
                     show-copy
@@ -455,34 +454,38 @@ limitations under the License.
                     ejs-aggregation="{{item.entityAggregation}}">
                   </elastic-client-aggregation-builder>
 
-                  <elastic-client-aggregation-builder
-                    name="[[item.date.key]]"
-                    type="date_histogram"
-                    count="0"
-                    field="[[item.date.field]]"
-                    interval="week"
-                    nested-aggregations="[[buildArray(item.entityAggregation)]]"
-                    ejs-aggregation="{{item.dateAggregation}}">
-                  </elastic-client-aggregation-builder>
+                  <template is="dom-if" if="[[item.entityAggregation]]">
+                    <elastic-client-aggregation-builder
+                      name="[[item.date.key]]"
+                      type="date_histogram"
+                      count="0"
+                      field="[[item.date.field]]"
+                      interval="week"
+                      nested-aggregations="[[buildArray(item.entityAggregation)]]"
+                      ejs-aggregation="{{item.dateAggregation}}">
+                    </elastic-client-aggregation-builder>
 
-                  <build-and-run-query
-                    type="terms"
-                    fields="[[pageConfig.field]]"
-                    values="[[pageId]]"
-                    client="[[esClient]]"
-                    index-name="[[esConfig.esIndex]]"
-                    index-types="[[esConfig.esType]]"
-                    aggregations="[[buildArray(item.dateAggregation)]]"
-                    filters="[[filterList]]"
-                    page-size="0"
-                    source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-                    source-exclude='["knowledge_graph.*.provenance"]'
-                    transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
-                    transform-function="[[transforms.entity.histogram]]"
-                    error="{{item.histogramError}}"
-                    loading="{{item.histogramLoading}}"
-                    results="{{item.histogramResults}}">
-                  </build-and-run-query>
+                    <template is="dom-if" if="[[item.dateAggregation]]">
+                      <build-and-run-query
+                        type="terms"
+                        fields="[[pageConfig.field]]"
+                        values="[[pageId]]"
+                        client="[[esClient]]"
+                        index-name="[[esConfig.esIndex]]"
+                        index-types="[[esConfig.esType]]"
+                        aggregations="[[buildArray(item.dateAggregation)]]"
+                        filters="[[filterList]]"
+                        page-size="0"
+                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+                        source-exclude='["knowledge_graph.*.provenance"]'
+                        transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
+                        transform-function="[[transforms.entity.histogram]]"
+                        error="{{item.histogramError}}"
+                        loading="{{item.histogramLoading}}"
+                        results="{{item.histogramResults}}">
+                      </build-and-run-query>
+                    </template>
+                  </template>
 
                   <section-and-title
                     error="[[item.histogramError]]"
