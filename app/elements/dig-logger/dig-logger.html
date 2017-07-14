@@ -17,8 +17,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/elastic-create/elastic-create.html">
 
-<script src="../../scripts/google-analytics.js"></script>
-
 <dom-module id="dig-logger">
   <template>
     <elastic-create
@@ -104,15 +102,6 @@ limitations under the License.
       ],
 
       log: function(username, googleType, type, data) {
-        /* jshint ignore:start */
-        ga('set', 'dimension1', window.btoa(this.username));
-        ga('set', 'userId', window.btoa(this.username));
-        if(type) {
-          ga('send', googleType, type, data);
-        } else {
-          ga('send', googleType, data);
-        }
-        /* jshint ignore:end */
 
         this.push('_esLogList', {
           version: 'DIG_VERSION',
