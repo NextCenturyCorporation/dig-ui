@@ -67,7 +67,7 @@ var configTransforms = (function(_, commonTransforms) {
     aggregationFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
         // Dates will be shown in the histograms, images in the galleries, and locations in the maps.
-        return searchFieldsObject.type !== 'date' && searchFieldsObject.type !== 'image' && searchFieldsObject.type !== 'location';
+        return searchFieldsObject.type !== 'date' && searchFieldsObject.type !== 'image' && searchFieldsObject.type !== 'location' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
@@ -87,7 +87,7 @@ var configTransforms = (function(_, commonTransforms) {
 
     dateFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'date';
+        return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
@@ -151,10 +151,10 @@ var configTransforms = (function(_, commonTransforms) {
 
     histogramFields: function(searchFields) {
       var entityFields = searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.link === 'entity';
+        return searchFieldsObject.link === 'entity' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       });
       var dateFields = searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'date';
+        return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       });
       var histogramFields = dateFields.reduce(function(fields, dateFieldsObject) {
         return fields.concat(entityFields.map(function(entityFieldsObject) {
@@ -171,7 +171,7 @@ var configTransforms = (function(_, commonTransforms) {
 
     imageFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'image';
+        return searchFieldsObject.type === 'image' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
@@ -179,7 +179,7 @@ var configTransforms = (function(_, commonTransforms) {
 
     mapFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'location';
+        return searchFieldsObject.type === 'location' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
@@ -350,7 +350,7 @@ var configTransforms = (function(_, commonTransforms) {
 
     sortField: function(searchFields) {
       var index = _.findIndex(searchFields, function(searchFieldsObject) {
-        return searchFieldsObject.type === 'date';
+        return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       });
       return index >= 0 ? searchFields[index].field : '';
     }
