@@ -236,28 +236,7 @@ limitations under the License.
     <!-- logging: single top level object referenced for start and end dates
          internal component logic figures out which date is which -->
     <create-log-message
-      age-selected="[[filterCollection.age]]"
-      string-selected="[[filterCollection.city]]"
-      date-end-selected="[[filterCollection.posting_date]]"
-      date-start-selected="[[filterCollection.posting_date]]"
-      description-selected="[[filterCollection.description]]"
-      email-selected="[[filterCollection.email]]"
-      ethnicity-selected="[[filterCollection.ethnicity]]"
-      eye-selected="[[filterCollection.eye_color]]"
-      gender-selected="[[filterCollection.gender]]"
-      hair-selected="[[filterCollection.hair_color]]"
-      height-selected="[[filterCollection.height]]"
-      image-selected="[[filterCollection.image]]"
-      name-selected="[[filterCollection.name]]"
-      phone-selected="[[filterCollection.phone]]"
-      price-selected="[[filterCollection.price]]"
-      review-selected="[[filterCollection.review_id]]"
-      services-selected="[[filterCollection.service]]"
-      social-selected="[[filterCollection.social]]"
-      state-selected="[[filterCollection.state]]"
-      title-selected="[[filterCollection.title]]"
-      website-selected="[[filterCollection.website]]"
-      weight-selected="[[filterCollection.weight]]"
+      search-parameters="{{filterList}}"
       log-message="{{logMessage}}">
     </create-log-message>
 
