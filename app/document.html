@@ -156,7 +156,6 @@ limitations under the License.
       page-size="1"
       properties-ready="{{processRequest}}"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-      source-exclude='["knowledge_graph.*.provenance"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.document]]"
       error="{{documentError}}"
@@ -193,7 +192,6 @@ limitations under the License.
       sort-field="[[sortField]]"
       sort-order="desc"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-      source-exclude='["knowledge_graph.*.provenance"]'
       loading="{{revisionsLoading}}"
       last-error="{{revisionsError}}"
       results="{{revisionsResults}}"
@@ -227,7 +225,6 @@ limitations under the License.
       page="{{moreLikeThisPageNumber}}"
       page-size="25"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-      source-exclude='["knowledge_graph.*.provenance"]'
       loading="{{moreLikeThisLoading}}"
       last-error="{{moreLikeThisError}}"
       results="{{moreLikeThisResults}}"

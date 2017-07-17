@@ -226,7 +226,6 @@ limitations under the License.
       properties-ready="{{processRequest}}"
       sort-field="[[sortField]]"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-      source-exclude='["knowledge_graph.*.provenance"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.documents]]"
       error="{{documentsError}}"
@@ -479,7 +478,6 @@ limitations under the License.
                     filters="[[filterList]]"
                     page-size="0"
                     source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-                    source-exclude='["knowledge_graph.*.provenance"]'
                     transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
                     transform-function="[[transforms.entity.histogram]]"
                     error="{{item.histogramError}}"
