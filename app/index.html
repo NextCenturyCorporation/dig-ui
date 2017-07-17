@@ -248,6 +248,8 @@ limitations under the License.
           <template is="dom-if" if="[[searchParameters]]">
             <paper-toolbar class="drawer-header">
               <div class="layout vertical">
+                <div class="selected-facets-header">Project:  [[findDomain(params, serverConfig)]]</div>
+
                 <template is="dom-if" if="[[!noSearchParameters(searchParameters.*)]]">
                   <div class="selected-facets-header">Search Terms</div>
                 </template>
