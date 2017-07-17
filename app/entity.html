@@ -249,11 +249,11 @@ limitations under the License.
           <loading-spinner show type="Page"></loading-spinner>
         </template>
 
-        <template is="dom-if" if="[[pageConfig]]">
-          <!-- Entity header -->
-          <div class="paper-header layout horizontal">
+        <!-- Entity header -->
+        <div class="paper-header layout horizontal">
 
-            <!-- Entity title -->
+          <!-- Entity title -->
+          <template is="dom-if" if="[[pageConfig]]">
             <div class="layout horizontal center flex">
               <div class$="iron-icon-huge [[pageConfig.styleClass]]">
                 <iron-icon icon="[[pageConfig.icon]]"></iron-icon>
@@ -269,29 +269,31 @@ limitations under the License.
                 </template>
               </div>
             </div>
+          </template>
 
-            <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+          <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
-            <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
-              <div class="dropdown-content">
-                <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
-                  <iron-icon icon="refresh" item-icon></iron-icon>
-                  Reload the DIG Configuration
-                </paper-icon-item>
+          <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
+            <div class="dropdown-content">
+              <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
+                <iron-icon icon="refresh" item-icon></iron-icon>
+                Reload the DIG Configuration
+              </paper-icon-item>
 
-                <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-                  <iron-icon icon="open-in-new" item-icon></iron-icon>
-                  Open a DIG Search Page in a New Tab
-                </paper-icon-item>
+              <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+                <iron-icon icon="open-in-new" item-icon></iron-icon>
+                Open a DIG Search Page in a New Tab
+              </paper-icon-item>
 
-                <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
-                  <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
-                  Contact DIG Support
-                </paper-icon-item>
-              </div>
-            </iron-dropdown>
-          </div>
+              <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+                <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
+                Contact DIG Support
+              </paper-icon-item>
+            </div>
+          </iron-dropdown>
+        </div>
 
+        <template is="dom-if" if="[[pageConfig]]">
           <!-- Entity body -->
           <div class="entity-page">
 
