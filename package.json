@@ -1,6 +1,6 @@
 {
   "name": "dig-ui",
-  "version": "0.0.10",
+  "version": "0.0.14",
   "description": "Customizable DIG search and visualization interface for any domain",
   "license": "Apache-2.0",
   "author": "Next Century Corporation",

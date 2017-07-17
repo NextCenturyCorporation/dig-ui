@@ -1,0 +1,720 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paginated-list/paginated-list.html">
+<link rel="import" href="../single-result/single-result.html">
+
+<!--
+A Polymer Element showing a paginated-list of single-result elements.
+
+### Example
+```js
+headerExtractions = [{
+  name: 'Built By',
+  data: [{
+    confidence: 'high',
+    highlight: true,
+    icon: 'star',
+    link: 'https://nextcentury.com',
+    text: 'Next Century'
+  }]
+}];
+
+details = [{
+  name: 'Description',
+  text: 'DigElements is a library of common Polymer Elements built by Next Century Corporation.'
+}];
+
+detailExtractions = [{
+  name: 'My Favorite DigElements',
+  data: [{
+    confidence: 'high',
+    highlight: true,
+    icon: 'link',
+    link: 'https://github.com/DigElements/single-result',
+    text: 'Single Result'
+  }]
+}];
+
+images = [{
+  link: 'https://github.com/DigElements',
+  source: 'dig.png'
+}];
+
+results = [{
+  flag: 'Important',
+  highlightedText: 'The <em>DigElements</em> library.',
+  icon: 'favorite',
+  link: 'https://github.com/DigElements',
+  rank: '0.99',
+  type: 'Webpage',
+  headerExtractions: headerExtractions,
+  details: details,
+  detailExtractions: detailExtractions,
+  images: images
+}];
+```
+
+```html
+<result-list
+  query-results="[[results]]"
+  total-results="1"
+  loading="[[loading]]"
+  header="{{header}}">
+</result-list>
+```
+
+@demo demo/index.html
+-->
+
+<dom-module id="result-list">
+  <template>
+    <style>
+      :host {
+        display: block;
+        height: 100%;
+      }
+
+      paginated-list {
+        --paginated-list-max-height: var(--result-list-max-height, 1500px);
+      }
+
+      single-result:first-of-type {
+        border-top-style: solid;
+        border-top-width: 1px;
+        border-top-color: var(--primary-background-color);
+      }
+
+      single-result {
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+        border-bottom-color: var(--primary-background-color);
+      }
+    </style>
+
+    <paginated-list
+      loading="[[loading]]"
+      load-type="[[prettyName]]"
+      items="[[queryResults]]"
+      total-items="[[totalResults]]"
+      page="{{page}}"
+      page-size="[[pageSize]]"
+      shown-items="{{shownResults}}">
+
+      <template is="dom-repeat" items="[[shownResults]]" initial-count="25">
+        <single-result
+          flag="[[_getString(item, flagProperty)]]"
+          highlighted-text="[[_getString(item, highlightedTextProperty)]]"
+          icon="[[_getString(item, iconProperty)]]"
+          link="[[_getString(item, linkProperty)]]"
+          rank="[[_getString(item, rankProperty)]]"
+          style-class="[[_getString(item, styleClassProperty)]]"
+          text="[[_getString(item, textProperty)]]"
+          type="[[_getString(item, typeProperty)]]"
+          header-extractions="[[_getList(item, headerExtractionsProperty)]]"
+          detail-extractions="[[_getList(item, detailExtractionsProperty)]]"
+          extraction-data-property="[[extractionDataProperty]]"
+          extraction-data-annotate-property="[[extractionDataAnnotateProperty]]"
+          extraction-data-highlight-property="[[extractionDataHighlightProperty]]"
+          extraction-data-icon-property="[[extractionDataIconProperty]]"
+          extraction-data-id-property="[[extractionDataIdProperty]]"
+          extraction-data-link-property="[[extractionDataLinkProperty]]"
+          extraction-data-style-class-property="[[extractionDataStyleClassProperty]]"
+          extraction-data-text-property="[[extractionDataTextProperty]]"
+          extraction-data-type-property="[[extractionDataTypeProperty]]"
+          extraction-name-property="[[extractionNameProperty]]"
+          details="[[_getList(item, detailsProperty)]]"
+          detail-highlighted-text-property="[[detailHighlightedTextProperty]]"
+          detail-link-property="[[detailLinkProperty]]"
+          detail-name-property="[[detailNameProperty]]"
+          detail-text-property="[[detailTextProperty]]"
+          images="[[_getList(item, imagesProperty)]]"
+          image-link-property="[[imageLinkProperty]]"
+          image-source-property="[[imageSourceProperty]]"
+          small-image-style-class="[[smallImageStyleClass]]"
+          large-image-style-class="[[largeImageStyleClass]]"
+          highlighted-text-tags="[[highlightedTextTags]]"
+          new-tab="[[newTab]]">
+        </single-result>
+      </template>
+    </paginated-list>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'result-list',
+
+      properties: {
+        /**
+         * (Required)
+         *
+         * The list of result objects from a query to show in the list that are reset for each new page.
+         *
+         * @type {Array}
+         */
+        queryResults: {
+          type: Array
+        },
+
+        /**
+         * (Required)
+         *
+         * The total number of results for all pages.
+         *
+         * @type {Number}
+         */
+        totalResults: {
+          type: Number
+        },
+
+        /**
+         * (Optional)
+         *
+         * The current page.
+         *
+         * @type {Number}
+         * @default 1
+         */
+        page: {
+          notify: true,
+          type: Number,
+          value: 1
+        },
+
+        /**
+         * (Optional)
+         *
+         * The page size.
+         *
+         * @type {Number}
+         */
+        pageSize: {
+          type: Number
+        },
+
+        /**
+         * (Optional)
+         *
+         * Whether a query is running.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        loading: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * (Optional)
+         *
+         * The flag property in the result objects.
+         *
+         * @type {String}
+         * @default 'flag'
+         */
+        flagProperty: {
+          type: String,
+          value: 'flag'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The highlighted text property in the result objects.
+         *
+         * @type {String}
+         * @default 'highlightedText'
+         */
+        highlightedTextProperty: {
+          type: String,
+          value: 'highlightedText'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The icon property in the result objects.
+         *
+         * @type {String}
+         * @default 'icon'
+         */
+        iconProperty: {
+          type: String,
+          value: 'icon'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The link property in the result objects.
+         *
+         * @type {String}
+         * @default 'link'
+         */
+        linkProperty: {
+          type: String,
+          value: 'link'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The rank property in the result objects.
+         *
+         * @type {String}
+         * @default 'rank'
+         */
+        rankProperty: {
+          type: String,
+          value: 'rank'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The style class property in the result objects.
+         *
+         * @type {String}
+         * @default 'styleClass'
+         */
+        styleClassProperty: {
+          type: String,
+          value: 'styleClass'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The text property in the result objects.
+         *
+         * @type {String}
+         * @default 'text'
+         */
+        textProperty: {
+          type: String,
+          value: 'text'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The type property in the result objects.
+         *
+         * @type {String}
+         * @default 'type'
+         */
+        typeProperty: {
+          type: String,
+          value: 'type'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The header extractions property in the result objects that is a list of extraction objects to show in the result header.
+         *
+         * @type {String}
+         * @default 'headerExtractions'
+         */
+        headerExtractionsProperty: {
+          type: String,
+          value: 'headerExtractions'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The detail extractions property in the result objects that is a list of extraction objects to show in the collapsible details.
+         *
+         * @type {String}
+         * @default 'detailExtractions'
+         */
+        detailExtractionsProperty: {
+          type: String,
+          value: 'detailExtractions'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The data property in the extraction objects that is a list of extractions.
+         *
+         * @type {String}
+         * @default 'data'
+         */
+        extractionDataProperty: {
+          type: String,
+          value: 'data'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The confidence property in the data objects from the extraction objects.  Supported confidence values are "high" and "low".
+         *
+         * @type {String}
+         * @default 'confidence'
+         */
+        extractionDataConfidenceProperty: {
+          type: String,
+          value: 'confidence'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The highlight property in the data objects from the extraction objects on whether to highlight the background of the extraction.
+         *
+         * @type {String}
+         * @default 'highlight'
+         */
+        extractionDataHighlightProperty: {
+          type: String,
+          value: 'highlight'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The icon property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'icon'
+         */
+        extractionDataIconProperty: {
+          type: String,
+          value: 'icon'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The link property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'link'
+         */
+        extractionDataLinkProperty: {
+          type: String,
+          value: 'link'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The style class property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'styleClass'
+         */
+        extractionDataStyleClassProperty: {
+          type: String,
+          value: 'styleClass'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The text property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'text'
+         */
+        extractionDataTextProperty: {
+          type: String,
+          value: 'text'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The name property in the extraction objects.
+         *
+         * @type {String}
+         * @default 'name'
+         */
+        extractionNameProperty: {
+          type: String,
+          value: 'name'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The details property in the result objects that is a list of detail objects.
+         *
+         * @type {String}
+         * @default 'details'
+         */
+        detailsProperty: {
+          type: String,
+          value: 'details'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The highlighted text property in the detail objects.
+         *
+         * @type {String}
+         * @default 'highlightedText'
+         */
+        detailHighlightedTextProperty: {
+          type: String,
+          value: 'highlightedText'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The link property in the detail objects.
+         *
+         * @type {String}
+         * @default 'link'
+         */
+        detailLinkProperty: {
+          type: String,
+          value: 'link'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The name property in the detail objects.
+         *
+         * @type {String}
+         * @default 'name'
+         */
+        detailNameProperty: {
+          type: String,
+          value: 'name'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The text property in the detail objects.
+         *
+         * @type {String}
+         * @default 'text'
+         */
+        detailTextProperty: {
+          type: String,
+          value: 'text'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The images property in the result objects that is a list of image objects.
+         *
+         * @type {String}
+         * @default 'images'
+         */
+        imagesProperty: {
+          type: String,
+          value: 'images'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The link property in the image objects.
+         *
+         * @type {String}
+         * @default 'link'
+         */
+        imageLinkProperty: {
+          type: String,
+          value: 'link'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The source property in the image objects.
+         *
+         * @type {String}
+         * @default 'source'
+         */
+        imageSourceProperty: {
+          type: String,
+          value: 'source'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The style class for all the images in the gallery.
+         *
+         * @type {String}
+         * @default ''
+         */
+        smallImageStyleClass: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The style class for any image in a popup.
+         *
+         * @type {String}
+         * @default ''
+         */
+        largeImageStyleClass: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The highlighted text tags.  "This is <em>highlighted</em> text."
+         *
+         * @type {String}
+         * @default 'em'
+         */
+        highlightedTextTags: {
+          type: String,
+          value: 'em'
+        },
+
+        /**
+         * (Optional)
+         *
+         * Whether to open a link in a new tab.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        newTab: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * (Optional)
+         *
+         * The plural pretty name of the data shown in the header and loading spinner.
+         *
+         * @type {String}
+         * @default 'Results'
+         */
+        prettyName: {
+          type: String,
+          value: 'Results'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The singular pretty name of the data shown in the header.
+         *
+         * @type {String}
+         * @default 'Result'
+         */
+        prettyNameSingular: {
+          type: String,
+          value: 'Result'
+        },
+
+        /**
+         * (Output)
+         *
+         * The header for the list.
+         *
+         * @type {String}
+         */
+        header: {
+          computed: '_createHeader(prettyNameSingular, prettyName, totalResults, shownResults.length, loading)',
+          notify: true,
+          type: String
+        },
+
+        /**
+         * (Output)
+         *
+         * The list of result objects currently shown in the list that are the query results from each viewed page.
+         *
+         * @type {Array}
+         */
+        shownResults: {
+          notify: true,
+          type: Array
+        }
+      },
+
+      /**
+       * Returns the header for the list.
+       *
+       * @param {String} prettyNameSingular
+       * @param {String} prettyNamePlural
+       * @param {Number} totalCount
+       * @param {Number} totalShown
+       * @param {Boolean} loading
+       * @return {String}
+       * @private
+       */
+      _createHeader: function(prettyNameSingular, prettyNamePlural, totalCount, totalShown, loading) {
+        if(totalCount) {
+          // Use regex replace to add commas to count.
+          var totalCountString = totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+          if(totalShown && totalShown < totalCount) {
+            var totalShownString = totalShown.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            return totalShownString + ' of ' + totalCountString + ' ' + (totalCount === 1 ? prettyNameSingular : prettyNamePlural);
+          }
+          return totalCountString + ' ' + (totalCount === 1 ? prettyNameSingular : prettyNamePlural);
+        }
+        if(loading) {
+          return 'Loading ' + prettyNamePlural + '...';
+        }
+        return 'No ' + prettyNamePlural;
+      },
+
+      /**
+       * Returns the array in the given item at the given property or an empty array by default.
+       *
+       * @param {Object} item
+       * @param {String} property
+       * @return {Array}
+       * @private
+       */
+      _getList: function(item, property) {
+        return (item ? item[property] : undefined) || [];
+      },
+
+      /**
+       * Returns the string in the given item at the given property or an empty string by default.
+       *
+       * @param {Object} item
+       * @param {String} property
+       * @return {String}
+       * @private
+       */
+      _getString: function(item, property) {
+        return (item ? item[property] : undefined) || '';
+      }
+    });
+  })();
+  </script>
+</dom-module>

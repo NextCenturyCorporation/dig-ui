@@ -42,20 +42,20 @@ var configTransforms = (function(_, commonTransforms) {
     return [];
   }
 
-  function createFacetTransform(link, type) {
+  function createFacetTransform(linkType, fieldType, fieldId) {
     return function(response, key) {
       var aggregations = findAggregationsInResponse(response, key);
       return aggregations.reduce(function(data, bucket) {
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var count = bucket.doc_count;
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
-        var id = commonTransforms.getFacetsDataId(bucket.key, type);
+        var id = commonTransforms.getFacetsDataId(bucket.key, fieldType);
         if(id) {
           data.push({
             count: count,
             id: id,
-            link: commonTransforms.getLink(bucket.key, link, type),
-            text: commonTransforms.getFacetsDataText(bucket.key, type)
+            link: commonTransforms.getLink(bucket.key, linkType, fieldType, fieldId),
+            text: commonTransforms.getFacetsDataText(bucket.key, fieldType)
           });
         }
         return data;
@@ -67,7 +67,7 @@ var configTransforms = (function(_, commonTransforms) {
     aggregationFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
         // Dates will be shown in the histograms, images in the galleries, and locations in the maps.
-        return searchFieldsObject.type !== 'date' && searchFieldsObject.type !== 'image' && searchFieldsObject.type !== 'location';
+        return searchFieldsObject.type !== 'date' && searchFieldsObject.type !== 'image' && searchFieldsObject.type !== 'location' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
@@ -87,7 +87,7 @@ var configTransforms = (function(_, commonTransforms) {
 
     dateFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'date';
+        return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
@@ -151,10 +151,10 @@ var configTransforms = (function(_, commonTransforms) {
 
     histogramFields: function(searchFields) {
       var entityFields = searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.link === 'entity';
+        return searchFieldsObject.link === 'entity' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       });
       var dateFields = searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'date';
+        return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       });
       var histogramFields = dateFields.reduce(function(fields, dateFieldsObject) {
         return fields.concat(entityFields.map(function(entityFieldsObject) {
@@ -171,7 +171,7 @@ var configTransforms = (function(_, commonTransforms) {
 
     imageFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'image';
+        return searchFieldsObject.type === 'image' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
@@ -179,7 +179,7 @@ var configTransforms = (function(_, commonTransforms) {
 
     mapFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'location';
+        return searchFieldsObject.type === 'location' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
@@ -193,7 +193,7 @@ var configTransforms = (function(_, commonTransforms) {
     },
 
     searchFields: function(fields) {
-      return _.keys(fields || {}).filter(function(id) {
+      var searchFields =  _.keys(fields || {}).filter(function(id) {
         return !!fields[id].type;
       }).map(function(id) {
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
@@ -223,62 +223,116 @@ var configTransforms = (function(_, commonTransforms) {
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
         // The facet aggregation transform function.
-        searchFieldsObject.facetTransform = createFacetTransform(searchFieldsObject.link, searchFieldsObject.type);
+        searchFieldsObject.facetTransform = createFacetTransform(searchFieldsObject.link, searchFieldsObject.type, searchFieldsObject.key);
         // Add style class (e.g. 'entity-grey').
         searchFieldsObject.styleClass = commonTransforms.getStyleClass(searchFieldsObject.color);
+
+        searchFieldsObject.sort = {
+          sortId: 2,
+          sortType: 'extraction'
+        };
+        if(searchFieldsObject.type === 'date') {
+          searchFieldsObject.sort = {
+            sortId: 6,
+            sortType: 'date'
+          };
+        } else if(searchFieldsObject.link === 'entity') {
+          searchFieldsObject.sort = {
+            sortId: 1,
+            sortType: 'entity'
+          };
+        } else if(searchFieldsObject.result === 'title') {
+          searchFieldsObject.sort = {
+            sortId: 3,
+            sortType: 'document'
+          };
+        } else if(searchFieldsObject.result === 'description') {
+          searchFieldsObject.sort = {
+            sortId: 4,
+            sortType: 'document'
+          };
+        } else if(searchFieldsObject.result === 'tld' || searchFieldsObject.key === 'website') {
+          searchFieldsObject.sort = {
+            sortId: 5,
+            sortType: 'document'
+          };
+        }
 
         // Properties for the date facets.
         searchFieldsObject.dateProperties = fields[id].type === 'date' ? createDateProperties(searchFieldsObject) : {};
 
         return searchFieldsObject;
       }).sort(function(a, b) {
-        if(a.type === 'date' && b.type !== 'date') {
+        if(a.sort.sortId < b.sort.sortId) {
           return -1;
         }
-        if(a.type !== 'date' && b.type === 'date') {
+        if(a.sort.sortId > b.sort.sortId) {
           return 1;
         }
-        if(a.link === 'entity' && b.link !== 'entity') {
-          return -1;
-        }
-        if(a.link !== 'entity' && b.link === 'entity') {
-          return 1;
-        }
-        return a.titlePlural > b.titlePlural ? 1 : (a.titlePlural < b.titlePlural ? -1 : 0);
+        return a.title > b.title ? 1 : (a.title < b.title ? -1 : 0);
       });
+
+      console.log('searchFields', searchFields);
+      return searchFields;
     },
 
     searchFieldsDialogConfig: function(searchFields) {
       var config = [];
-      var fields = [];
 
-      searchFields.forEach(function(searchFieldsObject) {
-        // only add to search fields if search property is set to true
-        if(searchFieldsObject.search) {
-          if(searchFieldsObject.type === 'date') {
-            var dateProperties = createDateProperties(searchFieldsObject);
-            config.push({
-              name: searchFieldsObject.titlePlural,
-              type: 'date',
-              data: [
-                dateProperties.start,
-                dateProperties.end
-              ]
-            });
-          } else {
-            fields.push({
-              key: searchFieldsObject.key,
-              field: searchFieldsObject.field,
-              title: searchFieldsObject.title
-            });
-          }
-        }
+      searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'date';
+      }).forEach(function(searchFieldsObject) {
+        var dateProperties = createDateProperties(searchFieldsObject);
+        config.push({
+          name: searchFieldsObject.title,
+          type: 'date',
+          data: [
+            dateProperties.start,
+            dateProperties.end
+          ]
+        });
       });
 
-      return config.concat([{
-        name: 'Fields',
-        data: fields
-      }]);
+      config.push({
+        name: 'Entity',
+        data: searchFields.filter(function(searchFieldsObject) {
+          return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'entity';
+        }).map(function(searchFieldsObject) {
+          return {
+            key: searchFieldsObject.key,
+            field: searchFieldsObject.field,
+            title: searchFieldsObject.title
+          };
+        })
+      });
+
+      config.push({
+        name: 'Extraction',
+        data: searchFields.filter(function(searchFieldsObject) {
+          return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'extraction';
+        }).map(function(searchFieldsObject) {
+          return {
+            key: searchFieldsObject.key,
+            field: searchFieldsObject.field,
+            title: searchFieldsObject.title
+          };
+        })
+      });
+
+      config.push({
+        name: 'Document',
+        data: searchFields.filter(function(searchFieldsObject) {
+          return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'document';
+        }).map(function(searchFieldsObject) {
+          return {
+            key: searchFieldsObject.key,
+            field: searchFieldsObject.field,
+            title: searchFieldsObject.title
+          };
+        })
+      });
+
+      return config;
     },
 
     searchKeys: function(searchFields) {
@@ -296,7 +350,7 @@ var configTransforms = (function(_, commonTransforms) {
 
     sortField: function(searchFields) {
       var index = _.findIndex(searchFields, function(searchFieldsObject) {
-        return searchFieldsObject.type === 'date';
+        return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       });
       return index >= 0 ? searchFields[index].field : '';
     }

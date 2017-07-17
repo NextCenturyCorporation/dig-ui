@@ -182,7 +182,7 @@ limitations under the License.
       total="{{resultsTotalCount}}"
       search-parameters="[[searchParameters]]"
       search-function="[[searchQuery]]"
-      url="[[serverConfig.searchEndpoint]]">
+      url="[[esConfig.searchEndpoint]]">
     </query-transformer>
 
     <json-combine
@@ -235,7 +235,7 @@ limitations under the License.
           </search-fields-dialog>
         </div>
 
-        <a class="bottom" href="." style="color: #ffffff;">
+        <a class="bottom" href="[[getURLWithProject(domain)]]" style="color: #ffffff;">
           <paper-icon-button icon="clear" title="Reset Page"></paper-icon-button>
         </a>
 
@@ -267,9 +267,9 @@ limitations under the License.
               Open a DIG Search Page in a New Tab
             </paper-icon-item>
 
-            <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+            <paper-icon-item title="Contact DIG Support (dig-support@nextcentury.com)" on-tap="emailSupport">
               <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
-              Contact Support (dig-support@nextcentury.com)
+              Contact DIG Support
             </paper-icon-item>
           </div>
         </iron-dropdown>
@@ -310,9 +310,25 @@ limitations under the License.
 
                 <template is="dom-repeat" items="[[searchFields]]">
                   <template is="dom-if" if="[[item.facets]]">
+                    <template is="dom-if" if="[[!equals(item.type, 'date')]]">
+                      <facet-list
+                        class="facet"
+                        query-url="[[esConfig.searchEndpoint]]"
+                        name="[[item.key]]"
+                        title="[[item.title]]"
+                        target="_blank"
+                        result-function="[[item.facetTransform]]"
+                        search-function="[[facetsQuery]]"
+                        search-parameters-property="[[item.key]]"
+                        search-parameters="{{searchParameters}}"
+                        process-request="{{processRequest}}">
+                      </facet-list>
+                    </template>
+
                     <template is="dom-if" if="[[equals(item.type, 'date')]]">
                       <date-range-facet
                         class="facet"
+                        header-title="[[item.title]]"
                         date-start-key="[[item.dateProperties.start.key]]"
                         date-start-title="[[item.dateProperties.start.title]]"
                         date-start-prefix-label="[[item.dateProperties.start.title]]"
@@ -324,21 +340,6 @@ limitations under the License.
                         search-parameters-property="[[item.key]]"
                         search-parameters="{{searchParameters}}">
                       </date-range-facet>
-                    </template>
-
-                    <template is="dom-if" if="[[!equals(item.type, 'date')]]">
-                      <facet-list
-                        class="facet"
-                        query-url="[[serverConfig.searchEndpoint]]"
-                        name="[[item.key]]"
-                        title="[[item.title]]"
-                        target="_blank"
-                        result-function="[[item.facetTransform]]"
-                        search-function="[[facetsQuery]]"
-                        search-parameters-property="[[item.key]]"
-                        search-parameters="{{searchParameters}}"
-                        process-request="{{processRequest}}">
-                      </facet-list>
                     </template>
                   </template>
                 </template>
@@ -484,8 +485,12 @@ limitations under the License.
         app.set('clientConfig', {});
       };
 
+      app.getURLWithProject = function(domain) {
+        return './?project=' + domain;
+      };
+
       app.openNewTab = function() {
-        window.open('.');
+        window.open('./?project=' + app.domain);
       };
 
       app.emailSupport = function() {

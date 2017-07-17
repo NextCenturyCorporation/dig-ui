@@ -41,7 +41,9 @@ limitations under the License.
 
     setup(function() {
       transformFunctions = fixture('transform-functions-fixture');
-      transformFunctions.config = {};
+      transformFunctions.domain = 'domain';
+      transformFunctions.clientConfig = {};
+      transformFunctions.serverConfig = {};
     });
 
     test('does define search object', function() {
