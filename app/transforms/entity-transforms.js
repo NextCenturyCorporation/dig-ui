@@ -175,16 +175,19 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     };
 
     // Use the data from the searchFieldsObject if possible.
-    if(searchFieldsObject && searchFieldsObject.field) {
-      returnObject.text = _.get(result, '_source.knowledge_graph.' + searchFieldsObject.key);
-      if(_.isArray(returnObject.text)) {
-        returnObject.text = returnObject.text.map(function(object) {
-          return object.value;
-        }).join(' ');
-      } else {
-        returnObject.text = returnObject.text.value;
+    if(highlightMapping && searchFieldsObject) {
+      var extraction = _.get(result, '_source.knowledge_graph.' + searchFieldsObject.key);
+      if(_.isObject(extraction) || _.isArray(extraction)) {
+        if(_.isObject(extraction)) {
+          returnObject.text = extraction.value;
+        }
+        if(_.isArray(extraction)) {
+          returnObject.text = extraction.map(function(object) {
+            return object.value;
+          }).join(' ');
+        }
+        returnObject.highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlightMapping[searchFieldsObject.key]) || returnObject.text;
       }
-      returnObject.highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlightMapping[searchFieldsObject.key]) || returnObject.text;
     }
 
     return returnObject;
