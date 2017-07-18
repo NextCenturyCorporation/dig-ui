@@ -40,7 +40,7 @@ limitations under the License.
       },
 
       observers: [
-        '_createLogMessage(searchParameters.*)',
+        '_createLogMessage(searchParameters.*)'
       ],
 
       _createLogMessage: function(searchParameters) {
@@ -55,7 +55,7 @@ limitations under the License.
             var elements = [];
             var category = search[Object.keys(search)[0]].category;
 
-            //update the list
+            //update the elements list
             for(var element in search) {
               elements.push(element);
             }
