@@ -47,7 +47,6 @@ module.exports = function(app) {
       searchConfig: serverConfig.searchConfig,
       logIndex: serverConfig.logIndex,
       logType: serverConfig.logType
-      
     });
   });
 

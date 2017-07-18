@@ -53,11 +53,16 @@ limitations under the License.
 
           if(!_.isEmpty(search)) {
             var elements = [];
-            var category = search[Object.keys(search)[0]].category;
+            var keys = Object.keys(search);
+            var category = search[keys[0]].category;
 
             //update the elements list
-            for(var element in search) {
-              elements.push(element);
+            for(var i = 0; i < keys.length; i++) {
+              var element = search[keys[i]];
+              
+              if(element.enabled) {
+                elements.push(element.key);
+              }
             }
 
             list.push(this._getSelectedString(elements, category));
