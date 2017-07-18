@@ -33,6 +33,9 @@ limitations under the License.
         searchParameters: {
           type: Object
         },
+        filterCollection: {
+          type: Object
+        },
         logMessage: {
           type: String,
           notify: true
@@ -40,26 +43,26 @@ limitations under the License.
       },
 
       observers: [
-        '_createLogMessage(searchParameters.*)'
+        '_createSearchParameterLog(searchParameters.*)',
+        '_createFilterCollectionLog(filterCollection.*)'
       ],
 
-      _createLogMessage: function(searchParameters) {
+      _createSearchParameterLog: function(searchParameters) {
         var list = [];
         var searchParameter = searchParameters.base;
 
-        //find all non empty searchFields
-        for(var searchField in searchParameter) {
-          var search = searchParameter[searchField];
+        //find all non empty categories
+        for(var category in searchParameter) {
+          var search = searchParameter[category];
 
           if(!_.isEmpty(search)) {
             var elements = [];
             var keys = Object.keys(search);
-            var category = search[keys[0]].category;
 
             //update the elements list
             for(var i = 0; i < keys.length; i++) {
               var element = search[keys[i]];
-              
+
               if(element.enabled) {
                 elements.push(element.key);
               }
@@ -69,6 +72,25 @@ limitations under the License.
           }
         }
 
+        this._createLogMessage(list);
+      },
+
+      _createFilterCollectionLog: function(filterCollection) {
+        var list = [];
+        var filterList = filterCollection.base;
+
+        for(var category in filterList) {
+          var elements = filterList[category];
+
+          if(!_.isEmpty(elements)) {
+            list.push(this._getSelectedString(elements, category));
+          }
+        }
+
+        this._createLogMessage(list);
+      },
+
+      _createLogMessage: function(list) {
         var logMessage = '{' + list.filter(function(value) {
           return !!value;
         }).join(',') + '}';
