@@ -181,7 +181,7 @@ var searchTransforms = (function(_) {
           response[0].query.SPARQL.where.clauses.forEach(function(clause) {
             if(clause.predicate && clause.constraint && clause._id) {
               fields[clause.predicate] = fields[clause.predicate] || {};
-              fields[clause.predicate][clause.constraint] = clause._id;
+              fields[clause.predicate][('' + clause.constraint).toLowerCase()] = clause._id;
             }
           });
         }

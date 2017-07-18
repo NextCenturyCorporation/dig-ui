@@ -81,33 +81,46 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return getExtractionsFromList(data, config);
   }
 
-  function getHighlightedText(result, paths) {
-    var path = _.find(paths, function(path) {
-      return result.highlight && result.highlight[path] && result.highlight[path].length && result.highlight[path][0];
-    });
-    return path ? result.highlight[path][0] : undefined;
-  }
+  function getHighlightPathList(itemId, itemText, result, type, highlightMapping) {
+    // The highlightMapping property maps search terms to unique IDs.
+    // The result.matched_queries property lists highlights in the format <id>:<path>:<text>
 
-  function getHighlightPathList(item, result, highlightMapping) {
     /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-    var pathList = result.matched_queries;
+    var highlightResults = result.matched_queries;
     /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-    if(pathList && pathList.length && highlightMapping && highlightMapping[item.id]) {
-      return pathList.filter(function(path) {
-        return _.startsWith(path, highlightMapping[item.id]);
-      }).map(function(path) {
-        return path.split(':')[1];
+    // Check the full text and all single words in the text.  Remove all punctuation so we can separate the words.
+    var wordsOrPhrases = [itemText];
+    if(type === 'location') {
+      wordsOrPhrases = [itemId.substring(0, itemId.indexOf(':'))];
+    }
+    wordsOrPhrases = wordsOrPhrases.concat(itemText.replace(/\W/g, ' ').split(' '));
+
+    var highlightPaths = {};
+
+    if(highlightResults && highlightResults.length && highlightMapping) {
+      wordsOrPhrases.forEach(function(wordOrPhrase) {
+        // If a highlight mapping exists for the word or phrase, check the highlight results.
+        if(highlightMapping[wordOrPhrase]) {
+          return highlightResults.filter(function(path) {
+            return _.startsWith(path, highlightMapping[wordOrPhrase]);
+          }).map(function(path) {
+            // Return the path in the highlight results.
+            return path.split(':')[1];
+          }).forEach(function(path) {
+            highlightPaths[path] = true;
+          });
+        }
       });
     }
 
-    return [];
+    return _.keys(highlightPaths);
   }
 
-  function cleanHighlight(text, type) {
+  function checkHighlightedText(text, type) {
     // Ignore partial matches for emails.
     if(type === 'email' && (!_.startsWith(text, '<em>') || !_.endsWith(text, '</em>'))) {
-      return text.toLowerCase();
+      return false;
     }
 
     var output = text;
@@ -117,38 +130,64 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       output = output.indexOf(' ') ? output.substring(output.indexOf(' ') + 1) : output;
     }
 
-    return output.indexOf('<em>') >= 0 ? output.replace(/<\/?em\>/g, '').toLowerCase() : '';
+    return output.indexOf('<em>') >= 0 && output.indexOf('</em>') >= 0 ? !!(output.replace(/<\/?em\>/g, '')) : false;
   }
 
-  function addHighlight(item, result, type, highlightMapping) {
-    var pathList = getHighlightPathList(item, result, highlightMapping);
+  function getHighlightedText(itemId, itemText, result, type, highlightMapping) {
+    var pathList = getHighlightPathList(('' + itemId).toLowerCase(), ('' + itemText).toLowerCase(), result, type, highlightMapping);
+    var textList = [];
     if(result.highlight && pathList.length) {
-      item.highlight = pathList.some(function(path) {
-        return (result.highlight[path] || []).some(function(text) {
-          var cleanedHighlight = cleanHighlight(text, type);
-          return cleanedHighlight && (('' + item.id).toLowerCase().indexOf(cleanedHighlight) >= 0);
+      // Find highlighted text in the result highlights using a highlight path.
+      pathList.forEach(function(path) {
+        (result.highlight[path] || []).forEach(function(text) {
+          if(checkHighlightedText(text)) {
+            textList.push(text);
+          }
         });
       });
     }
-    return item;
-  }
-
-  function addAllHighlights(data, result, type, highlightMapping) {
-    return data.map(function(item) {
-      return addHighlight(item, result, type, highlightMapping);
-    });
+    return textList.length ? textList[0] : undefined;
   }
 
   function getHighlightedExtractionObjectFromResult(result, config, highlightMapping) {
     var data = getExtractionsFromResult(result, '_source.knowledge_graph.' + config.key, config);
     if(highlightMapping) {
-      data = addAllHighlights(data, result, config.type, highlightMapping[config.key]);
+      data = data.map(function(item) {
+        item.highlight = !!(getHighlightedText(item.id, item.text, result, config.type, highlightMapping[config.key]));
+        return item;
+      });
     }
     return {
       data: data,
       key: config.key,
       name: config.titlePlural
     };
+  }
+
+  function getTitleOrDescription(type, searchFields, result, path, highlightMapping) {
+    var searchFieldsObject = _.find(searchFields, function(object) {
+      return object.result === type;
+    });
+
+    var returnObject = {
+      text: getSingleStringFromResult(result, path),
+      highlight: result.highlight && result.highlight[path] && result.highlight[path].length ? result.highlight[path][0] : undefined
+    };
+
+    // Use the data from the searchFieldsObject if possible.
+    if(searchFieldsObject && searchFieldsObject.field) {
+      returnObject.text = _.get(result, '_source.knowledge_graph.' + searchFieldsObject.key);
+      if(_.isArray(returnObject.text)) {
+        returnObject.text = returnObject.text.map(function(object) {
+          return object.value;
+        }).join(' ');
+      } else {
+        returnObject.text = returnObject.text.value;
+      }
+      returnObject.highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlightMapping[searchFieldsObject.key]) || returnObject.text;
+    }
+
+    return returnObject;
   }
 
   function getDocumentObject(result, searchFields, documentPage, highlightMapping) {
@@ -162,41 +201,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var rank = _.get(result, '_score');
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
-    var titleFieldObject = _.find(searchFields, function(object) {
-      return object.result === 'title';
-    });
-
-    var titleText;
-    var titleHighlight;
-
-    if(titleFieldObject && titleFieldObject.field) {
-      titleText = getSingleStringFromResult(result, titleFieldObject.field);
-      titleHighlight = getHighlightedText(result, [titleFieldObject.field]);
-    }
-
-    // if there's no titleFieldObject or the title cannot be found there, use an alternate field
-    if(!titleText) {
-      titleText = getSingleStringFromResult(result, '_source.content_extraction.title.text');
-      titleHighlight = getHighlightedText(result, ['_source.content_extraction.title.text']);
-    }
-
-    var descriptionText;
-    var descriptionHighlight;
-
-    var descriptionFieldObject = _.find(searchFields, function(object) {
-      return object.result === 'description';
-    });
-
-    if(descriptionFieldObject && descriptionFieldObject.field) {
-      descriptionText = getSingleStringFromResult(result, descriptionFieldObject.field);
-      descriptionHighlight = getHighlightedText(result, [descriptionFieldObject.field]);
-    }
-
-    // if there's no descriptionFieldObject or the description cannot be found there, use an alternate field
-    if(!descriptionText) {
-      descriptionText = getSingleStringFromResult(result, '_source.content_extraction.content_strict.text');
-      descriptionHighlight = getHighlightedText(result, ['_source.content_extraction.content_strict.text']);
-    }
+    var title = getTitleOrDescription('title', searchFields, result, '_source.content_extraction.title.text', highlightMapping);
+    var description = getTitleOrDescription('description', searchFields, result, '_source.content_extraction.content_strict.text', highlightMapping);
 
     var documentObject = {
       id: id,
@@ -209,17 +215,23 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       cached: commonTransforms.getLink(id, 'cached'),
       esData: esDataEndpoint,
       // TODO
-      title: titleText || 'No Title',
-      description: descriptionText || 'No Description',
-      highlightedText: titleHighlight,
+      title: title.text || 'No Title',
+      description: description.text || 'No Description',
+      highlightedText: title.highlight,
       headerExtractions: [],
       detailExtractions: [],
       details: []
     };
 
-    // TODO Don't truncate the extractions once the data can support it.
-    var truncateFunction = function(extractionObject) {
+    var finalizeExtractionFunction = function(extractionObject) {
+      extractionObject.data = extractionObject.data.sort(function(a, b) {
+        if(extractionObject.type === 'date') {
+          return new Date(a.id) - new Date(b.id);
+        }
+        return ('' + a.text).toLowerCase() - ('' + b.text).toLowerCase();
+      });
       if(!documentPage) {
+        // TODO Don't truncate the extractions once the data can support it.
         extractionObject.data = extractionObject.data.slice(0, 10);
       }
       return extractionObject;
@@ -228,13 +240,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     documentObject.headerExtractions = searchFields.filter(function(object) {
       return object.result === 'header';
     }).map(function(object) {
-      return truncateFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
+      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
     });
 
     documentObject.detailExtractions = searchFields.filter(function(object) {
       return object.result === 'detail';
     }).map(function(object) {
-      return truncateFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
+      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
     });
 
     if(esDataEndpoint) {
@@ -253,7 +265,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     documentObject.details.push({
       name: 'Description',
-      highlightedText: descriptionHighlight,
+      highlightedText: description.highlight,
       text: documentObject.description
     });
 
