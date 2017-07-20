@@ -320,11 +320,9 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   function createDateObjectFromBucket(dateBucket, config) {
     var newData = [];
     if (dateBucket && dateBucket[config.entity.key] && dateBucket[config.entity.key].buckets) {
-      newData = dateBucket[config.entity.key].buckets.map(
-                  function(entityBucket, index) {
-                    return getExtraction(entityBucket, config.entity, index);
-                  }
-                ).filter(commonTransforms.getExtractionFilterFunction(config.entity.type))
+      newData = dateBucket[config.entity.key].buckets.map(function(entityBucket, index) {
+        return getExtraction(entityBucket, config.entity, index);
+      }).filter(commonTransforms.getExtractionFilterFunction(config.entity.type))
     }
     return {
       date: commonTransforms.getFormattedDate(dateBucket.key),
@@ -436,11 +434,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     histogram: function(data, config) {
       if(data && data.aggregations && data.aggregations[config.date.key] && data.aggregations[config.date.key][config.date.key]) {
-        var hist = createDateHistogram(data.aggregations[config.date.key][config.date.key].buckets, config);
-        console.log('config',config);
-        console.log('data',data);
-        console.log('histogram',hist);
-        return hist;
+        return createDateHistogram(data.aggregations[config.date.key][config.date.key].buckets, config);
       }
       return {};
     }
