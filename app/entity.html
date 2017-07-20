@@ -37,8 +37,6 @@ limitations under the License.
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <!-- endbuild -->
 
-  <script src="scripts/google-analytics.js"></script>
-  
   <!-- will be replaced with elements/elements.vulcanized.html -->
   <link rel="import" href="elements/elements.html">
   <!-- endreplace-->
@@ -167,7 +165,7 @@ limitations under the License.
     </json-combine>
 
     <json-combine
-      data-in1="[[params.id]]"
+      data-in1="[[pageId]]"
       data-in2="[[params.type]]"
       data-out="{{pageName}}"
       combine-function="[[transforms.config.formatName]]">
@@ -226,7 +224,6 @@ limitations under the License.
       properties-ready="{{processRequest}}"
       sort-field="[[sortField]]"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-      source-exclude='["knowledge_graph.*.provenance"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.documents]]"
       error="{{documentsError}}"
@@ -250,11 +247,11 @@ limitations under the License.
           <loading-spinner show type="Page"></loading-spinner>
         </template>
 
-        <template is="dom-if" if="[[pageConfig]]">
-          <!-- Entity header -->
-          <div class="paper-header layout horizontal">
+        <!-- Entity header -->
+        <div class="paper-header layout horizontal">
 
-            <!-- Entity title -->
+          <!-- Entity title -->
+          <template is="dom-if" if="[[pageConfig]]">
             <div class="layout horizontal center flex">
               <div class$="iron-icon-huge [[pageConfig.styleClass]]">
                 <iron-icon icon="[[pageConfig.icon]]"></iron-icon>
@@ -270,29 +267,31 @@ limitations under the License.
                 </template>
               </div>
             </div>
+          </template>
 
-            <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+          <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
-            <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
-              <div class="dropdown-content">
-                <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
-                  <iron-icon icon="refresh" item-icon></iron-icon>
-                  Reload the DIG Configuration
-                </paper-icon-item>
+          <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
+            <div class="dropdown-content">
+              <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
+                <iron-icon icon="refresh" item-icon></iron-icon>
+                Reload the DIG Configuration
+              </paper-icon-item>
 
-                <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-                  <iron-icon icon="open-in-new" item-icon></iron-icon>
-                  Open a DIG Search Page in a New Tab
-                </paper-icon-item>
+              <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+                <iron-icon icon="open-in-new" item-icon></iron-icon>
+                Open a DIG Search Page in a New Tab
+              </paper-icon-item>
 
-                <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
-                  <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
-                  Contact Support (dig-support@nextcentury.com)
-                </paper-icon-item>
-              </div>
-            </iron-dropdown>
-          </div>
+              <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+                <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
+                Contact DIG Support
+              </paper-icon-item>
+            </div>
+          </iron-dropdown>
+        </div>
 
+        <template is="dom-if" if="[[pageConfig]]">
           <!-- Entity body -->
           <div class="entity-page">
 
@@ -334,40 +333,42 @@ limitations under the License.
                 </template>
 
                 <template is="dom-repeat" items="[[aggregationFields]]">
-                  <section-and-title
-                    show-copy
-                    copy-type="[[item.titlePlural]]"
-                    icon="[[item.icon]]"
-                    style-class="[[item.styleClass]]"
-                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
-                    transform-function="[[getSectionTitleTransformFunction]]"
-                    data="[[item.aggregationData]]">
+                  <template is="dom-if" if="[[item.result]]">
+                    <section-and-title
+                      show-copy
+                      copy-type="[[item.titlePlural]]"
+                      icon="[[item.icon]]"
+                      style-class="[[item.styleClass]]"
+                      transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
+                      transform-function="[[getSectionTitleTransformFunction]]"
+                      data="[[item.aggregationData]]">
 
-                    <aggregation-query-and-display
-                      aggregation-name="[[item.key]]"
-                      aggregation-field="[[item.field]]"
-                      selected-property="[[item.key]]"
-                      selected="{{filterCollection}}"
-                      query-field="[[pageConfig.field]]"
-                      query-value="[[pageId]]"
-                      client="[[esClient]]"
-                      index-name="[[esConfig.esIndex]]"
-                      index-types="[[esConfig.esType]]"
-                      filter-list="[[filterList]]"
-                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
-                      transform-function="[[transforms.entity.extractions]]"
-                      data="{{item.aggregationData}}"
-                      header-data-name="[[item.title]]"
-                      header-counts-name="Results"
-                      header-entity-name="[[pageName]]"
-                      show-checkboxes
-                      show-double-bar-chart="[[showDoubleBarChart(item)]]">
-                    </aggregation-query-and-display>
+                      <aggregation-query-and-display
+                        aggregation-name="[[item.key]]"
+                        aggregation-field="[[item.field]]"
+                        selected-property="[[item.key]]"
+                        selected="{{filterCollection}}"
+                        query-field="[[pageConfig.field]]"
+                        query-value="[[pageId]]"
+                        client="[[esClient]]"
+                        index-name="[[esConfig.esIndex]]"
+                        index-types="[[esConfig.esType]]"
+                        filter-list="[[filterList]]"
+                        transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
+                        transform-function="[[transforms.entity.extractions]]"
+                        data="{{item.aggregationData}}"
+                        header-data-name="[[item.title]]"
+                        header-counts-name="Results"
+                        header-entity-name="[[pageName]]"
+                        show-checkboxes
+                        show-double-bar-chart="[[showDoubleBarChart(item)]]">
+                      </aggregation-query-and-display>
 
-                    <template is="dom-if" if="[[item.aggregationData.length]]">
-                      <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
-                    </template>
-                  </section-and-title>
+                      <template is="dom-if" if="[[item.aggregationData.length]]">
+                        <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
+                      </template>
+                    </section-and-title>
+                  </template>
                 </template>
 
                 <template is="dom-repeat" items="[[imageFields]]">
@@ -565,7 +566,7 @@ limitations under the License.
     /* globals _, DigBehaviors */
     var app = document.querySelector('#app');
 
-    app.blurImages = true;
+    app.blurImages = false;
 
     app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
 

@@ -34,15 +34,13 @@ module.exports = {
 
     appVersion: pjson.version,
 
-    configEndpoint: process.env.CONFIG_ENDPOINT,
+    configEndpoint: process.env.CONFIG_ENDPOINT || 'http://localhost:1234',
     configPassword: process.env.CONFIG_PASSWORD || '',
     configUsername: process.env.CONFIG_USERNAME || '',
-    defaultProject: process.env.DEFAULT_PROJECT || '',
+    databaseType: process.env.DATABASE_TYPE || 'sample',
+    defaultProject: process.env.DEFAULT_PROJECT || undefined,
     esHost: JSON.parse(process.env.ES_HOST || '{"host":"http://localhost:9200"}'),
-    esIndex: process.env.ES_INDEX,
-    esType: process.env.ES_TYPE,
-    esDataEndpoint: process.env.ES_DATA_ENDPOINT,
-    searchEndpoint: process.env.SEARCH_ENDPOINT,
     imageServiceAuth: process.env.IMAGE_SERVICE_AUTH || '{"user": "", "password": ""}',
     imageServiceHost: process.env.IMAGE_SERVICE_HOST || '{"url": "", "base64": ""}',
+    searchConfig: process.env.SEARCH_CONFIG ? JSON.parse(process.env.SEARCH_CONFIG) : undefined
 };

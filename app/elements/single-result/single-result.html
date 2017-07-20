@@ -1,0 +1,857 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../detail-view/detail-view.html">
+<link rel="import" href="../extraction-grid/extraction-grid.html">
+<link rel="import" href="../../bower_components/highlighted-text/highlighted-text.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../../bower_components/modal-icon/modal-icon.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+
+<!--
+A Polymer Element showing a single stylized result with images, extractions, details, and other optional information.
+
+### Example
+```js
+headerExtractions = [{
+  name: 'Built By',
+  data: [{
+    confidence: 'high',
+    highlight: true,
+    icon: 'star',
+    link: 'https://nextcentury.com',
+    text: 'Next Century'
+  }]
+}];
+
+details = [{
+  name: 'Description',
+  text: 'DigElements is a library of common Polymer Elements built by Next Century Corporation.'
+}];
+
+detailExtractions = [{
+  name: 'My Favorite DigElements',
+  data: [{
+    confidence: 'high',
+    highlight: true,
+    icon: 'link',
+    link: 'https://github.com/DigElements/single-result',
+    text: 'Single Result'
+  }]
+}];
+
+images = [{
+  link: 'https://github.com/DigElements',
+  source: 'dig.png'
+}];
+```
+
+```html
+<single-result
+  flag="Important"
+  highlighted-text="The <em>DigElements</em> library."
+  icon="favorite"
+  link="https://github.com/DigElements"
+  rank="0.99"
+  type="Webpage"
+  headerExtractions="[[headerExtractions]]"
+  details="[[details]]"
+  detailExtractions="[[detailExtractions]]"
+  images="[[images]]">
+</single-result>
+```
+
+@demo demo/index.html
+-->
+
+<dom-module id="single-result">
+  <template>
+    <style include="iron-flex iron-flex-alignment iron-flex-factors"></style>
+
+    <style>
+      :host {
+        display: block;
+      }
+
+      .result {
+        min-height: 50px;
+        padding: 10px;
+      }
+
+      .pointer {
+        cursor: pointer;
+      }
+
+      .closed {
+        /* Override default paper-material box-shadow. */
+        box-shadow: none;
+      }
+
+      .opened,
+      .result:hover {
+        background-color: rgba(0,0,0,0.1);
+      }
+
+      .left-column {
+        margin-right: 10px;
+      }
+
+      iron-image {
+        --iron-image-width: 50px;
+        background-color: transparent;
+        margin: 5px;
+      }
+
+      .opened iron-image,
+      .result:hover iron-image {
+        /* Keep the color of a blank image the same as its background. */
+        background-color: initial;
+      }
+
+      .text {
+        font-size: 18px;
+        line-height: 30px;
+        min-height: 30px;
+      }
+
+      .border {
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 0 5px;
+      }
+
+      .result-rank {
+        background-color:  var(--paper-grey-400);
+      }
+
+      .result-flag {
+        background-color:  var(--paper-red-200);
+        margin-right: 10px;
+      }
+
+      .result-text {
+        /* Needed to fix flexbox layout issues in newer browsers. */
+        display: -webkit-box;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        word-break: break-word;
+        -webkit-line-clamp: 5;
+        -webkit-box-orient: vertical;
+      }
+
+      .result-link {
+        color: var(--primary-text-color);
+      }
+
+      .result-link:hover {
+        color: var(--secondary-text-color);
+      }
+
+      modal-icon {
+        --paper-icon-button: {
+          padding: 5px;
+        };
+      }
+
+      modal-icon ::content paper-icon-button[icon*="icons:expand"] {
+        /* Remove the padding to make the expand icons bigger because they look better that way. */
+        padding: 0;
+      }
+
+      .hide {
+        display: none;
+      }
+
+      .show {
+        display: inline-block;
+      }
+    </style>
+
+    <paper-material
+      class$="layout horizontal flex result [[_getResultHeaderStyleClass(details, detailExtractions, images, _open)]]"
+      on-mouseover="_hoverStart"
+      on-mouseout="_hoverEnd"
+      on-tap="toggleDetails">
+
+      <div class="layout vertical center left-column">
+        <template is="dom-if" if="[[rank]]">
+          <div class="result-rank text border" title$="Search Result Score:  [[rank]]">
+            <strong>[[rank]]</strong>
+          </div>
+        </template>
+        <iron-image class$="[[smallImageStyleClass]] hide [[_showImageElement(images)]]" src="[[_imageSrc]]"></iron-image>
+      </div>
+
+      <div class="layout vertical flex">
+        <div class="layout horizontal">
+          <template is="dom-if" if="[[flag]]">
+            <div class="result-flag text border">
+              <strong>[[flag]]</strong>
+            </div>
+          </template>
+          <div class="result-text text" title$="[[text]]">
+            <strong>
+              <template is="dom-if" if="[[link]]">
+                <a class="result-link" href$="[[link]]" target="[[_getTarget(newTab)]]" title="Open [[type]]">
+                  <highlighted-text tags="[[highlightedTextTags]]" text="[[_getResultHeaderText(text, highlightedText)]]"></highlighted-text>
+                </a>
+              </template>
+              <template is="dom-if" if="[[!link]]">
+                <highlighted-text tags="[[highlightedTextTags]]" text="[[_getResultHeaderText(text, highlightedText)]]"></highlighted-text>
+              </template>
+            </strong>
+          </div>
+        </div>
+
+        <template is="dom-if" if="[[headerExtractions.length]]">
+          <extraction-grid
+            extractions="[[headerExtractions]]"
+            data-property="[[extractionDataProperty]]"
+            data-confidence-property="[[extractionDataConfidenceProperty]]"
+            data-highlight-property="[[extractionDataHighlightProperty]]"
+            data-icon-property="[[extractionDataIconProperty]]"
+            data-link-property="[[extractionDataLinkProperty]]"
+            data-style-class-property="[[extractionDataStyleClassProperty]]"
+            data-text-property="[[extractionDataTextProperty]]"
+            name-property="[[extractionNameProperty]]"
+            target="[[_getTarget(newTab)]]">
+          </extraction-grid>
+        </template>
+      </div>
+
+      <modal-icon
+        icon="[[icon]]"
+        icon-style-class="[[styleClass]]"
+        show-icon="[[!_hovering]]"
+        openable="[[_doesHaveDetails(details, detailExtractions, images)]]"
+        open="[[_open]]">
+      </modal-icon>
+
+    </paper-material>
+
+    <template is="dom-if" if="[[_doesHaveDetails(details, detailExtractions, images)]]">
+      <iron-collapse id="details">
+        <detail-view
+          button-link="[[link]]"
+          button-text="Open [[type]]"
+          details="[[details]]"
+          detail-highlighted-text-property="[[detailHighlightedTextProperty]]"
+          detail-link-property="[[detailLinkProperty]]"
+          detail-name-property="[[detailNameProperty]]"
+          detail-text-property="[[detailTextProperty]]"
+          extractions="[[detailExtractions]]"
+          extraction-data-property="[[extractionDataProperty]]"
+          extraction-data-confidence-property="[[extractionDataConfidenceProperty]]"
+          extraction-data-highlight-property="[[extractionDataHighlightProperty]]"
+          extraction-data-icon-property="[[extractionDataIconProperty]]"
+          extraction-data-link-property="[[extractionDataLinkProperty]]"
+          extraction-data-style-class-property="[[extractionDataStyleClassProperty]]"
+          extraction-data-text-property="[[extractionDataTextProperty]]"
+          extraction-name-property="[[extractionNameProperty]]"
+          images="[[images]]"
+          image-link-property="[[imageLinkProperty]]"
+          image-source-property="[[imageSourceProperty]]"
+          small-image-style-class="[[smallImageStyleClass]]"
+          large-image-style-class="[[largeImageStyleClass]]"
+          new-tab="[[newTab]]">
+        </detail-view>
+      </iron-collapse>
+    </template>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'single-result',
+
+      properties: {
+        /**
+         * (Optional)
+         *
+         * The flag of the result.
+         *
+         * @type {String}
+         * @default ''
+         */
+        flag: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The highlighted text of the result.  Setting this property causes the "text" property to be ignored.
+         *
+         * @type {String}
+         * @default ''
+         */
+        highlightedText: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The icon of the result.
+         *
+         * @type {String}
+         * @default ''
+         */
+        icon: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The link of the result.
+         *
+         * @type {String}
+         * @default ''
+         */
+        link: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The rank of the result.
+         *
+         * @type {Number}
+         * @default 0
+         */
+        rank: {
+          type: Number,
+          value: 0
+        },
+
+        /**
+         * (Optional)
+         *
+         * The style class of the result icon.
+         *
+         * @type {String}
+         * @default ''
+         */
+        styleClass: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The text of the result.
+         *
+         * @type {String}
+         * @default ''
+         */
+        text: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The type of the result.
+         *
+         * @type {String}
+         * @default ''
+         */
+        type: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The list of extraction objects to show in the result header.
+         *
+         * @type {Array}
+         * @default []
+         */
+        headerExtractions: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * (Optional)
+         *
+         * The list of extraction objects to show in the collapsible details.
+         *
+         * @type {Array}
+         * @default []
+         */
+        detailExtractions: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * (Optional)
+         *
+         * The data property in the extraction objects with a list of extractions.
+         *
+         * @type {String}
+         * @default 'data'
+         */
+        extractionDataProperty: {
+          type: String,
+          value: 'data'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The confidence property in the data objects from the extraction objects.  Supported confidence values are "high" and "low".
+         *
+         * @type {String}
+         * @default 'confidence'
+         */
+        extractionDataConfidenceProperty: {
+          type: String,
+          value: 'confidence'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The highlight property in the data objects from the extraction objects on whether to highlight the background of the extraction.
+         *
+         * @type {String}
+         * @default 'highlight'
+         */
+        extractionDataHighlightProperty: {
+          type: String,
+          value: 'highlight'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The icon property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'icon'
+         */
+        extractionDataIconProperty: {
+          type: String,
+          value: 'icon'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The link property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'link'
+         */
+        extractionDataLinkProperty: {
+          type: String,
+          value: 'link'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The style class property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'styleClass'
+         */
+        extractionDataStyleClassProperty: {
+          type: String,
+          value: 'styleClass'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The text property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'text'
+         */
+        extractionDataTextProperty: {
+          type: String,
+          value: 'text'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The name property in the extraction objects.
+         *
+         * @type {String}
+         * @default 'name'
+         */
+        extractionNameProperty: {
+          type: String,
+          value: 'name'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The list of detail objects.
+         *
+         * @type {Array}
+         * @default []
+         */
+        details: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * (Optional)
+         *
+         * The highlighted text property in the detail objects.
+         *
+         * @type {String}
+         * @default 'highlightedText'
+         */
+        detailHighlightedTextProperty: {
+          type: String,
+          value: 'highlightedText'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The link property in the detail objects.
+         *
+         * @type {String}
+         * @default 'link'
+         */
+        detailLinkProperty: {
+          type: String,
+          value: 'link'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The name property in the detail objects.
+         *
+         * @type {String}
+         * @default 'name'
+         */
+        detailNameProperty: {
+          type: String,
+          value: 'name'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The text property in the detail objects.
+         *
+         * @type {String}
+         * @default 'text'
+         */
+        detailTextProperty: {
+          type: String,
+          value: 'text'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The list of image objects.
+         *
+         * @type {Array}
+         * @default []
+         */
+        images: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        /**
+         * (Optional)
+         *
+         * The link property in the image objects.
+         *
+         * @type {String}
+         * @default 'link'
+         */
+        imageLinkProperty: {
+          type: String,
+          value: 'link'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The source property in the image objects.
+         *
+         * @type {String}
+         * @default 'source'
+         */
+        imageSourceProperty: {
+          type: String,
+          value: 'source'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The style class for all the images in the gallery.
+         *
+         * @type {String}
+         * @default ''
+         */
+        smallImageStyleClass: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The style class for any image in a popup.
+         *
+         * @type {String}
+         * @default ''
+         */
+        largeImageStyleClass: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The highlighted text tags.  "This is <em>highlighted</em> text."
+         *
+         * @type {String}
+         * @default 'em'
+         */
+        highlightedTextTags: {
+          type: String,
+          value: 'em'
+        },
+
+        /**
+         * (Optional)
+         *
+         * Whether to open a link in a new tab.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        newTab: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Whether the user is hovering over the result.
+         *
+         * @type {Boolean}
+         * @default false
+         * @private
+         */
+        _hovering: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * The src of the image in the result header.
+         *
+         * @type {String}
+         * @default ''
+         * @private
+         */
+        _imageSrc: {
+          computed: '_computeImageSrc(images, imageSourceProperty)',
+          type: String,
+          value: ''
+        },
+
+        /**
+         * Whether the collapsible details are opened.
+         *
+         * @type {Boolean}
+         * @default false
+         * @private
+         */
+        _open: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      /**
+       * Returns the src for the iron-imgae in the result header using the first image in the list of images.
+       *
+       * @param {Array} images
+       * @param {String} property
+       * @return {String}
+       * @private
+       */
+      _computeImageSrc: function(images, property) {
+        if(images && images.length && property) {
+          return images[0][property];
+        }
+        if(images) {
+          return undefined;
+        }
+        return this._imageSrc;
+      },
+
+      /**
+       * Returns whether the result has collapsible details to show.
+       *
+       * @param {Array} details
+       * @param {Array} detailExtractions
+       * @param {Array} images
+       * @return {Boolean}
+       * @private
+       */
+      _doesHaveDetails: function(details, detailExtractions, images) {
+        return !!((details && details.length) || (detailExtractions && detailExtractions.length) || (images && images.length));
+      },
+
+      /**
+       * Returns the object in the given item at the given property.
+       *
+       * @param {Object} item
+       * @param {String} property
+       * @return {Object}
+       * @private
+       */
+      _getProperty: function(item, property) {
+        return item ? item[property] : undefined;
+      },
+
+      /**
+       * Returns the style class for the result header.
+       *
+       * @param {Array} details
+       * @param {Array} detailExtractions
+       * @param {Array} images
+       * @param {Boolean} open
+       * @return {String}
+       * @private
+       */
+      _getResultHeaderStyleClass: function(details, detailExtractions, images, open) {
+        var pointer = this._doesHaveDetails(details, detailExtractions, images);
+        return (open ? 'opened' : 'closed') + (pointer ? ' pointer' : '');
+      },
+
+      /**
+       * Returns the text for the result header.
+       *
+       * @param {String} text
+       * @param {String} highlightedText
+       * @return {String}
+       * @private
+       */
+      _getResultHeaderText: function(text, highlightedText) {
+        return highlightedText || text;
+      },
+
+      /**
+       * Returns the anchor and button target string.
+       *
+       * @param {Boolean} newTab
+       * @return {String}
+       * @private
+       */
+      _getTarget: function(newTab) {
+        return (newTab ? '_blank' : '_self');
+      },
+
+      /**
+       * Ends hovering behavior.
+       *
+       * @event mouseout
+       * @private
+       */
+      _hoverEnd: function() {
+        this._hovering = false;
+      },
+
+      /**
+       * Starts hovering behavior.
+       *
+       * @event mouseover
+       * @private
+       */
+      _hoverStart: function() {
+        this._hovering = true;
+      },
+
+      /**
+       * Returns whether or not to show the iron-image element in the result header based on whether the list of images is set.
+       *
+       * @param {Array} images
+       * @return {String}
+       * @private
+       */
+      _showImageElement: function(images) {
+        return images ? 'show' : '';
+      },
+
+      /**
+       * Expands or collapses the result details if its item has any details and the event was not triggered by clicking on a button.
+       *
+       * @event tap
+       */
+      toggleDetails: function(event) {
+        if(this._doesHaveDetails(this.details, this.detailExtractions, this.images)) {
+          var isButton = (event.target.localName === 'paper-button');
+          var isLink = (event.target.localName === 'a' || (event.target.parentElement && event.target.parentElement.localName === 'a'));
+          // Do not open the result if the user clicked on a button or link inside the result (including the annotation).
+          if(!isButton && !isLink) {
+            this.set('_open', !this._open);
+            this.$$('#details').toggle();
+          }
+        }
+      }
+    });
+  })();
+  </script>
+</dom-module>

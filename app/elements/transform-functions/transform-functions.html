@@ -60,14 +60,28 @@ limitations under the License.
       _initializeEsConfig: function(clientConfig, serverConfig) {
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var esConfig = {
-          esIndex: (clientConfig.index ? clientConfig.index.sample : '') || serverConfig.esIndex,
-          esType: clientConfig.root_name || serverConfig.esType
+          esIndex: (clientConfig.index && serverConfig.databaseType ? clientConfig.index[serverConfig.databaseType] : undefined),
+          esType: clientConfig.root_name,
+          imagePrefix: clientConfig.image_prefix || 'http://memex-summer2017-domain1.s3.amazonaws.com/',
+          searchEndpoint: (clientConfig.configuration && serverConfig.databaseType ? clientConfig.configuration['sandpaper_' + serverConfig.databaseType + '_url'] : undefined)
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
-        if(serverConfig.esDataEndpoint) {
-          var slash = serverConfig.esDataEndpoint.lastIndexOf('/') === (serverConfig.esDataEndpoint.length - 1) ? '' : '/';
-          esConfig.esDataEndpoint = serverConfig.esDataEndpoint + slash + esConfig.esIndex + '/' + esConfig.esType + '/';
+
+        if(esConfig.searchEndpoint) {
+          if(serverConfig.searchConfig) {
+            esConfig.searchEndpoint = serverConfig.searchConfig[esConfig.searchEndpoint];
+          } else {
+            esConfig.searchEndpoint = esConfig.searchEndpoint + '/search/coarse';
+          }
         }
+
+        if(serverConfig.esHost && serverConfig.esHost.host && esConfig.esIndex && esConfig.esType) {
+          var slash = serverConfig.esHost.host.lastIndexOf('/') === (serverConfig.esHost.host.length - 1) ? '' : '/';
+          esConfig.esDataEndpoint = serverConfig.esHost.host + slash + esConfig.esIndex + '/' + esConfig.esType + '/';
+        }
+
+        console.log('esConfig', esConfig);
+
         return esConfig;
       },
 

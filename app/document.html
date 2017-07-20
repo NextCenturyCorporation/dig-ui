@@ -37,8 +37,6 @@ limitations under the License.
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <!-- endbuild -->
 
-  <script src="scripts/google-analytics.js"></script>
-  
   <!-- will be replaced with elements/elements.vulcanized.html -->
   <link rel="import" href="elements/elements.html">
   <!-- endreplace-->
@@ -156,7 +154,6 @@ limitations under the License.
       page-size="1"
       properties-ready="{{processRequest}}"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-      source-exclude='["knowledge_graph.*.provenance"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.document]]"
       error="{{documentError}}"
@@ -193,7 +190,6 @@ limitations under the License.
       sort-field="[[sortField]]"
       sort-order="desc"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-      source-exclude='["knowledge_graph.*.provenance"]'
       loading="{{revisionsLoading}}"
       last-error="{{revisionsError}}"
       results="{{revisionsResults}}"
@@ -227,7 +223,6 @@ limitations under the License.
       page="{{moreLikeThisPageNumber}}"
       page-size="25"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-      source-exclude='["knowledge_graph.*.provenance"]'
       loading="{{moreLikeThisLoading}}"
       last-error="{{moreLikeThisError}}"
       results="{{moreLikeThisResults}}"
@@ -281,7 +276,7 @@ limitations under the License.
 
                 <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
                   <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
-                  Contact Support (dig-support@nextcentury.com)
+                  Contact DIG Support
                 </paper-icon-item>
               </div>
             </iron-dropdown>
@@ -317,7 +312,7 @@ limitations under the License.
                     <section-and-title
                       icon="[[item.config.icon]]"
                       style-class="[[item.config.styleClass]]"
-                      transform-config="[[getSectionTitleTransformConfig(item.config, imageData.length)]]"
+                      transform-config="[[getSectionTitleTransformConfig(item.config, item.data.length)]]"
                       transform-function="[[getSectionTitleTransformFunction]]"
                       data="[[item.data]]">
 
@@ -418,6 +413,22 @@ limitations under the License.
                   </detail-subsection>
                 </section-and-title>
 
+                <template is="dom-if" if="[[document.images]]">
+                  <section-and-title
+                    icon="[[item.config.icon]]"
+                    style-class="[[item.config.styleClass]]"
+                    transform-config="[[getImageSectionTitleTransformConfig(document.images.length)]]"
+                    transform-function="[[getSectionTitleTransformFunction]]"
+                    data="[[item.data]]">
+
+                    <image-gallery
+                      small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                      large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                      images="[[document.images]]">
+                    </image-gallery>
+                  </section-and-title>
+                </template>
+
                 <section-container>
                   <section-title
                     icon="icons:assignment"
@@ -469,7 +480,7 @@ limitations under the License.
     /* globals _, DigBehaviors */
     var app = document.querySelector('#app');
 
-    app.blurImages = true;
+    app.blurImages = false;
 
     app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
 
@@ -540,6 +551,14 @@ limitations under the License.
     /********************************/
 
     /******** VISUALIZATIONS ********/
+    app.getImageSectionTitleTransformConfig = function(totalCount) {
+      return {
+        name: 'Image',
+        namePlural: 'Images',
+        totalCount: totalCount
+      };
+    };
+
     app.getSectionTitleTransformConfig = function(searchFieldsObject, totalCount) {
       return {
         name: searchFieldsObject.title,
