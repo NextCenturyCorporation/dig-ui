@@ -89,12 +89,17 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var matchedQueries = result.matched_queries;
     /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-    // Check the full text and all single words in the text.  Remove all punctuation so we can separate the words.
-    var wordsOrPhrases = [itemText];
+    var wordsOrPhrases = [];
     if(type === 'location') {
+      // Add the city name.
       wordsOrPhrases = [itemId.substring(0, itemId.indexOf(':'))];
+    } else if(type === 'phone') {
+      // Add the phone without punctuation.
+      wordsOrPhrases = [itemText, itemText.replace(/\W/g, '')];
+    } else {
+      // Add the full text and all single words in the text.  Remove all punctuation so we can separate the words.
+      wordsOrPhrases = [itemText].concat(itemText.replace(/\W/g, ' ').split(' '));
     }
-    wordsOrPhrases = wordsOrPhrases.concat(itemText.replace(/\W/g, ' ').split(' '));
 
     var highlightPaths = {};
 
