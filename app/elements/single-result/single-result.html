@@ -17,6 +17,8 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../detail-view/detail-view.html">
 <link rel="import" href="../extraction-grid/extraction-grid.html">
+<link rel="import" href="../transform-functions/transform-functions.html">
+<link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
 <link rel="import" href="../../bower_components/highlighted-text/highlighted-text.html">
 <link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
@@ -26,6 +28,9 @@ limitations under the License.
 <link rel="import" href="../../bower_components/modal-icon/modal-icon.html">
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../bower_components/paper-tabs/paper-tab.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 
 <!--
 A Polymer Element showing a single stylized result with images, extractions, details, and other optional information.
@@ -185,6 +190,17 @@ images = [{
       .show {
         display: inline-block;
       }
+
+      .cached-page {
+        width: 99%;
+        height: 30em;
+        padding: 5px;
+      }
+
+      .cached-doc {
+        width: 100%;
+        height: 30em;
+      }
     </style>
 
     <paper-material
@@ -251,30 +267,61 @@ images = [{
 
     <template is="dom-if" if="[[_doesHaveDetails(details, detailExtractions, images)]]">
       <iron-collapse id="details">
-        <detail-view
-          button-link="[[link]]"
-          button-text="Open [[type]]"
-          details="[[details]]"
-          detail-highlighted-text-property="[[detailHighlightedTextProperty]]"
-          detail-link-property="[[detailLinkProperty]]"
-          detail-name-property="[[detailNameProperty]]"
-          detail-text-property="[[detailTextProperty]]"
-          extractions="[[detailExtractions]]"
-          extraction-data-property="[[extractionDataProperty]]"
-          extraction-data-confidence-property="[[extractionDataConfidenceProperty]]"
-          extraction-data-highlight-property="[[extractionDataHighlightProperty]]"
-          extraction-data-icon-property="[[extractionDataIconProperty]]"
-          extraction-data-link-property="[[extractionDataLinkProperty]]"
-          extraction-data-style-class-property="[[extractionDataStyleClassProperty]]"
-          extraction-data-text-property="[[extractionDataTextProperty]]"
-          extraction-name-property="[[extractionNameProperty]]"
-          images="[[images]]"
-          image-link-property="[[imageLinkProperty]]"
-          image-source-property="[[imageSourceProperty]]"
-          small-image-style-class="[[smallImageStyleClass]]"
-          large-image-style-class="[[largeImageStyleClass]]"
-          new-tab="[[newTab]]">
-        </detail-view>
+        <paper-tabs class='flex' selected="{{selected}}">
+          <paper-tab>Details</paper-tab>
+          <paper-tab>Cached Webpage</paper-tab>
+        </paper-tabs>
+        <template is="dom-if" if="[[_isSelected(0, selected)]]">
+          <detail-view
+            button-link="[[link]]"
+            button-text="Open [[type]]"
+            details="[[details]]"
+            detail-highlighted-text-property="[[detailHighlightedTextProperty]]"
+            detail-link-property="[[detailLinkProperty]]"
+            detail-name-property="[[detailNameProperty]]"
+            detail-text-property="[[detailTextProperty]]"
+            extractions="[[detailExtractions]]"
+            extraction-data-property="[[extractionDataProperty]]"
+            extraction-data-confidence-property="[[extractionDataConfidenceProperty]]"
+            extraction-data-highlight-property="[[extractionDataHighlightProperty]]"
+            extraction-data-icon-property="[[extractionDataIconProperty]]"
+            extraction-data-link-property="[[extractionDataLinkProperty]]"
+            extraction-data-style-class-property="[[extractionDataStyleClassProperty]]"
+            extraction-data-text-property="[[extractionDataTextProperty]]"
+            extraction-name-property="[[extractionNameProperty]]"
+            images="[[images]]"
+            image-link-property="[[imageLinkProperty]]"
+            image-source-property="[[imageSourceProperty]]"
+            small-image-style-class="[[smallImageStyleClass]]"
+            large-image-style-class="[[largeImageStyleClass]]"
+            new-tab="[[newTab]]">
+          </detail-view>
+        </template>
+        <template is="dom-if" if="[[_isSelected(1, selected)]]">
+          <div class="cached-page">
+            <template is="dom-if" if="[[queryConfig]]">
+              <build-and-run-query
+                fields='"doc_id"'
+                values='[[queryConfig.id]]'
+                client="[[queryConfig.esClient]]"
+                index-name="[[queryConfig.esConfig.esIndex]]"
+                index-types="[[queryConfig.esConfig.esType]]"
+                aggregations="[]"
+                filters="[]"
+                sort-field="[[queryConfig.sortField]]"
+                source-include='["raw_content"]'
+                source-exclude='[]'
+                transform-config="[[queryConfig.searchFields]]"
+                transform-function="[[queryConfig.transforms.entity.cache]]"
+                error="{{cacheError}}"
+                loading="{{cacheLoading}}"
+                results="{{cache}}"
+                total="{{cacheTotal}}">
+              </build-and-run-query>
+            </template>
+            <iframe class='cached-doc' srcdoc="[[cache.html]]"></iframe>
+          </div>
+        </template>
       </iron-collapse>
     </template>
   </template>
@@ -348,6 +395,19 @@ images = [{
          * @default 0
          */
         rank: {
+          type: Number,
+          value: 0
+        },
+
+        /**
+         * (Optional)
+         *
+         * Which tab is selected (Details, Cached Webpage)
+         *
+         * @type {Number}
+         * @default 0
+         */
+        selected: {
           type: Number,
           value: 0
         },
@@ -675,6 +735,19 @@ images = [{
         /**
          * (Optional)
          *
+         * The config for the build-and-run-query
+         *
+         * @type {Object}
+         * @default undefined
+         */
+        queryConfig: {
+          type: Object,
+          value: undefined
+        },
+
+        /**
+         * (Optional)
+         *
          * Whether to open a link in a new tab.
          *
          * @type {Boolean}
@@ -822,6 +895,18 @@ images = [{
        */
       _hoverStart: function() {
         this._hovering = true;
+      },
+
+      /**
+       * Returns whether or not the index is selected.
+       *
+       * @param {Number} index
+       * @param {Number} selected
+       * @return {Boolean}
+       * @private
+       */
+      _isSelected: function(index,selected) {
+        return index === selected;
       },
 
       /**
