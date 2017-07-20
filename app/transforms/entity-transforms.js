@@ -86,7 +86,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     // The result.matched_queries property lists highlights in the format <id>:<path>:<text>
 
     /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-    var highlightResults = result.matched_queries;
+    var matchedQueries = result.matched_queries;
     /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
     // Check the full text and all single words in the text.  Remove all punctuation so we can separate the words.
@@ -98,14 +98,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     var highlightPaths = {};
 
-    if(highlightResults && highlightResults.length && highlightMapping) {
+    if(matchedQueries && matchedQueries.length && highlightMapping) {
       wordsOrPhrases.forEach(function(wordOrPhrase) {
-        // If a highlight mapping exists for the word or phrase, check the highlight results.
+        // If a highlight mapping exists for the word or phrase, check the matched queries.
         if(highlightMapping[wordOrPhrase]) {
-          return highlightResults.filter(function(path) {
+          return matchedQueries.filter(function(path) {
             return _.startsWith(path, highlightMapping[wordOrPhrase]);
           }).map(function(path) {
-            // Return the path in the highlight results.
+            // Return the path in the matched queries.
             return path.split(':')[1];
           }).forEach(function(path) {
             highlightPaths[path] = true;
@@ -118,8 +118,9 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function checkHighlightedText(text, type) {
-    // Ignore partial matches for emails.
-    if(type === 'email' && (!_.startsWith(text, '<em>') || !_.endsWith(text, '</em>'))) {
+    // TODO Do we have to hard-code <em> or can we make it a config variable?
+    // Ignore partial matches for emails and websites.
+    if((type === 'email' || type === 'website') && (!_.startsWith(text, '<em>') || !_.endsWith(text, '</em>'))) {
       return false;
     }
 
@@ -130,14 +131,16 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       output = output.indexOf(' ') ? output.substring(output.indexOf(' ') + 1) : output;
     }
 
+    // Return whether the given text has both start and end tags.
     return output.indexOf('<em>') >= 0 && output.indexOf('</em>') >= 0 ? !!(output.replace(/<\/?em\>/g, '')) : false;
   }
 
   function getHighlightedText(itemId, itemText, result, type, highlightMapping) {
+    // Get the paths from the highlight mapping to explore in the result highlights specifically for the given item.
     var pathList = getHighlightPathList(('' + itemId).toLowerCase(), ('' + itemText).toLowerCase(), result, type, highlightMapping);
     var textList = [];
     if(result.highlight && pathList.length) {
-      // Find highlighted text in the result highlights using a highlight path.
+      // Find the highlighted text in the result highlights using a highlights path.  Use the first because they are all the same.
       pathList.forEach(function(path) {
         (result.highlight[path] || []).forEach(function(text) {
           if(checkHighlightedText(text)) {
@@ -153,6 +156,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var data = getExtractionsFromResult(result, '_source.knowledge_graph.' + config.key, config);
     if(highlightMapping) {
       data = data.map(function(item) {
+        // The highlight in the extraction object is a boolean (YES or NO).
         item.highlight = !!(getHighlightedText(item.id, item.text, result, config.type, highlightMapping[config.key]));
         return item;
       });
@@ -169,12 +173,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return object.result === type;
     });
 
+    // By default, use the given non-knowledge-graph path.
     var returnObject = {
       text: getSingleStringFromResult(result, path),
+      // The highlight in the title/description object is the tagged text.
       highlight: result.highlight && result.highlight[path] && result.highlight[path].length ? result.highlight[path][0] : undefined
     };
 
-    // Use the data from the searchFieldsObject if possible.
+    // Use the extraction data from the field in the searchFieldsObject if possible.  This overwrites the default.
     if(highlightMapping && searchFieldsObject) {
       var extraction = _.get(result, '_source.knowledge_graph.' + searchFieldsObject.key);
       if(_.isObject(extraction) || _.isArray(extraction)) {
@@ -193,6 +199,24 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return returnObject;
   }
 
+  /**
+   * Creates and returns the transformed document object.
+   *
+   * @param {Object} result The elasticsearch result object.
+   * @param {Array} searchFields The list of search fields config objects.
+   * @param {Boolean} documentPage Whether to create an object for the document page (rather than the entity page).
+   * @param {Object} highlightMapping The highlight mapping returned by the search.  An object that maps search fields to objects that map search terms to unique IDs.  For example:
+   * {
+   *   email: {
+   *     abc@gmail.com: 123
+   *   },
+   *   phone: {
+   *     1234567890: 456,
+   *     9876543210: 789
+   *   }
+   * }
+   * @return {Object}
+   */
   function getDocumentObject(result, searchFields, documentPage, highlightMapping) {
     var id = _.get(result, '_source.doc_id');
     var url = _.get(result, '_source.url');
@@ -212,12 +236,11 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       url: url,
       rank: rank ? rank.toFixed(2) : rank,
       type: 'document',
-      icon: '', // icon: 'icons:assignment', -- commenting out for now and leaving blank
+      icon: '',
       link: commonTransforms.getLink(id, 'document'),
       styleClass: '',
       cached: commonTransforms.getLink(id, 'cached'),
       esData: esDataEndpoint,
-      // TODO
       title: title.text || 'No Title',
       description: description.text || 'No Description',
       highlightedText: title.highlight,
@@ -295,13 +318,19 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function createDateObjectFromBucket(dateBucket, config) {
+    var newData = [];
+    if (dateBucket && dateBucket[config.entity.key] && dateBucket[config.entity.key].buckets) {
+      newData = dateBucket[config.entity.key].buckets.map(
+                  function(entityBucket, index) {
+                    return getExtraction(entityBucket, config.entity, index);
+                  }
+                ).filter(commonTransforms.getExtractionFilterFunction(config.entity.type))
+    }
     return {
       date: commonTransforms.getFormattedDate(dateBucket.key),
       icon: config.date.icon,
       styleClass: config.date.styleClass,
-      data: dateBucket[config.entity.key].buckets.map(function(entityBucket, index) {
-        return getExtraction(entityBucket, config.entity, index);
-      }).filter(commonTransforms.getExtractionFilterFunction(config.entity.type))
+      data: newData
     };
   }
 
@@ -325,7 +354,9 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function createDateHistogram(buckets, config) {
-    return buckets.reduce(function(histogram, dateBucket) {
+    var doesHaveIdentifiedData = false;
+
+    var histogram = buckets.reduce(function(histogram, dateBucket) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var count = dateBucket.doc_count;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
@@ -337,8 +368,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
           return sum + entityObject.count;
         }, 0);
 
+        doesHaveIdentifiedData = doesHaveIdentifiedData || !!sum;
+
         if(sum < count) {
-          dateObject.data.push(createUnidentifiedEntityObject(count - sum));
+          dateObject.data.push(createUnidentifiedEntityObject(config.entity, count - sum));
         }
 
         if(config.entity.key === config.page.key) {
@@ -349,12 +382,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         }
 
         // The data list may be empty if none match the ID for the entity page.
-        if(!dateObject.data.length) {
-          return;
+        if(dateObject.data.length) {
+          dateObject.subtitle = createSubtitle(dateObject.data);
+          histogram.push(dateObject);
         }
-
-        dateObject.subtitle = createSubtitle(dateObject.data);
-        histogram.push(dateObject);
       }
 
       return histogram;
@@ -362,6 +393,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       // Sort oldest first.
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
+
+    return doesHaveIdentifiedData ? histogram : [];
   }
 
   return {
@@ -403,7 +436,11 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     histogram: function(data, config) {
       if(data && data.aggregations && data.aggregations[config.date.key] && data.aggregations[config.date.key][config.date.key]) {
-        return createDateHistogram(data.aggregations[config.date.key][config.date.key].buckets, config);
+        var hist = createDateHistogram(data.aggregations[config.date.key][config.date.key].buckets, config);
+        console.log('config',config);
+        console.log('data',data);
+        console.log('histogram',hist);
+        return hist;
       }
       return {};
     }
