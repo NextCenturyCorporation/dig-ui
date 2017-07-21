@@ -18,6 +18,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paginated-list/paginated-list.html">
 <link rel="import" href="../single-result/single-result.html">
 <link rel="import" href="../transform-functions/transform-functions.html">
+<script type="text/javascript" src="../../bower_components/lodash/dist/lodash.js"></script>
 
 <!--
 A Polymer Element showing a paginated-list of single-result elements.
@@ -235,6 +236,7 @@ results = [{
   (function() {
     'use strict';
 
+    /* globals _ */
     Polymer({
       is: 'result-list',
 
@@ -793,16 +795,16 @@ results = [{
       },
 
       exists: function(item) {
-        if (item) { return true;}
+        if(item) { return true;}
         return false;
       },
-      
+
       _noData: function(object) {
         return _.isEmpty(object);
       },
-      
+
       _buildQueryConfig: function(esClient, esConfig, sortField, searchFields, id, transforms) {
-        if (esClient && esConfig && sortField && searchFields && id && transforms){
+        if(esClient && esConfig && sortField && searchFields && id && transforms) {
           return {esClient, esConfig, sortField, searchFields, id, transforms};
         }
         return undefined;
