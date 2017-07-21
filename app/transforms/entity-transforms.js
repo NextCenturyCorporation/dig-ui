@@ -319,7 +319,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
   function createDateObjectFromBucket(dateBucket, config) {
     var newData = [];
-    if (dateBucket && dateBucket[config.entity.key] && dateBucket[config.entity.key].buckets) {
+    if(dateBucket && dateBucket[config.entity.key] && dateBucket[config.entity.key].buckets) {
       newData = dateBucket[config.entity.key].buckets.map(function(entityBucket, index) {
         return getExtraction(entityBucket, config.entity, index);
       }).filter(commonTransforms.getExtractionFilterFunction(config.entity.type));
