@@ -407,43 +407,6 @@ limitations under the License.
 
               <!-- Right Pane -->
               <div class="flex layout vertical">
-                <template is="dom-repeat" items="[[dateFields]]">
-                  <section-and-title
-                    show-copy
-                    copy-type="[[item.titlePlural]]"
-                    icon="[[item.icon]]"
-                    style-class="[[item.styleClass]]"
-                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
-                    transform-function="[[getSectionTitleTransformFunction]]"
-                    data="[[item.aggregationData]]">
-
-                    <aggregation-query-and-display
-                      aggregation-name="[[item.key]]"
-                      aggregation-field="[[item.field]]"
-                      selected-property="[[item.key]]"
-                      selected="{{filterCollection}}"
-                      query-field="[[pageConfig.field]]"
-                      query-value="[[pageId]]"
-                      client="[[esClient]]"
-                      index-name="[[esConfig.esIndex]]"
-                      index-types="[[esConfig.esType]]"
-                      filter-list="[[filterList]]"
-                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
-                      transform-function="[[transforms.entity.extractions]]"
-                      data="{{item.aggregationData}}"
-                      header-data-name="[[item.title]]"
-                      header-counts-name="Results"
-                      header-entity-name="[[pageName]]"
-                      show-checkboxes
-                      show-double-bar-chart="[[showDoubleBarChart(item)]]">
-                    </aggregation-query-and-display>
-
-                    <template is="dom-if" if="[[item.aggregationData.length]]">
-                      <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
-                    </template>
-                  </section-and-title>
-                </template>
-
                 <template is="dom-repeat" items="[[histogramFields]]">
                   <elastic-client-aggregation-builder
                     name="[[item.entity.key]]"
