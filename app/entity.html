@@ -218,7 +218,7 @@ limitations under the License.
       es-client="[[esClient]]"
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
-      type="UI-Filter-SubmitSearch"
+      type="Filter-SubmitSearch"
       data="[[logMessage]]"
       username="[[serverConfig.configUsername]]">
     </dig-logger>
@@ -228,9 +228,20 @@ limitations under the License.
       es-client="[[esClient]]"
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
-      type="Entity-ShowResultPageNumber"
+      type="Entity-Filter"
       data="[[documentPage]]"
       username="[[serverConfig.configUsername]]">
+    </dig-logger>
+
+    <!-- Logger for Page View -->
+    <dig-logger log-page-view
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
+      type="Entity-Open"
+      data=""
+      username="[[serverConfig.configUsername]]"
+      logger="{{logger}}">
     </dig-logger>
 
     <!-- logging: single top level object referenced for start and end dates
