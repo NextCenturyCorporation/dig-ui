@@ -199,7 +199,7 @@ limitations under the License.
       es-type="[[serverConfig.logType]]"
       type="Search-SubmitSearch"
       data="[[logMessage]]"
-      username="[[serverConfig.configUsername]]">
+      username="defaultUser">
     </dig-logger>
 
     <!-- Logger for Pagination -->
@@ -209,7 +209,7 @@ limitations under the License.
       es-type="[[serverConfig.logType]]"
       type="Search-ShowResultPageNumber"
       data="[[resultPage]]"
-      username="[[serverConfig.configUsername]]">
+      username="defaultUser">
     </dig-logger>
 
     <!-- Logger for Page View -->
@@ -219,7 +219,7 @@ limitations under the License.
       es-type="[[serverConfig.logType]]"
       type="Search-Open"
       data=""
-      username="[[serverConfig.configUsername]]"
+      username="defaultUser"
       logger="{{logger}}">
     </dig-logger>
 

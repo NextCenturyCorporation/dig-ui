@@ -150,7 +150,7 @@ limitations under the License.
       es-type="[[serverConfig.logType]]"
       type="Document-ShowRevisionPageNumber"
       data="[[revisionPageNumber]]"
-      username="[[serverConfig.configUsername]]">
+      username="defaultUser">
     </dig-logger>
 
     <dig-logger
@@ -159,7 +159,7 @@ limitations under the License.
       es-type="[[serverConfig.logType]]"
       type="Document-ShowSimilarDocPageNumber"
       data="[[moreLikeThisPageNumber]]"
-      username="[[serverConfig.configUsername]]">
+      username="defaultUser">
     </dig-logger>
 
     <!-- Logger for Page View -->
@@ -169,7 +169,7 @@ limitations under the License.
       es-type="[[serverConfig.logType]]"
       type="Document-Open"
       data=""
-      username="[[serverConfig.configUsername]]"
+      username="defaultUser"
       logger="{{logger}}">
     </dig-logger>
 
