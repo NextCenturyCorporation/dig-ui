@@ -30,10 +30,31 @@ limitations under the License.
       is: 'create-log-message',
 
       properties: {
-        searchParameters: {
-          type: Object
+        objectStructureFunction: {
+          type: Object,
+          value: function() {
+            return function(collection) {
+              var elements = [];
+
+              if(collection.constructor === Array) {
+                elements = collection;
+              }else {
+                var keys = Object.keys(collection);
+
+                for(var i = 0; i < keys.length; i++) {
+                  var element = collection[keys[i]];
+
+                  if(element.enabled) {
+                    elements.push(element.key);
+                  }
+                }
+              }
+
+              return elements;
+            };
+          }
         },
-        filterCollection: {
+        object: {
           type: Object
         },
         logMessage: {
@@ -43,54 +64,23 @@ limitations under the License.
       },
 
       observers: [
-        '_createSearchParameterLog(searchParameters.*)',
-        '_createFilterCollectionLog(filterCollection.*)'
+        '_createLogMessage(object.*)'
       ],
 
-      _createSearchParameterLog: function(searchParameters) {
+      _createLogMessage: function(object) {
         var list = [];
-        var searchParameter = searchParameters.base;
+        var base = object.base;
+        var self = this;
 
-        //find all non empty categories
-        for(var category in searchParameter) {
-          var search = searchParameter[category];
+        _.keys(base).forEach(function(category) {
+          var collection = base[category];
 
-          if(!_.isEmpty(search)) {
-            var elements = [];
-            var keys = Object.keys(search);
-
-            //update the elements list
-            for(var i = 0; i < keys.length; i++) {
-              var element = search[keys[i]];
-
-              if(element.enabled) {
-                elements.push(element.key);
-              }
-            }
-
-            list.push(this._getSelectedString(elements, category));
+          if(!_.isEmpty(collection)) {
+            var elements = self.objectStructureFunction(collection);
+            list.push(self._getSelectedString(elements, category));
           }
-        }
+        });
 
-        this._createLogMessage(list);
-      },
-
-      _createFilterCollectionLog: function(filterCollection) {
-        var list = [];
-        var filterList = filterCollection.base;
-
-        for(var category in filterList) {
-          var elements = filterList[category];
-
-          if(!_.isEmpty(elements)) {
-            list.push(this._getSelectedString(elements, category));
-          }
-        }
-
-        this._createLogMessage(list);
-      },
-
-      _createLogMessage: function(list) {
         var logMessage = '{' + list.filter(function(value) {
           return !!value;
         }).join(',') + '}';
