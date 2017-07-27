@@ -244,10 +244,10 @@ limitations under the License.
 
     <!-- logging: single top level object referenced for start and end dates
          internal component logic figures out which date is which -->
-    <create-log-message
+    <log-creator
       object="{{filterCollection}}"
       log-message="{{logMessage}}">
-    </create-log-message>
+    </log-creator>
 
     <build-and-run-query
       fields="[[pageConfig.field]]"
