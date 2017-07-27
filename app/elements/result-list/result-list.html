@@ -17,7 +17,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paginated-list/paginated-list.html">
 <link rel="import" href="../single-result/single-result.html">
-<link rel="import" href="../transform-functions/transform-functions.html">
 <script type="text/javascript" src="../../bower_components/lodash/dist/lodash.js"></script>
 
 <!--
@@ -108,77 +107,6 @@ results = [{
       }
     </style>
 
-    <iron-ajax
-      auto
-      handle-as="json"
-      url="/serverConfig"
-      last-response="{{serverConfig}}">
-    </iron-ajax>
-
-    <iron-ajax
-      auto="[[exists(serverConfig.defaultProject)]]"
-      handle-as="json"
-      url="/clientConfig/[[serverConfig.defaultProject]]"
-      last-response="{{clientConfig}}">
-    </iron-ajax>
-
-    <template is="dom-if" if="[[_noData(clientConfig)]]">
-      <json-combine
-        data-in1="[[serverConfig.configUsername]]"
-        data-in2="[[serverConfig.configPassword]]"
-        data-out="{{configHeader}}"
-        combine-function="[[createAuthHeader]]">
-      </json-combine>
-
-      <iron-ajax
-        auto="[[exists(configHeader)]]"
-        handle-as="json"
-        headers="[[configHeader]]"
-        url="[[concat(serverConfig.configEndpoint, domain)]]"
-        with-credentials
-        loading="{{clientConfigLoading}}"
-        last-error="{{clientConfigError}}"
-        last-response="{{clientConfig}}">
-      </iron-ajax>
-
-      <iron-ajax
-        auto="[[exists(clientConfig)]]"
-        body="[[clientConfig]]"
-        content-type="application/json"
-        method="POST"
-        url="/saveClientConfig/[[domain]]">
-      </iron-ajax>
-    </template>
-
-    <transform-functions
-      client-config="[[clientConfig]]"
-      domain="[[serverConfig.defaultProject]]"
-      server-config="[[serverConfig]]"
-      es-config="{{esConfig}}"
-      transforms="{{transforms}}">
-    </transform-functions>
-
-    <json-combine
-      data-in1="[[clientConfig]]"
-      data-in2="{}"
-      data-out="{{clientConfigFields}}"
-      combine-function="[[transforms.config.fields]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[clientConfigFields]]"
-      data-in2="{}"
-      data-out="{{searchFields}}"
-      combine-function="[[transforms.config.searchFields]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{sortField}}"
-      combine-function="[[transforms.config.sortField]]">
-    </json-combine>
-
     <paginated-list
       loading="[[loading]]"
       load-type="[[prettyName]]"
@@ -187,10 +115,6 @@ results = [{
       page="{{page}}"
       page-size="[[pageSize]]"
       shown-items="{{shownResults}}">
-      <elastic-client
-        config="[[serverConfig.esHost]]"
-        client="{{esClient}}">
-      </elastic-client>
 
       <template is="dom-repeat" items="[[shownResults]]" initial-count="25">
         <single-result
@@ -226,7 +150,7 @@ results = [{
           large-image-style-class="[[largeImageStyleClass]]"
           highlighted-text-tags="[[highlightedTextTags]]"
           new-tab="[[newTab]]"
-          query-config="[[_buildQueryConfig(esClient, esConfig, sortField, searchFields, item.id, transforms)]]">
+          query-config="[[_updateQueryConfig(queryConfig, item.id)]]">
         </single-result>
       </template>
     </paginated-list>
@@ -718,6 +642,19 @@ results = [{
         },
 
         /**
+         * (Optional)
+         *
+         * The config for the build-and-run-query
+         *
+         * @type {Object}
+         * @default undefined
+         */
+        queryConfig: {
+          type: Object,
+          value: undefined
+        },
+
+        /**
          * (Output)
          *
          * The header for the list.
@@ -794,20 +731,11 @@ results = [{
         return (item ? item[property] : undefined) || '';
       },
 
-      exists: function(item) {
-        if(item) { return true;}
-        return false;
-      },
-
-      _noData: function(object) {
-        return _.isEmpty(object);
-      },
-
-      _buildQueryConfig: function(esClient, esConfig, sortField, searchFields, id, transforms) {
-        if(esClient && esConfig && sortField && searchFields && id && transforms) {
-          return {esClient, esConfig, sortField, searchFields, id, transforms};
+      _updateQueryConfig: function(queryConfig, id) {
+        if(queryConfig && id) {
+          queryConfig.id = id;
         }
-        return undefined;
+        return queryConfig;
       }
     });
   })();
