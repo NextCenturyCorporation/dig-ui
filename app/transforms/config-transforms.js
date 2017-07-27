@@ -135,7 +135,8 @@ var configTransforms = (function(_, commonTransforms) {
     filtersBuilderConfig: function(searchFields) {
       return searchFields.reduce(function(filtersBuilderConfig, searchFieldsObject) {
         filtersBuilderConfig[searchFieldsObject.key] = {
-          field: searchFieldsObject.field
+          field: searchFieldsObject.field,
+          type: searchFieldsObject.type
         };
         return filtersBuilderConfig;
       }, {});
@@ -227,6 +228,8 @@ var configTransforms = (function(_, commonTransforms) {
         // Add style class (e.g. 'entity-grey').
         searchFieldsObject.styleClass = commonTransforms.getStyleClass(searchFieldsObject.color);
 
+        // Add sort properties based on fields config to use in sorting the searchFields and searchFieldsDialogConfig.
+        // Sort the searchFields in the order:  entity fields, extraction (non-entity) fields, title fields, description fields, website fields, date fields, image fields.
         searchFieldsObject.sort = {
           sortId: 2,
           sortType: 'extraction'
@@ -235,6 +238,11 @@ var configTransforms = (function(_, commonTransforms) {
           searchFieldsObject.sort = {
             sortId: 6,
             sortType: 'date'
+          };
+        } else if(searchFieldsObject.type === 'image') {
+          searchFieldsObject.sort = {
+            sortId: 7,
+            sortType: 'image'
           };
         } else if(searchFieldsObject.link === 'entity') {
           searchFieldsObject.sort = {
@@ -279,6 +287,7 @@ var configTransforms = (function(_, commonTransforms) {
     searchFieldsDialogConfig: function(searchFields) {
       var config = [];
 
+      // Add the searchFields to the config in the order:  date fields, entity fields, extraction (non-entity) fields, document fields.
       searchFields.filter(function(searchFieldsObject) {
         return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'date';
       }).forEach(function(searchFieldsObject) {

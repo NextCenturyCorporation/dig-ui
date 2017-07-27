@@ -37,8 +37,6 @@ limitations under the License.
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <!-- endbuild -->
 
-  <script src="scripts/google-analytics.js"></script>
-  
   <!-- will be replaced with elements/elements.vulcanized.html -->
   <link rel="import" href="elements/elements.html">
   <!-- endreplace-->
@@ -167,7 +165,7 @@ limitations under the License.
     </json-combine>
 
     <json-combine
-      data-in1="[[params.id]]"
+      data-in1="[[pageId]]"
       data-in2="[[params.type]]"
       data-out="{{pageName}}"
       combine-function="[[transforms.config.formatName]]">
@@ -262,7 +260,6 @@ limitations under the License.
       properties-ready="{{processRequest}}"
       sort-field="[[sortField]]"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-      source-exclude='["knowledge_graph.*.provenance"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.documents]]"
       error="{{documentsError}}"
@@ -286,11 +283,11 @@ limitations under the License.
           <loading-spinner show type="Page"></loading-spinner>
         </template>
 
-        <template is="dom-if" if="[[pageConfig]]">
-          <!-- Entity header -->
-          <div class="paper-header layout horizontal">
+        <!-- Entity header -->
+        <div class="paper-header layout horizontal">
 
-            <!-- Entity title -->
+          <!-- Entity title -->
+          <template is="dom-if" if="[[pageConfig]]">
             <div class="layout horizontal center flex">
               <div class$="iron-icon-huge [[pageConfig.styleClass]]">
                 <iron-icon icon="[[pageConfig.icon]]"></iron-icon>
@@ -306,29 +303,31 @@ limitations under the License.
                 </template>
               </div>
             </div>
+          </template>
 
-            <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+          <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
-            <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
-              <div class="dropdown-content">
-                <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
-                  <iron-icon icon="refresh" item-icon></iron-icon>
-                  Reload the DIG Configuration
-                </paper-icon-item>
+          <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
+            <div class="dropdown-content">
+              <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
+                <iron-icon icon="refresh" item-icon></iron-icon>
+                Reload the DIG Configuration
+              </paper-icon-item>
 
-                <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-                  <iron-icon icon="open-in-new" item-icon></iron-icon>
-                  Open a DIG Search Page in a New Tab
-                </paper-icon-item>
+              <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+                <iron-icon icon="open-in-new" item-icon></iron-icon>
+                Open a DIG Search Page in a New Tab
+              </paper-icon-item>
 
-                <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
-                  <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
-                  Contact DIG Support
-                </paper-icon-item>
-              </div>
-            </iron-dropdown>
-          </div>
+              <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+                <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
+                Contact DIG Support
+              </paper-icon-item>
+            </div>
+          </iron-dropdown>
+        </div>
 
+        <template is="dom-if" if="[[pageConfig]]">
           <!-- Entity body -->
           <div class="entity-page">
 
@@ -444,45 +443,6 @@ limitations under the License.
 
               <!-- Right Pane -->
               <div class="flex layout vertical">
-                <!-- TODO Temporary until histograms work -->
-                <template is="dom-repeat" items="[[dateFields]]">
-                  <section-and-title
-                    show-copy
-                    copy-type="[[item.titlePlural]]"
-                    icon="[[item.icon]]"
-                    style-class="[[item.styleClass]]"
-                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
-                    transform-function="[[getSectionTitleTransformFunction]]"
-                    data="[[item.aggregationData]]">
-
-                    <aggregation-query-and-display
-                      aggregation-name="[[item.key]]"
-                      aggregation-field="[[item.field]]"
-                      selected-property="[[item.key]]"
-                      selected="{{filterCollection}}"
-                      query-field="[[pageConfig.field]]"
-                      query-value="[[pageId]]"
-                      client="[[esClient]]"
-                      index-name="[[esConfig.esIndex]]"
-                      index-types="[[esConfig.esType]]"
-                      filter-list="[[filterList]]"
-                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
-                      transform-function="[[transforms.entity.extractions]]"
-                      data="{{item.aggregationData}}"
-                      header-data-name="[[item.title]]"
-                      header-counts-name="Results"
-                      header-entity-name="[[pageName]]"
-                      show-checkboxes
-                      show-double-bar-chart="[[showDoubleBarChart(item)]]">
-                    </aggregation-query-and-display>
-
-                    <template is="dom-if" if="[[item.aggregationData.length]]">
-                      <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
-                    </template>
-                  </section-and-title>
-                </template>
-
-                <!--
                 <template is="dom-repeat" items="[[histogramFields]]">
                   <elastic-client-aggregation-builder
                     name="[[item.entity.key]]"
@@ -494,66 +454,63 @@ limitations under the License.
                     ejs-aggregation="{{item.entityAggregation}}">
                   </elastic-client-aggregation-builder>
 
-                  <elastic-client-aggregation-builder
-                    name="[[item.date.key]]"
-                    type="date_histogram"
-                    count="0"
-                    field="[[item.date.field]]"
-                    interval="week"
-                    nested-aggregations="[[buildArray(item.entityAggregation)]]"
-                    ejs-aggregation="{{item.dateAggregation}}">
-                  </elastic-client-aggregation-builder>
-
-                  <build-and-run-query
-                    type="terms"
-                    fields="[[pageConfig.field]]"
-                    values="[[pageId]]"
-                    client="[[esClient]]"
-                    index-name="[[esConfig.esIndex]]"
-                    index-types="[[esConfig.esType]]"
-                    aggregations="[[buildArray(item.dateAggregation)]]"
-                    filters="[[filterList]]"
-                    page-size="0"
-                    source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-                    source-exclude='["knowledge_graph.*.provenance"]'
-                    transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
-                    transform-function="[[transforms.entity.histogram]]"
-                    error="{{item.histogramError}}"
-                    loading="{{item.histogramLoading}}"
-                    results="{{item.histogramResults}}">
-                  </build-and-run-query>
-
-                  <section-and-title
-                    error="[[item.histogramError]]"
-                    icon="editor:insert-chart"
-                    section-title="[[item.entity.title]] Bar Timeline">
-
-                    <template is="dom-if" if="[[!documents.length]]">
-                      <div>No Results</div>
-                    </template>
-
-                    <template is="dom-if" if="[[!item.histogramLoading]]">
-                      <template is="dom-if" if="[[!item.histogramResults.length]]">
-                        <div>No [[item.date.titlePlural]] and/or [[item.entity.titlePlural]]</div>
-                      </template>
-                    </template>
-
-                    <zoomable-bar-chart timeline
-                      selected-property="[[item.date.key]]"
-                      selected="{{filterCollection}}"
-                      bar-property="date"
-                      label-property="text"
-                      stack-property="data"
+                  <template is="dom-if" if="[[item.entityAggregation]]">
+                    <elastic-client-aggregation-builder
+                      name="[[item.date.key]]"
+                      type="date_histogram"
+                      count="0"
+                      field="[[item.date.field]]"
                       interval="week"
-                      data="[[item.histogramResults]]"
-                      default-label="Unidentified [[item.entity.titlePlural]]"
-                      source="Results"
-                      loading="[[item.histogramLoading]]"
-                      display-filter-text>
-                    </zoomable-bar-chart>
-                  </section-and-title>
+                      nested-aggregations="[[buildArray(item.entityAggregation)]]"
+                      ejs-aggregation="{{item.dateAggregation}}">
+                    </elastic-client-aggregation-builder>
+
+                    <template is="dom-if" if="[[item.dateAggregation]]">
+                      <build-and-run-query
+                        type="terms"
+                        fields="[[pageConfig.field]]"
+                        values="[[pageId]]"
+                        client="[[esClient]]"
+                        index-name="[[esConfig.esIndex]]"
+                        index-types="[[esConfig.esType]]"
+                        aggregations="[[buildArray(item.dateAggregation)]]"
+                        filters="[[filterList]]"
+                        page-size="0"
+                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+                        source-exclude='["knowledge_graph.*.provenance"]'
+                        transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
+                        transform-function="[[transforms.entity.histogram]]"
+                        error="{{item.histogramError}}"
+                        loading="{{item.histogramLoading}}"
+                        results="{{item.histogramResults}}">
+                      </build-and-run-query>
+                    </template>
+                  </template>
+
+                  <template is="dom-if" if="[[documents.length]]">
+                    <template is="dom-if" if="[[item.histogramResults.length]]">
+                      <section-and-title
+                        error="[[item.histogramError]]"
+                        icon="editor:insert-chart"
+                        section-title="[[getBarTimelineSectionTitle(item.entity.title, item.date.title)]]">
+
+                        <zoomable-bar-chart timeline
+                          selected-property="[[item.date.key]]"
+                          selected="{{filterCollection}}"
+                          bar-property="date"
+                          label-property="text"
+                          stack-property="data"
+                          interval="week"
+                          data="[[item.histogramResults]]"
+                          default-label="Unidentified [[item.entity.titlePlural]]"
+                          source="Results"
+                          loading="[[item.histogramLoading]]"
+                          display-filter-text>
+                        </zoomable-bar-chart>
+                      </section-and-title>
+                    </template>
+                  </template>
                 </template>
-                -->
 
                 <section-container>
                   <section-title
@@ -695,6 +652,10 @@ limitations under the License.
 
     app.showDoubleBarChart = function(searchFieldsConfig) {
       return searchFieldsConfig.link === 'entity';
+    };
+
+    app.getBarTimelineSectionTitle = function(entity, date) {
+      return entity + ' by ' + date + ' Timeline';
     };
 
     app.getBlurStyleClass = function(blur, large) {

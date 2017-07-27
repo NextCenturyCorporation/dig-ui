@@ -118,7 +118,6 @@ gulp.task('jslint', function() {
       'app/*.html',
       'app/behaviors/*.js',
       'app/elements/**/*.html',
-      'app/scripts/*.js',
       'app/test/*.html',
       'app/transforms/*.js',
       'gulpfile.js'
@@ -203,16 +202,12 @@ gulp.task('copy', function() {
     'app/bower_components/{webcomponentsjs,platinum-sw,sw-toolbox,promise-polyfill,leaflet,leaflet-map,lodash,array-behavior,filter-behavior,phone-behavior}/**/*'
   ]).pipe(gulp.dest(dist('bower_components')));
 
-  var scripts = gulp.src([
-    'app/scripts/google-analytics.js'
-  ]).pipe(gulp.dest(dist('scripts')));
-
   var sourceMaps = gulp.src([
     'app/bower_components/web-animations-js/web-animations-next-lite.min.js.map',
     'app/bower_components/pdfmake/build/pdfmake.min.js.map'
   ]).pipe(gulp.dest(dist('elements')));
 
-  return merge(app, behaviors, bower, scripts, sourceMaps)
+  return merge(app, behaviors, bower, sourceMaps)
     .pipe($.size({
       title: 'copy'
     }));
