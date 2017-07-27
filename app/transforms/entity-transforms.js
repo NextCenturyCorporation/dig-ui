@@ -186,7 +186,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     };
 
     // Use the extraction data from the field in the searchFieldsObject if possible.  This overwrites the default.
-    if(highlightMapping && searchFieldsObject) {
+    if(searchFieldsObject) {
       var extraction = _.get(result, '_source.knowledge_graph.' + searchFieldsObject.key);
       if(_.isObject(extraction) || _.isArray(extraction)) {
         if(_.isObject(extraction)) {
@@ -197,7 +197,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
             return object.value;
           }).join(' ');
         }
-        returnObject.highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlightMapping[searchFieldsObject.key]) || returnObject.text;
+        returnObject.highlight = highlightMapping ? (getHighlightedText(returnObject.text, returnObject.text, result, type, highlightMapping[searchFieldsObject.key]) || returnObject.text) : undefined;
       }
     }
 

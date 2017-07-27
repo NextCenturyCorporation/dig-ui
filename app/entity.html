@@ -451,35 +451,29 @@ limitations under the License.
                     </template>
                   </template>
 
-                  <section-and-title
-                    error="[[item.histogramError]]"
-                    icon="editor:insert-chart"
-                    section-title="[[item.entity.title]] Bar Timeline">
+                  <template is="dom-if" if="[[documents.length]]">
+                    <template is="dom-if" if="[[item.histogramResults.length]]">
+                      <section-and-title
+                        error="[[item.histogramError]]"
+                        icon="editor:insert-chart"
+                        section-title="[[getBarTimelineSectionTitle(item.entity.title, item.date.title)]]">
 
-                    <template is="dom-if" if="[[!documents.length]]">
-                      <div>No Results</div>
+                        <zoomable-bar-chart timeline
+                          selected-property="[[item.date.key]]"
+                          selected="{{filterCollection}}"
+                          bar-property="date"
+                          label-property="text"
+                          stack-property="data"
+                          interval="week"
+                          data="[[item.histogramResults]]"
+                          default-label="Unidentified [[item.entity.titlePlural]]"
+                          source="Results"
+                          loading="[[item.histogramLoading]]"
+                          display-filter-text>
+                        </zoomable-bar-chart>
+                      </section-and-title>
                     </template>
-
-                    <template is="dom-if" if="[[!item.histogramLoading]]">
-                      <template is="dom-if" if="[[!item.histogramResults.length]]">
-                        <div>No [[item.date.titlePlural]] and/or [[item.entity.titlePlural]]</div>
-                      </template>
-                    </template>
-
-                    <zoomable-bar-chart timeline
-                      selected-property="[[item.date.key]]"
-                      selected="{{filterCollection}}"
-                      bar-property="date"
-                      label-property="text"
-                      stack-property="data"
-                      interval="week"
-                      data="[[item.histogramResults]]"
-                      default-label="Unidentified [[item.entity.titlePlural]]"
-                      source="Results"
-                      loading="[[item.histogramLoading]]"
-                      display-filter-text>
-                    </zoomable-bar-chart>
-                  </section-and-title>
+                  </template>
                 </template>
 
                 <section-container>
@@ -622,6 +616,10 @@ limitations under the License.
 
     app.showDoubleBarChart = function(searchFieldsConfig) {
       return searchFieldsConfig.link === 'entity';
+    };
+
+    app.getBarTimelineSectionTitle = function(entity, date) {
+      return entity + ' by ' + date + ' Timeline';
     };
 
     app.getBlurStyleClass = function(blur, large) {
