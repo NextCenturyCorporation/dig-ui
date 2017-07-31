@@ -269,7 +269,7 @@ images = [{
       <iron-collapse id="details">
         <paper-tabs class='flex' selected="{{selected}}">
           <paper-tab>Details</paper-tab>
-          <paper-tab>Cached Webpage</paper-tab>
+          <paper-tab>Cached Webpage (Warning: Runs Page Scripts)</paper-tab>
         </paper-tabs>
         <template is="dom-if" if="[[_isSelected(0, selected)]]">
           <detail-view
@@ -308,11 +308,10 @@ images = [{
                 index-types="[[queryConfig.esConfig.esType]]"
                 aggregations="[]"
                 filters="[]"
-                sort-field="[[queryConfig.sortField]]"
                 source-include='["raw_content"]'
                 source-exclude='[]'
                 transform-config="[[queryConfig.searchFields]]"
-                transform-function="[[queryConfig.transforms.entity.cache]]"
+                transform-function="[[queryConfig.cacheTransform]]"
                 error="{{cacheError}}"
                 loading="{{cacheLoading}}"
                 results="{{cache}}"

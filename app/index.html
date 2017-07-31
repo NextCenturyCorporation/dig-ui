@@ -183,6 +183,11 @@ limitations under the License.
       combine-function="[[transforms.entity.documents]]">
     </json-combine>
 
+    <elastic-client
+      config="[[serverConfig.esHost]]"
+      client="{{esClient}}">
+    </elastic-client>
+
     <paper-header-panel class="flex" mode="waterfall">
 
       <!-- Search toolbar -->
@@ -353,7 +358,8 @@ limitations under the License.
               page="{{resultPage}}"
               page-size="25"
               loading="[[searchLoading]]"
-              header="{{resultListHeader}}">
+              header="{{resultListHeader}}"
+              query-config="[[buildQueryConfig(esClient, esConfig, searchFields, transforms)]]">
             </result-list>
           </template>
         </paper-header-panel>
@@ -375,6 +381,15 @@ limitations under the License.
       var app = document.querySelector('#app');
 
       app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
+
+
+      app.buildQueryConfig = function(esClient, esConfig, searchFields, transforms) {
+        if(esClient && esConfig && searchFields && transforms) {
+          var cacheTransform = transforms.entity.cache;
+          return {esClient, esConfig, searchFields, cacheTransform};
+        }
+        return undefined;
+      };
 
       app.createAuthHeader = function(username, password) {
         if(username && password) {
