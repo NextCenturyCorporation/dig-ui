@@ -224,10 +224,9 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
    */
   function getDocumentObject(result, searchFields, documentPage, highlightMapping) {
     var id = _.get(result, '_source.doc_id');
-    var url = _.get(result, '_source.url');
 
-    if(!id || !url) {
-      return {};
+    if(!id) {
+      return undefined;
     }
 
     var rank = _.get(result, '_score');
@@ -238,7 +237,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     var documentObject = {
       id: id,
-      url: url,
+      url: _.get(result, '_source.url'),
       rank: rank ? rank.toFixed(2) : rank,
       type: 'document',
       icon: '',
@@ -288,11 +287,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       });
     }
 
-    documentObject.details.push({
-      name: 'Url',
-      link: url,
-      text: url
-    });
+    if(documentObject.url) {
+      documentObject.details.push({
+        name: 'Url',
+        link: documentObject.url,
+        text: documentObject.url
+      });
+    }
 
     documentObject.details.push({
       name: 'Description',
@@ -413,6 +414,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         return data.hits.hits.map(function(result) {
           // Data returned by the searchResults function from the searchTransforms will have a "fields" property.
           return getDocumentObject(result, searchFields, false, data.fields);
+        }).filter(function(object) {
+          return !_.isUndefined(object);
         });
       }
       return [];
