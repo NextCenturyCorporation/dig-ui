@@ -15,6 +15,9 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" hred="../classify-ad-buttons/classify-ad-buttons.html">
+<link rel="import" hred="../classify-extraction-buttons/classify-extraction-buttons.html">
+<link rel="import" hred="../classification-manager/classification-manager.html">
 <link rel="import" href="../../bower_components/fontawesome-iconset/fa-all.html">
 <link rel="import" href="../../bower_components/icon-label/icon-label.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
@@ -161,7 +164,15 @@ Custom property                            | Description                        
                 </icon-label>
                 <confidence-marker
                   extraction=[[extraction]]>
-                </confidence-marker> 
+                </confidence-marker>
+                <template is="dom-if" if="[[classificationManager]]">
+                  <classify-extraction-buttons
+                    classification-manager="[[classificationManager]]"
+                    classifications="{{_getProperty(extraction, extractionDataClassificationsProperty)}}"
+                    entity-id="[[itemId]]"
+                    extraction-id="[[_getProperty(extraction, extractionDataIdProperty)]]">
+                  </classify-extraction-buttons>
+                </template>
               </div>
             </template>
           </div>
@@ -178,6 +189,56 @@ Custom property                            | Description                        
       is: 'extraction-grid',
 
       properties: {
+        /**
+         * (Optional)
+         *
+         * The ID of the result.
+         *
+         * @type {String}
+         * @default ''
+         */
+        itemId: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The classification manager object.
+         *
+         * @type {Object}
+         */
+        classificationManager: {
+          type: Object
+        },
+
+        /**
+         * (Optional)
+         *
+         * The ID property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'id'
+         */
+        extractionDataIdProperty: {
+          type: String,
+          value: 'id'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The classifications property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'classifications'
+         */
+        extractionDataClassificationsProperty: {
+          type: String,
+          value: 'classifications'
+        },
+
         /**
          * (Required)
          *

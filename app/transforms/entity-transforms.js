@@ -48,10 +48,12 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       provenance: item.provenance
     };
     if(config.type !== 'url') {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var userClassification = item.human_annotation;
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
       extraction.classifications = {
-        database: '',
         type: config.key,
-        user: ''
+        user: (userClassification === '1' ? 'positive' : (userClassification === '0' ? 'negative' : undefined))
       };
     }
     if(config.type === 'location') {
@@ -173,6 +175,20 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     };
   }
 
+  function getClassifications(result, path) {
+    var classifications = _.get(result, path, {});
+    return _.keys(classifications).reduce(function(object, flag) {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var userClassification = classifications[flag].human_annotation;
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      object[flag] = {
+        type: 'ad',
+        user: (userClassification === '1' ? 'positive' : (userClassification === '0' ? 'negative' : undefined))
+      };
+      return object;
+    }, {});
+  }
+
   function getTitleOrDescription(type, searchFields, result, path, highlightMapping) {
     var searchFieldsObject = _.find(searchFields, function(object) {
       return object.result === type;
@@ -243,6 +259,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       icon: '',
       link: commonTransforms.getLink(id, 'document'),
       styleClass: '',
+      classifications: getClassifications(result, '_source.knowledge_graph._tags'),
       cached: commonTransforms.getLink(id, 'cached'),
       esData: esDataEndpoint,
       title: title.text || 'No Title',

@@ -250,19 +250,30 @@ images = [{
             data-style-class-property="[[extractionDataStyleClassProperty]]"
             data-text-property="[[extractionDataTextProperty]]"
             name-property="[[extractionNameProperty]]"
-            target="[[_getTarget(newTab)]]">
+            target="[[_getTarget(newTab)]]"
+            classification-manager="[[classificationManager]]"
+            item-id="[[itemId]]">
           </extraction-grid>
         </template>
       </div>
 
-      <modal-icon
-        icon="[[icon]]"
-        icon-style-class="[[styleClass]]"
-        show-icon="[[!_hovering]]"
-        openable="[[_doesHaveDetails(details, detailExtractions, images)]]"
-        open="[[_open]]">
-      </modal-icon>
+      <div class="layout vertical">
+        <template is="dom-if" if="[[classificationManager]]">
+          <classify-ad-buttons class="border"
+            classification-manager="[[classificationManager]]"
+            classifications="{{_getProperty(extraction, extractionDataClassificationsProperty)}}"
+            entity-id="[[itemId]]">
+          </classify-ad-buttons>
+        </template>
 
+        <modal-icon
+          icon="[[icon]]"
+          icon-style-class="[[styleClass]]"
+          show-icon="[[!_hovering]]"
+          openable="[[_doesHaveDetails(details, detailExtractions, images)]]"
+          open="[[_open]]">
+        </modal-icon>
+      </div>
     </paper-material>
 
     <template is="dom-if" if="[[_doesHaveDetails(details, detailExtractions, images)]]">
@@ -333,6 +344,17 @@ images = [{
       is: 'single-result',
 
       properties: {
+        /**
+         * (Optional)
+         *
+         * The classification manager object.
+         *
+         * @type {Object}
+         */
+        classificationManager: {
+          type: Object
+        },
+
         /**
          * (Optional)
          *
@@ -792,6 +814,19 @@ images = [{
         _open: {
           type: Boolean,
           value: false
+        },
+
+        /**
+         * (Optional)
+         *
+         * The ID of the result.
+         *
+         * @type {String}
+         * @default ''
+         */
+        itemId: {
+          type: String,
+          value: ''
         }
       },
 

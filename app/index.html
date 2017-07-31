@@ -188,6 +188,18 @@ limitations under the License.
       client="{{esClient}}">
     </elastic-client>
 
+    <classification-manager
+      dev="[[config.dev]]"
+      show="[[annotationsIsi]]"
+      auth="[[config.classificationAuth]]"
+      entity-url="[[config.classificationEntityUrl]]"
+      extraction-url="[[config.classificationExtractionUrl]]"
+      flag-url="[[config.classificationFlagUrl]]"
+      flag="[[classificationFlag]]"
+      flag-list="{{classificationFlagList}}"
+      classification-manager="{{classificationManager}}">
+    </classification-manager>
+
     <paper-header-panel class="flex" mode="waterfall">
 
       <!-- Search toolbar -->
@@ -359,7 +371,8 @@ limitations under the License.
               page-size="25"
               loading="[[searchLoading]]"
               header="{{resultListHeader}}"
-              query-config="[[buildQueryConfig(esClient, esConfig, searchFields, transforms)]]">
+              query-config="[[buildQueryConfig(esClient, esConfig, searchFields, transforms)]]"
+              classification-manager="[[classificationManager]]">
             </result-list>
           </template>
         </paper-header-panel>
@@ -381,7 +394,6 @@ limitations under the License.
       var app = document.querySelector('#app');
 
       app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
-
 
       app.buildQueryConfig = function(esClient, esConfig, searchFields, transforms) {
         if(esClient && esConfig && searchFields && transforms) {
