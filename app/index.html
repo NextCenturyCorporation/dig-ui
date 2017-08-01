@@ -189,14 +189,12 @@ limitations under the License.
     </elastic-client>
 
     <classification-manager
-      dev="[[config.dev]]"
-      show="[[annotationsIsi]]"
-      auth="[[config.classificationAuth]]"
-      entity-url="[[config.classificationEntityUrl]]"
-      extraction-url="[[config.classificationExtractionUrl]]"
-      flag-url="[[config.classificationFlagUrl]]"
-      flag="[[classificationFlag]]"
-      flag-list="{{classificationFlagList}}"
+      id="classificationManager"
+      project="[[domain]]"
+      auth="[[serverConfig.tagsAuth]]"
+      entity-url="[[serverConfig.tagsEntityEndpoint]]"
+      extraction-url="[[serverConfig.tagsExtractionEndpoint]]"
+      flag-url="[[serverConfig.tagsListEndpoint]]"
       classification-manager="{{classificationManager}}">
     </classification-manager>
 
@@ -238,6 +236,11 @@ limitations under the License.
               Reload the DIG Configuration
             </paper-icon-item>
 
+            <paper-icon-item title="Open Training Options" on-tap="openTagsDialog">
+              <iron-icon icon="fa:check-circle" item-icon></iron-icon>
+              Open Training Options
+            </paper-icon-item>
+
             <paper-icon-item title="Search on an Image URL or Uploaded Image" on-tap="openSimilarImageSearchDialog">
               <iron-icon icon="image:compare" item-icon></iron-icon>
               Similar Image Search
@@ -263,7 +266,7 @@ limitations under the License.
           <template is="dom-if" if="[[searchParameters]]">
             <paper-toolbar class="drawer-header">
               <div class="layout vertical">
-                <div class="selected-facets-header">Project:  [[findDomain(params, serverConfig)]]</div>
+                <div class="selected-facets-header">Project:  [[domain]]</div>
 
                 <template is="dom-if" if="[[!noSearchParameters(searchParameters.*)]]">
                   <div class="selected-facets-header">Search Terms</div>
@@ -466,6 +469,10 @@ limitations under the License.
 
       /********************************/
       /************* MENU *************/
+      app.getURLWithProject = function(domain) {
+        return './?project=' + domain;
+      };
+
       app.toggleMenu = function() {
         if(this.$.menuDropdown.style.display === 'none') {
           this.$.menuDropdown.open();
@@ -478,8 +485,9 @@ limitations under the License.
         app.set('clientConfig', {});
       };
 
-      app.getURLWithProject = function(domain) {
-        return './?project=' + domain;
+      app.openTagsDialog = function() {
+        this.$.menuDropdown.close();
+        this.$.classificationManager.openDialog();
       };
 
       app.openNewTab = function() {

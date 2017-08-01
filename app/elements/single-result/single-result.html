@@ -17,7 +17,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../detail-view/detail-view.html">
 <link rel="import" href="../extraction-grid/extraction-grid.html">
-<link rel="import" href="../transform-functions/transform-functions.html">
 <link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
 <link rel="import" href="../../bower_components/highlighted-text/highlighted-text.html">
 <link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
@@ -25,12 +24,12 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/modal-icon/modal-icon.html">
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
 <link rel="import" href="../../bower_components/paper-tabs/paper-tab.html">
-<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 
 <!--
 A Polymer Element showing a single stylized result with images, extractions, details, and other optional information.
@@ -201,6 +200,14 @@ images = [{
         width: 100%;
         height: 30em;
       }
+
+      classify-ad-buttons ::content .background {
+        background-color: var(--paper-grey-400);
+        border-radius: 5px;
+        line-height: 30px;
+        max-height: 60px;
+        padding: 5px;
+      }
     </style>
 
     <paper-material
@@ -257,23 +264,21 @@ images = [{
         </template>
       </div>
 
-      <div class="layout vertical">
-        <template is="dom-if" if="[[classificationManager]]">
-          <classify-ad-buttons class="border"
-            classification-manager="[[classificationManager]]"
-            classifications="{{_getProperty(extraction, extractionDataClassificationsProperty)}}"
-            entity-id="[[itemId]]">
-          </classify-ad-buttons>
-        </template>
+      <template is="dom-if" if="[[classificationManager]]">
+        <classify-ad-buttons class="self-center"
+          classification-manager="[[classificationManager]]"
+          classifications="{{_getProperty(extraction, extractionDataClassificationsProperty)}}"
+          entity-id="[[itemId]]">
+        </classify-ad-buttons>
+      </template>
 
-        <modal-icon
-          icon="[[icon]]"
-          icon-style-class="[[styleClass]]"
-          show-icon="[[!_hovering]]"
-          openable="[[_doesHaveDetails(details, detailExtractions, images)]]"
-          open="[[_open]]">
-        </modal-icon>
-      </div>
+      <modal-icon
+        icon="[[icon]]"
+        icon-style-class="[[styleClass]]"
+        show-icon="[[!_hovering]]"
+        openable="[[_doesHaveDetails(details, detailExtractions, images)]]"
+        open="[[_open]]">
+      </modal-icon>
     </paper-material>
 
     <template is="dom-if" if="[[_doesHaveDetails(details, detailExtractions, images)]]">
@@ -962,9 +967,10 @@ images = [{
       toggleDetails: function(event) {
         if(this._doesHaveDetails(this.details, this.detailExtractions, this.images)) {
           var isButton = (event.target.localName === 'paper-button');
+          var isButtonLink = (event.target.parentElement && event.target.parentElement.localName === 'paper-icon-button');
           var isLink = (event.target.localName === 'a' || (event.target.parentElement && event.target.parentElement.localName === 'a'));
           // Do not open the result if the user clicked on a button or link inside the result (including the annotation).
-          if(!isButton && !isLink) {
+          if(!isButton && !isButtonLink && !isLink) {
             this.set('_open', !this._open);
             this.$$('#details').toggle();
           }
