@@ -120,7 +120,6 @@ results = [{
           flag="[[_getString(item, flagProperty)]]"
           highlighted-text="[[_getString(item, highlightedTextProperty)]]"
           classification-manager="[[classificationManager]]"
-          classifications="[[_getObject(item,extractionDataClassificationsProperty)]]"
           icon="[[_getString(item, iconProperty)]]"
           link="[[_getString(item, linkProperty)]]"
           rank="[[_getString(item, rankProperty)]]"
@@ -427,7 +426,7 @@ results = [{
         /**
          * (Optional)
          *
-         * The id property in the data objects from the extraction objects.
+         * The ID property in the data objects from the extraction objects.
          *
          * @type {String}
          * @default 'id'
@@ -759,10 +758,6 @@ results = [{
        */
       _getString: function(item, property) {
         return (item ? item[property] : undefined) || '';
-      },
-
-      _getObject: function(item, property) {
-        return (item ? item[property] : undefined) || {};
       },
 
       _updateQueryConfig: function(queryConfig, id) {

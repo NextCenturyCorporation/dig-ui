@@ -248,18 +248,20 @@ images = [{
 
         <template is="dom-if" if="[[headerExtractions.length]]">
           <extraction-grid
+            classification-manager="[[classificationManager]]"
             extractions="[[headerExtractions]]"
             data-property="[[extractionDataProperty]]"
+            data-classifications-property="[[extractionDataClassificationsProperty]]"
             data-confidence-property="[[extractionDataConfidenceProperty]]"
             data-highlight-property="[[extractionDataHighlightProperty]]"
             data-icon-property="[[extractionDataIconProperty]]"
+            data-id-property="[[extractionDataIdProperty]]"
             data-link-property="[[extractionDataLinkProperty]]"
             data-style-class-property="[[extractionDataStyleClassProperty]]"
             data-text-property="[[extractionDataTextProperty]]"
+            item-id="[[itemId]]"
             name-property="[[extractionNameProperty]]"
-            target="[[_getTarget(newTab)]]"
-            classification-manager="[[classificationManager]]"
-            item-id="[[itemId]]">
+            target="[[_getTarget(newTab)]]">
           </extraction-grid>
         </template>
       </div>
@@ -291,6 +293,7 @@ images = [{
           <detail-view
             button-link="[[link]]"
             button-text="Open [[type]]"
+            classification-manager="[[classificationManager]]"
             details="[[details]]"
             detail-highlighted-text-property="[[detailHighlightedTextProperty]]"
             detail-link-property="[[detailLinkProperty]]"
@@ -298,9 +301,11 @@ images = [{
             detail-text-property="[[detailTextProperty]]"
             extractions="[[detailExtractions]]"
             extraction-data-property="[[extractionDataProperty]]"
+            extraction-data-classifications-property="[[extractionDataClassificationsProperty]]"
             extraction-data-confidence-property="[[extractionDataConfidenceProperty]]"
             extraction-data-highlight-property="[[extractionDataHighlightProperty]]"
             extraction-data-icon-property="[[extractionDataIconProperty]]"
+            extraction-data-id-property="[[extractionDataIdProperty]]"
             extraction-data-link-property="[[extractionDataLinkProperty]]"
             extraction-data-style-class-property="[[extractionDataStyleClassProperty]]"
             extraction-data-text-property="[[extractionDataTextProperty]]"
@@ -308,6 +313,7 @@ images = [{
             images="[[images]]"
             image-link-property="[[imageLinkProperty]]"
             image-source-property="[[imageSourceProperty]]"
+            item-id="[[itemId]]"
             small-image-style-class="[[smallImageStyleClass]]"
             large-image-style-class="[[largeImageStyleClass]]"
             new-tab="[[newTab]]">
@@ -349,6 +355,19 @@ images = [{
       is: 'single-result',
 
       properties: {
+        /**
+         * (Optional)
+         *
+         * The ID of the result.
+         *
+         * @type {String}
+         * @default ''
+         */
+        itemId: {
+          type: String,
+          value: ''
+        },
+
         /**
          * (Optional)
          *
@@ -523,6 +542,19 @@ images = [{
         /**
          * (Optional)
          *
+         * The classifications property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'classifications'
+         */
+        extractionDataClassificationsProperty: {
+          type: String,
+          value: 'classifications'
+        },
+
+        /**
+         * (Optional)
+         *
          * The confidence property in the data objects from the extraction objects.  Supported confidence values are "high" and "low".
          *
          * @type {String}
@@ -557,6 +589,19 @@ images = [{
         extractionDataIconProperty: {
           type: String,
           value: 'icon'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The ID property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'id'
+         */
+        extractionDataIdProperty: {
+          type: String,
+          value: 'id'
         },
 
         /**
@@ -819,19 +864,6 @@ images = [{
         _open: {
           type: Boolean,
           value: false
-        },
-
-        /**
-         * (Optional)
-         *
-         * The ID of the result.
-         *
-         * @type {String}
-         * @default ''
-         */
-        itemId: {
-          type: String,
-          value: ''
         }
       },
 

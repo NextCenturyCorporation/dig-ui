@@ -168,9 +168,9 @@ Custom property                            | Description                        
                 <template is="dom-if" if="[[classificationManager]]">
                   <classify-extraction-buttons
                     classification-manager="[[classificationManager]]"
-                    classifications="{{_getProperty(extraction, extractionDataClassificationsProperty)}}"
+                    classifications="{{_getProperty(extraction, dataClassificationsProperty)}}"
                     entity-id="[[itemId]]"
-                    extraction-id="[[_getProperty(extraction, extractionDataIdProperty)]]">
+                    extraction-id="[[_getProperty(extraction, dataIdProperty)]]">
                   </classify-extraction-buttons>
                 </template>
               </div>
@@ -192,7 +192,7 @@ Custom property                            | Description                        
         /**
          * (Optional)
          *
-         * The ID of the result.
+         * The ID of the result corresponding to this extraction-grid.
          *
          * @type {String}
          * @default ''
@@ -211,32 +211,6 @@ Custom property                            | Description                        
          */
         classificationManager: {
           type: Object
-        },
-
-        /**
-         * (Optional)
-         *
-         * The ID property in the data objects from the extraction objects.
-         *
-         * @type {String}
-         * @default 'id'
-         */
-        extractionDataIdProperty: {
-          type: String,
-          value: 'id'
-        },
-
-        /**
-         * (Optional)
-         *
-         * The classifications property in the data objects from the extraction objects.
-         *
-         * @type {String}
-         * @default 'classifications'
-         */
-        extractionDataClassificationsProperty: {
-          type: String,
-          value: 'classifications'
         },
 
         /**
@@ -265,6 +239,19 @@ Custom property                            | Description                        
         dataProperty: {
           type: String,
           value: 'data'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The classifications property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'classifications'
+         */
+        dataClassificationsProperty: {
+          type: String,
+          value: 'classifications'
         },
 
         /**
@@ -304,6 +291,19 @@ Custom property                            | Description                        
         dataIconProperty: {
           type: String,
           value: 'icon'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The ID property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'id'
+         */
+        dataIdProperty: {
+          type: String,
+          value: 'id'
         },
 
         /**
