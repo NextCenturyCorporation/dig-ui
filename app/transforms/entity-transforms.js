@@ -49,7 +49,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     };
     if(config.type !== 'url') {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-      var userClassification = item.human_annotation;
+      var userClassification = '' + item.human_annotation;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
       extraction.classifications = {
         type: config.key,
@@ -179,7 +179,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var classifications = _.get(result, path, {});
     return _.keys(classifications).reduce(function(object, flag) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-      var userClassification = classifications[flag].human_annotation;
+      var userClassification = '' + classifications[flag].human_annotation;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
       object[flag] = {
         type: 'ad',
@@ -428,12 +428,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     documents: function(data, searchFields) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
-        return data.hits.hits.map(function(result) {
+        var returnData = data.hits.hits.map(function(result) {
           // Data returned by the searchResults function from the searchTransforms will have a "fields" property.
           return getDocumentObject(result, searchFields, false, data.fields);
         }).filter(function(object) {
           return !_.isUndefined(object);
         });
+        return returnData;
       }
       return [];
     },
