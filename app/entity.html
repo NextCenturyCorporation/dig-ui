@@ -239,6 +239,16 @@ limitations under the License.
       filters="{{filterList}}">
     </filters-builder>
 
+    <classification-manager
+      id="classificationManager"
+      project="[[domain]]"
+      auth="[[serverConfig.tagsAuth]]"
+      entity-url="[[serverConfig.tagsEntityEndpoint]]"
+      extraction-url="[[serverConfig.tagsExtractionEndpoint]]"
+      flag-url="[[serverConfig.tagsListEndpoint]]"
+      classification-manager="{{classificationManager}}">
+    </classification-manager>
+
     <!-- Main Content -->
     <div class="entity">
 
@@ -276,6 +286,11 @@ limitations under the License.
               <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
                 <iron-icon icon="refresh" item-icon></iron-icon>
                 Reload the DIG Configuration
+              </paper-icon-item>
+
+              <paper-icon-item title="Open Training Options" on-tap="openTagsDialog">
+                <iron-icon icon="fa:check-circle" item-icon></iron-icon>
+                Open Training Options
               </paper-icon-item>
 
               <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
@@ -501,7 +516,9 @@ limitations under the License.
                     page="{{documentPage}}"
                     page-size="25"
                     loading="[[documentsLoading]]"
-                    header="{{documentsHeader}}">
+                    header="{{documentsHeader}}"
+                    query-config="[[buildQueryConfig(esClient, esConfig, searchFields, transforms)]]"
+                    classification-manager="[[classificationManager]]">
                   </result-list>
                 </section-container>
               </div>
@@ -526,6 +543,14 @@ limitations under the License.
     app.blurImages = false;
 
     app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
+
+    app.buildQueryConfig = function(esClient, esConfig, searchFields, transforms) {
+      if(esClient && esConfig && searchFields && transforms) {
+        var cacheTransform = transforms.entity.cache;
+        return {esClient, esConfig, searchFields, cacheTransform};
+      }
+      return undefined;
+    };
 
     app.buildArray = DigBehaviors.ArrayBehavior.buildArray;
 
@@ -570,6 +595,11 @@ limitations under the License.
 
     app.reloadClientConfig = function() {
       app.set('clientConfig', {});
+    };
+
+    app.openTagsDialog = function() {
+      this.$.menuDropdown.close();
+      this.$.classificationManager.openDialog();
     };
 
     app.openNewTab = function() {
