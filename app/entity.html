@@ -517,7 +517,10 @@ limitations under the License.
                     page-size="25"
                     loading="[[documentsLoading]]"
                     header="{{documentsHeader}}"
-                    query-config="[[buildQueryConfig(esClient, esConfig, searchFields, transforms)]]"
+                    cache-transform="[[transforms.entity.cache]]"
+                    es-client="[[esClient]]"
+                    es-config="[[esConfig]]"
+                    search-fields="[[searchFields]]"
                     classification-manager="[[classificationManager]]">
                   </result-list>
                 </section-container>
@@ -543,14 +546,6 @@ limitations under the License.
     app.blurImages = false;
 
     app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
-
-    app.buildQueryConfig = function(esClient, esConfig, searchFields, transforms) {
-      if(esClient && esConfig && searchFields && transforms) {
-        var cacheTransform = transforms.entity.cache;
-        return {esClient, esConfig, searchFields, cacheTransform};
-      }
-      return undefined;
-    };
 
     app.buildArray = DigBehaviors.ArrayBehavior.buildArray;
 

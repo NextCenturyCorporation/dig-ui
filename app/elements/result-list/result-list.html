@@ -152,7 +152,7 @@ results = [{
           highlighted-text-tags="[[highlightedTextTags]]"
           new-tab="[[newTab]]"
           item-id="[[_getString(item, extractionDataIdProperty)]]"
-          query-config="[[_updateQueryConfig(queryConfig, item.id)]]">
+          query-config="[[_buildQueryConfig(cacheTransform, esClient, esConfig, searchFields, item.id)]]">
         </single-result>
       </template>
     </paginated-list>
@@ -673,14 +673,45 @@ results = [{
         /**
          * (Optional)
          *
-         * The config for the build-and-run-query
+         * The cache transform function.
          *
          * @type {Object}
-         * @default undefined
          */
-        queryConfig: {
-          type: Object,
-          value: undefined
+        cacheTransform: {
+          type: Object
+        },
+
+        /**
+         * (Optional)
+         *
+         * The elasticsearch client object.
+         *
+         * @type {Object}
+         */
+        esClient: {
+          type: Object
+        },
+
+        /**
+         * (Optional)
+         *
+         * The elasticsearch config object.
+         *
+         * @type {Object}
+         */
+        esConfig: {
+          type: Object
+        },
+
+        /**
+         * (Optional)
+         *
+         * The search fields config object.
+         *
+         * @type {Object}
+         */
+        searchFields: {
+          type: Object
         },
 
         /**
@@ -760,11 +791,14 @@ results = [{
         return (item ? item[property] : undefined) || '';
       },
 
-      _updateQueryConfig: function(queryConfig, id) {
-        if(queryConfig && id) {
-          queryConfig.id = id;
-        }
-        return queryConfig;
+      _buildQueryConfig: function(cacheTransform, esClient, esConfig, searchFields, id) {
+        return {
+          cacheTransform: cacheTransform,
+          esClient: esClient,
+          esConfig: esConfig,
+          searchFields: searchFields,
+          id: id
+        };
       }
     });
   })();
