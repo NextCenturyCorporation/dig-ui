@@ -5,3 +5,4 @@ node_modules
 /server/config/local.env.js
 *.swp
 .tmp
+*.csv
