@@ -115,24 +115,7 @@ var exportTransforms = (function(_) {
       var linkPrefix = window.location.hostname + ':' + window.location.port;
       var exportData = [];
       var nextId = 1;
-
       searchData.forEach(function(result) {
-        var locations = result.locations.map(function(location) {
-          return location.textAndCountry;
-        }).join(', ');
-        var phones = result.phones.map(function(phone) {
-          return phone.text;
-        }).join(', ');
-        var emails = result.emails.map(function(email) {
-          return email.text;
-        }).join(', ');
-        var socialIds = result.socialIds.map(function(socialId) {
-          return socialId.text;
-        }).join(', ');
-        var reviewIds = result.reviewIds.map(function(reviewId) {
-          return reviewId.text;
-        }).join(', ');
-
         var item = {
           images: (result.images || []).map(function(image) {
             return {
@@ -144,48 +127,23 @@ var exportTransforms = (function(_) {
           paragraphs: []
         };
 
-        item.paragraphs.push({
-          big: true,
-          label: result.title,
-          value: ''
-        });
-        item.paragraphs.push({
-          label: 'Posting Date:  ',
-          value: result.date
-        });
-        item.paragraphs.push({
-          label: 'Locations:  ',
-          value: locations
-        });
-        item.paragraphs.push({
-          label: 'Telephone Numbers:  ',
-          value: phones
-        });
-        item.paragraphs.push({
-          label: 'Email Addresses:  ',
-          value: emails
-        });
-        item.paragraphs.push({
-          label: 'Social Media IDs:  ',
-          value: socialIds
-        });
-        item.paragraphs.push({
-          label: 'Review IDs:  ',
-          value: reviewIds
-        });
-        item.paragraphs.push({
-          label: 'Description:  ',
-          value: result.description.replace(/\n/g, ' ')
-        });
-        item.paragraphs.push({
-          label: 'URL:  ',
-          value: result.url
-        });
-        item.paragraphs.push({
-          label: 'DIG URL:  ',
-          value: linkPrefix + result.link
-        });
+        Object.keys(result).forEach(function(property) {
+          if(property !== 'rank' && property !== 'type' && property !== 'esData' && property !== 'highlightedText' &&
+          result[property] && result[property].constructor !== Array) {
+            var data = result[property];
 
+            if(property === 'description') {
+              data = data.replace(/\n/g, ' ');
+            } else if(property === 'link') {
+              data = linkPrefix + data;
+            }
+
+            item.paragraphs.push({
+              label: property + ': ',
+              value: data
+            });
+          }
+        });
         exportData.push(item);
       });
 
