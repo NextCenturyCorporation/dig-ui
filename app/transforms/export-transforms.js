@@ -124,29 +124,42 @@ var exportTransforms = (function(_) {
               text: image.source
             };
           }),
-          paragraphs: []
+          paragraphs: [{
+            big: true,
+            label: result.title,
+            value: ''
+          }, {
+            label: 'URL:  ',
+            value: result.url
+          }, {
+            label: 'DIG URL:  ',
+            value: linkPrefix + result.link
+          }]
         };
 
-        Object.keys(result).forEach(function(property) {
-          if(property !== 'rank' && property !== 'type' && property !== 'esData' && property !== 'highlightedText' &&
-          result[property] && result[property].constructor !== Array) {
-            var data = result[property];
+        result.headerExtractions.forEach(function(elementArray) {
+          var data = '';
+          elementArray.data.forEach(function(element) {
+            data += element.text + ', ';
+          });
 
-            if(property === 'description') {
-              data = data.replace(/\n/g, ' ');
-            } else if(property === 'link') {
-              data = linkPrefix + data;
-            }
+          data = data.substring(0, data.length - 2);
 
+          if(data !== '') {
             item.paragraphs.push({
-              label: property + ': ',
+              label: elementArray.key + ': ',
               value: data
             });
           }
         });
+
+        item.paragraphs.push({
+          label: 'Description:  ',
+          value: result.description.replace(/\n/g, ' ')
+        });
+
         exportData.push(item);
       });
-
       return exportData;
     }
   };
