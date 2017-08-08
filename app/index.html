@@ -228,6 +228,15 @@ limitations under the License.
         </similar-image-search>
         <!-- TODO: add logger, update transform when we're ready to link to image entity pages -->
 
+        <info-data
+          id="dataDialog"
+          client="[[esClient]]"
+          index-name="[[esConfig.esIndex]]"
+          index-types="[[esConfig.esType]]"
+          domain="[[domain]]"
+          sort-field="timestamp_crawl">
+        </info-data>
+
         <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
         <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="60">
@@ -235,6 +244,11 @@ limitations under the License.
             <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
               <iron-icon icon="refresh" item-icon></iron-icon>
               Reload the DIG Configuration
+            </paper-icon-item>
+
+            <paper-icon-item title="View Data Information" on-tap="openDataDialog">
+              <iron-icon icon="icons:info" item-icon></iron-icon>
+              View Data Information
             </paper-icon-item>
 
             <paper-icon-item title="Open Training Options" on-tap="openTagsDialog">
@@ -388,6 +402,11 @@ limitations under the License.
 
       app.reloadClientConfig = function() {
         app.set('clientConfig', {});
+      };
+
+      app.openDataDialog = function() {
+        this.$.menuDropdown.close();
+        this.$.dataDialog.open();
       };
 
       app.openTagsDialog = function() {
