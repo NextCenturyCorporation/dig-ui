@@ -1,0 +1,326 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../bower_components/styled-dialog/styled-dialog.html">
+<link rel="import" href="../lodash.html">
+
+<dom-module id="classification-manager">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      styled-dialog ::content paper-dialog.styled-dialog {
+        /* Needed to fix an overflow issue with the paper-dropdown-menu. */
+        overflow: initial;
+      }
+
+      .checkbox {
+        height: 20px;
+        width: 20px;
+      }
+
+      paper-listbox {
+        --paper-listbox: {
+          padding: 0;
+        }
+      }
+
+      .pointer,
+      paper-listbox paper-item {
+        cursor: pointer;
+      }
+    </style>
+
+    <iron-ajax
+      auto
+      url="[[_getTagListUrl(project, flagUrl)]]"
+      handle-as="json"
+      headers="[[_headers]]"
+      with-credentials="[[_exists(auth)]]"
+      last-response="{{_flagResponse}}">
+    </iron-ajax>
+
+    <iron-ajax
+      auto="[[_exists(_data.body)]]"
+      body="[[_data.body]]"
+      content-type="application/json"
+      headers="[[_headers]]"
+      method="[[_data.method]]"
+      url="[[_data.url]]"
+      last-error="{{error}}"
+      last-response="{{_response}}"
+      loading="{{loading}}">
+    </iron-ajax>
+
+    <styled-dialog id="tagsDialog" header="Tag List">
+      <div class="layout horizontal pointer" title="Toggle Show Training Tags" on-tap="_toggleShowTags">
+        <iron-icon class="checkbox styled-dialog-right-space" icon$="[[_getCheckboxIcon(show)]]"></iron-icon>
+        <span class="styled-dialog-text">Show Training Tags</span>
+      </div>
+
+      <div class="layout horizontal">
+        <template is="dom-if" if="[[!flagList.length]]">
+          <span class="styled-dialog-name styled-dialog-tall">No Training Tags</span>
+        </template>
+        <template is="dom-if" if="[[flagList.length]]">
+          <span class="styled-dialog-name styled-dialog-tall styled-dialog-right-space">Training Focus Tag:</span>
+          <paper-dropdown-menu label="Tag" no-label-float>
+            <paper-listbox class="dropdown-content" attr-for-selected="value" selected="{{flag}}">
+              <template is="dom-repeat" items="[[flagList]]">
+                <paper-item id$="[[item]]" value="[[item]]">[[item]]</paper-item>
+              </template>
+            </paper-listbox>
+          </paper-dropdown-menu>
+        </template>
+      </div>
+    </styled-dialog>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    /* globals _ */
+    Polymer({
+      is: 'classification-manager',
+
+      properties: {
+        /**
+         * Whether to show classifications.
+         */
+        show: {
+          observer: '_notifyShowListeners',
+          type: Boolean,
+          value: false
+        },
+
+        auth: {
+          type: String
+        },
+
+        classificationManager: {
+          notify: true,
+          type: Object,
+          value: function() {
+            return this._buildClassificationManager();
+          }
+        },
+
+        entityUrl: {
+          type: String
+        },
+
+        error: {
+          notify: true,
+          type: Object
+        },
+
+        extractionUrl: {
+          type: String
+        },
+
+        flag: {
+          observer: '_notifyFlagListeners',
+          type: String
+        },
+
+        flagList: {
+          notify: true,
+          type: Array,
+          value: function() {
+            return ['abcd', '1234', 'the quick brown fox'];
+          }
+        },
+
+        flagUrl: {
+          type: String
+        },
+
+        loading: {
+          notify: true,
+          type: Boolean,
+          value: false
+        },
+
+        project: {
+          type: String
+        },
+
+        _data: {
+          type: Object,
+          value: function() {
+            return {};
+          }
+        },
+
+        _flagResponse: {
+          observer: '_updateFlagList',
+          type: Object
+        },
+
+        _headers: {
+          computed: '_buildHeaders(auth)',
+          type: Object,
+          value: function() {
+            return {};
+          }
+        },
+
+        _listeners: {
+          type: Object,
+          value: function() {
+            return {};
+          }
+        },
+
+        _nextListenerId: {
+          type: Number,
+          value: 1
+        },
+
+        _response: {
+          type: Object
+        }
+      },
+
+      _buildClassificationManager: function() {
+        var self = this;
+        return {
+          addListener: function(showListener, flagListener) {
+            var id = self._nextListenerId++;
+            self._listeners[id] = {
+              flag: flagListener,
+              show: showListener
+            };
+            if(flagListener) {
+              flagListener(self.flag);
+            }
+            if(showListener) {
+              showListener(self.show);
+            }
+            return id;
+          },
+
+          removeListener: function(id) {
+            delete self._listeners[id];
+          },
+
+          setEntityClassification: function(classification, flag, id, type) {
+            if(self.entityUrl && id) {
+              self.set('_data', {
+                body: !classification ? {} : {
+                  'kg_id': id,
+                  'human_annotation': (classification === 'positive' ? 1 : 0)
+                },
+                method: !classification ? 'DELETE' : 'POST',
+                url: self.entityUrl.replace('PROJECT', self.project).replace('ENTITY_ID', id).replace('ENTITY_TYPE', type).replace('FLAG', flag)
+              });
+            }
+          },
+
+          setExtractionClassification: function(classification, entityId, extractionId, extractionType) {
+            if(self.extractionUrl && extractionId) {
+              self.set('_data', {
+                body: !classification ? {} : {
+                  'key': extractionId,
+                  'human_annotation': (classification === 'positive' ? 1 : 0)
+                },
+                method: !classification ? 'DELETE' : 'POST',
+                url: self.extractionUrl.replace('PROJECT', self.project).replace('ENTITY_ID', entityId).replace('EXTRACTION_ID', extractionId).replace('EXTRACTION_TYPE', extractionType)
+              });
+            }
+          }
+        };
+      },
+
+      _buildHeaders: function(authString) {
+        var authObject = authString ? JSON.parse(authString) : {};
+        if(authObject.user && authObject.password) {
+          return {
+            'Authorization': 'Basic ' + btoa(authObject.user + ':' + authObject.password)
+          };
+        }
+        return {};
+      },
+
+      _exists: function(object) {
+        return !!object;
+      },
+
+      /**
+       * Returns the checkbox icon for the given boolean.
+       */
+      _getCheckboxIcon: function(show) {
+        return show ? 'check-box' : 'check-box-outline-blank';
+      },
+
+      _getTagListUrl: function(project, url) {
+        return url.replace('PROJECT', project);
+      },
+
+      _notifyFlagListeners: function() {
+        var self = this;
+        _.keys(this._listeners).forEach(function(listenerId) {
+          var flagListener = self._listeners[listenerId].flag;
+          if(flagListener) {
+            flagListener(self.flag);
+          }
+        });
+      },
+
+      _notifyShowListeners: function() {
+        var self = this;
+        _.keys(this._listeners).forEach(function(listenerId) {
+          var showListener = self._listeners[listenerId].show;
+          if(showListener) {
+            showListener(self.show);
+          }
+        });
+      },
+
+      /**
+       * Toggles whether to show tags.
+       */
+      _toggleShowTags: function() {
+        this.show = !this.show;
+      },
+
+      _updateFlagList: function(response) {
+        var list = [];
+        if(response) {
+          _.keys(response).forEach(function(key) {
+            list.push(key);
+          });
+        }
+        this.set('flagList', list);
+      },
+
+      openDialog: function() {
+        this.$.tagsDialog.open();
+      }
+    });
+  })();
+  </script>
+</dom-module>

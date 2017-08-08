@@ -236,6 +236,16 @@ limitations under the License.
       combine-function="[[transforms.entity.documents]]">
     </json-combine>
 
+    <classification-manager
+      id="classificationManager"
+      project="[[domain]]"
+      auth="[[serverConfig.tagsAuth]]"
+      entity-url="[[serverConfig.tagsEntityEndpoint]]"
+      extraction-url="[[serverConfig.tagsExtractionEndpoint]]"
+      flag-url="[[serverConfig.tagsListEndpoint]]"
+      classification-manager="{{classificationManager}}">
+    </classification-manager>
+
     <!-- Main Content -->
     <div class="entity">
 
@@ -267,6 +277,11 @@ limitations under the License.
                 <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
                   <iron-icon icon="refresh" item-icon></iron-icon>
                   Reload the DIG Configuration
+                </paper-icon-item>
+
+                <paper-icon-item title="Open Training Options" on-tap="openTagsDialog">
+                  <iron-icon icon="fa:check-circle" item-icon></iron-icon>
+                  Open Training Options
                 </paper-icon-item>
 
                 <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
@@ -370,7 +385,12 @@ limitations under the License.
                     loading="[[revisionsLoading]]"
                     pretty-name="Revisions"
                     pretty-name-singular="Revision"
-                    header="{{revisionsHeader}}">
+                    header="{{revisionsHeader}}"
+                    cache-transform="[[transforms.entity.cache]]"
+                    es-client="[[esClient]]"
+                    es-config="[[esConfig]]"
+                    search-fields="[[searchFields]]"
+                    classification-manager="[[classificationManager]]">
                   </result-list>
                 </section-container>
               </div>
@@ -458,7 +478,12 @@ limitations under the License.
                     loading="[[moreLikeThisLoading]]"
                     pretty-name="Similar Results"
                     pretty-name-singular="Similar Result"
-                    header="{{moreLikeThisHeader}}">
+                    header="{{moreLikeThisHeader}}"
+                    cache-transform="[[transforms.entity.cache]]"
+                    es-client="[[esClient]]"
+                    es-config="[[esConfig]]"
+                    search-fields="[[searchFields]]"
+                    classification-manager="[[classificationManager]]">
                   </result-list>
                 </section-container>
               </div>
@@ -539,6 +564,11 @@ limitations under the License.
 
     app.reloadClientConfig = function() {
       app.set('clientConfig', {});
+    };
+
+    app.openTagsDialog = function() {
+      this.$.menuDropdown.close();
+      this.$.classificationManager.openDialog();
     };
 
     app.openNewTab = function() {

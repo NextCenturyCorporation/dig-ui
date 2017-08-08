@@ -139,14 +139,18 @@ Custom property                        | Description                            
 
       <template is="dom-if" if="[[extractions.length]]">
         <extraction-grid
+          classification-manager="[[classificationManager]]"
           extractions="[[extractions]]"
           data-property="[[extractionDataProperty]]"
+          data-classifications-property="[[extractionDataClassificationsProperty]]"
           data-confidence-property="[[extractionDataConfidenceProperty]]"
           data-highlight-property="[[extractionDataHighlightProperty]]"
           data-icon-property="[[extractionDataIconProperty]]"
+          data-id-property="[[extractionDataIdProperty]]"
           data-link-property="[[extractionDataLinkProperty]]"
           data-style-class-property="[[extractionDataStyleClassProperty]]"
           data-text-property="[[extractionDataTextProperty]]"
+          item-id="[[itemId]]"
           name-property="[[extractionNameProperty]]"
           target="[[_getTarget(newTab)]]">
         </extraction-grid>
@@ -183,6 +187,30 @@ Custom property                        | Description                            
       is: 'detail-view',
 
       properties: {
+        /**
+         * (Optional)
+         *
+         * The ID of the result corresponding to this detail-view.
+         *
+         * @type {String}
+         * @default ''
+         */
+        itemId: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * The classification manager object.
+         *
+         * @type {Object}
+         */
+        classificationManager: {
+          type: Object
+        },
+
         /**
          * (Optional)
          *
@@ -307,6 +335,19 @@ Custom property                        | Description                            
         /**
          * (Optional)
          *
+         * The classifications property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'classifications'
+         */
+        extractionDataClassificationsProperty: {
+          type: String,
+          value: 'classifications'
+        },
+
+        /**
+         * (Optional)
+         *
          * The confidence property in the data objects from the extraction objects.  Supported confidence values are "high" and "low".
          *
          * @type {String}
@@ -341,6 +382,19 @@ Custom property                        | Description                            
         extractionDataIconProperty: {
           type: String,
           value: 'icon'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The ID property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'id'
+         */
+        extractionDataIdProperty: {
+          type: String,
+          value: 'id'
         },
 
         /**

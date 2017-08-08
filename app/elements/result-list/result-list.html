@@ -17,7 +17,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paginated-list/paginated-list.html">
 <link rel="import" href="../single-result/single-result.html">
-<script type="text/javascript" src="../../bower_components/lodash/dist/lodash.js"></script>
 
 <!--
 A Polymer Element showing a paginated-list of single-result elements.
@@ -120,6 +119,7 @@ results = [{
         <single-result
           flag="[[_getString(item, flagProperty)]]"
           highlighted-text="[[_getString(item, highlightedTextProperty)]]"
+          classification-manager="[[classificationManager]]"
           icon="[[_getString(item, iconProperty)]]"
           link="[[_getString(item, linkProperty)]]"
           rank="[[_getString(item, rankProperty)]]"
@@ -137,6 +137,7 @@ results = [{
           extraction-data-style-class-property="[[extractionDataStyleClassProperty]]"
           extraction-data-text-property="[[extractionDataTextProperty]]"
           extraction-data-type-property="[[extractionDataTypeProperty]]"
+          extraction-data-classifications-property="[[extractionDataClassificationsProperty]]"
           extraction-name-property="[[extractionNameProperty]]"
           details="[[_getList(item, detailsProperty)]]"
           detail-highlighted-text-property="[[detailHighlightedTextProperty]]"
@@ -150,7 +151,8 @@ results = [{
           large-image-style-class="[[largeImageStyleClass]]"
           highlighted-text-tags="[[highlightedTextTags]]"
           new-tab="[[newTab]]"
-          query-config="[[_updateQueryConfig(queryConfig, item.id)]]">
+          item-id="[[_getString(item, extractionDataIdProperty)]]"
+          query-config="[[_buildQueryConfig(cacheTransform, esClient, esConfig, searchFields, item.id)]]">
         </single-result>
       </template>
     </paginated-list>
@@ -160,7 +162,6 @@ results = [{
   (function() {
     'use strict';
 
-    /* globals _ */
     Polymer({
       is: 'result-list',
 
@@ -236,6 +237,13 @@ results = [{
         flagProperty: {
           type: String,
           value: 'flag'
+        },
+
+        /**
+         * The classification manager.
+         */
+        classificationManager: {
+          type: Object
         },
 
         /**
@@ -395,6 +403,14 @@ results = [{
         },
 
         /**
+         * The property for the classifications of each item in the extraction data.
+         */
+        extractionDataClassificationsProperty: {
+          type: String,
+          value: 'classifications'
+        },
+
+        /**
          * (Optional)
          *
          * The icon property in the data objects from the extraction objects.
@@ -405,6 +421,19 @@ results = [{
         extractionDataIconProperty: {
           type: String,
           value: 'icon'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The ID property in the data objects from the extraction objects.
+         *
+         * @type {String}
+         * @default 'id'
+         */
+        extractionDataIdProperty: {
+          type: String,
+          value: 'id'
         },
 
         /**
@@ -644,14 +673,45 @@ results = [{
         /**
          * (Optional)
          *
-         * The config for the build-and-run-query
+         * The cache transform function.
          *
          * @type {Object}
-         * @default undefined
          */
-        queryConfig: {
-          type: Object,
-          value: undefined
+        cacheTransform: {
+          type: Object
+        },
+
+        /**
+         * (Optional)
+         *
+         * The elasticsearch client object.
+         *
+         * @type {Object}
+         */
+        esClient: {
+          type: Object
+        },
+
+        /**
+         * (Optional)
+         *
+         * The elasticsearch config object.
+         *
+         * @type {Object}
+         */
+        esConfig: {
+          type: Object
+        },
+
+        /**
+         * (Optional)
+         *
+         * The search fields config object.
+         *
+         * @type {Object}
+         */
+        searchFields: {
+          type: Object
         },
 
         /**
@@ -731,16 +791,14 @@ results = [{
         return (item ? item[property] : undefined) || '';
       },
 
-      _updateQueryConfig: function(queryConfig, id) {
-        if(queryConfig && id) {
-          var newConfig = {};
-          for(var key in queryConfig) {
-            newConfig[key] = queryConfig[key];
-          };
-          newConfig.id = id;
-          return newConfig;
-        }
-        return queryConfig;
+      _buildQueryConfig: function(cacheTransform, esClient, esConfig, searchFields, id) {
+        return {
+          cacheTransform: cacheTransform,
+          esClient: esClient,
+          esConfig: esConfig,
+          searchFields: searchFields,
+          id: id
+        };
       }
     });
   })();
