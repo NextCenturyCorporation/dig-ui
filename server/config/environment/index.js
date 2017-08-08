@@ -43,7 +43,6 @@ module.exports = {
     imageServiceAuth: process.env.IMAGE_SERVICE_AUTH || '{"user": "", "password": ""}',
     imageServiceHost: process.env.IMAGE_SERVICE_HOST || '{"url": "", "base64": ""}',
     searchConfig: process.env.SEARCH_CONFIG ? JSON.parse(process.env.SEARCH_CONFIG) : undefined,
-    tagsAuth: process.env.TAGS_AUTH,
     tagsEntityEndpoint: process.env.TAGS_ENTITY_ENDPOINT,
     tagsExtractionEndpoint: process.env.TAGS_EXTRACTION_ENDPOINT,
     tagsListEndpoint: process.env.TAGS_LIST_ENDPOINT

@@ -45,7 +45,6 @@ module.exports = function(app) {
       imageServiceAuth: serverConfig.imageServiceAuth,
       imageServiceHost: serverConfig.imageServiceHost,
       searchConfig: serverConfig.searchConfig,
-      tagsAuth: serverConfig.tagsAuth,
       tagsEntityEndpoint: serverConfig.tagsEntityEndpoint,
       tagsExtractionEndpoint: serverConfig.tagsExtractionEndpoint,
       tagsListEndpoint: serverConfig.tagsListEndpoint

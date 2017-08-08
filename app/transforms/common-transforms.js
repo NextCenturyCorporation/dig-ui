@@ -45,7 +45,7 @@ var commonTransforms = (function(_, moment, domain) {
    * Returns the link for the given ID.
    */
   function getLink(itemId, linkType, fieldType, fieldId) {
-    if(linkType === 'document') {
+    if(linkType === 'ad') {
       return '/document.html?domain=' + domain + '&id=' + itemId;
     }
     if(itemId && linkType === 'entity') {

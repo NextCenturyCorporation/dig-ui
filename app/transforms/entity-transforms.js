@@ -175,13 +175,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     };
   }
 
-  function getClassifications(result, path) {
-    var classifications = _.get(result, path, {});
-    return _.keys(classifications).reduce(function(object, flag) {
+  function getDocumentTags(result, path) {
+    var tags = _.get(result, path, {});
+    return _.keys(tags).reduce(function(object, tag) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-      var userClassification = '' + classifications[flag].human_annotation;
+      var userClassification = '' + tags[tag].human_annotation;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
-      object[flag] = {
+      object[tag] = {
         type: 'ad',
         user: (userClassification === '1' ? 'positive' : (userClassification === '0' ? 'negative' : undefined))
       };
@@ -255,12 +255,11 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       id: id,
       url: _.get(result, '_source.url'),
       rank: rank ? rank.toFixed(2) : rank,
-      type: 'document',
+      type: 'ad',
       icon: '',
-      link: commonTransforms.getLink(id, 'document'),
+      link: commonTransforms.getLink(id, 'ad'),
       styleClass: '',
-      classifications: getClassifications(result, '_source.knowledge_graph._tags'),
-      cached: commonTransforms.getLink(id, 'cached'),
+      tags: getDocumentTags(result, '_source.knowledge_graph._tags'),
       esData: esDataEndpoint,
       title: title.text || 'No Title',
       description: description.text || 'No Description',
@@ -317,14 +316,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       highlightedText: description.highlight,
       text: documentObject.description
     });
-
-    if(documentObject.cached) {
-      documentObject.details.push({
-        name: 'Cached Ad Webpage',
-        link: documentObject.cached,
-        text: 'Open'
-      });
-    }
 
     // TODO Will the images be moved from _source.objects to _source.knowledge_graph?
     var images = _.get(result, '_source.objects', []);
@@ -466,16 +457,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     cache: function(data) {
-      if(data && data.hits.hits.length > 0) {
-        return {
-          id: _.get(data.hits.hits[0], '_id', ''),
-          html: _.get(data.hits.hits[0], '_source.raw_content', '')
-        };
+      if(data && data.hits && data.hits.hits && data.hits.hits.length) {
+        return _.get(data.hits.hits[0], '_source.raw_content', '');
       }
-      return {
-        id: '',
-        html: ''
-      };
+      return '';
     }
   };
 });

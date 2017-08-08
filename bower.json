@@ -42,9 +42,11 @@
     "phone-behavior": "DigElements/phone-behavior#1.0.0",
     "polymer": "Polymer/polymer#^1.7.0",
     "query-transformer": "DigElements/query-transformer#1.0.9",
+    "result-list": "DigElements/result-list#1.0.7",
     "search-fields-dialog": "DigElements/search-fields-dialog#1.0.1",
     "selected-facets-display": "DigElements/selected-facets-display#1.1.0",
     "styled-dialog": "DigElements/styled-dialog#1.0.4",
+    "tag-manager": "DigElements/tag-manager#1.0.0",
     "zoomable-bar-chart": "DigElements/zoomable-bar-chart#1.0.8"
   },
   "devDependencies": {

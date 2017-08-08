@@ -239,15 +239,16 @@ limitations under the License.
       filters="{{filterList}}">
     </filters-builder>
 
-    <classification-manager
-      id="classificationManager"
+    <tag-manager
+      id="tagManager"
+      auth-username="[[serverConfig.configUsername]]"
+      auth-password="[[serverConfig.configPassword]]"
+      entity-endpoint="[[serverConfig.tagsEntityEndpoint]]"
+      extraction-endpoint="[[serverConfig.tagsExtractionEndpoint]]"
+      list-endpoint="[[serverConfig.tagsListEndpoint]]"
       project="[[domain]]"
-      auth="[[serverConfig.tagsAuth]]"
-      entity-url="[[serverConfig.tagsEntityEndpoint]]"
-      extraction-url="[[serverConfig.tagsExtractionEndpoint]]"
-      flag-url="[[serverConfig.tagsListEndpoint]]"
-      classification-manager="{{classificationManager}}">
-    </classification-manager>
+      tag-manager="{{tagManager}}">
+    </tag-manager>
 
     <!-- Main Content -->
     <div class="entity">
@@ -518,10 +519,12 @@ limitations under the License.
                     loading="[[documentsLoading]]"
                     header="{{documentsHeader}}"
                     cache-transform="[[transforms.entity.cache]]"
-                    es-client="[[esClient]]"
-                    es-config="[[esConfig]]"
+                    client="[[esClient]]"
+                    index-name="[[esConfig.esIndex]]"
+                    index-types="[[esConfig.esType]]"
                     search-fields="[[searchFields]]"
-                    classification-manager="[[classificationManager]]">
+                    source-include='["raw_content"]'
+                    tag-manager="[[tagManager]]">
                   </result-list>
                 </section-container>
               </div>
@@ -594,7 +597,7 @@ limitations under the License.
 
     app.openTagsDialog = function() {
       this.$.menuDropdown.close();
-      this.$.classificationManager.openDialog();
+      this.$.tagManager.openDialog();
     };
 
     app.openNewTab = function() {

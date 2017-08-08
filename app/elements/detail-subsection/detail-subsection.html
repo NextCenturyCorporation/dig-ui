@@ -105,15 +105,6 @@ limitations under the License.
               link="[[_getProperty(extraction, linkProperty)]]"
               text="[[_getProperty(extraction, textProperty)]]">
             </icon-label>
-
-            <template is="dom-if" if="[[classificationManager]]">
-              <classify-extraction-buttons
-                classification-manager="[[classificationManager]]"
-                classifications="{{_getProperty(extraction, classificationsProperty)}}"
-                entity-id="[[entityId]]"
-                extraction-id="[[_getProperty(extraction, idProperty)]]">
-              </classify-extraction-buttons>
-            </template>
           </div>
         </template>
       </iron-scroll-threshold>
