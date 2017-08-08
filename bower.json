@@ -14,6 +14,7 @@
     "clipboard": "^1.5.15",
     "date-picker-display": "DigElements/date-picker-display#1.1.0",
     "date-range-facet": "DigElements/date-range-facet#1.1.0",
+    "detail-subsection": "DigElements/detail-subsection#1.0.2",
     "elastic-client": "DigElements/elastic-client#1.0.5",
     "elastic-client-aggregation-builder": "DigElements/elastic-client-aggregation-builder#1.0.9",
     "elastic-error": "DigElements/elastic-error#1.0.1",
