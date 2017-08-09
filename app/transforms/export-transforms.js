@@ -70,7 +70,7 @@ var exportTransforms = (function(_) {
         result.headerExtractions.forEach(function(elementArray) {
           var data = '';
           elementArray.data.forEach(function(element) {
-            data += element.text + "; "
+            data += element.text + '; ';
           });
 
           exportDataBody.push(data);
@@ -79,7 +79,7 @@ var exportTransforms = (function(_) {
         result.detailExtractions.forEach(function(elementArray) {
           var data = '';
           elementArray.data.forEach(function(element) {
-            data += element.text + "; "
+            data += element.text + '; ';
           });
 
           exportDataBody.push(data);
