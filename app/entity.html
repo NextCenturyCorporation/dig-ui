@@ -286,7 +286,7 @@ limitations under the License.
 
           <!-- Entity title -->
           <template is="dom-if" if="[[pageConfig]]">
-            <div class="layout horizontal center flex">
+            <div class="layout horizontal flex center">
               <div class$="iron-icon-huge [[pageConfig.styleClass]]">
                 <iron-icon icon="[[pageConfig.icon]]"></iron-icon>
               </div>
@@ -300,10 +300,12 @@ limitations under the License.
                   </div>
                 </template>
               </div>
+
+              <div class="layout horizontal flex end-justified">
+                <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+              </div>
             </div>
           </template>
-
-          <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
           <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
             <div class="dropdown-content">

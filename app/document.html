@@ -268,7 +268,7 @@ limitations under the License.
         <div class="paper-header layout horizontal">
 
           <!-- Entity title -->
-          <div class="layout horizontal center flex">
+          <div class="layout horizontal flex center">
             <div class="iron-icon-huge entity-grey">
               <iron-icon icon="icons:assignment"></iron-icon>
             </div>
@@ -277,9 +277,11 @@ limitations under the License.
                 [[document.title]]
               </div>
             </div>
-          </div>
 
-          <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+            <div class="layout horizontal flex end-justified">
+              <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+            </div>
+          </div>
 
           <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
             <div class="dropdown-content">
