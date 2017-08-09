@@ -257,6 +257,12 @@ gulp.task('serve', ['lint', 'styles', 'elements', 'nodemon'], function() {
   var saveClientConfigProxyOptions = url.parse('http://localhost:9000/saveClientConfig');
   saveClientConfigProxyOptions.route = '/saveClientConfig';
 
+  var exportProxyOptions = url.parse('http://localhost:9000/export');
+  exportProxyOptions.route = '/export';
+
+  var fileProxyOptions = url.parse('http://localhost:9000/file');
+  fileProxyOptions.route = '/file';
+
   var uploadProxyOptions = url.parse('http://localhost:9000/upload');
   uploadProxyOptions.route = '/upload';
 
@@ -282,6 +288,8 @@ gulp.task('serve', ['lint', 'styles', 'elements', 'nodemon'], function() {
         proxy(serverConfigProxyOptions),
         proxy(clientConfigProxyOptions),
         proxy(saveClientConfigProxyOptions),
+        proxy(exportProxyOptions),
+        proxy(fileProxyOptions),
         proxy(uploadProxyOptions),
         historyApiFallback()
       ]
@@ -305,6 +313,12 @@ gulp.task('serve:dist', ['default', 'nodemon'], function() {
 
   var saveClientConfigProxyOptions = url.parse('http://localhost:9000/saveClientConfig');
   saveClientConfigProxyOptions.route = '/saveClientConfig';
+
+  var exportProxyOptions = url.parse('http://localhost:9000/export');
+  exportProxyOptions.route = '/export';
+
+  var fileProxyOptions = url.parse('http://localhost:9000/file');
+  fileProxyOptions.route = '/file';
 
   var uploadProxyOptions = url.parse('http://localhost:9000/upload');
   uploadProxyOptions.route = '/upload';
@@ -330,6 +344,8 @@ gulp.task('serve:dist', ['default', 'nodemon'], function() {
       proxy(serverConfigProxyOptions),
       proxy(clientConfigProxyOptions),
       proxy(saveClientConfigProxyOptions),
+      proxy(exportProxyOptions),
+      proxy(fileProxyOptions),
       proxy(uploadProxyOptions),
       historyApiFallback()
     ]
@@ -397,7 +413,6 @@ gulp.task('docker', ['default'], $.shell.task([
   'echo "Pushing docker container for digmemex/digui version ' + version + '"',
   'docker push digmemex/digui:' + version
 ]));
-
 // Load tasks for web-component-tester
 // Adds tasks for `gulp test:local` and `gulp test:remote`
 require('web-component-tester').gulp.init(gulp, ['lint']);
