@@ -512,125 +512,125 @@ limitations under the License.
   <script src="bower_components/filter-behavior/filter-behavior.js"></script>
 
   <script>
-  (function(document) {
-    /* globals _, DigBehaviors */
-    var app = document.querySelector('#app');
+    (function(document) {
+      /* globals _, DigBehaviors */
+      var app = document.querySelector('#app');
 
-    app.blurImages = false;
+      app.blurImages = false;
 
-    app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
+      app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
 
-    app.buildArray = DigBehaviors.ArrayBehavior.buildArray;
+      app.buildArray = DigBehaviors.ArrayBehavior.buildArray;
 
-    app.buildMoreLikeThisValue = function(title, content) {
-      // Remove special characters.
-      return (title + ' ' + content).replace(/[^\w\s]/gi, '');
-    };
+      app.buildMoreLikeThisValue = function(title, content) {
+        // Remove special characters.
+        return (title + ' ' + content).replace(/[^\w\s]/gi, '');
+      };
 
-    app.concat = function(a, b) {
-      return a + b;
-    };
+      app.concat = function(a, b) {
+        return a + b;
+      };
 
-    app.createAuthHeader = function(username, password) {
-      if(username && password) {
-        return {
-          'Authorization': 'Basic ' + btoa(username + ':' + password)
-        };
-      }
-      return {};
-    };
+      app.createAuthHeader = function(username, password) {
+        if(username && password) {
+          return {
+            'Authorization': 'Basic ' + btoa(username + ':' + password)
+          };
+        }
+        return {};
+      };
 
-    app.exists = function(object) {
-      return typeof object !== 'undefined';
-    };
+      app.exists = function(object) {
+        return typeof object !== 'undefined';
+      };
 
-    app.findDomain = function(parameters, serverConfig) {
-      return parameters.domain || parameters.project || serverConfig.defaultProject;
-    };
+      app.findDomain = function(parameters, serverConfig) {
+        return parameters.domain || parameters.project || serverConfig.defaultProject;
+      };
 
-    app.isImage = function(type) {
-      return type === 'image';
-    };
+      app.isImage = function(type) {
+        return type === 'image';
+      };
 
-    app.isLocation = function(type) {
-      return type === 'location';
-    };
+      app.isLocation = function(type) {
+        return type === 'location';
+      };
 
-    app.isOther = function(type) {
-      return !app.isImage(type) && !app.isLocation(type);
-    };
+      app.isOther = function(type) {
+        return !app.isImage(type) && !app.isLocation(type);
+      };
 
-    app.noData = function(object) {
-      return _.isEmpty(object);
-    };
+      app.noData = function(object) {
+        return _.isEmpty(object);
+      };
 
-    /************* MENU *************/
-    app.toggleMenu = function() {
-      if(this.$.menuDropdown.style.display === 'none') {
-        this.$.menuDropdown.open();
-      } else {
+      /************* MENU *************/
+      app.toggleMenu = function() {
+        if(this.$.menuDropdown.style.display === 'none') {
+          this.$.menuDropdown.open();
+        } else {
+          this.$.menuDropdown.close();
+        }
+      };
+
+      app.reloadClientConfig = function() {
+        app.set('clientConfig', {});
+      };
+
+      app.openDataInfoDialog = function() {
         this.$.menuDropdown.close();
-      }
-    };
-
-    app.reloadClientConfig = function() {
-      app.set('clientConfig', {});
-    };
-
-    app.openDataInfoDialog = function() {
-      this.$.menuDropdown.close();
-      this.$.dataInfoDialog.open();
-    };
-
-    app.openTagsDialog = function() {
-      this.$.menuDropdown.close();
-      this.$.tagManager.openDialog();
-    };
-
-    app.openNewTab = function() {
-      window.open('.');
-    };
-
-    app.emailSupport = function() {
-      window.open('mailto:dig-support@nextcentury.com');
-    };
-    /********************************/
-
-    /******** VISUALIZATIONS ********/
-    app.getImageSectionTitleTransformConfig = function(totalCount) {
-      return {
-        name: 'Image',
-        namePlural: 'Images',
-        totalCount: totalCount
+        this.$.dataInfoDialog.open();
       };
-    };
 
-    app.getSectionTitleTransformConfig = function(searchFieldsObject, totalCount) {
-      return {
-        name: searchFieldsObject.title,
-        namePlural: searchFieldsObject.titlePlural,
-        totalCount: totalCount
+      app.openTagsDialog = function() {
+        this.$.menuDropdown.close();
+        this.$.tagManager.openDialog();
       };
-    };
 
-    app.getSectionTitleTransformFunction = function(size, config) {
-      var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-      var totalCountString = config.totalCount && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
-      return sizeString + totalCountString + ' ' + (size === 1 ? config.name : config.namePlural);
-    };
-
-    app.createExtractionsConfig = function(entityConfig, id) {
-      return {
-        entity: entityConfig,
-        id: id
+      app.openNewTab = function() {
+        window.open('.');
       };
-    };
 
-    app.getBlurStyleClass = function(blur, large) {
-      return (blur ? (large ? 'large-blur' : 'small-blur') : '');
-    };
-    /********************************/
-  })(document);
+      app.emailSupport = function() {
+        window.open('mailto:dig-support@nextcentury.com');
+      };
+      /********************************/
+
+      /******** VISUALIZATIONS ********/
+      app.getImageSectionTitleTransformConfig = function(totalCount) {
+        return {
+          name: 'Image',
+          namePlural: 'Images',
+          totalCount: totalCount
+        };
+      };
+
+      app.getSectionTitleTransformConfig = function(searchFieldsObject, totalCount) {
+        return {
+          name: searchFieldsObject.title,
+          namePlural: searchFieldsObject.titlePlural,
+          totalCount: totalCount
+        };
+      };
+
+      app.getSectionTitleTransformFunction = function(size, config) {
+        var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        var totalCountString = config.totalCount && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
+        return sizeString + totalCountString + ' ' + (size === 1 ? config.name : config.namePlural);
+      };
+
+      app.createExtractionsConfig = function(entityConfig, id) {
+        return {
+          entity: entityConfig,
+          id: id
+        };
+      };
+
+      app.getBlurStyleClass = function(blur, large) {
+        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+      };
+      /********************************/
+    })(document);
   </script>
 </body>
 

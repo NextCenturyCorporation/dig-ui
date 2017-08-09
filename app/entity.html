@@ -580,149 +580,149 @@ limitations under the License.
   <script src="bower_components/filter-behavior/filter-behavior.js"></script>
 
   <script>
-  (function(document) {
-    /* globals _, DigBehaviors */
-    var app = document.querySelector('#app');
+    (function(document) {
+      /* globals _, DigBehaviors */
+      var app = document.querySelector('#app');
 
-    app.blurImages = false;
-    app.processRequest = false;
+      app.blurImages = false;
+      app.processRequest = false;
 
-    app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
+      app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
 
-    if(!app.params.state) {
-      app.processRequest = true;
-    }
-
-    app.buildArray = DigBehaviors.ArrayBehavior.buildArray;
-
-    app.filtersBuilderCallback = {
-      terms: DigBehaviors.FilterBehavior.getEntityPageFilterItems,
-      dates: DigBehaviors.FilterBehavior.getEntityPageFilterItems
-    };
-
-    app.concat = function(a, b) {
-      return a + b;
-    };
-
-    app.createAuthHeader = function(username, password) {
-      if(username && password) {
-        return {
-          'Authorization': 'Basic ' + btoa(username + ':' + password)
-        };
+      if(!app.params.state) {
+        app.processRequest = true;
       }
-      return {};
-    };
 
-    app.exists = function(object) {
-      return typeof object !== 'undefined';
-    };
+      app.buildArray = DigBehaviors.ArrayBehavior.buildArray;
 
-    app.findDomain = function(parameters, serverConfig) {
-      return parameters.domain || parameters.project || serverConfig.defaultProject;
-    };
+      app.filtersBuilderCallback = {
+        terms: DigBehaviors.FilterBehavior.getEntityPageFilterItems,
+        dates: DigBehaviors.FilterBehavior.getEntityPageFilterItems
+      };
 
-    app.noData = function(object) {
-      return _.isEmpty(object);
-    };
+      app.concat = function(a, b) {
+        return a + b;
+      };
 
-    /************* MENU *************/
-    app.toggleMenu = function() {
-      if(this.$.menuDropdown.style.display === 'none') {
-        this.$.menuDropdown.open();
-      } else {
+      app.createAuthHeader = function(username, password) {
+        if(username && password) {
+          return {
+            'Authorization': 'Basic ' + btoa(username + ':' + password)
+          };
+        }
+        return {};
+      };
+
+      app.exists = function(object) {
+        return typeof object !== 'undefined';
+      };
+
+      app.findDomain = function(parameters, serverConfig) {
+        return parameters.domain || parameters.project || serverConfig.defaultProject;
+      };
+
+      app.noData = function(object) {
+        return _.isEmpty(object);
+      };
+
+      /************* MENU *************/
+      app.toggleMenu = function() {
+        if(this.$.menuDropdown.style.display === 'none') {
+          this.$.menuDropdown.open();
+        } else {
+          this.$.menuDropdown.close();
+        }
+      };
+
+      app.reloadClientConfig = function() {
+        app.set('clientConfig', {});
+      };
+
+      app.openDataInfoDialog = function() {
         this.$.menuDropdown.close();
-      }
-    };
-
-    app.reloadClientConfig = function() {
-      app.set('clientConfig', {});
-    };
-
-    app.openDataInfoDialog = function() {
-      this.$.menuDropdown.close();
-      this.$.dataInfoDialog.open();
-    };
-
-    app.openStateHistoryDialog = function() {
-      this.$.menuDropdown.close();
-      this.$.stateManager.openStateHistory();
-    };
-
-    app.openTagsDialog = function() {
-      this.$.menuDropdown.close();
-      this.$.tagManager.openDialog();
-    };
-
-    app.openNewTab = function() {
-      window.open('.');
-    };
-
-    app.emailSupport = function() {
-      window.open('mailto:dig-support@nextcentury.com');
-    };
-    /********************************/
-
-    /******** VISUALIZATIONS ********/
-    app.getSectionTitleTransformConfig = function(pageConfig, searchFieldsObject, totalCount) {
-      return {
-        name: searchFieldsObject.title,
-        namePlural: searchFieldsObject.titlePlural,
-        sayOther: (pageConfig && pageConfig.key === searchFieldsObject.key),
-        totalCount: totalCount
+        this.$.dataInfoDialog.open();
       };
-    };
 
-    app.getSectionTitleTransformFunction = function(size, config) {
-      var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-      var totalCountString = config.totalCount && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
-      return sizeString + totalCountString + (config.sayOther ? ' Other ' : ' ') + (size === 1 ? config.name : config.namePlural);
-    };
-
-    app.createExtractionsConfig = function(entityConfig, pageConfig, id) {
-      return {
-        entity: entityConfig,
-        page: pageConfig,
-        id: id
+      app.openStateHistoryDialog = function() {
+        this.$.menuDropdown.close();
+        this.$.stateManager.openStateHistory();
       };
-    };
 
-    app.createHistogramConfig = function(dateConfig, entityConfig, pageConfig, id) {
-      return {
-        date: dateConfig,
-        entity: entityConfig,
-        page: pageConfig,
-        id: id
+      app.openTagsDialog = function() {
+        this.$.menuDropdown.close();
+        this.$.tagManager.openDialog();
       };
-    };
 
-    app.showDoubleBarChart = function(searchFieldsConfig) {
-      return searchFieldsConfig.link === 'entity';
-    };
+      app.openNewTab = function() {
+        window.open('.');
+      };
 
-    app.getBarTimelineSectionTitle = function(entity, date) {
-      return entity + ' by ' + date + ' Timeline';
-    };
+      app.emailSupport = function() {
+        window.open('mailto:dig-support@nextcentury.com');
+      };
+      /********************************/
 
-    app.getBlurStyleClass = function(blur, large) {
-      return (blur ? (large ? 'large-blur' : 'small-blur') : '');
-    };
-    /********************************/
+      /******** VISUALIZATIONS ********/
+      app.getSectionTitleTransformConfig = function(pageConfig, searchFieldsObject, totalCount) {
+        return {
+          name: searchFieldsObject.title,
+          namePlural: searchFieldsObject.titlePlural,
+          sayOther: (pageConfig && pageConfig.key === searchFieldsObject.key),
+          totalCount: totalCount
+        };
+      };
 
-    /************************* START STATE HISTORY *************************/
-    window.onpopstate = function() {
-      // TODO: refreshing for now. Need to address issues with interrupting logging entries -- perhaps a better
-      // approach would to be not to reload the page, but to rerun the query with the changed parameters + make
-      // sure logging is done correctly in this case, which may involve adding processRequest to create-log-message.
-      window.location.reload();
-    };
+      app.getSectionTitleTransformFunction = function(size, config) {
+        var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        var totalCountString = config.totalCount && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
+        return sizeString + totalCountString + (config.sayOther ? ' Other ' : ' ') + (size === 1 ? config.name : config.namePlural);
+      };
 
-    window.onload = function() {
-      if(window.history.state && window.history.state.stateHistory) {
-        app.stateHistory = window.history.state.stateHistory;
-      }
-    };
-    /************************** END STATE HISTORY **************************/
-  })(document);
+      app.createExtractionsConfig = function(entityConfig, pageConfig, id) {
+        return {
+          entity: entityConfig,
+          page: pageConfig,
+          id: id
+        };
+      };
+
+      app.createHistogramConfig = function(dateConfig, entityConfig, pageConfig, id) {
+        return {
+          date: dateConfig,
+          entity: entityConfig,
+          page: pageConfig,
+          id: id
+        };
+      };
+
+      app.showDoubleBarChart = function(searchFieldsConfig) {
+        return searchFieldsConfig.link === 'entity';
+      };
+
+      app.getBarTimelineSectionTitle = function(entity, date) {
+        return entity + ' by ' + date + ' Timeline';
+      };
+
+      app.getBlurStyleClass = function(blur, large) {
+        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+      };
+      /********************************/
+
+      /************************* START STATE HISTORY *************************/
+      window.onpopstate = function() {
+        // TODO: refreshing for now. Need to address issues with interrupting logging entries -- perhaps a better
+        // approach would to be not to reload the page, but to rerun the query with the changed parameters + make
+        // sure logging is done correctly in this case, which may involve adding processRequest to create-log-message.
+        window.location.reload();
+      };
+
+      window.onload = function() {
+        if(window.history.state && window.history.state.stateHistory) {
+          app.stateHistory = window.history.state.stateHistory;
+        }
+      };
+      /************************** END STATE HISTORY **************************/
+    })(document);
   </script>
 </body>
 
