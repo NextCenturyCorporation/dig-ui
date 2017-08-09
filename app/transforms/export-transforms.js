@@ -35,77 +35,61 @@ var exportTransforms = (function(_) {
       }, []);
     },
 
-    createExportDataForCsv: function(searchData) {
+    createExportDataForCsv: function(searchData, searchFields) {
       var linkPrefix = window.location.hostname + ':' + window.location.port;
-      var exportData = [[
-        'ad url',
-        'dig url',
-        'title',
-        'dates',
-        'website',
-        'locations',
-        'telephone numbers',
-        'email addresses',
-        'prices',
-        'names',
-        'ages',
-        'genders',
-        'ethnicities',
-        'eye colors',
-        'hair colors',
-        'heights',
-        'weights',
-        'social media ids',
-        'review ids',
-        'description'
-      ]];
+      var exportData = [];
+      var header = ['Ad url', 'Dig url', 'Title'];
+
+      searchFields.forEach(function(field) {
+        if(field.result === 'header') {
+          header.push(field.title);
+        }
+      });
+
+      searchFields.forEach(function(field) {
+        if(field.result === 'detail') {
+          header.push(field.title);
+        }
+      });
+
+      header.push('Description');
+      header.push('Images');
+      exportData.push(header);
 
       searchData.forEach(function(result) {
-        var getExtractionTextList = function(extractions, property) {
-          return extractions.map(function(extraction) {
-            return extraction[property || 'text'];
-          }).join('; ');
-        };
-
-        var dates = getExtractionTextList(result.dates);
-        var locations = getExtractionTextList(result.locations);
-        var phones = getExtractionTextList(result.phones);
-        var emails = getExtractionTextList(result.emails);
-        var prices = getExtractionTextList(result.prices);
-        var names = getExtractionTextList(result.names);
-        var ages = getExtractionTextList(result.ages);
-        var genders = getExtractionTextList(result.genders);
-        var ethnicities = getExtractionTextList(result.ethnicities);
-        var eyeColors = getExtractionTextList(result.eyeColors);
-        var hairColors = getExtractionTextList(result.hairColors);
-        var heights = getExtractionTextList(result.heights);
-        var weights = getExtractionTextList(result.weights);
-        var socialIds = getExtractionTextList(result.socialIds);
-        var reviewIds = getExtractionTextList(result.reviewIds);
-        var description = result.description.replace(/\s/g, ' ');
-
-        exportData.push([
+        var exportDataBody = [
             result.url,
             linkPrefix + result.link,
             result.title,
-            dates,
-            result.domain,
-            locations,
-            phones,
-            emails,
-            prices,
-            names,
-            ages,
-            genders,
-            ethnicities,
-            eyeColors,
-            hairColors,
-            heights,
-            weights,
-            socialIds,
-            reviewIds,
-            description
-        ]);
+        ];
+        var imageLinks = (result.images || []).map(function(image) {
+
+          return image.source.replace('https://s3.amazonaws.com/', '');
+        }).join('; ');
+
+        result.headerExtractions.forEach(function(elementArray) {
+          var data = '';
+          elementArray.data.forEach(function(element) {
+            data += element.text + "; "
+          });
+
+          exportDataBody.push(data);
+        });
+
+        result.detailExtractions.forEach(function(elementArray) {
+          var data = '';
+          elementArray.data.forEach(function(element) {
+            data += element.text + "; "
+          });
+
+          exportDataBody.push(data);
+        });
+
+        exportDataBody.push(result.description.replace(/\s/g, ' '));
+        exportDataBody.push(imageLinks);
+        exportData.push(exportDataBody);
+
+        console.log(exportData);
       });
 
       return exportData;
@@ -138,6 +122,22 @@ var exportTransforms = (function(_) {
         };
 
         result.headerExtractions.forEach(function(elementArray) {
+          var data = '';
+          elementArray.data.forEach(function(element) {
+            data += element.text + ', ';
+          });
+
+          data = data.substring(0, data.length - 2);
+
+          if(data !== '') {
+            item.paragraphs.push({
+              label: elementArray.key + ': ',
+              value: data
+            });
+          }
+        });
+
+        result.detailExtractions.forEach(function(elementArray) {
           var data = '';
           elementArray.data.forEach(function(element) {
             data += element.text + ', ';

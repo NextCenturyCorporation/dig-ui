@@ -353,6 +353,8 @@ limitations under the License.
               <export-button
                 client="[[esClient]]"
                 data="[[shownRecords]]"
+                search-fields="[[searchFields]]"
+                transform-csv-function="[[transforms.export.createExportDataForCsv]]"
                 transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
               </export-button>
             </div>
