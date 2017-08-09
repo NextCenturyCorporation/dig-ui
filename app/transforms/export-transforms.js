@@ -57,16 +57,15 @@ var exportTransforms = (function(_) {
       exportData.push(header);
 
       searchData.forEach(function(result) {
+        var imageLinks = (result.images || []).map(function(image) {
+
+          return image.source.replace('https://s3.amazonaws.com/', '');
+        }).join('; ');
         var exportDataBody = [
             result.url,
             linkPrefix + result.link,
             result.title,
         ];
-        var imageLinks = (result.images || []).map(function(image) {
-
-          return image.source.replace('https://s3.amazonaws.com/', '');
-        }).join('; ');
-
         result.headerExtractions.forEach(function(elementArray) {
           var data = '';
           elementArray.data.forEach(function(element) {
@@ -88,8 +87,6 @@ var exportTransforms = (function(_) {
         exportDataBody.push(result.description.replace(/\s/g, ' '));
         exportDataBody.push(imageLinks);
         exportData.push(exportDataBody);
-
-        console.log(exportData);
       });
 
       return exportData;

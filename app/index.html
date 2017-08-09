@@ -322,9 +322,16 @@ limitations under the License.
               <export-button
                 client="[[esClient]]"
                 data="[[shownRecords]]"
+                filter-list="[[buildArray()]]"
+                index-name="[[esConfig.esIndex]]"
+                index-types="[[esConfig.esType]]"
                 search-fields="[[searchFields]]"
+                search-parameters="[[searchParameters]]"
+                source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
                 transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
+                transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
+                transform-search-input-function="[[transforms.export.createBulkSearchData]]"
+                transform-search-results-function="[[transforms.offer.offers]]">
               </export-button>
             </div>
 
@@ -366,6 +373,7 @@ limitations under the License.
       var app = document.querySelector('#app');
 
       app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
+      app.buildArray = DigBehaviors.ArrayBehavior.buildArray;
 
       app.createAuthHeader = function(username, password) {
         if(username && password) {
