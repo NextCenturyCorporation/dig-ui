@@ -48,10 +48,12 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       provenance: item.provenance
     };
     if(config.type !== 'url') {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var userClassification = '' + item.human_annotation;
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
       extraction.classifications = {
-        database: '',
         type: config.key,
-        user: ''
+        user: (userClassification === '1' ? 'positive' : (userClassification === '0' ? 'negative' : undefined))
       };
     }
     if(config.type === 'location') {
@@ -173,6 +175,20 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     };
   }
 
+  function getDocumentTags(result, path) {
+    var tags = _.get(result, path, {});
+    return _.keys(tags).reduce(function(object, tag) {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var userClassification = '' + tags[tag].human_annotation;
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      object[tag] = {
+        type: 'ad',
+        user: (userClassification === '1' ? 'positive' : (userClassification === '0' ? 'negative' : undefined))
+      };
+      return object;
+    }, {});
+  }
+
   function getTitleOrDescription(type, searchFields, result, path, highlightMapping) {
     var searchFieldsObject = _.find(searchFields, function(object) {
       return object.result === type;
@@ -239,11 +255,11 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       id: id,
       url: _.get(result, '_source.url'),
       rank: rank ? rank.toFixed(2) : rank,
-      type: 'document',
+      type: 'ad',
       icon: '',
-      link: commonTransforms.getLink(id, 'document'),
+      link: commonTransforms.getLink(id, 'ad'),
       styleClass: '',
-      cached: commonTransforms.getLink(id, 'cached'),
+      tags: getDocumentTags(result, '_source.knowledge_graph._tags'),
       esData: esDataEndpoint,
       title: title.text || 'No Title',
       description: description.text || 'No Description',
@@ -300,14 +316,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       highlightedText: description.highlight,
       text: documentObject.description
     });
-
-    if(documentObject.cached) {
-      documentObject.details.push({
-        name: 'Cached Ad Webpage',
-        link: documentObject.cached,
-        text: 'Open'
-      });
-    }
 
     // TODO Will the images be moved from _source.objects to _source.knowledge_graph?
     var images = _.get(result, '_source.objects', []);
@@ -411,12 +419,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     documents: function(data, searchFields) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
-        return data.hits.hits.map(function(result) {
+        var returnData = data.hits.hits.map(function(result) {
           // Data returned by the searchResults function from the searchTransforms will have a "fields" property.
           return getDocumentObject(result, searchFields, false, data.fields);
         }).filter(function(object) {
           return !_.isUndefined(object);
         });
+        return returnData;
       }
       return [];
     },
@@ -448,16 +457,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     cache: function(data) {
-      if(data && data.hits.hits.length > 0) {
-        return {
-          id: _.get(data.hits.hits[0], '_id', ''),
-          html: _.get(data.hits.hits[0], '_source.raw_content', '')
-        };
+      if(data && data.hits && data.hits.hits && data.hits.hits.length) {
+        return _.get(data.hits.hits[0], '_source.raw_content', '');
       }
-      return {
-        id: '',
-        html: ''
-      };
+      return '';
     }
   };
 });

@@ -45,7 +45,10 @@ module.exports = function(app) {
       esHost: serverConfig.esHost,
       imageServiceAuth: serverConfig.imageServiceAuth,
       imageServiceHost: serverConfig.imageServiceHost,
-      searchConfig: serverConfig.searchConfig
+      searchConfig: serverConfig.searchConfig,
+      tagsEntityEndpoint: serverConfig.tagsEntityEndpoint,
+      tagsExtractionEndpoint: serverConfig.tagsExtractionEndpoint,
+      tagsListEndpoint: serverConfig.tagsListEndpoint
     });
   });
 

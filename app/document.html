@@ -236,6 +236,17 @@ limitations under the License.
       combine-function="[[transforms.entity.documents]]">
     </json-combine>
 
+    <tag-manager
+      id="tagManager"
+      auth-username="[[serverConfig.configUsername]]"
+      auth-password="[[serverConfig.configPassword]]"
+      entity-endpoint="[[serverConfig.tagsEntityEndpoint]]"
+      extraction-endpoint="[[serverConfig.tagsExtractionEndpoint]]"
+      list-endpoint="[[serverConfig.tagsListEndpoint]]"
+      project="[[domain]]"
+      tag-manager="{{tagManager}}">
+    </tag-manager>
+
     <!-- Main Content -->
     <div class="entity">
 
@@ -244,227 +255,236 @@ limitations under the License.
           <loading-spinner show type="Page"></loading-spinner>
         </template>
 
-        <template is="dom-if" if="[[document.id]]">
-          <!-- Entity header -->
-          <div class="paper-header layout horizontal">
+        <!-- Entity header -->
+        <div class="paper-header layout horizontal">
 
-            <!-- Entity title -->
-            <div class="layout horizontal center flex">
-              <div class="iron-icon-huge entity-grey">
-                <iron-icon icon="icons:assignment"></iron-icon>
-              </div>
-              <div class="page-name">
-                <div class="paper-font-headline">
-                  [[document.title]]
-                </div>
+          <!-- Entity title -->
+          <div class="layout horizontal center flex">
+            <div class="iron-icon-huge entity-grey">
+              <iron-icon icon="icons:assignment"></iron-icon>
+            </div>
+            <div class="page-name">
+              <div class="paper-font-headline">
+                [[document.title]]
               </div>
             </div>
-
-            <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
-
-            <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
-              <div class="dropdown-content">
-                <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
-                  <iron-icon icon="refresh" item-icon></iron-icon>
-                  Reload the DIG Configuration
-                </paper-icon-item>
-
-                <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-                  <iron-icon icon="open-in-new" item-icon></iron-icon>
-                  Open a DIG Search Page in a New Tab
-                </paper-icon-item>
-
-                <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
-                  <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
-                  Contact DIG Support
-                </paper-icon-item>
-              </div>
-            </iron-dropdown>
           </div>
 
-          <!-- Entity body -->
-          <div class="entity-page">
+          <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
-            <div class="content">
+          <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
+            <div class="dropdown-content">
+              <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
+                <iron-icon icon="refresh" item-icon></iron-icon>
+                Reload the DIG Configuration
+              </paper-icon-item>
 
-              <!-- Left Pane -->
-              <div class="flex layout vertical">
-                <template is="dom-repeat" items="[[documentInfo]]">
-                  <template is="dom-if" if="[[isLocation(item.config.type)]]">
-                    <section-and-map
-                      show-copy
-                      icon="[[item.config.icon]]"
-                      style-class="[[item.config.styleClass]]"
-                      text-property="textAndCount"
-                      transform-config="[[getSectionTitleTransformConfig(item.config)]]"
-                      transform-function="[[getSectionTitleTransformFunction]]"
-                      data="[[item.data]]">
+              <paper-icon-item title="Open Training Options" on-tap="openTagsDialog">
+                <iron-icon icon="fa:check-circle" item-icon></iron-icon>
+                Open Training Options
+              </paper-icon-item>
 
-                      <detail-subsection
-                        entity-id="[[document.id]]"
-                        icon-style-class-property="styleClass"
-                        extractions="[[item.data]]">
-                      </detail-subsection>
-                    </section-and-map>
-                  </template>
+              <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+                <iron-icon icon="open-in-new" item-icon></iron-icon>
+                Open a DIG Search Page in a New Tab
+              </paper-icon-item>
 
-                  <template is="dom-if" if="[[isImage(item.config.type)]]">
-                    <section-and-title
-                      icon="[[item.config.icon]]"
-                      style-class="[[item.config.styleClass]]"
-                      transform-config="[[getSectionTitleTransformConfig(item.config, item.data.length)]]"
-                      transform-function="[[getSectionTitleTransformFunction]]"
-                      data="[[item.data]]">
+              <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+                <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
+                Contact DIG Support
+              </paper-icon-item>
+            </div>
+          </iron-dropdown>
+        </div>
 
-                      <image-gallery
-                        small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-                        large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                        images="[[item.data]]">
-                      </image-gallery>
-                    </section-and-title>
-                  </template>
+        <!-- Entity body -->
+        <div class="document-page">
 
-                  <template is="dom-if" if="[[isOther(item.config.type)]]">
-                    <section-and-title
-                      show-copy
-                      icon="[[item.config.icon]]"
-                      style-class="[[item.config.styleClass]]"
-                      transform-config="[[getSectionTitleTransformConfig(item.config)]]"
-                      transform-function="[[getSectionTitleTransformFunction]]"
-                      data="[[item.data]]">
+          <div class="content">
 
-                      <detail-subsection
-                        entity-id="[[document.id]]"
-                        icon-style-class-property="styleClass"
-                        extractions="[[item.data]]">
-                      </detail-subsection>
-                    </section-and-title>
-                  </template>
+            <!-- Left Pane -->
+            <div class="flex layout vertical">
+              <template is="dom-repeat" items="[[documentInfo]]">
+                <template is="dom-if" if="[[isLocation(item.config.type)]]">
+                  <section-and-map
+                    show-copy
+                    icon="[[item.config.icon]]"
+                    style-class="[[item.config.styleClass]]"
+                    text-property="textAndCount"
+                    transform-config="[[getSectionTitleTransformConfig(item.config)]]"
+                    transform-function="[[getSectionTitleTransformFunction]]"
+                    data="[[item.data]]">
+
+                    <detail-subsection
+                      entity-id="[[document.id]]"
+                      icon-style-class-property="styleClass"
+                      extractions="[[item.data]]">
+                    </detail-subsection>
+                  </section-and-map>
                 </template>
 
-                <section-container>
-                  <section-title
-                    icon="icons:assignment"
-                    style-class="entity-grey"
-                    section-title="[[revisionsHeader]]">
-
-                    <!-- TODO Export Button -->
-                  </section-title>
-
-                  <template is="dom-if" if="[[revisionsError]]">
-                    <elastic-error error="[[revisionsError]]" message="{{revisionsErrorMessage}}"></elastic-error>
-                    <div>[[revisionsErrorMessage]]</div>
-                  </template>
-
-                  <template is="dom-if" if="[[revisionsTotal]]">
-                    <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
-                    <info-revisions></info-revisions>
-                  </template>
-
-                  <result-list
-                    text-property="title"
-                    query-results="[[revisions]]"
-                    total-results="{{revisionsTotal}}"
-                    page="{{revisionPageNumber}}"
-                    page-size="25"
-                    loading="[[revisionsLoading]]"
-                    pretty-name="Revisions"
-                    pretty-name-singular="Revision"
-                    header="{{revisionsHeader}}">
-                  </result-list>
-                </section-container>
-              </div>
-
-              <!-- Right Pane -->
-              <div class="flex layout vertical">
-                <section-and-title
-                  icon="icons:assignment"
-                  style-class="entity-grey"
-                  section-title="Details">
-
-                  <detail-subsection
-                    entity-id="[[document.id]]"
-                    link="[[document.url]]"
-                    header="Webpage"
-                    header-style-class="entity-light-green"
-                    detail="[[document.url]]">
-                  </detail-subsection>
-
-                  <template is="dom-if" if="[[document.esData]]">
-                    <detail-subsection
-                      entity-id="[[document.id]]"
-                      link="[[document.esData]]"
-                      detail="Open Raw ES Document">
-                    </detail-subsection>
-                  </template>
-
-                  <template is="dom-if" if="[[document.cached]]">
-                    <detail-subsection
-                      entity-id="[[document.id]]"
-                      link="[[document.cached]]"
-                      detail="Open Cached Webpage">
-                    </detail-subsection>
-                  </template>
-
-                  <detail-subsection
-                    entity-id="[[document.id]]"
-                    header="Description"
-                    detail="[[document.description]]">
-                  </detail-subsection>
-                </section-and-title>
-
-                <template is="dom-if" if="[[document.images]]">
+                <template is="dom-if" if="[[isImage(item.config.type)]]">
                   <section-and-title
                     icon="[[item.config.icon]]"
                     style-class="[[item.config.styleClass]]"
-                    transform-config="[[getImageSectionTitleTransformConfig(document.images.length)]]"
+                    transform-config="[[getSectionTitleTransformConfig(item.config, item.data.length)]]"
                     transform-function="[[getSectionTitleTransformFunction]]"
                     data="[[item.data]]">
 
                     <image-gallery
                       small-image-style-class="[[getBlurStyleClass(blurImages)]]"
                       large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                      images="[[document.images]]">
+                      images="[[item.data]]">
                     </image-gallery>
                   </section-and-title>
                 </template>
 
-                <section-container>
-                  <section-title
-                    icon="icons:assignment"
-                    style-class="entity-grey"
-                    section-title="[[moreLikeThisHeader]]">
+                <template is="dom-if" if="[[isOther(item.config.type)]]">
+                  <section-and-title
+                    show-copy
+                    icon="[[item.config.icon]]"
+                    style-class="[[item.config.styleClass]]"
+                    transform-config="[[getSectionTitleTransformConfig(item.config)]]"
+                    transform-function="[[getSectionTitleTransformFunction]]"
+                    data="[[item.data]]">
+
+                    <detail-subsection
+                      entity-id="[[document.id]]"
+                      icon-style-class-property="styleClass"
+                      extractions="[[item.data]]">
+                    </detail-subsection>
+                  </section-and-title>
+                </template>
+              </template>
+
+              <section-container>
+                <section-title
+                  icon="icons:assignment"
+                  style-class="entity-grey"
+                  section-title="[[revisionsHeader]]">
+
+                  <!-- TODO Export Button -->
+                </section-title>
+
+                <template is="dom-if" if="[[revisionsError]]">
+                  <elastic-error error="[[revisionsError]]" message="{{revisionsErrorMessage}}"></elastic-error>
+                  <div>[[revisionsErrorMessage]]</div>
+                </template>
+
+                <template is="dom-if" if="[[revisionsTotal]]">
+                  <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
+                  <info-revisions></info-revisions>
+                </template>
+
+                <result-list
+                  text-property="title"
+                  query-results="[[revisions]]"
+                  total-results="{{revisionsTotal}}"
+                  page="{{revisionPageNumber}}"
+                  page-size="25"
+                  loading="[[revisionsLoading]]"
+                  pretty-name="Revisions"
+                  pretty-name-singular="Revision"
+                  header="{{revisionsHeader}}"
+                  cache-transform="[[transforms.entity.cache]]"
+                  client="[[esClient]]"
+                  index-name="[[esConfig.esIndex]]"
+                  index-types="[[esConfig.esType]]"
+                  search-fields="[[searchFields]]"
+                  source-include='["raw_content"]'
+                  tag-manager="[[tagManager]]">
+                </result-list>
+              </section-container>
+            </div>
+
+            <!-- Right Pane -->
+            <div class="flex layout vertical">
+              <section-container>
+                <build-and-run-query
+                  fields='"doc_id"'
+                  values="[[document.id]]"
+                  client="[[esClient]]"
+                  index-name="[[esConfig.esIndex]]"
+                  index-types="[[esConfig.esType]]"
+                  aggregations="[]"
+                  filters="[]"
+                  source-include='["raw_content"]'
+                  transform-config="[[searchFields]]"
+                  transform-function="[[transforms.entity.cache]]"
+                  error="{{cachedPageError}}"
+                  loading="{{cachedPageLoading}}"
+                  results="{{cachedPage}}"
+                  total="{{cachedPageTotal}}">
+                </build-and-run-query>
+
+                <single-result
+                  hide-header
+                  open
+                  cached-page="[[cachedPage]]"
+                  icon="[[document.icon]]"
+                  link="[[document.link]]"
+                  result-id="[[document.id]]"
+                  style-class="[[document.styleClass]]"
+                  tags="[[document.tags]]"
+                  type="[[document.type]]"
+                  details="[[document.details]]"
+                  images="[[document.images]]"
+                  small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                  large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                  tag-manager="[[tagManager]]">
+                </single-result>
+
+                <tag-entity-buttons
+                  class="layout horizontal center-justified"
+                  entity-id="[[document.id]]"
+                  entity-type="[[document.type]]"
+                  tag-manager="[[tagManager]]"
+                  tags="[[document.tags]]">
+                </tag-entity-buttons>
+              </section-container>
+
+              <section-container>
+                <section-title
+                  icon="icons:assignment"
+                  style-class="entity-grey"
+                  section-title="[[moreLikeThisHeader]]">
 
 
-                    <!-- TODO Export Button -->
-                  </section-title>
+                  <!-- TODO Export Button -->
+                </section-title>
 
-                  <template is="dom-if" if="[[moreLikeThisError]]">
-                    <elastic-error error="[[moreLikeThisError]]" message="{{moreLikeThisErrorMessage}}"></elastic-error>
-                    <div>[[moreLikeThisErrorMessage]]</div>
-                  </template>
+                <template is="dom-if" if="[[moreLikeThisError]]">
+                  <elastic-error error="[[moreLikeThisError]]" message="{{moreLikeThisErrorMessage}}"></elastic-error>
+                  <div>[[moreLikeThisErrorMessage]]</div>
+                </template>
 
-                  <template is="dom-if" if="[[moreLikeThisTotal]]">
-                    <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
-                    <info-similar-documents></info-similar-documents>
-                  </template>
+                <template is="dom-if" if="[[moreLikeThisTotal]]">
+                  <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
+                  <info-similar-documents></info-similar-documents>
+                </template>
 
-                  <result-list
-                    text-property="title"
-                    query-results="[[moreLikeThisDocuments]]"
-                    total-results="{{moreLikeThisTotal}}"
-                    page="{{moreLikeThisPageNumber}}"
-                    page-size="25"
-                    loading="[[moreLikeThisLoading]]"
-                    pretty-name="Similar Results"
-                    pretty-name-singular="Similar Result"
-                    header="{{moreLikeThisHeader}}">
-                  </result-list>
-                </section-container>
-              </div>
+                <result-list
+                  text-property="title"
+                  query-results="[[moreLikeThisDocuments]]"
+                  total-results="{{moreLikeThisTotal}}"
+                  page="{{moreLikeThisPageNumber}}"
+                  page-size="25"
+                  loading="[[moreLikeThisLoading]]"
+                  pretty-name="Similar Results"
+                  pretty-name-singular="Similar Result"
+                  header="{{moreLikeThisHeader}}"
+                  cache-transform="[[transforms.entity.cache]]"
+                  client="[[esClient]]"
+                  index-name="[[esConfig.esIndex]]"
+                  index-types="[[esConfig.esType]]"
+                  search-fields="[[searchFields]]"
+                  source-include='["raw_content"]'
+                  tag-manager="[[tagManager]]">
+                </result-list>
+              </section-container>
             </div>
           </div>
-        </template>
+        </div>
       </paper-header-panel>
     </div>
   </template>
@@ -539,6 +559,11 @@ limitations under the License.
 
     app.reloadClientConfig = function() {
       app.set('clientConfig', {});
+    };
+
+    app.openTagsDialog = function() {
+      this.$.menuDropdown.close();
+      this.$.tagManager.openDialog();
     };
 
     app.openNewTab = function() {

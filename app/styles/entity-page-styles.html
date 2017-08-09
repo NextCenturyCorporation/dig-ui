@@ -23,6 +23,7 @@ limitations under the License.
         @apply(--layout-horizontal);
       }
 
+      .document-page,
       .entity-page {
         @apply(--layout-vertical);
       }
@@ -125,6 +126,16 @@ limitations under the License.
         font-size: 14px;
         font-style: italic;
         text-decoration: underline;
+      }
+
+      .document-page tag-entity-buttons ::content .background {
+        background-color: var(--paper-grey-400);
+        border-radius: 5px;
+        display: inline-block;
+        line-height: 30px;
+        margin-top: 10px;
+        max-height: 60px;
+        padding: 5px;
       }
 
       /* Material Design Adaptive Breakpoints */

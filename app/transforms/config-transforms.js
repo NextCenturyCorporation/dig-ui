@@ -280,6 +280,8 @@ var configTransforms = (function(_, commonTransforms) {
         return a.title > b.title ? 1 : (a.title < b.title ? -1 : 0);
       });
 
+      console.log('searchFields', searchFields);
+
       return searchFields;
     },
 

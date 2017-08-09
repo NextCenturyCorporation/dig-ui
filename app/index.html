@@ -188,6 +188,17 @@ limitations under the License.
       client="{{esClient}}">
     </elastic-client>
 
+    <tag-manager
+      id="tagManager"
+      auth-username="[[serverConfig.configUsername]]"
+      auth-password="[[serverConfig.configPassword]]"
+      entity-endpoint="[[serverConfig.tagsEntityEndpoint]]"
+      extraction-endpoint="[[serverConfig.tagsExtractionEndpoint]]"
+      list-endpoint="[[serverConfig.tagsListEndpoint]]"
+      project="[[domain]]"
+      tag-manager="{{tagManager}}">
+    </tag-manager>
+
     <paper-header-panel class="flex" mode="waterfall">
 
       <!-- Search toolbar -->
@@ -217,6 +228,15 @@ limitations under the License.
         </similar-image-search>
         <!-- TODO: add logger, update transform when we're ready to link to image entity pages -->
 
+        <info-data
+          id="dataDialog"
+          client="[[esClient]]"
+          index-name="[[esConfig.esIndex]]"
+          index-types="[[esConfig.esType]]"
+          domain="[[domain]]"
+          sort-field="timestamp_crawl">
+        </info-data>
+
         <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
         <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="60">
@@ -224,6 +244,16 @@ limitations under the License.
             <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
               <iron-icon icon="refresh" item-icon></iron-icon>
               Reload the DIG Configuration
+            </paper-icon-item>
+
+            <paper-icon-item title="View Data Information" on-tap="openDataDialog">
+              <iron-icon icon="icons:info" item-icon></iron-icon>
+              View Data Information
+            </paper-icon-item>
+
+            <paper-icon-item title="Open Training Options" on-tap="openTagsDialog">
+              <iron-icon icon="fa:check-circle" item-icon></iron-icon>
+              Open Training Options
             </paper-icon-item>
 
             <paper-icon-item title="Search on an Image URL or Uploaded Image" on-tap="openSimilarImageSearchDialog">
@@ -247,77 +277,16 @@ limitations under the License.
       <paper-drawer-panel drawer-width="320px">
 
         <!-- Sidebar on left side -->
-        <paper-header-panel drawer>
-          <template is="dom-if" if="[[searchParameters]]">
-            <paper-toolbar class="drawer-header">
-              <div class="layout vertical">
-                <div class="selected-facets-header">Project:  [[findDomain(params, serverConfig)]]</div>
+        <facet-panel drawer
+          facets-query="[[facetsQuery]]"
+          search-keys="[[searchKeys]]"
+          process-request="{{processRequest}}"
+          search-endpoint="[[esConfig.searchEndpoint]]"
+          search-fields="[[searchFields]]"
+          search-parameters="{{searchParameters}}">
 
-                <template is="dom-if" if="[[!noSearchParameters(searchParameters.*)]]">
-                  <div class="selected-facets-header">Search Terms</div>
-                </template>
-
-                <template is="dom-if" if="[[noSearchParameters(searchParameters.*)]]">
-                  <div class="selected-facets-header">No Search Terms</div>
-                </template>
-
-                <div class="layout horizontal wrap">
-                  <template is="dom-repeat" items="[[searchKeys]]">
-                    <selected-facets-display facet-key="[[item]]" facets="{{searchParameters}}"></selected-facets-display>
-                  </template>
-                </div>
-              </div>
-            </paper-toolbar>
-
-            <iron-pages attr-for-selected="data-type" selected="documents">
-              <div data-type="documents">
-                <div class="layout horizontal facet expand-collapse-all" title="Toggle All Facets" on-tap="toggleAllFacetLists">
-                  <span class="flex">Facets</span>
-                  <span>[[getToggleAllFacetsText(facetListsExpanded)]]</span>
-                  <iron-icon icon="[[getToggleAllFacetsIcon(facetListsExpanded)]]"></iron-icon>
-                </div>
-
-                <info-facets></info-facets>
-
-                <template is="dom-repeat" items="[[searchFields]]">
-                  <template is="dom-if" if="[[item.facets]]">
-                    <template is="dom-if" if="[[!equals(item.type, 'date')]]">
-                      <facet-list
-                        class="facet"
-                        query-url="[[esConfig.searchEndpoint]]"
-                        name="[[item.key]]"
-                        title="[[item.title]]"
-                        target="_blank"
-                        result-function="[[item.facetTransform]]"
-                        search-function="[[facetsQuery]]"
-                        search-parameters-property="[[item.key]]"
-                        search-parameters="{{searchParameters}}"
-                        process-request="{{processRequest}}">
-                      </facet-list>
-                    </template>
-
-                    <template is="dom-if" if="[[equals(item.type, 'date')]]">
-                      <date-range-facet
-                        class="facet"
-                        header-title="[[item.title]]"
-                        date-start-key="[[item.dateProperties.start.key]]"
-                        date-start-title="[[item.dateProperties.start.title]]"
-                        date-start-prefix-label="[[item.dateProperties.start.title]]"
-                        date-start-identifier="[[item.dateProperties.start.dateIdentifier]]"
-                        date-end-key="[[item.dateProperties.end.key]]"
-                        date-end-title="[[item.dateProperties.end.title]]"
-                        date-end-prefix-label="[[item.dateProperties.end.title]]"
-                        date-end-identifier="[[item.dateProperties.end.dateIdentifier]]"
-                        search-parameters-property="[[item.key]]"
-                        search-parameters="{{searchParameters}}">
-                      </date-range-facet>
-                    </template>
-                  </template>
-                </template>
-              </div>
-            </iron-pages>
-          </template>
-        </paper-header-panel>
+          <info-facets></info-facets>
+        </facet-panel>
 
         <!-- Main content on right side -->
         <paper-header-panel main id="searchPanel">
@@ -370,7 +339,13 @@ limitations under the License.
               page-size="25"
               loading="[[searchLoading]]"
               header="{{resultListHeader}}"
-              query-config="[[buildQueryConfig(esClient, esConfig, searchFields, transforms)]]">
+              cache-transform="[[transforms.entity.cache]]"
+              client="[[esClient]]"
+              index-name="[[esConfig.esIndex]]"
+              index-types="[[esConfig.esType]]"
+              search-fields="[[searchFields]]"
+              source-include='["raw_content"]'
+              tag-manager="[[tagManager]]">
             </result-list>
           </template>
         </paper-header-panel>
@@ -384,7 +359,6 @@ limitations under the License.
   <!-- Need to include dependencies here for IE -->
   <script src="bower_components/lodash/dist/lodash.js"></script>
   <script src="behaviors/browser-behavior.js"></script>
-  <script src="bower_components/filter-behavior/filter-behavior.js"></script>
 
   <script>
     (function(document) {
@@ -392,15 +366,6 @@ limitations under the License.
       var app = document.querySelector('#app');
 
       app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
-
-
-      app.buildQueryConfig = function(esClient, esConfig, searchFields, transforms) {
-        if(esClient && esConfig && searchFields && transforms) {
-          var cacheTransform = transforms.entity.cache;
-          return {esClient, esConfig, searchFields, cacheTransform};
-        }
-        return undefined;
-      };
 
       app.createAuthHeader = function(username, password) {
         if(username && password) {
@@ -415,10 +380,6 @@ limitations under the License.
         return a + b;
       };
 
-      app.equals = function(a, b) {
-        return a === b;
-      };
-
       app.exists = function(object) {
         return typeof object !== 'undefined';
       };
@@ -431,40 +392,17 @@ limitations under the License.
         return _.isEmpty(object);
       };
 
-      app.noSearchParameters = function() {
-        return DigBehaviors.FilterBehavior.areAllFacetsDisabled(this.searchParameters);
-      };
-
-      /************ FACETS ************/
-      app.facetListsExpanded = true;
-
-      app.toggleAllFacetLists = function() {
-        app.facetListsExpanded = !app.facetListsExpanded;
-        // All facet lists should have the class 'facet'
-        var allFacetListNames = document.querySelectorAll('.facet');
-
-        for(var i = 0, length = allFacetListNames.length; i < length; i++) {
-          allFacetListNames[i].opened = app.facetListsExpanded;
-        }
-      };
-
-      app.getToggleAllFacetsText = function() {
-        return (app.facetListsExpanded ? 'Collapse' : 'Expand') + ' All';
-      };
-
-      app.getToggleAllFacetsIcon = function() {
-        return (app.facetListsExpanded ? 'icons:expand-less' : 'icons:expand-more');
-      };
-      /********************************/
-      /************ MENU OPTIONS ************/
+      /************* MENU *************/
 
       app.openSimilarImageSearchDialog = function() {
         this.$.menuDropdown.close();
         this.$.similarImageSearchDialog.open();
       };
 
-      /********************************/
-      /************* MENU *************/
+      app.getURLWithProject = function(domain) {
+        return './?project=' + domain;
+      };
+
       app.toggleMenu = function() {
         if(this.$.menuDropdown.style.display === 'none') {
           this.$.menuDropdown.open();
@@ -477,8 +415,14 @@ limitations under the License.
         app.set('clientConfig', {});
       };
 
-      app.getURLWithProject = function(domain) {
-        return './?project=' + domain;
+      app.openDataDialog = function() {
+        this.$.menuDropdown.close();
+        this.$.dataDialog.open();
+      };
+
+      app.openTagsDialog = function() {
+        this.$.menuDropdown.close();
+        this.$.tagManager.openDialog();
       };
 
       app.openNewTab = function() {
