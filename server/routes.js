@@ -71,14 +71,11 @@ module.exports = function(app) {
   });
 
   app.get('/file/:file', function(req, res) {
-    console.log('hello1');
     res.download(req.params.file);
   });
 
   app.post('/export', function(req, res) {
-    console.log('hello2', req);
     if(req.body && req.body.length > 1) {
-      console.log('hello3');
       var filename = req.body[0] + '.csv';
       var header = req.body[1];
       var writer = csvWriteStream({
