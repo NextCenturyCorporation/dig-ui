@@ -43,6 +43,8 @@ module.exports = {
     imageServiceAuth: process.env.IMAGE_SERVICE_AUTH || '{"user": "", "password": ""}',
     imageServiceHost: process.env.IMAGE_SERVICE_HOST || '{"url": "", "base64": ""}',
     searchConfig: process.env.SEARCH_CONFIG ? JSON.parse(process.env.SEARCH_CONFIG) : undefined,
+    stateIndexName: process.env.STATE_INDEX_NAME || 'dig-states',
+    stateIndexType: process.env.STATE_INDEX_TYPE || 'state',
     tagsEntityEndpoint: process.env.TAGS_ENTITY_ENDPOINT,
     tagsExtractionEndpoint: process.env.TAGS_EXTRACTION_ENDPOINT,
     tagsListEndpoint: process.env.TAGS_LIST_ENDPOINT

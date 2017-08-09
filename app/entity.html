@@ -250,6 +250,20 @@ limitations under the License.
       tag-manager="{{tagManager}}">
     </tag-manager>
 
+    <state-manager id="stateManager"
+      build-popup-data-function="[[transforms.config.filterTerms]]"
+      build-state-data-function="[[transforms.config.filterState]]"
+      client="[[esClient]]"
+      function-config="[[searchFields]]"
+      state-index="[[serverConfig.stateIndexName]]"
+      state-type="[[serverConfig.stateIndexType]]"
+      state-id="[[params.state]]"
+      collection="{{filterCollection}}"
+      process-request="{{processRequest}}"
+      state-history="{{stateHistory}}"
+      has-history="{{hasHistory}}">
+    </state-manager>
+
     <!-- Main Content -->
     <div class="entity">
 
@@ -287,6 +301,11 @@ limitations under the License.
               <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
                 <iron-icon icon="refresh" item-icon></iron-icon>
                 Reload the DIG Configuration
+              </paper-icon-item>
+
+              <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
+                <iron-icon icon="history" item-icon></iron-icon>
+                View Search State History
               </paper-icon-item>
 
               <paper-icon-item title="Open Training Options" on-tap="openTagsDialog">
@@ -336,6 +355,7 @@ limitations under the License.
                       index-name="[[esConfig.esIndex]]"
                       index-types="[[esConfig.esType]]"
                       filter-list="[[filterList]]"
+                      properties-ready="[[processRequest]]"
                       transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
                       transform-function="[[transforms.entity.extractions]]"
                       data="{{item.mapData}}"
@@ -370,6 +390,7 @@ limitations under the License.
                         index-name="[[esConfig.esIndex]]"
                         index-types="[[esConfig.esType]]"
                         filter-list="[[filterList]]"
+                        properties-ready="[[processRequest]]"
                         transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
                         transform-function="[[transforms.entity.extractions]]"
                         data="{{item.aggregationData}}"
@@ -406,6 +427,7 @@ limitations under the License.
                       image-id-property="source"
                       index-name="[[esConfig.esIndex]]"
                       index-types="[[esConfig.esType]]"
+                      properties-ready="[[processRequest]]"
                       query-fields="[[pageConfig.field]]"
                       query-values="[[pageId]]"
                       transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
@@ -547,8 +569,13 @@ limitations under the License.
     var app = document.querySelector('#app');
 
     app.blurImages = false;
+    app.processRequest = false;
 
     app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
+
+    if(!app.params.state) {
+      app.processRequest = true;
+    }
 
     app.buildArray = DigBehaviors.ArrayBehavior.buildArray;
 
@@ -593,6 +620,11 @@ limitations under the License.
 
     app.reloadClientConfig = function() {
       app.set('clientConfig', {});
+    };
+
+    app.openStateHistoryDialog = function() {
+      this.$.menuDropdown.close();
+      this.$.stateManager.openStateHistory();
     };
 
     app.openTagsDialog = function() {
@@ -654,6 +686,21 @@ limitations under the License.
       return (blur ? (large ? 'large-blur' : 'small-blur') : '');
     };
     /********************************/
+
+    /************************* START STATE HISTORY *************************/
+    window.onpopstate = function() {
+      // TODO: refreshing for now. Need to address issues with interrupting logging entries -- perhaps a better
+      // approach would to be not to reload the page, but to rerun the query with the changed parameters + make
+      // sure logging is done correctly in this case, which may involve adding processRequest to create-log-message.
+      window.location.reload();
+    };
+
+    window.onload = function() {
+      if(window.history.state && window.history.state.stateHistory) {
+        app.stateHistory = window.history.state.stateHistory;
+      }
+    };
+    /************************** END STATE HISTORY **************************/
   })(document);
   </script>
 </body>

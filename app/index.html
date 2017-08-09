@@ -199,6 +199,20 @@ limitations under the License.
       tag-manager="{{tagManager}}">
     </tag-manager>
 
+    <state-manager id="stateManager"
+      build-popup-data-function="[[transforms.config.searchTerms]]"
+      build-state-data-function="[[transforms.config.searchState]]"
+      client="[[esClient]]"
+      function-config="[[searchFields]]"
+      state-index="[[serverConfig.stateIndexName]]"
+      state-type="[[serverConfig.stateIndexType]]"
+      state-id="[[params.state]]"
+      collection="{{searchParameters}}"
+      process-request="{{processRequest}}"
+      state-history="{{stateHistory}}"
+      has-history="{{hasHistory}}">
+    </state-manager>
+
     <paper-header-panel class="flex" mode="waterfall">
 
       <!-- Search toolbar -->
@@ -249,6 +263,11 @@ limitations under the License.
             <paper-icon-item title="View Data Information" on-tap="openDataDialog">
               <iron-icon icon="icons:info" item-icon></iron-icon>
               View Data Information
+            </paper-icon-item>
+
+            <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
+              <iron-icon icon="history" item-icon></iron-icon>
+              View Search State History
             </paper-icon-item>
 
             <paper-icon-item title="Open Training Options" on-tap="openTagsDialog">
@@ -409,6 +428,11 @@ limitations under the License.
         this.$.dataDialog.open();
       };
 
+      app.openStateHistoryDialog = function() {
+        this.$.menuDropdown.close();
+        this.$.stateManager.openStateHistory();
+      };
+
       app.openTagsDialog = function() {
         this.$.menuDropdown.close();
         this.$.tagManager.openDialog();
@@ -422,6 +446,21 @@ limitations under the License.
         window.open('mailto:dig-support@nextcentury.com');
       };
       /********************************/
+
+      /************************* START STATE HISTORY *************************/
+      window.onpopstate = function() {
+        // TODO: refreshing for now. Need to address issues with interrupting logging entries -- perhaps a better
+        // approach would to be not to reload the page, but to rerun the query with the changed parameters + make
+        // sure logging is done correctly in this case, which may involve adding processRequest to create-log-message.
+        window.location.reload();
+      };
+
+      window.onload = function() {
+        if(window.history.state && window.history.state.stateHistory) {
+          app.stateHistory = window.history.state.stateHistory;
+        }
+      };
+      /************************** END STATE HISTORY **************************/
     })(document);
   </script>
 </body>
