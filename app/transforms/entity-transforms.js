@@ -42,11 +42,21 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       id: commonTransforms.getExtractionDataId(item.key, item.value, config.type),
       icon: config.icon,
       link: commonTransforms.getLink(item.key, config.link, config.type, config.key),
+      provenances: [],
       styleClass: commonTransforms.getStyleClass(config.color),
       text: commonTransforms.getExtractionDataText(item.key, item.value, config.type, (index || 0)),
-      type: config.key,
-      provenance: item.provenance
+      type: config.key
     };
+
+    if(item.provenance) {
+      extraction.provenances = item.provenance.map(function(provenance) {
+        return {
+          method: provenance.method + (provenance.source && provenance.source.segment ? ' from ' + provenance.source.segment : ''),
+          text: provenance.source && provenance.source.context ? provenance.source.context.text : 'Not Available'
+        };
+      });
+    }
+
     if(config.type !== 'url') {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var userClassification = '' + item.human_annotation;
@@ -56,6 +66,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         user: (userClassification === '1' ? 'positive' : (userClassification === '0' ? 'negative' : undefined))
       };
     }
+
     if(config.type === 'location') {
       var locationData = commonTransforms.getLocationDataFromKey(item.key);
       extraction.latitude = locationData.latitude;
@@ -63,9 +74,11 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       extraction.text = locationData.text;
       extraction.textAndCountry = locationData.text + (locationData.country ? (', ' + locationData.country) : '');
     }
+
     if(config.type === 'image') {
       extraction.source = item.key;
     }
+
     extraction.textAndCount = extraction.text + (extraction.count ? (' (' + extraction.count + ')') : '');
     return extraction;
   }
@@ -410,6 +423,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   return {
+    /**
+     * Returns the document object for the given query results to show in the document page.
+     *
+     * @param {Object} data
+     * @param {Object} searchFields
+     * @return {Object}
+     */
     document: function(data, searchFields) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
         return getDocumentObject(data.hits.hits[0], searchFields, true);
@@ -417,6 +437,48 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return {};
     },
 
+    /**
+     * Returns the extractions for the given document to show in the document page.
+     *
+     * @param {Object} document
+     * @param {Object} searchFields
+     * @return {Object}
+     */
+    documentInfo: function(document, searchFields) {
+      var searchKeys = searchFields.map(function(searchFieldsObject) {
+        return searchFieldsObject.key;
+      });
+
+      var headerExtractions = (document.headerExtractions || []).filter(function(extraction) {
+        return extraction.key !== '_domain';
+      }).map(function(extraction) {
+        var index = searchKeys.indexOf(extraction.key);
+        var config = index >= 0 ? searchFields[index] : {};
+        return {
+          config: config,
+          data: extraction.data
+        };
+      });
+
+      var detailExtractions = (document.detailExtractions || []).map(function(extraction) {
+        var index = searchKeys.indexOf(extraction.key);
+        var config = index >= 0 ? searchFields[index] : {};
+        return {
+          config: config,
+          data: extraction.data
+        };
+      });
+
+      return headerExtractions.concat(detailExtractions);
+    },
+
+    /**
+     * Returns the list of document objects for the given query results to show in a result-list.
+     *
+     * @param {Object} data
+     * @param {Object} searchFields
+     * @return {Array}
+     */
     documents: function(data, searchFields) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
         var returnData = data.hits.hits.map(function(result) {
@@ -430,10 +492,23 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return [];
     },
 
+    /**
+     * Returns the link for the image with the given ID.
+     *
+     * @param {String} id
+     * @return {String}
+     */
     externalImageLink: function(id) {
       return commonTransforms.getLink(id, 'image');
     },
 
+    /**
+     * Returns the list of extraction objects for the given query results to show in an aggregation-display.
+     *
+     * @param {Object} data
+     * @param {Object} config
+     * @return {Array}
+     */
     extractions: function(data, config) {
       var extractions = [];
       var sayOther = false;
@@ -449,6 +524,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return extractions;
     },
 
+    /**
+     * Returns the histogram data for the given query results to show in a timeline.
+     *
+     * @param {Object} data
+     * @param {Object} config
+     * @return {Object}
+     */
     histogram: function(data, config) {
       if(data && data.aggregations && data.aggregations[config.date.key] && data.aggregations[config.date.key][config.date.key]) {
         return createDateHistogram(data.aggregations[config.date.key][config.date.key].buckets, config);
@@ -456,6 +538,12 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return {};
     },
 
+    /**
+     * Returns the cached page data for the given query results.
+     *
+     * @param {Object} data
+     * @return {String}
+     */
     cache: function(data) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
         return _.get(data.hits.hits[0], '_source.raw_content', '');

@@ -199,6 +199,29 @@ limitations under the License.
       tag-manager="{{tagManager}}">
     </tag-manager>
 
+    <state-manager id="stateManager"
+      build-popup-data-function="[[transforms.config.searchTerms]]"
+      build-state-data-function="[[transforms.config.searchState]]"
+      client="[[esClient]]"
+      function-config="[[searchFields]]"
+      state-index="[[serverConfig.stateIndexName]]"
+      state-type="[[serverConfig.stateIndexType]]"
+      state-id="[[params.state]]"
+      collection="{{searchParameters}}"
+      process-request="{{processRequest}}"
+      state-history="{{stateHistory}}"
+      has-history="{{hasHistory}}">
+    </state-manager>
+
+    <info-data
+      id="dataInfoDialog"
+      client="[[esClient]]"
+      index-name="[[esConfig.esIndex]]"
+      index-types="[[esConfig.esType]]"
+      domain="[[domain]]"
+      sort-field="timestamp_crawl">
+    </info-data>
+
     <paper-header-panel class="flex" mode="waterfall">
 
       <!-- Search toolbar -->
@@ -228,15 +251,6 @@ limitations under the License.
         </similar-image-search>
         <!-- TODO: add logger, update transform when we're ready to link to image entity pages -->
 
-        <info-data
-          id="dataDialog"
-          client="[[esClient]]"
-          index-name="[[esConfig.esIndex]]"
-          index-types="[[esConfig.esType]]"
-          domain="[[domain]]"
-          sort-field="timestamp_crawl">
-        </info-data>
-
         <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
         <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="60">
@@ -246,14 +260,19 @@ limitations under the License.
               Reload the DIG Configuration
             </paper-icon-item>
 
-            <paper-icon-item title="View Data Information" on-tap="openDataDialog">
-              <iron-icon icon="icons:info" item-icon></iron-icon>
-              View Data Information
+            <paper-icon-item title="View Database Information" on-tap="openDataInfoDialog">
+              <iron-icon icon="fa:database" item-icon></iron-icon>
+              View Database Information
             </paper-icon-item>
 
-            <paper-icon-item title="Open Training Options" on-tap="openTagsDialog">
+            <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
+              <iron-icon icon="history" item-icon></iron-icon>
+              View Search State History
+            </paper-icon-item>
+
+            <paper-icon-item title="View Training Options" on-tap="openTagsDialog">
               <iron-icon icon="fa:check-circle" item-icon></iron-icon>
-              Open Training Options
+              View Training Options
             </paper-icon-item>
 
             <paper-icon-item title="Search on an Image URL or Uploaded Image" on-tap="openSimilarImageSearchDialog">
@@ -423,9 +442,14 @@ limitations under the License.
         app.set('clientConfig', {});
       };
 
-      app.openDataDialog = function() {
+      app.openDataInfoDialog = function() {
         this.$.menuDropdown.close();
-        this.$.dataDialog.open();
+        this.$.dataInfoDialog.open();
+      };
+
+      app.openStateHistoryDialog = function() {
+        this.$.menuDropdown.close();
+        this.$.stateManager.openStateHistory();
       };
 
       app.openTagsDialog = function() {
@@ -441,6 +465,21 @@ limitations under the License.
         window.open('mailto:dig-support@nextcentury.com');
       };
       /********************************/
+
+      /************************* START STATE HISTORY *************************/
+      window.onpopstate = function() {
+        // TODO: refreshing for now. Need to address issues with interrupting logging entries -- perhaps a better
+        // approach would to be not to reload the page, but to rerun the query with the changed parameters + make
+        // sure logging is done correctly in this case, which may involve adding processRequest to create-log-message.
+        window.location.reload();
+      };
+
+      window.onload = function() {
+        if(window.history.state && window.history.state.stateHistory) {
+          app.stateHistory = window.history.state.stateHistory;
+        }
+      };
+      /************************** END STATE HISTORY **************************/
     })(document);
   </script>
 </body>

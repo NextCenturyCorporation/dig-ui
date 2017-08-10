@@ -64,6 +64,12 @@ var configTransforms = (function(_, commonTransforms) {
   }
 
   return {
+    /**
+     * Returns the fields for which to show aggregations in entity pages.
+     *
+     * @param {Object} searchFields
+     * @return {Array}
+     */
     aggregationFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
         // Dates will be shown in the histograms, images in the galleries, and locations in the maps.
@@ -73,6 +79,12 @@ var configTransforms = (function(_, commonTransforms) {
       });
     },
 
+    /**
+     * Returns the config for the date fields needed for the other transforms.
+     *
+     * @param {Object} searchFields
+     * @return {Object}
+     */
     dateConfig: function(searchFields) {
       var dateConfig = {};
       searchFields.forEach(function(searchFieldsObject) {
@@ -85,6 +97,12 @@ var configTransforms = (function(_, commonTransforms) {
       return dateConfig;
     },
 
+    /**
+     * Returns the fields for which to show date facets in the search page and timelines in the entity pages.
+     *
+     * @param {Object} searchFields
+     * @return {Array}
+     */
     dateFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
         return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
@@ -93,38 +111,22 @@ var configTransforms = (function(_, commonTransforms) {
       });
     },
 
-    documentInfo: function(document, searchFields) {
-      var searchKeys = searchFields.map(function(searchFieldsObject) {
-        return searchFieldsObject.key;
-      });
-
-      var headerExtractions = (document.headerExtractions || []).filter(function(extraction) {
-        return extraction.key !== '_domain';
-      }).map(function(extraction) {
-        var index = searchKeys.indexOf(extraction.key);
-        var config = index >= 0 ? searchFields[index] : {};
-        return {
-          config: config,
-          data: extraction.data
-        };
-      });
-
-      var detailExtractions = (document.detailExtractions || []).map(function(extraction) {
-        var index = searchKeys.indexOf(extraction.key);
-        var config = index >= 0 ? searchFields[index] : {};
-        return {
-          config: config,
-          data: extraction.data
-        };
-      });
-
-      return headerExtractions.concat(detailExtractions);
-    },
-
+    /**
+     * Returns the fields in the given client config object.
+     *
+     * @param {Object} clientConfig
+     * @return {Object}
+     */
     fields: function(clientConfig) {
       return clientConfig.fields || {};
     },
 
+    /**
+     * Returns a new filter collection object for the entity pages.
+     *
+     * @param {Object} searchFields
+     * @return {Object}
+     */
     filterCollection: function(searchFields) {
       return searchFields.reduce(function(filterCollection, searchFieldsObject) {
         filterCollection[searchFieldsObject.key] = [];
@@ -132,6 +134,12 @@ var configTransforms = (function(_, commonTransforms) {
       }, {});
     },
 
+    /**
+     * Returns the config for the filters-builder element.
+     *
+     * @param {Object} searchFields
+     * @return {Object}
+     */
     filtersBuilderConfig: function(searchFields) {
       return searchFields.reduce(function(filtersBuilderConfig, searchFieldsObject) {
         filtersBuilderConfig[searchFieldsObject.key] = {
@@ -142,14 +150,72 @@ var configTransforms = (function(_, commonTransforms) {
       }, {});
     },
 
+    /**
+     * Returns the filter state object.
+     *
+     * @param {Object} filterCollection
+     * @param {Object} searchFields
+     * @return {Object}
+     */
+    filterState: function(filterCollection, searchFields) {
+      return searchFields.reduce(function(state, searchFieldsObject) {
+        state[searchFieldsObject.key] = filterCollection[searchFieldsObject.key] || [];
+        return state;
+      }, {});
+    },
+
+    /**
+     * Returns the filter terms object to show in the state history dialog.
+     *
+     * @param {Object} filterCollection
+     * @param {Object} searchFields
+     * @return {Object}
+     */
+    filterTerms: function(filterCollection, searchFields) {
+      return searchFields.reduce(function(terms, searchFieldsObject) {
+        var filterCollectionObject = filterCollection[searchFieldsObject.key];
+        if(searchFieldsObject.type === 'date') {
+          if(_.isArray(filterCollectionObject) && filterCollectionObject.length === 2) {
+            terms['Start ' + searchFieldsObject.title] = [filterCollectionObject[0]];
+            terms['End ' + searchFieldsObject.title] = [filterCollectionObject[1]];
+          }
+        } else {
+          // Use map to create a new array.
+          terms[searchFieldsObject.title] = filterCollectionObject.map(function(term) {
+            return term;
+          });
+        }
+        return terms;
+      }, {});
+    },
+
+    /**
+     * Returns a formatted ID.
+     *
+     * @param {String} id
+     * @return {String}
+     */
     formatId: function(id) {
       return decodeURIComponent(id);
     },
 
+    /**
+     * Returns a formatted pretty name.
+     *
+     * @param {String} id
+     * @param {String} type
+     * @return {String}
+     */
     formatName: function(id, type) {
       return commonTransforms.getExtractionDataText(id, id, type);
     },
 
+    /**
+     * Returns the fields for which to show histograms (timelines) in the entity pages.
+     *
+     * @param {Object} searchFields
+     * @return {Array}
+     */
     histogramFields: function(searchFields) {
       var entityFields = searchFields.filter(function(searchFieldsObject) {
         return searchFieldsObject.link === 'entity' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
@@ -170,6 +236,12 @@ var configTransforms = (function(_, commonTransforms) {
       });
     },
 
+    /**
+     * Returns the fields for which to show image galleries in the entity pages.
+     *
+     * @param {Object} searchFields
+     * @return {Array}
+     */
     imageFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
         return searchFieldsObject.type === 'image' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
@@ -178,6 +250,12 @@ var configTransforms = (function(_, commonTransforms) {
       });
     },
 
+    /**
+     * Returns the fields for which to show maps in the entity pages.
+     *
+     * @param {Object} searchFields
+     * @return {Array}
+     */
     mapFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
         return searchFieldsObject.type === 'location' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
@@ -186,6 +264,13 @@ var configTransforms = (function(_, commonTransforms) {
       });
     },
 
+    /**
+     * Returns the config object from the search fields for the entity page with the given key.
+     *
+     * @param {Object} searchFields
+     * @param {String} key
+     * @return {Object}
+     */
     pageConfig: function(searchFields, key) {
       var index = _.findIndex(searchFields, function(searchFieldsObject) {
         return searchFieldsObject.key === key;
@@ -193,6 +278,12 @@ var configTransforms = (function(_, commonTransforms) {
       return index >= 0 ? searchFields[index] : {};
     },
 
+    /**
+     * Transforms the given fields from the client config object into the search fields config objects needed for the other transforms.
+     *
+     * @param {Object} fields
+     * @return {Object}
+     */
     searchFields: function(fields) {
       var searchFields =  _.keys(fields || {}).filter(function(id) {
         return !!fields[id].type;
@@ -285,6 +376,12 @@ var configTransforms = (function(_, commonTransforms) {
       return searchFields;
     },
 
+    /**
+     * Returns the config for the search fields dialog.
+     *
+     * @param {Object} searchFields
+     * @return {Object}
+     */
     searchFieldsDialogConfig: function(searchFields) {
       var config = [];
 
@@ -345,12 +442,24 @@ var configTransforms = (function(_, commonTransforms) {
       return config;
     },
 
+    /**
+     * Returns the search fields keys.
+     *
+     * @param {Object} searchFields
+     * @return {Array}
+     */
     searchKeys: function(searchFields) {
       return searchFields.map(function(searchFieldsObject) {
         return searchFieldsObject.key;
       });
     },
 
+    /**
+     * Returns a new search parameters object for the search page.
+     *
+     * @param {Object} searchFields
+     * @return {Object}
+     */
     searchParameters: function(searchFields) {
       return searchFields.reduce(function(searchParameters, searchFieldsObject) {
         searchParameters[searchFieldsObject.key] = {};
@@ -358,6 +467,57 @@ var configTransforms = (function(_, commonTransforms) {
       }, {});
     },
 
+    /**
+     * Returns the search state object.
+     *
+     * @param {Object} searchParameters
+     * @param {Object} searchFields
+     * @return {Object}
+     */
+    searchState: function(searchParameters, searchFields) {
+      return searchFields.reduce(function(state, searchFieldsObject) {
+        state[searchFieldsObject.key] = searchParameters[searchFieldsObject.key] || {};
+        return state;
+      }, {});
+    },
+
+    /**
+     * Returns the search terms object to show in the state history dialog.
+     *
+     * @param {Object} searchParameters
+     * @param {Object} searchFields
+     * @return {Object}
+     */
+    searchTerms: function(searchParameters, searchFields) {
+      return searchFields.reduce(function(terms, searchFieldsObject) {
+        var searchParametersObject = searchParameters[searchFieldsObject.key];
+        if(searchFieldsObject.type === 'date') {
+          var startKey = searchFieldsObject.dateProperties.start.key;
+          if(searchParametersObject[startKey] && searchParametersObject[startKey].enabled) {
+            terms['Start ' + searchFieldsObject.title] = [searchParametersObject[startKey].text];
+          }
+          var endKey = searchFieldsObject.dateProperties.end.key;
+          if(searchParametersObject[endKey] && searchParametersObject[endKey].enabled) {
+            terms['End ' + searchFieldsObject.title] = [searchParametersObject[endKey].text];
+          }
+        } else {
+          terms[searchFieldsObject.title] = _.keys(searchParametersObject).reduce(function(list, term) {
+            if(searchParametersObject[term].enabled) {
+              list.push(searchParametersObject[term].text);
+            }
+            return list;
+          }, []);
+        }
+        return terms;
+      }, {});
+    },
+
+    /**
+     * Returns the date sort field.
+     *
+     * @param {Object} searchFields
+     * @return {String}
+     */
     sortField: function(searchFields) {
       var index = _.findIndex(searchFields, function(searchFieldsObject) {
         return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
