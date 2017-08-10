@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-/* exported offerTransform */
+/* exported offerTransforms */
 /* jshint camelcase:false */
 
-var offerTransform = (function(_, commonTransforms, serverConfig) {
+var offerTransforms = (function(_, commonTransforms, serverConfig) {
 
   function getSingleStringFromRecord(record, path, property) {
     var data = _.get(record, path, []);

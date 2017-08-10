@@ -19,7 +19,7 @@
     "elastic-client-aggregation-builder": "DigElements/elastic-client-aggregation-builder#1.0.9",
     "elastic-client-query-builder": "DigElements/elastic-client-query-builder#1.0.8",
     "elastic-error": "DigElements/elastic-error#1.0.1",
-    "export-button": "DigElements/export-button#1.0.1",
+    "export-button": "DigElements/export-button#1.0.2",
     "facet-list": "DigElements/facet-list#1.3.2",
     "facet-panel": "DigElements/facet-panel#1.0.4",
     "file-upload": "DigElements/file-upload#2.2.2",
