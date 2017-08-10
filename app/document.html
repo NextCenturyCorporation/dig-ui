@@ -141,6 +141,36 @@ limitations under the License.
       client="{{esClient}}">
     </elastic-client>
 
+    <!-- Logger for Pagination -->
+    <dig-logger
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
+      type="Document-ShowRevisionPageNumber"
+      data="[[revisionPageNumber]]"
+      username="defaultUser">
+    </dig-logger>
+
+    <dig-logger
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
+      type="Document-ShowSimilarDocPageNumber"
+      data="[[moreLikeThisPageNumber]]"
+      username="defaultUser">
+    </dig-logger>
+
+    <!-- Logger for Page View -->
+    <dig-logger log-page-view
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
+      type="Document-Open"
+      data=""
+      username="defaultUser"
+      logger="{{logger}}">
+    </dig-logger>
+
     <!-- Document Query -->
 
     <build-and-run-query
