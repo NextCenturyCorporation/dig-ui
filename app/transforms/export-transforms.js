@@ -26,9 +26,15 @@ var exportTransforms = (function(_) {
         }).map(function(term) {
           return searchParameters[type][term].key;
         }).forEach(function(id) {
-          data.push({
-            field: searchFields[type].field,
-            value: id
+          searchFields.forEach(function(fieldObject) {
+            if(fieldObject.key === type) {
+              data.push({
+                field: fieldObject.field,
+                value: id
+              });
+
+              return;
+            }
           });
         });
         return data;
