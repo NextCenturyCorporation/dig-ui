@@ -12,6 +12,7 @@
     "build-and-run-query": "DigElements/build-and-run-query#1.0.9",
     "button-action": "DigElements/button-action#1.0.3",
     "clipboard": "^1.5.15",
+    "confidence-marker": "DigElements/confidence-marker#2.0.1",
     "date-picker-display": "DigElements/date-picker-display#1.1.0",
     "date-range-facet": "DigElements/date-range-facet#1.1.0",
     "detail-subsection": "DigElements/detail-subsection#1.0.2",
@@ -61,6 +62,7 @@
     "lodash": "~4.17.2",
     "icon-label": "1.0.6",
     "image-gallery": "1.0.7",
-    "styled-dialog": "1.0.4"
+    "styled-dialog": "1.0.4",
+    "confidence-marker": "2.0.1"
   }
 }

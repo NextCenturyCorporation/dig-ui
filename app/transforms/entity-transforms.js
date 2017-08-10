@@ -42,11 +42,21 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       id: commonTransforms.getExtractionDataId(item.key, item.value, config.type),
       icon: config.icon,
       link: commonTransforms.getLink(item.key, config.link, config.type, config.key),
+      provenances: [],
       styleClass: commonTransforms.getStyleClass(config.color),
       text: commonTransforms.getExtractionDataText(item.key, item.value, config.type, (index || 0)),
-      type: config.key,
-      provenance: item.provenance
+      type: config.key
     };
+
+    if(item.provenance) {
+      extraction.provenances = item.provenance.map(function(provenance) {
+        return {
+          method: provenance.method + (provenance.source && provenance.source.segment ? ' from ' + provenance.source.segment : ''),
+          text: provenance.source && provenance.source.context ? provenance.source.context.text : 'Not Available'
+        };
+      });
+    }
+
     if(config.type !== 'url') {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var userClassification = '' + item.human_annotation;
@@ -56,6 +66,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         user: (userClassification === '1' ? 'positive' : (userClassification === '0' ? 'negative' : undefined))
       };
     }
+
     if(config.type === 'location') {
       var locationData = commonTransforms.getLocationDataFromKey(item.key);
       extraction.latitude = locationData.latitude;
@@ -63,9 +74,11 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       extraction.text = locationData.text;
       extraction.textAndCountry = locationData.text + (locationData.country ? (', ' + locationData.country) : '');
     }
+
     if(config.type === 'image') {
       extraction.source = item.key;
     }
+
     extraction.textAndCount = extraction.text + (extraction.count ? (' (' + extraction.count + ')') : '');
     return extraction;
   }
