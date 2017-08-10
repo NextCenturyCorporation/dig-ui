@@ -43,7 +43,9 @@ module.exports = function(app) {
     extended: true,
     limit: '100gb'
   }));
-  app.use(bodyParser.json());
+  app.use(bodyParser.json({
+    limit: '100gb'
+  }));
   app.use(methodOverride());
   app.use(cookieParser());
   
