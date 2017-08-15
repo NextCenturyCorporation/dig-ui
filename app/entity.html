@@ -452,6 +452,15 @@ limitations under the License.
                       </aggregation-query-and-display>
 
                       <template is="dom-if" if="[[item.aggregationData.length]]">
+                        <terms-transformer
+                          category="[[item.title]]"
+                          object="{{item.selectedFacet}}"
+                          list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
+                          text-function="[[getTextFunction(item.aggregationData)]]">
+                        </terms-transformer>
+                      </template>
+
+                      <template is="dom-if" if="[[item.aggregationData.length]]">
                         <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
                       </template>
                     </section-and-title>
@@ -539,7 +548,7 @@ limitations under the License.
                     </template>
                   </template>
 
-                  <template is="dom-if" if="[[documents.length]]">
+                  <template is="dom-if" if="[[documents.length]]">      
                     <template is="dom-if" if="[[item.histogramResults.length]]">
                       <section-and-title
                         error="[[item.histogramError]]"
@@ -739,6 +748,29 @@ limitations under the License.
 
       app.getBlurStyleClass = function(blur, large) {
         return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+      };
+      /********************************/
+
+      /************ TERMS ************/
+      app.getFacetProperty = function(collection, key) {
+        return collection[key];
+      };
+
+      app.getTextFunction = function(data) {
+        return function(id) {
+          var text = '';
+
+          if(data) {
+            data.forEach(function(object) {
+              if(id === object.id) {
+                text = object.text;
+                return;
+              }
+            });
+          }
+
+          return text;
+        };
       };
       /********************************/
 

@@ -54,6 +54,7 @@
     "state-manager": "DigElements/state-manager#1.0.2",
     "styled-dialog": "DigElements/styled-dialog#1.0.4",
     "tag-manager": "DigElements/tag-manager#1.0.0",
+    "terms-transformer": "DigElements/terms-transformer#1.0.2",
     "zoomable-bar-chart": "DigElements/zoomable-bar-chart#1.0.8"
   },
   "devDependencies": {
