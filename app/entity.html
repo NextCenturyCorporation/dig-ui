@@ -458,9 +458,7 @@ limitations under the License.
                           list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
                           text-function="[[getTextFunction(item.aggregationData)]]">
                         </terms-transformer>
-                      </template>
 
-                      <template is="dom-if" if="[[item.aggregationData.length]]">
                         <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
                       </template>
                     </section-and-title>
@@ -768,7 +766,7 @@ limitations under the License.
               }
             });
           }
-
+          console.log(text);
           return text;
         };
       };
