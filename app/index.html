@@ -188,6 +188,42 @@ limitations under the License.
       client="{{esClient}}">
     </elastic-client>
 
+    <!-- Logger for Search Terms -->
+    <dig-logger
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
+      type="Search-SubmitSearch"
+      data="[[logMessage]]"
+      username="defaultUser">
+    </dig-logger>
+
+    <!-- Logger for Pagination -->
+    <dig-logger
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
+      type="Search-ShowResultPageNumber"
+      data="[[resultPage]]"
+      username="defaultUser">
+    </dig-logger>
+
+    <!-- Logger for Page View -->
+    <dig-logger log-page-view
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
+      type="Search-Open"
+      data=""
+      username="defaultUser"
+      logger="{{logger}}">
+    </dig-logger>
+
+    <log-creator
+      object="{{searchParameters}}"
+      log-message="{{logMessage}}">
+    </log-creator>
+
     <tag-manager
       id="tagManager"
       auth-username="[[serverConfig.configUsername]]"

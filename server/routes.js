@@ -45,6 +45,8 @@ module.exports = function(app) {
       esHost: serverConfig.esHost,
       imageServiceAuth: serverConfig.imageServiceAuth,
       imageServiceHost: serverConfig.imageServiceHost,
+      logIndex: serverConfig.logIndex,
+      logType: serverConfig.logType,
       searchConfig: serverConfig.searchConfig,
       stateIndexName: serverConfig.stateIndexName,
       stateIndexType: serverConfig.stateIndexType,

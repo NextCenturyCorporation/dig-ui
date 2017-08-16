@@ -42,6 +42,8 @@ module.exports = {
     esHost: JSON.parse(process.env.ES_HOST || '{"host":"http://localhost:9200"}'),
     imageServiceAuth: process.env.IMAGE_SERVICE_AUTH || '{"user": "", "password": ""}',
     imageServiceHost: process.env.IMAGE_SERVICE_HOST || '{"url": "", "base64": ""}',
+    logIndex: process.env.LOG_INDEX || 'dig-logs',
+    logType: process.env.LOG_TYPE || 'log',
     searchConfig: process.env.SEARCH_CONFIG ? JSON.parse(process.env.SEARCH_CONFIG) : undefined,
     stateIndexName: process.env.STATE_INDEX_NAME || 'dig-states',
     stateIndexType: process.env.STATE_INDEX_TYPE || 'state',
