@@ -340,8 +340,8 @@ limitations under the License.
               
               <export-button
                 client="[[esClient]]"
-                data="[[shownRecords]]"
-                filter-list="[[buildArray()]]"
+                data="[[shownResults]]"
+                filter-list="[]"
                 index-name="[[esConfig.esIndex]]"
                 index-types="[[esConfig.esType]]"
                 search-fields="[[searchFields]]"
@@ -360,7 +360,7 @@ limitations under the License.
               text-property="title"
               query-results="[[results]]"
               total-results="[[resultsTotalCount]]"
-              shown-results="{{shownRecords}}"
+              shown-results="{{shownResults}}"
               page="{{resultPage}}"
               page-size="25"
               loading="[[searchLoading]]"
@@ -392,7 +392,6 @@ limitations under the License.
       var app = document.querySelector('#app');
 
       app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
-      app.buildArray = DigBehaviors.ArrayBehavior.buildArray;
 
       app.createAuthHeader = function(username, password) {
         if(username && password) {
