@@ -408,13 +408,15 @@ limitations under the License.
                   icon="icons:assignment"
                   style-class="entity-grey"
                   section-title="[[revisionsHeader]]">
-                  
-                  <export-button
-                    data="[[shownResults]]"
-                    search-fields="[[searchFields]]"
-                    transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                    transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
-                  </export-button>
+
+                  <template is="dom-if" if="[[shownRevisions]]">
+                    <export-button
+                      data="[[shownRevisions]]"
+                      search-fields="[[searchFields]]"
+                      transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                      transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
+                    </export-button>
+                  </template>
                 </section-title>
 
                 <template is="dom-if" if="[[revisionsError]]">
@@ -431,7 +433,7 @@ limitations under the License.
                   text-property="title"
                   query-results="[[revisions]]"
                   total-results="{{revisionsTotal}}"
-                  shown-results="{{shownResults}}"
+                  shown-results="{{shownRevisions}}"
                   page="{{revisionPageNumber}}"
                   page-size="25"
                   loading="[[revisionsLoading]]"
@@ -501,8 +503,12 @@ limitations under the License.
                   style-class="entity-grey"
                   section-title="[[moreLikeThisHeader]]">
 
-
-                  <!-- TODO Export Button -->
+                  <export-button
+                    data="[[shownResults]]"
+                    search-fields="[[searchFields]]"
+                    transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                    transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
+                  </export-button>
                 </section-title>
 
                 <template is="dom-if" if="[[moreLikeThisError]]">
@@ -519,6 +525,7 @@ limitations under the License.
                   text-property="title"
                   query-results="[[moreLikeThisDocuments]]"
                   total-results="{{moreLikeThisTotal}}"
+                  shown-results="{{shownResults}}"
                   page="{{moreLikeThisPageNumber}}"
                   page-size="25"
                   loading="[[moreLikeThisLoading]]"
