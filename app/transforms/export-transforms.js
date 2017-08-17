@@ -29,7 +29,7 @@ var exportTransforms = (function(_) {
           searchFields.forEach(function(fieldObject) {
             if(fieldObject.key === type) {
               data.push({
-                field: fieldObject.field,
+                field: fieldObject.queryField,
                 value: id
               });
 
