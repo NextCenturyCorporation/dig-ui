@@ -35,16 +35,22 @@ var configTransforms = (function(_, commonTransforms) {
     };
   }
 
-  function findAggregationsInResponse(response, property) {
-    if(response && response.length && response[0].result && response[0].result.aggregations && response[0].result.aggregations['?' + property]) {
-      return response[0].result.aggregations['?' + property].buckets || [];
+  function findAggregationsInResponse(response, property, isNetworkExpansion) {
+    if(isNetworkExpansion) {
+      if(response && response.length && response[0].result && response[0].result.length > 1 && response[0].result[1].aggregations && response[0].result[1].aggregations['?' + property]) {
+        return response[0].result[1].aggregations['?' + property].buckets || [];
+      }
+    } else {
+      if(response && response.length && response[0].result && response[0].result.aggregations && response[0].result.aggregations['?' + property]) {
+        return response[0].result.aggregations['?' + property].buckets || [];
+      }
     }
     return [];
   }
 
   function createFacetTransform(linkType, fieldType, fieldId) {
-    return function(response, key) {
-      var aggregations = findAggregationsInResponse(response, key);
+    return function(response, config) {
+      var aggregations = findAggregationsInResponse(response, config.name, config.isNetworkExpansion);
       return aggregations.reduce(function(data, bucket) {
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var count = bucket.doc_count;
@@ -262,6 +268,19 @@ var configTransforms = (function(_, commonTransforms) {
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
+    },
+
+    /**
+     * Returns a new network expansion parameters object for the search page.
+     *
+     * @param {Object} searchFields
+     * @return {Object}
+     */
+    networkExpansionParameters: function(searchFields) {
+      return searchFields.reduce(function(searchParameters, searchFieldsObject) {
+        searchParameters[searchFieldsObject.key] = false;
+        return searchParameters;
+      }, {});
     },
 
     /**
