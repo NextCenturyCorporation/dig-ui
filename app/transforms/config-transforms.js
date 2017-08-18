@@ -112,6 +112,21 @@ var configTransforms = (function(_, commonTransforms) {
     },
 
     /**
+     * Initializes an Object with filter subproperties for the facets on the entity page
+     *
+     * @param {Object} searchFields
+     * @return {Object}
+     */
+    entityFilters: function(searchFields) {
+      var filters = {};
+
+      searchFields.forEach(function(element) {
+        filters[element.key] = {};
+      });
+      return filters;
+    },
+
+    /**
      * Returns the fields in the given client config object.
      *
      * @param {Object} clientConfig

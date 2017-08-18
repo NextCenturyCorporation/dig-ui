@@ -206,6 +206,13 @@ limitations under the License.
       combine-function="[[transforms.config.sortField]]">
     </json-combine>
 
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{entityFilters}}"
+      combine-function="[[transforms.config.entityFilters]]">
+    </json-combine>
+
     <elastic-client
       config="[[serverConfig.esHost]]"
       client="{{esClient}}">
@@ -316,64 +323,75 @@ limitations under the License.
         </template>
 
         <!-- Entity header -->
-        <div class="paper-header layout horizontal">
-
-          <!-- Entity title -->
-          <template is="dom-if" if="[[pageConfig]]">
-            <div class="layout horizontal flex center">
-              <div class$="iron-icon-huge [[pageConfig.styleClass]]">
-                <iron-icon icon="[[pageConfig.icon]]"></iron-icon>
-              </div>
-              <div class="page-name">
-                <div class="paper-font-headline">
-                  [[pageConfig.title]]: <span>[[pageName]]</span>
+        <div class="paper-header layout vertical">
+          <div class="layout horizontal">
+            <!-- Entity title -->
+            <template is="dom-if" if="[[pageConfig]]">
+              <div class="layout horizontal flex center">
+                <div class$="iron-icon-huge [[pageConfig.styleClass]]">
+                  <iron-icon icon="[[pageConfig.icon]]"></iron-icon>
                 </div>
-                <template is="dom-if" if="[[documentsTotal]]">
-                  <div class="paper-font-subhead">
-                    [[documentsTotal]] Total Results
+                <div class="page-name">
+                  <div class="paper-font-headline">
+                    [[pageConfig.title]]: <span>[[pageName]]</span>
                   </div>
-                </template>
+                  <template is="dom-if" if="[[documentsTotal]]">
+                    <div class="paper-font-subhead">
+                      [[documentsTotal]] Total Results
+                    </div>
+                  </template>
+                </div>
+
+                <div class="layout horizontal flex end-justified">
+                  <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+                </div>
               </div>
+            </template>
 
-              <div class="layout horizontal flex end-justified">
-                <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+            <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
+              <div class="dropdown-content">
+                <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
+                  <iron-icon icon="refresh" item-icon></iron-icon>
+                  Reload the DIG Configuration
+                </paper-icon-item>
+
+                <paper-icon-item title="View Database Information" on-tap="openDataInfoDialog">
+                  <iron-icon icon="fa:database" item-icon></iron-icon>
+                  View Database Information
+                </paper-icon-item>
+
+                <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
+                  <iron-icon icon="history" item-icon></iron-icon>
+                  View Search State History
+                </paper-icon-item>
+
+                <paper-icon-item title="View Training Options" on-tap="openTagsDialog">
+                  <iron-icon icon="fa:check-circle" item-icon></iron-icon>
+                  View Training Options
+                </paper-icon-item>
+
+                <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+                  <iron-icon icon="open-in-new" item-icon></iron-icon>
+                  Open a DIG Search Page in a New Tab
+                </paper-icon-item>
+
+                <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+                  <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
+                  Contact DIG Support
+                </paper-icon-item>
               </div>
-            </div>
-          </template>
+            </iron-dropdown>
+          </div>
 
-          <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
-            <div class="dropdown-content">
-              <paper-icon-item title="Reload the DIG Configuration for Entities and Fields" on-tap="reloadClientConfig">
-                <iron-icon icon="refresh" item-icon></iron-icon>
-                Reload the DIG Configuration
-              </paper-icon-item>
-
-              <paper-icon-item title="View Database Information" on-tap="openDataInfoDialog">
-                <iron-icon icon="fa:database" item-icon></iron-icon>
-                View Database Information
-              </paper-icon-item>
-
-              <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
-                <iron-icon icon="history" item-icon></iron-icon>
-                View Search State History
-              </paper-icon-item>
-
-              <paper-icon-item title="View Training Options" on-tap="openTagsDialog">
-                <iron-icon icon="fa:check-circle" item-icon></iron-icon>
-                View Training Options
-              </paper-icon-item>
-
-              <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-                <iron-icon icon="open-in-new" item-icon></iron-icon>
-                Open a DIG Search Page in a New Tab
-              </paper-icon-item>
-
-              <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
-                <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
-                Contact DIG Support
-              </paper-icon-item>
-            </div>
-          </iron-dropdown>
+          <div class="layout horizontal wrap">
+            <!-- Selected facets displays -->
+            <template is="dom-repeat" items="[[searchFields]]">
+              <selected-facets-display
+                facets="[[entityFilters]]"
+                facet-key="[[item.key]]">
+              </selected-facets-display>
+            </template>
+          </div>
         </div>
 
         <template is="dom-if" if="[[pageConfig]]">
@@ -415,6 +433,16 @@ limitations under the License.
                       show-checkboxes
                       show-double-bar-chart="[[showDoubleBarChart(item)]]">
                     </aggregation-query-and-display>
+
+                    <template is="dom-if" if="[[item.mapData.length]]">
+                      <terms-transformer
+                        category="[[item.title]]"
+                        object="{{entityFilters}}"
+                        object-property="[[item.key]]"
+                        list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
+                        text-function="[[getTextFunction(item.mapData)]]">
+                      </terms-transformer>
+                    </template>
                   </section-and-map>
                 </template>
 
@@ -454,7 +482,8 @@ limitations under the License.
                       <template is="dom-if" if="[[item.aggregationData.length]]">
                         <terms-transformer
                           category="[[item.title]]"
-                          object="{{item.selectedFacet}}"
+                          object="{{entityFilters}}"
+                          object-property="[[item.key]]"
                           list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
                           text-function="[[getTextFunction(item.aggregationData)]]">
                         </terms-transformer>
@@ -766,7 +795,6 @@ limitations under the License.
               }
             });
           }
-          console.log(text);
           return text;
         };
       };
