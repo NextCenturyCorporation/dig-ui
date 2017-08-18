@@ -1,0 +1,458 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>transform-functions</title>
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../bower_components/web-component-tester/browser.js"></script>
+  <link rel="import" href="../elements/transform-functions/transform-functions.html">
+</head>
+
+<body>
+<test-fixture id="transform-functions-fixture">
+  <template>
+    <transform-functions></transform-functions>
+  </template>
+</test-fixture>
+
+<script>
+  'use strict';
+  /* globals suite, setup, fixture, test, expect */
+  /* jshint -W030 */
+  suite('transform-functions export transforms initialization tests', function() {
+    var transformFunctions;
+
+    setup(function() {
+      transformFunctions = fixture('transform-functions-fixture');
+      transformFunctions.domain = 'domain';
+      transformFunctions.clientConfig = {};
+      transformFunctions.serverConfig = {};
+    });
+
+    test('does define export object', function() {
+      expect(transformFunctions).to.exist;
+      expect(transformFunctions.transforms).to.exist;
+      expect(transformFunctions.transforms.export).to.exist;
+      expect(transformFunctions.transforms.export).to.be.an('Object');
+    });
+
+    test('does define export functions', function() {
+      expect(transformFunctions.transforms.export.createExportDataForCsv).to.be.a('Function');
+      expect(transformFunctions.transforms.export.createExportDataForPdf).to.be.a('Function');
+      expect(transformFunctions.transforms.export.createBulkSearchData).to.be.a('Function');
+    });
+  });
+
+  suite('transform-functions export transform tests for CSV export data', function() {
+    var transformFunctions;
+
+    setup(function() {
+      transformFunctions = fixture('transform-functions-fixture');
+      transformFunctions.domain = 'domain';
+      transformFunctions.clientConfig = {};
+      transformFunctions.serverConfig = {};
+    });
+
+    test('CSV export data function given empty input returns correct array', function() {
+      var output = transformFunctions.transforms.export.createExportDataForCsv([], []);
+      expect(output).to.be.an('Array');
+      expect(output).to.deep.equal([['Ad url', 'Dig url', 'Title', 'Description', 'Images']]);
+    });
+
+    test('CSV export data function given results array returns correct array', function() {
+      var output = transformFunctions.transforms.export.createExportDataForCsv([{
+        url: 'url',
+        link: '/link',
+        title: 'title',
+        headerExtractions: [{
+          data: [{
+            text: 'today'
+          }]
+        }, {
+          data: [{
+            text: 'location'
+          }]
+        }],
+        detailExtractions: [{
+          data: [{
+            text: 'phone'
+          }]
+        }, {
+          data: [{
+            text: 'email'
+          }]
+        }],
+        images: [{
+          source: 'https://s3.amazonaws.com/image'
+        }],
+        description: 'A quick brown fox\njumped over the lazy dog.'
+      }], [{
+        result: 'header',
+        title: 'Dates'
+      }, {
+        result: 'header',
+        title: 'Locations'
+      }, {
+        result: 'detail',
+        title: 'Phones'
+      }, {
+        result: 'detail',
+        title: 'Emails'
+      }]);
+
+      expect(output).to.be.an('Array');
+      expect(output.length).to.equal(2);
+      expect(output[0]).to.deep.equal([
+        'Ad url',
+        'Dig url',
+        'Title',
+        'Dates',
+        'Locations',
+        'Phones',
+        'Emails',
+        'Description',
+        'Images']);
+      expect(output[1].length).to.equal(9);
+      expect(output[1][0]).to.equal('url');
+      expect(output[1][1]).to.equal(window.location.hostname + ':' + window.location.port + '/link');
+      expect(output[1][2]).to.equal('title');
+      expect(output[1][3]).to.equal('today; ');
+      expect(output[1][4]).to.equal('location; ');
+      expect(output[1][5]).to.equal('phone; ');
+      expect(output[1][6]).to.equal('email; ');
+      expect(output[1][7]).to.equal('A quick brown fox jumped over the lazy dog.');
+      expect(output[1][8]).to.equal('image');
+    });
+
+    test('CSV export data function given results array with multiple dates, locations, phones and emails returns correct array', function() {
+      var output = transformFunctions.transforms.export.createExportDataForCsv([{
+        url: 'url',
+        link: '/link',
+        title: 'title',
+        headerExtractions: [{
+          data: [{
+            text: 'today1'
+          }, {
+            text: 'today2'
+          }, {
+            text: 'today3'
+          }]
+        }, {
+          data: [{
+            text: 'location1'
+          }, {
+            text: 'location2'
+          }, {
+            text: 'location3'
+          }]
+        }],
+        detailExtractions: [{
+          data: [{
+            text: 'phone1'
+          }, {
+            text: 'phone2'
+          }, {
+            text: 'phone3'
+          }]
+        }, {
+          data: [{
+            text: 'email1'
+          }, {
+            text: 'email2'
+          }, {
+            text: 'email3'
+          }]
+        }],
+        images: [{
+          source: 'https://s3.amazonaws.com/image1'
+        }, {
+          source: 'https://s3.amazonaws.com/image2'
+        }, {
+          source: 'https://s3.amazonaws.com/image3'
+        }],
+        description: 'A quick brown fox\njumped over the lazy dog.'
+      }], [{
+        result: 'header',
+        title: 'Dates'
+      }, {
+        result: 'header',
+        title: 'Locations'
+      }, {
+        result: 'detail',
+        title: 'Phones'
+      }, {
+        result: 'detail',
+        title: 'Emails'
+      }]);
+
+      expect(output).to.be.an('Array');
+      expect(output.length).to.equal(2);
+      expect(output[0]).to.deep.equal([
+        'Ad url',
+        'Dig url',
+        'Title',
+        'Dates',
+        'Locations',
+        'Phones',
+        'Emails',
+        'Description',
+        'Images']);
+      expect(output[1].length).to.equal(9);
+      expect(output[1][0]).to.equal('url');
+      expect(output[1][1]).to.equal(window.location.hostname + ':' + window.location.port + '/link');
+      expect(output[1][2]).to.equal('title');
+      expect(output[1][3]).to.equal('today1; today2; today3; ');
+      expect(output[1][4]).to.equal('location1; location2; location3; ');
+      expect(output[1][5]).to.equal('phone1; phone2; phone3; ');
+      expect(output[1][6]).to.equal('email1; email2; email3; ');
+      expect(output[1][7]).to.equal('A quick brown fox jumped over the lazy dog.');
+      expect(output[1][8]).to.equal('image1; image2; image3');
+    });
+  });
+
+  suite('transform-functions export transform tests for PDF export data', function() {
+    var transformFunctions;
+
+    setup(function() {
+      transformFunctions = fixture('transform-functions-fixture');
+      transformFunctions.domain = 'domain';
+      transformFunctions.clientConfig = {};
+      transformFunctions.serverConfig = {};
+    });
+
+    test('PDF export data function given empty input returns correct array', function() {
+      var output = transformFunctions.transforms.export.createExportDataForPdf([]);
+      expect(output).to.be.an('Array');
+      expect(output).to.deep.equal([]);
+    });
+
+    test('PDF export data function given results array returns correct array', function() {
+      var output = transformFunctions.transforms.export.createExportDataForPdf([{
+        url: 'url',
+        link: '/link',
+        title: 'title',
+        headerExtractions: [{
+          key: 'Dates',
+          data: [{
+            text: 'today'
+          }]
+        }, {
+          key: 'Locations',
+          data: [{
+            text: 'location'
+          }]
+        }],
+        detailExtractions: [{
+          key: 'Phones',
+          data: [{
+            text: 'phone'
+          }]
+        }, {
+          key: 'Emails',
+          data: [{
+            text: 'email'
+          }]
+        }],
+        images: [{
+          source: 'https://s3.amazonaws.com/image'
+        }],
+        description: 'A quick brown fox\njumped over the lazy dog.'
+      }], [{
+        result: 'header',
+        title: 'Dates'
+      }, {
+        result: 'header',
+        title: 'Locations'
+      }, {
+        result: 'detail',
+        title: 'Phones'
+      }, {
+        result: 'detail',
+        title: 'Emails'
+      }]);
+
+      expect(output).to.be.an('Array');
+      expect(output.length).to.equal(1);
+      expect(output[0].images).to.be.an('Array');
+      expect(output[0].images.length).to.equal(1);
+      expect(output[0].images).deep.equal([{
+        id: 'image1',
+        source: 'image',
+        text: 'https://s3.amazonaws.com/image'
+      }]);
+      expect(output[0].paragraphs).to.be.an('Array');
+      expect(output[0].paragraphs.length).to.equal(8);
+      expect(output[0].paragraphs[0]).to.deep.equal({
+        big: true,
+        label: 'title',
+        value: ''
+      });
+      expect(output[0].paragraphs[1]).to.deep.equal({
+        label: 'URL:  ',
+        value: 'url'
+      });
+      expect(output[0].paragraphs[2]).to.deep.equal({
+        label: 'DIG URL:  ',
+        value: window.location.hostname + ':' + window.location.port + '/link'
+      });
+      expect(output[0].paragraphs[3]).to.deep.equal({
+        label: 'Dates: ',
+        value: 'today'
+      });
+      expect(output[0].paragraphs[4]).to.deep.equal({
+        label: 'Locations: ',
+        value: 'location'
+      });
+      expect(output[0].paragraphs[5]).to.deep.equal({
+        label: 'Phones: ',
+        value: 'phone'
+      });
+      expect(output[0].paragraphs[6]).to.deep.equal({
+        label: 'Emails: ',
+        value: 'email'
+      });
+      expect(output[0].paragraphs[7]).to.deep.equal({
+        label: 'Description:  ',
+        value: 'A quick brown fox jumped over the lazy dog.'
+      });
+    });
+
+    test('PDF export data function given results array with multiple dates, locations, phones and emails returns correct array', function() {
+      var output = transformFunctions.transforms.export.createExportDataForPdf([{
+        url: 'url',
+        link: '/link',
+        title: 'title',
+        headerExtractions: [{
+          key: 'Dates',
+          data: [{
+            text: 'today1'
+          }, {
+            text: 'today2'
+          }, {
+            text: 'today3'
+          }]
+        }, {
+          key: 'Locations',
+          data: [{
+            text: 'location1'
+          }, {
+            text: 'location2'
+          }, {
+            text: 'location3'
+          }]
+        }],
+        detailExtractions: [{
+          key: 'Phones',
+          data: [{
+            text: 'phone1'
+          }, {
+            text: 'phone2'
+          }, {
+            text: 'phone3'
+          }]
+        }, {
+          key: 'Emails',
+          data: [{
+            text: 'email1'
+          }, {
+            text: 'email2'
+          }, {
+            text: 'email3'
+          }]
+        }],
+        images: [{
+          source: 'https://s3.amazonaws.com/image1'
+        }, {
+          source: 'https://s3.amazonaws.com/image2'
+        }, {
+          source: 'https://s3.amazonaws.com/image3'
+        }],
+        description: 'A quick brown fox\njumped over the lazy dog.'
+      }], [{
+        result: 'header',
+        title: 'Dates'
+      }, {
+        result: 'header',
+        title: 'Locations'
+      }, {
+        result: 'detail',
+        title: 'Phones'
+      }, {
+        result: 'detail',
+        title: 'Emails'
+      }]);
+
+      expect(output).to.be.an('Array');
+      expect(output.length).to.equal(1);
+      expect(output[0].images).to.be.an('Array');
+      expect(output[0].images.length).to.equal(3);
+      expect(output[0].images).deep.equal([{
+        id: 'image1',
+        source: 'image1',
+        text: 'https://s3.amazonaws.com/image1'
+      }, {
+        id: 'image2',
+        source: 'image2',
+        text: 'https://s3.amazonaws.com/image2'
+      }, {
+        id: 'image3',
+        source: 'image3',
+        text: 'https://s3.amazonaws.com/image3'
+      }]);
+      expect(output[0].paragraphs).to.be.an('Array');
+      expect(output[0].paragraphs.length).to.equal(8);
+      expect(output[0].paragraphs[0]).to.deep.equal({
+        big: true,
+        label: 'title',
+        value: ''
+      });
+      expect(output[0].paragraphs[1]).to.deep.equal({
+        label: 'URL:  ',
+        value: 'url'
+      });
+      expect(output[0].paragraphs[2]).to.deep.equal({
+        label: 'DIG URL:  ',
+        value: window.location.hostname + ':' + window.location.port + '/link'
+      });
+      expect(output[0].paragraphs[3]).to.deep.equal({
+        label: 'Dates: ',
+        value: 'today1, today2, today3'
+      });
+      expect(output[0].paragraphs[4]).to.deep.equal({
+        label: 'Locations: ',
+        value: 'location1, location2, location3'
+      });
+      expect(output[0].paragraphs[5]).to.deep.equal({
+        label: 'Phones: ',
+        value: 'phone1, phone2, phone3'
+      });
+      expect(output[0].paragraphs[6]).to.deep.equal({
+        label: 'Emails: ',
+        value: 'email1, email2, email3'
+      });
+      expect(output[0].paragraphs[7]).to.deep.equal({
+        label: 'Description:  ',
+        value: 'A quick brown fox jumped over the lazy dog.'
+      });
+    });
+  });
+</script>
+</body>
+</html>

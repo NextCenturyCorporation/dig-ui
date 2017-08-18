@@ -316,6 +316,8 @@ var configTransforms = (function(_, commonTransforms) {
           icon: fields[id].icon || 'icons:text-format',
           // Either entity, text, or undefined.
           link: fields[id].show_as_link !== 'no' ? fields[id].show_as_link : undefined,
+          // The queryField field.
+          queryField: 'knowledge_graph.' + id + '.value',
           // Either header, detail, title, description, or undefined.
           result: fields[id].show_in_result !== 'no' ? fields[id].show_in_result : undefined,
           // Whether to show in the search fields.

@@ -44,7 +44,14 @@ DEFAULT_PROJECT | The default project. | undefined
 ES_HOST | The stringified object containing the location of elasticsearch. | '{"host": "http://localhost:9200"}'
 IMAGE_SERVICE_AUTH | The stringified object containing the username and password authorization for the similar image REST service. | '{"user": "", "password": ""}'
 IMAGE_SERVICE_HOST | The stringified object containing the location for the similar image REST service.  The "url" property is for GET requests sending a specific image URL.  The "base64" property is for POST requests sending specific image base64 data.  | {"url": "", "base64": ""}
+LOG_INDEX | The elasticsearch log index name. | 'dig-logs'
+LOG_TYPE | The elasticsearch log index type. | 'log'
 SEARCH_CONFIG | The stringified object containing locations for the search REST service (from project configs) mapped to replacement locations. | undefined
+STATE_INDEX | The elasticsearch state index name. | 'dig-states'
+STATE_TYPE | The elasticsearch state index type. | 'state'
+TAG_ENTITY_ENDPOINT | The entity endpoint for the tag REST service. | undefined
+TAG_EXTRACTION_ENDPOINT | The extraction endpoint for the tag REST service. | undefined
+TAG_LIST_ENDPOINT | The tag list endpoint for the tag REST service. | undefined
 
 ## Run Local Server
 ```

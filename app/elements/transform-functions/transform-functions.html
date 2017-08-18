@@ -21,12 +21,13 @@ limitations under the License.
 <script src="../../transforms/common-transforms.js" type="text/javascript"></script>
 <script src="../../transforms/config-transforms.js" type="text/javascript"></script>
 <script src="../../transforms/entity-transforms.js" type="text/javascript"></script>
+<script src="../../transforms/export-transforms.js" type="text/javascript"></script>
 <script src="../../transforms/search-transforms.js" type="text/javascript"></script>
 
 <script>
   (function() {
     Polymer({
-      /* globals _, moment, commonTransforms, configTransforms, entityTransforms, searchTransforms */
+      /* globals _, moment, commonTransforms, configTransforms, entityTransforms, exportTransforms, searchTransforms*/
       is: 'transform-functions',
 
       properties: {
@@ -92,6 +93,7 @@ limitations under the License.
 
         transforms.config = configTransforms(_, util);
         transforms.entity = entityTransforms(_, util, esConfig);
+        transforms.export = exportTransforms(_);
         transforms.search = searchTransforms(_);
 
         return transforms;

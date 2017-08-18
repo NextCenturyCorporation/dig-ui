@@ -12,7 +12,7 @@
     "build-and-run-query": "DigElements/build-and-run-query#1.0.9",
     "button-action": "DigElements/button-action#1.0.3",
     "clipboard": "^1.5.15",
-    "confidence-marker": "DigElements/confidence-marker#2.0.1",
+    "confidence-marker": "DigElements/confidence-marker#2.0.2",
     "date-picker-display": "DigElements/date-picker-display#1.1.0",
     "date-range-facet": "DigElements/date-range-facet#1.1.0",
     "detail-subsection": "DigElements/detail-subsection#1.0.2",
@@ -22,8 +22,9 @@
     "elastic-client-query-builder": "DigElements/elastic-client-query-builder#1.0.8",
     "elastic-create": "DigElements/elastic-create#~1.0.3",
     "elastic-error": "DigElements/elastic-error#1.0.1",
+    "export-button": "DigElements/export-button#1.0.3",
     "facet-list": "DigElements/facet-list#1.3.2",
-    "facet-panel": "DigElements/facet-panel#1.0.4",
+    "facet-panel": "DigElements/facet-panel#1.0.5",
     "file-upload": "DigElements/file-upload#2.2.2",
     "filters-builder": "DigElements/filters-builder#1.0.1",
     "filter-behavior": "DigElements/filter-behavior#1.0.0",
@@ -45,6 +46,7 @@
     "moment-element": "bendavis78/moment-element#^1.1.0",
     "paginated-image-gallery": "DigElements/paginated-image-gallery#1.0.11",
     "paper-elements": "PolymerElements/paper-elements#^1.0.7",
+    "pdfmake": "^0.1.25",
     "phone-behavior": "DigElements/phone-behavior#1.0.0",
     "polymer": "Polymer/polymer#^1.7.0",
     "query-transformer": "DigElements/query-transformer#1.0.9",
@@ -67,6 +69,6 @@
     "icon-label": "1.0.6",
     "image-gallery": "1.0.7",
     "styled-dialog": "1.0.4",
-    "confidence-marker": "2.0.1"
+    "confidence-marker": "2.0.2"
   }
 }

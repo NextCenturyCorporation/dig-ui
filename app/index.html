@@ -350,27 +350,44 @@ limitations under the License.
           </template>
 
           <template is="dom-if" if="[[!noData(clientConfig)]]">
-            <div id="searchTitle" class="layout vertical">
-              <template is="dom-if" if="[[!searchError]]">
-                <div class="layout horizontal flex">
-                  <div class="paper-font-title">[[resultListHeader]]</div>
+            <div id="searchTitle" class="layout horizontal">
+              <div class="layout vertical flex">
+                <template is="dom-if" if="[[!searchError]]">
+                  <div class="layout horizontal flex">
+                    <div class="paper-font-title">[[resultListHeader]]</div>
 
-                  <template is="dom-if" if="[[resultsTotalCount]]">
-                    <info-search search-parameters="[[searchParameters]]"></info-search>
-                  </template>
-                </div>
-              </template>
+                    <template is="dom-if" if="[[resultsTotalCount]]">
+                      <info-search search-parameters="[[searchParameters]]"></info-search>
+                    </template>
+                  </div>
+                </template>
 
-              <template is="dom-if" if="[[searchError]]">
-                <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
-                <div class="paper-font-title flex">
-                  [[searchErrorMessage]]
-                </div>
-              </template>
+                <template is="dom-if" if="[[searchError]]">
+                  <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
+                  <div class="paper-font-title flex">
+                    [[searchErrorMessage]]
+                  </div>
+                </template>
 
-              <template is="dom-if" if="[[resultsTotalCount]]">
-                <div class="note">Please note that only the top 10 extractions of each type are shown in the result list.</div>
-              </template>
+                <template is="dom-if" if="[[resultsTotalCount]]">
+                  <div class="note">Please note that only the top 10 extractions of each type are shown in the result list.</div>
+                </template>
+              </div>
+              
+              <export-button
+                client="[[esClient]]"
+                data="[[shownResults]]"
+                filter-list="[]"
+                index-name="[[esConfig.esIndex]]"
+                index-types="[[esConfig.esType]]"
+                search-fields="[[searchFields]]"
+                search-parameters="[[searchParameters]]"
+                source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+                transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
+                transform-search-input-function="[[transforms.export.createBulkSearchData]]"
+                transform-search-results-function="[[transforms.entity.documents]]">
+              </export-button>
             </div>
 
             <result-list
@@ -379,6 +396,7 @@ limitations under the License.
               text-property="title"
               query-results="[[results]]"
               total-results="[[resultsTotalCount]]"
+              shown-results="{{shownResults}}"
               page="{{resultPage}}"
               page-size="25"
               loading="[[searchLoading]]"

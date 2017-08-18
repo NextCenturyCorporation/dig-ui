@@ -140,7 +140,7 @@ limitations under the License.
       },
 
       _buildCountString: function(totalCount) {
-        return totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        return (totalCount || '').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       },
 
       _buildResultsTimestampTransformFunction: function(sortField) {

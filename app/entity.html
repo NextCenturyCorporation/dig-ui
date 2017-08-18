@@ -606,7 +606,12 @@ limitations under the License.
                     style-class="entity-grey"
                     section-title="[[documentsHeader]]">
 
-                    <!-- TODO Export Button -->
+                    <export-button
+                      data="[[shownResults]]"
+                      search-fields="[[searchFields]]"
+                      transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                      transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
+                    </export-button>
                   </section-title>
 
                   <template is="dom-if" if="[[documentsError]]">
@@ -622,6 +627,7 @@ limitations under the License.
                     text-property="title"
                     query-results="[[documents]]"
                     total-results="{{documentsTotal}}"
+                    shown-results="{{shownResults}}"
                     page="{{documentPage}}"
                     page-size="25"
                     loading="[[documentsLoading]]"
