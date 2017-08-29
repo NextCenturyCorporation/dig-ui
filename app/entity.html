@@ -335,11 +335,19 @@ limitations under the License.
                   <div class="paper-font-headline">
                     [[pageConfig.title]]: <span>[[pageName]]</span>
                   </div>
-                  <template is="dom-if" if="[[documentsTotal]]">
-                    <div class="paper-font-subhead">
-                      [[documentsTotal]] Total Results
-                    </div>
-                  </template>
+                  <div class="paper-font-subhead">
+                    <template is="dom-if" if="[[documentsLoading]]">
+                      Loading Results...
+                    </template>
+                    <template is="dom-if" if="[[!documentsLoading]]">
+                      <template is="dom-if" if="[[!documentsTotal]]">
+                        No Results
+                      </template>
+                      <template is="dom-if" if="[[documentsTotal]]">
+                        [[documentsTotal]] Results
+                      </template>
+                    </template>
+                  </div>
                 </div>
 
                 <div class="layout horizontal flex end-justified">
@@ -389,7 +397,7 @@ limitations under the License.
               <selected-facets-display
                 facets="[[entityFilters]]"
                 facet-key="[[item.key]]"
-                hide-remove-button="true">
+                hide-remove-button>
               </selected-facets-display>
             </template>
           </div>
