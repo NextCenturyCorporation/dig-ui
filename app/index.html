@@ -149,6 +149,13 @@ limitations under the License.
     </json-combine>
 
     <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{networkExpansionParameters}}"
+      combine-function="[[transforms.config.networkExpansionParameters]]">
+    </json-combine>
+
+    <json-combine
       data-in1="[[dateConfig]]"
       data-in2="{}"
       data-out="{{searchQuery}}"
@@ -168,11 +175,14 @@ limitations under the License.
       page="{{resultPage}}"
       page-size="25"
       process-request="[[processRequest]]"
+      result-config="[[createSearchResultConfig(networkExpansionParameters.*)]]"
       result-function="[[transforms.search.searchResults]]"
       results="{{searchResults}}"
-      total="{{resultsTotalCount}}"
       search-parameters="[[searchParameters]]"
+      search-config="[[networkExpansionParameters]]"
       search-function="[[searchQuery]]"
+      total-count-function="[[createTotalCountFunction()]]"
+      total="{{resultsTotalCount}}"
       url="[[esConfig.searchEndpoint]]">
     </query-transformer>
 
@@ -270,6 +280,7 @@ limitations under the License.
             date-config="[[dateConfig]]"
             search-fields-config="[[searchFieldsDialogConfig]]"
             search-parameters="{{searchParameters}}"
+            network-expansion-parameters="{{networkExpansionParameters}}"
             process-request="{{processRequest}}">
           </search-fields-dialog>
         </div>
@@ -334,9 +345,10 @@ limitations under the License.
         <!-- Sidebar on left side -->
         <facet-panel drawer
           facets-query="[[facetsQuery]]"
-          search-keys="[[searchKeys]]"
+          network-expansion-parameters="[[networkExpansionParameters]]"
           process-request="{{processRequest}}"
           search-endpoint="[[esConfig.searchEndpoint]]"
+          search-keys="[[searchKeys]]"
           search-fields="[[searchFields]]"
           search-parameters="{{searchParameters}}">
 
@@ -452,6 +464,26 @@ limitations under the License.
 
       app.noData = function(object) {
         return _.isEmpty(object);
+      };
+
+      app.createSearchResultConfig = function() {
+        return {
+          isNetworkExpansion: !!(_.findKey(app.networkExpansionParameters, function(key) {
+            return key;
+          }))
+        };
+      };
+
+      app.createTotalCountFunction = function() {
+        return function(response) {
+          if(response && response.length && response[0] && response[0].result) {
+            if(_.isArray(response[0].result)) {
+              return (response[0].result.length && response[0].result[1].hits && response[0].result[1].hits.total ? response[0].result[1].hits.total : 0);
+            }
+            return (response[0].result.hits && response[0].result.hits.total ? response[0].result.hits.total : 0);
+          }
+          return 0;
+        };
       };
 
       /************* MENU *************/
