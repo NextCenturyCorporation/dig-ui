@@ -267,7 +267,7 @@ var searchTransforms = (function(_) {
           });
         }
 
-        if(response[0].result && response[0].result.length) {
+        if(response[0].result) {
           if(config && config.isNetworkExpansion && response[0].result.length > 1) {
             hits = response[0].result[1].hits || {};
           } else {
