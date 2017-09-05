@@ -40,7 +40,7 @@ limitations under the License.
         },
 
         esConfig: {
-          computed: '_initializeEsConfig(clientConfig, serverConfig)',
+          computed: '_initializeEsConfig(domain, clientConfig, serverConfig)',
           notify: true,
           readOnly: true,
           type: Object
@@ -58,17 +58,27 @@ limitations under the License.
         }
       },
 
-      _initializeEsConfig: function(clientConfig, serverConfig) {
+      _initializeEsConfig: function(domain, clientConfig, serverConfig) {
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var esConfig = {
           esIndex: (clientConfig.index && serverConfig.databaseType ? clientConfig.index[serverConfig.databaseType] : undefined),
           esType: clientConfig.root_name,
-          imagePrefix: clientConfig.image_prefix || 'http://memex-summer2017-domain1.s3.amazonaws.com/',
-          searchEndpoint: serverConfig.overrideSearchEndpoint || (clientConfig.configuration && serverConfig.databaseType ? clientConfig.configuration['sandpaper_' + serverConfig.databaseType + '_url'] : undefined)
+          imagePrefix: clientConfig.image_prefix || 'http://memex-summer2017-domain1.s3.amazonaws.com/'
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-        if(esConfig.searchEndpoint) {
+        if(serverConfig.overrideSearchEndpoint) {
+          if(_.isString(serverConfig.overrideSearchEndpoint)) {
+            esConfig.searchEndpoint = serverConfig.overrideSearchEndpoint;
+          }
+          if(_.isObject(serverConfig.overrideSearchEndpoint) && serverConfig.overrideSearchEndpoint[domain]) {
+            esConfig.searchEndpoint = serverConfig.overrideSearchEndpoint[domain];
+          }
+        }
+
+        if(!esConfig.searchEndpoint && clientConfig.configuration && serverConfig.databaseType) {
+          esConfig.searchEndpoint = clientConfig.configuration['sandpaper_' + serverConfig.databaseType + '_url'];
+
           if(serverConfig.searchConfig) {
             esConfig.searchEndpoint = serverConfig.searchConfig[esConfig.searchEndpoint];
           } else {

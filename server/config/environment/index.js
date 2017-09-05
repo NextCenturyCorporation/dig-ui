@@ -44,7 +44,7 @@ module.exports = {
     imageServiceHost: process.env.IMAGE_SERVICE_HOST || '{"url": "", "base64": ""}',
     logIndex: process.env.LOG_INDEX || 'dig-logs',
     logType: process.env.LOG_TYPE || 'log',
-    overrideSearchEndpoint: process.env.OVERRIDE_SEARCH_ENDPOINT,
+    overrideSearchEndpoint: process.env.OVERRIDE_SEARCH_ENDPOINT ? JSON.parse(process.env.OVERRIDE_SEARCH_ENDPOINT) : undefined,
     searchConfig: process.env.SEARCH_CONFIG ? JSON.parse(process.env.SEARCH_CONFIG) : undefined,
     stateIndexName: process.env.STATE_INDEX_NAME || 'dig-states',
     stateIndexType: process.env.STATE_INDEX_TYPE || 'state',

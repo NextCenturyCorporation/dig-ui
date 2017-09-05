@@ -46,7 +46,7 @@ IMAGE_SERVICE_AUTH | The stringified object containing the username and password
 IMAGE_SERVICE_HOST | The stringified object containing the location for the similar image REST service.  The "url" property is for GET requests sending a specific image URL.  The "base64" property is for POST requests sending specific image base64 data.  | {"url": "", "base64": ""}
 LOG_INDEX | The elasticsearch log index name. | 'dig-logs'
 LOG_TYPE | The elasticsearch log index type. | 'log'
-OVERRIDE_SEARCH_ENDPOINT | The endpoint for the search and facets REST service.  Overrides the endpoint from the project config. | undefined
+OVERRIDE_SEARCH_ENDPOINT | The stringified object containing the project names mapped to the endpoints for the search and facets REST services.  Overrides the endpoints from the project configs. | undefined
 SEARCH_CONFIG | The stringified object containing locations for the search REST service (from project configs) mapped to replacement locations. | undefined
 STATE_INDEX | The elasticsearch state index name. | 'dig-states'
 STATE_TYPE | The elasticsearch state index type. | 'state'
