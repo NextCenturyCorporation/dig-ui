@@ -2,6 +2,26 @@
 
 The following software licenses apply to the listed third-party dependencies:
 
+### Apache 2.0
+
+[License](https://github.com/NextCenturyCorporation/digapp-ht/blob/master/THIRD-PARTY-LICENSES/APACHE-2.0)
+
+#### elasticsearch
+- Copyright (c) 2016 Elasticsearch BV
+- https://raw.githubusercontent.com/elastic/bower-elasticsearch-js/master/elasticsearch.js
+
+#### vaadin-date-picker
+- Copyright 2014-2016 Vaadin Ltd.
+- https://github.com/vaadin/vaadin-date-picker/blob/master/LICENSE
+
+### BSD 2-Clause
+
+[License](https://github.com/NextCenturyCorporation/digapp-ht/blob/master/THIRD-PARTY-LICENSES/BSD-2-CLAUSE)
+
+#### leaflet-map
+- Copyright (c) 2014-2016 Hendrik Brummermann, Prateek Saxena
+- https://github.com/leaflet-extras/leaflet-map
+
 ### BSD 3-Clause
 
 [License](https://github.com/NextCenturyCorporation/digapp-ht/blob/master/THIRD-PARTY-LICENSES/BSD-3-CLAUSE)
@@ -34,6 +54,14 @@ The following software licenses apply to the listed third-party dependencies:
 - Copyright (c) 2014 Lucas Garron
 - https://github.com/lgarron/clipboard.js/blob/master/LICENSE.md
 
+#### elastic.js
+- Copyright (c) 2012 FullScale Labs, LLC
+- https://opensource.org/licenses/MIT
+
+#### file-upload
+- Copyright (c) 2015 Winston Howes
+- https://github.com/winhowes/file-upload/blob/master/LICENSE
+
 #### fontawesome-iconset
 - https://github.com/vangware/fontawesome-iconset
 
@@ -44,4 +72,8 @@ The following software licenses apply to the listed third-party dependencies:
 #### moment-element
 - Copyright (c) 2016 Abdón Rodríguez Davila (@abdonrd)
 - https://github.com/abdonrd/moment-element/blob/master/LICENSE
+
+#### node-uuid
+- Copyright (c) 2010-2016 Robert Kieffer and other contributors
+- https://github.com/broofa/node-uuid/blob/master/LICENSE.md
 

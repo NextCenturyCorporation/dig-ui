@@ -54,7 +54,7 @@ var searchTransforms = (function(_) {
 
               andFilter.clauses.push({
                 constraint: searchParameters[type][term].date,
-                operator: term.includes('start') ? '>' : '<',
+                operator: term.includes('start') ? '>=' : '<=',
                 variable: '?' + type + '1'
               });
             } else if(searchParameters[type][term].search === 'excluded') {

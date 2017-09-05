@@ -23,14 +23,12 @@ var configTransforms = (function(_, commonTransforms) {
       start: {
         key: searchFieldsObject.key + '_start',
         field: searchFieldsObject.field,
-        title: searchFieldsObject.title + ' From',
-        dateIdentifier: 'start'
+        title: searchFieldsObject.title + ' Start'
       },
       end: {
         key: searchFieldsObject.key + '_end',
         field: searchFieldsObject.field,
-        title: searchFieldsObject.title + ' To',
-        dateIdentifier: 'end'
+        title: searchFieldsObject.title + ' End'
       }
     };
   }
