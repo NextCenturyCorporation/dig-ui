@@ -48,7 +48,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       type: config.key
     };
 
-    if(item.provenance) {
+    if(item.provenance && item.provenance.length) {
       extraction.provenances = item.provenance.map(function(provenance) {
         return {
           method: provenance.method + (provenance.source && provenance.source.segment ? ' from ' + provenance.source.segment : ''),

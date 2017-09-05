@@ -47,6 +47,7 @@ module.exports = function(app) {
       imageServiceHost: serverConfig.imageServiceHost,
       logIndex: serverConfig.logIndex,
       logType: serverConfig.logType,
+      overrideSearchEndpoint: serverConfig.overrideSearchEndpoint,
       searchConfig: serverConfig.searchConfig,
       stateIndexName: serverConfig.stateIndexName,
       stateIndexType: serverConfig.stateIndexType,
@@ -54,27 +55,6 @@ module.exports = function(app) {
       tagsExtractionEndpoint: serverConfig.tagsExtractionEndpoint,
       tagsListEndpoint: serverConfig.tagsListEndpoint
     });
-  });
-
-  app.get('/clientConfig/:domain', function(req, res) {
-    if(!req.params.domain) {
-      return res.status(200).send({});
-    }
-    if(!clientConfig[req.params.domain]) {
-      var filename = 'client-config-' + req.params.domain + '.json';
-      clientConfig[req.params.domain] = fs.existsSync('./server/' + filename) ? require('./' + filename) : {};
-    }
-    res.status(200).send(clientConfig[req.params.domain]);
-  });
-
-  app.post('/saveClientConfig/:domain', function(req, res) {
-    if(req.params.domain && req.body) {
-      clientConfig[req.params.domain] = req.body;
-      fs.writeFile('./server/client-config-' + req.params.domain + '.json', JSON.stringify(req.body, null, 2), function(err) {
-        console.log(err);
-      });
-    }
-    res.status(200).send();
   });
 
   app.get('/file/:file', function(req, res) {

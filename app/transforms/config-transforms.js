@@ -444,7 +444,9 @@ var configTransforms = (function(_, commonTransforms) {
           return {
             key: searchFieldsObject.key,
             field: searchFieldsObject.field,
-            title: searchFieldsObject.title
+            title: searchFieldsObject.title,
+            // Enable network expansion for the entity fields.
+            enableNetworkExpansion: true
           };
         })
       });

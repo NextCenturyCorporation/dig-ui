@@ -64,7 +64,7 @@ limitations under the License.
           esIndex: (clientConfig.index && serverConfig.databaseType ? clientConfig.index[serverConfig.databaseType] : undefined),
           esType: clientConfig.root_name,
           imagePrefix: clientConfig.image_prefix || 'http://memex-summer2017-domain1.s3.amazonaws.com/',
-          searchEndpoint: (clientConfig.configuration && serverConfig.databaseType ? clientConfig.configuration['sandpaper_' + serverConfig.databaseType + '_url'] : undefined)
+          searchEndpoint: serverConfig.overrideSearchEndpoint || (clientConfig.configuration && serverConfig.databaseType ? clientConfig.configuration['sandpaper_' + serverConfig.databaseType + '_url'] : undefined)
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
