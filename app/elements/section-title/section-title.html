@@ -90,7 +90,7 @@ limitations under the License.
         </div>
       </template>
 
-      <content></content>
+      <slot></slot>
     </div>
   </template>
 
@@ -237,7 +237,7 @@ limitations under the License.
        * @private
        */
       _getClipboardText: function(data, textFunction) {
-        return data.map(textFunction).join(',');
+        return (data || []).map(textFunction).join(',');
       },
 
       /**

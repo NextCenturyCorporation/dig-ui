@@ -1,0 +1,188 @@
+/*
+ * Copyright 2017 Next Century Corporation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Colors from the Polymer Material Palette http://www.materialpalette.com/ and https://github.com/PolymerElements/paper-styles/blob/master/color.html */
+
+.entity-amber {
+  color: #ffb300;
+}
+
+.bar.entity-amber {
+  background-color: #ffecb3;
+  color: inherit;
+}
+
+.entity-blue {
+  color: #1e88e5;
+}
+
+.bar.entity-blue {
+  background-color: #bbdefb;
+  color: inherit;
+}
+
+.entity-blue-grey {
+  color: #546e7a;
+}
+
+.bar.entity-blue-grey {
+  background-color: #cfd8dc;
+  color: inherit;
+}
+
+.entity-brown {
+  color: #6d4c41;
+}
+
+.bar.entity-brown {
+  background-color: #d7ccc8;
+  color: inherit;
+}
+
+.entity-cyan {
+  color: #00acc1;
+}
+
+.bar.entity-cyan {
+  background-color: #b2ebf2;
+  color: inherit;
+}
+
+.entity-deep-orange {
+  color: #f4511e;
+}
+
+.bar.entity-deep-orange {
+  background-color: #ffccbc;
+  color: inherit;
+}
+
+.entity-deep-purple {
+  color: #5e35b1;
+}
+
+.bar.entity-deep-purple {
+  background-color: #d1c4e9;
+  color: inherit;
+}
+
+.entity-green {
+  color: #43a047;
+}
+
+.bar.entity-green {
+  background-color: #c8e6c9;
+  color: inherit;
+}
+
+.entity-grey {
+  color: #757575;
+}
+
+.bar.entity-grey {
+  background-color: #f5f5f5;
+  color: inherit;
+}
+
+.entity-indigo {
+  color: #3949ab;
+}
+
+.bar.entity-indigo {
+  background-color: #c5cae9;
+  color: inherit;
+}
+
+.entity-light-blue {
+  color: #039be5;
+}
+
+.bar.entity-light-blue {
+  background-color: #b3e5fc;
+  color: inherit;
+}
+
+.entity-light-green {
+  color: #7cb342;
+}
+
+.bar.entity-light-green {
+  background-color: #dcedc8;
+  color: inherit;
+}
+
+.entity-lime {
+  color: #c0ca33;
+}
+
+.bar.entity-lime {
+  background-color: #f0f4c3;
+  color: inherit;
+}
+
+.entity-orange {
+  color: #fb8c00;
+}
+
+.bar.entity-orange {
+  background-color: #ffe0b2;
+  color: inherit;
+}
+
+.entity-pink {
+  color: #d81b60;
+}
+
+.bar.entity-pink {
+  background-color: #f8bbd0;
+  color: inherit;
+}
+
+.entity-purple {
+  color: #8e24aa;
+}
+
+.bar.entity-purple {
+  background-color: #e1bee7;
+  color: inherit;
+}
+
+.entity-red {
+  color: #e53935;
+}
+
+.bar.entity-red {
+  background-color: #ffcdd2;
+  color: inherit;
+}
+
+.entity-teal {
+  color: #00897b;
+}
+
+.bar.entity-teal {
+  background-color: #b2bfdb;
+  color: inherit;
+}
+
+.entity-yellow {
+  color: #fdd835;
+}
+
+.bar.entity-yellow {
+  background-color: #fff9c4;
+  color: inherit;
+}

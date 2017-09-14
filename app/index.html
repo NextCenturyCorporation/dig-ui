@@ -20,10 +20,10 @@ limitations under the License.
 
 <head>
   <meta charset="utf-8">
-  <meta name="description" content="">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
   <title>DIG</title>
+  <meta name="description" content="DIG">
 
   <link rel="icon" href="favicon.ico"/>
 
@@ -33,391 +33,395 @@ limitations under the License.
   <link rel="stylesheet" href="styles/main.css">
   <!-- endbuild-->
 
+  <link rel="stylesheet" href="styles/colors.css">
+
   <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
-  <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
   <!-- endbuild -->
 
   <!-- will be replaced with elements/elements.vulcanized.html -->
   <link rel="import" href="elements/elements.html">
   <!-- endreplace-->
 
-  <link rel="import" href="styles/entity-styles.html">
-  <style is="custom-style" include="entity-styles"></style>
+  <link rel="import" href="styles/app-theme.html">
 </head>
 
 <body unresolved class="fullbleed layout vertical">
   <span id="browser-sync-binding"></span>
 
-  <template is="dom-bind" id="app">
-    <iron-ajax
-      auto
-      handle-as="json"
-      url="/serverConfig"
-      last-response="{{serverConfig}}">
-    </iron-ajax>
+  <dom-bind id="app">
+    <template is="dom-bind">
+      <iron-ajax
+        auto
+        handle-as="json"
+        url="/serverConfig"
+        last-response="{{serverConfig}}">
+      </iron-ajax>
 
-    <json-combine
-      data-in1="[[params]]"
-      data-in2="[[serverConfig]]"
-      data-out="{{domain}}"
-      combine-function="[[findDomain]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[params]]"
+        data-in2="[[serverConfig]]"
+        data-out="{{domain}}"
+        combine-function="[[findDomain]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[serverConfig.configUsername]]"
-      data-in2="[[serverConfig.configPassword]]"
-      data-out="{{configHeader}}"
-      combine-function="[[createAuthHeader]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[serverConfig.configUsername]]"
+        data-in2="[[serverConfig.configPassword]]"
+        data-out="{{configHeader}}"
+        combine-function="[[createAuthHeader]]">
+      </json-combine>
 
-    <iron-ajax
-      auto="[[exists(configHeader)]]"
-      handle-as="json"
-      headers="[[configHeader]]"
-      url="[[concat(serverConfig.configEndpoint, domain)]]"
-      with-credentials
-      loading="{{clientConfigLoading}}"
-      last-error="{{clientConfigError}}"
-      last-response="{{clientConfig}}">
-    </iron-ajax>
+      <iron-ajax
+        auto="[[exists(configHeader)]]"
+        handle-as="json"
+        headers="[[configHeader]]"
+        url="[[concat(serverConfig.configEndpoint, domain)]]"
+        with-credentials
+        loading="{{clientConfigLoading}}"
+        last-error="{{clientConfigError}}"
+        last-response="{{clientConfig}}">
+      </iron-ajax>
 
-    <transform-functions
-      client-config="[[clientConfig]]"
-      domain="[[domain]]"
-      server-config="[[serverConfig]]"
-      es-config="{{esConfig}}"
-      transforms="{{transforms}}">
-    </transform-functions>
+      <transform-functions
+        client-config="[[clientConfig]]"
+        domain="[[domain]]"
+        server-config="[[serverConfig]]"
+        es-config="{{esConfig}}"
+        transforms="{{transforms}}">
+      </transform-functions>
 
-    <json-combine
-      data-in1="[[clientConfig]]"
-      data-in2="{}"
-      data-out="{{clientConfigFields}}"
-      combine-function="[[transforms.config.fields]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[clientConfig]]"
+        data-in2="{}"
+        data-out="{{clientConfigFields}}"
+        combine-function="[[transforms.config.fields]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[clientConfigFields]]"
-      data-in2="{}"
-      data-out="{{searchFields}}"
-      combine-function="[[transforms.config.searchFields]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[clientConfigFields]]"
+        data-in2="{}"
+        data-out="{{searchFields}}"
+        combine-function="[[transforms.config.searchFields]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{dateConfig}}"
-      combine-function="[[transforms.config.dateConfig]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{dateConfig}}"
+        combine-function="[[transforms.config.dateConfig]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{searchFieldsDialogConfig}}"
-      combine-function="[[transforms.config.searchFieldsDialogConfig]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{searchFieldsDialogConfig}}"
+        combine-function="[[transforms.config.searchFieldsDialogConfig]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{searchParameters}}"
-      combine-function="[[transforms.config.searchParameters]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{searchParameters}}"
+        combine-function="[[transforms.config.searchParameters]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{searchKeys}}"
-      combine-function="[[transforms.config.searchKeys]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{searchKeys}}"
+        combine-function="[[transforms.config.searchKeys]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{networkExpansionParameters}}"
-      combine-function="[[transforms.config.networkExpansionParameters]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{networkExpansionParameters}}"
+        combine-function="[[transforms.config.networkExpansionParameters]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[dateConfig]]"
-      data-in2="{}"
-      data-out="{{searchQuery}}"
-      combine-function="[[transforms.search.createSearchQuery]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[dateConfig]]"
+        data-in2="{}"
+        data-out="{{searchQuery}}"
+        combine-function="[[transforms.search.createSearchQuery]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[dateConfig]]"
-      data-in2="{}"
-      data-out="{{facetsQuery}}"
-      combine-function="[[transforms.search.createFacetsQuery]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[dateConfig]]"
+        data-in2="{}"
+        data-out="{{facetsQuery}}"
+        combine-function="[[transforms.search.createFacetsQuery]]">
+      </json-combine>
 
-    <query-transformer
-      error="{{searchError}}"
-      loading="{{searchLoading}}"
-      page="{{resultPage}}"
-      page-size="25"
-      process-request="[[processRequest]]"
-      result-config="[[createSearchResultConfig(networkExpansionParameters.*)]]"
-      result-function="[[transforms.search.searchResults]]"
-      results="{{searchResults}}"
-      search-parameters="[[searchParameters]]"
-      search-config="[[networkExpansionParameters]]"
-      search-function="[[searchQuery]]"
-      total-count-function="[[createTotalCountFunction()]]"
-      total="{{resultsTotalCount}}"
-      url="[[esConfig.searchEndpoint]]">
-    </query-transformer>
+      <query-transformer
+        error="{{searchError}}"
+        loading="{{searchLoading}}"
+        page="{{resultPage}}"
+        page-size="25"
+        process-request="[[processRequest]]"
+        result-config="[[createSearchResultConfig(networkExpansionParameters.*)]]"
+        result-function="[[transforms.search.searchResults]]"
+        results="{{searchResults}}"
+        search-parameters="[[searchParameters]]"
+        search-config="[[networkExpansionParameters]]"
+        search-function="[[searchQuery]]"
+        total-count-function="[[createTotalCountFunction()]]"
+        total="{{resultsTotalCount}}"
+        url="[[esConfig.searchEndpoint]]">
+      </query-transformer>
 
-    <json-combine
-      data-in1="[[searchResults]]"
-      data-in2="[[searchFields]]"
-      data-out="{{results}}"
-      combine-function="[[transforms.entity.documents]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchResults]]"
+        data-in2="[[searchFields]]"
+        data-out="{{results}}"
+        combine-function="[[transforms.entity.documents]]">
+      </json-combine>
 
-    <elastic-client
-      config="[[serverConfig.esHost]]"
-      client="{{esClient}}">
-    </elastic-client>
+      <elastic-client
+        config="[[serverConfig.esHost]]"
+        client="{{esClient}}">
+      </elastic-client>
 
-    <!-- Logger for Search Terms -->
-    <dig-logger
-      es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
-      type="Search-SubmitSearch"
-      data="[[logMessage]]"
-      username="defaultUser">
-    </dig-logger>
+      <!-- Logger for Search Terms -->
+      <dig-logger
+        es-client="[[esClient]]"
+        es-index="[[serverConfig.logIndex]]"
+        es-type="[[serverConfig.logType]]"
+        type="Search-SubmitSearch"
+        data="[[logMessage]]"
+        username="defaultUser">
+      </dig-logger>
 
-    <!-- Logger for Pagination -->
-    <dig-logger
-      es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
-      type="Search-ShowResultPageNumber"
-      data="[[resultPage]]"
-      username="defaultUser">
-    </dig-logger>
+      <!-- Logger for Pagination -->
+      <dig-logger
+        es-client="[[esClient]]"
+        es-index="[[serverConfig.logIndex]]"
+        es-type="[[serverConfig.logType]]"
+        type="Search-ShowResultPageNumber"
+        data="[[resultPage]]"
+        username="defaultUser">
+      </dig-logger>
 
-    <!-- Logger for Page View -->
-    <dig-logger log-page-view
-      es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
-      type="Search-Open"
-      data=""
-      username="defaultUser"
-      logger="{{logger}}">
-    </dig-logger>
+      <!-- Logger for Page View -->
+      <dig-logger log-page-view
+        es-client="[[esClient]]"
+        es-index="[[serverConfig.logIndex]]"
+        es-type="[[serverConfig.logType]]"
+        type="Search-Open"
+        data=""
+        username="defaultUser"
+        logger="{{logger}}">
+      </dig-logger>
 
-    <log-creator
-      object="{{searchParameters}}"
-      log-message="{{logMessage}}">
-    </log-creator>
+      <log-creator
+        object="{{searchParameters}}"
+        log-message="{{logMessage}}">
+      </log-creator>
 
-    <tag-manager
-      id="tagManager"
-      auth-username="[[serverConfig.configUsername]]"
-      auth-password="[[serverConfig.configPassword]]"
-      entity-endpoint="[[serverConfig.tagsEntityEndpoint]]"
-      extraction-endpoint="[[serverConfig.tagsExtractionEndpoint]]"
-      list-endpoint="[[serverConfig.tagsListEndpoint]]"
-      project="[[domain]]"
-      tag-manager="{{tagManager}}">
-    </tag-manager>
+      <tag-manager
+        id="tagManager"
+        auth-username="[[serverConfig.configUsername]]"
+        auth-password="[[serverConfig.configPassword]]"
+        entity-endpoint="[[serverConfig.tagsEntityEndpoint]]"
+        extraction-endpoint="[[serverConfig.tagsExtractionEndpoint]]"
+        list-endpoint="[[serverConfig.tagsListEndpoint]]"
+        project="[[domain]]"
+        tag-manager="{{tagManager}}">
+      </tag-manager>
 
-    <state-manager id="stateManager"
-      build-popup-data-function="[[transforms.config.searchTerms]]"
-      build-state-data-function="[[transforms.config.searchState]]"
-      client="[[esClient]]"
-      function-config="[[searchFields]]"
-      state-index="[[serverConfig.stateIndexName]]"
-      state-type="[[serverConfig.stateIndexType]]"
-      state-id="[[params.state]]"
-      collection="{{searchParameters}}"
-      process-request="{{processRequest}}"
-      state-history="{{stateHistory}}"
-      has-history="{{hasHistory}}">
-    </state-manager>
+      <state-manager id="stateManager"
+        build-popup-data-function="[[transforms.config.searchTerms]]"
+        build-state-data-function="[[transforms.config.searchState]]"
+        client="[[esClient]]"
+        function-config="[[searchFields]]"
+        state-index="[[serverConfig.stateIndexName]]"
+        state-type="[[serverConfig.stateIndexType]]"
+        state-id="[[params.state]]"
+        collection="{{searchParameters}}"
+        process-request="{{processRequest}}"
+        state-history="{{stateHistory}}"
+        has-history="{{hasHistory}}">
+      </state-manager>
 
-    <info-data
-      id="dataInfoDialog"
-      client="[[esClient]]"
-      index-name="[[esConfig.esIndex]]"
-      index-types="[[esConfig.esType]]"
-      domain="[[domain]]"
-      sort-field="timestamp_crawl">
-    </info-data>
+      <info-data
+        id="dataInfoDialog"
+        client="[[esClient]]"
+        index-name="[[esConfig.esIndex]]"
+        index-types="[[esConfig.esType]]"
+        domain="[[domain]]"
+        sort-field="timestamp_crawl">
+      </info-data>
 
-    <paper-header-panel class="flex" mode="waterfall">
+      <paper-header-panel id="pagePanel" class="flex" mode="waterfall">
+        <paper-toolbar slot="header" id="navbar">
+          <img slot="top" src="images/dig-logo.png" alt="">
+          <div slot="top" class="drawer-spacer"></div>
 
-      <!-- Search toolbar -->
-      <paper-toolbar id="navbar">
-        <img class="bottom" src="images/dig-logo.png" alt="">
-        <div class="bottom drawer-spacer"></div>
-
-        <div class="bottom flex">
-          <search-fields-dialog
-            date-config="[[dateConfig]]"
-            search-fields-config="[[searchFieldsDialogConfig]]"
-            search-parameters="{{searchParameters}}"
-            network-expansion-parameters="{{networkExpansionParameters}}"
-            process-request="{{processRequest}}">
-          </search-fields-dialog>
-        </div>
-
-        <a class="bottom" href="[[getURLWithProject(domain)]]" style="color: #ffffff;">
-          <paper-icon-button icon="clear" title="Reset Page"></paper-icon-button>
-        </a>
-
-        <similar-image-search id="similarImageSearchDialog"
-          logger="[[logger]]"
-          blur="[[blurImages]]"
-          image-service-auth="[[serverConfig.imageServiceAuth]]"
-          image-service-host="[[serverConfig.imageServiceHost]]"
-          link-function="[[transforms.entity.externalImageLink]]">
-        </similar-image-search>
-        <!-- TODO: add logger, update transform when we're ready to link to image entity pages -->
-
-        <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
-
-        <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="60">
-          <div class="dropdown-content">
-            <paper-icon-item title="View Database Information" on-tap="openDataInfoDialog">
-              <iron-icon icon="fa:database" item-icon></iron-icon>
-              View Database Information
-            </paper-icon-item>
-
-            <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
-              <iron-icon icon="history" item-icon></iron-icon>
-              View Search State History
-            </paper-icon-item>
-
-            <paper-icon-item title="View Training Options" on-tap="openTagsDialog">
-              <iron-icon icon="fa:check-circle" item-icon></iron-icon>
-              View Training Options
-            </paper-icon-item>
-
-            <paper-icon-item title="Search on an Image URL or Uploaded Image" on-tap="openSimilarImageSearchDialog">
-              <iron-icon icon="image:compare" item-icon></iron-icon>
-              Similar Image Search
-            </paper-icon-item>
-
-            <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-              <iron-icon icon="open-in-new" item-icon></iron-icon>
-              Open a DIG Search Page in a New Tab
-            </paper-icon-item>
-
-            <paper-icon-item title="Contact DIG Support (dig-support@nextcentury.com)" on-tap="emailSupport">
-              <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
-              Contact DIG Support
-            </paper-icon-item>
+          <div slot="top" class="flex">
+            <search-fields-dialog
+              date-config="[[dateConfig]]"
+              search-fields-config="[[searchFieldsDialogConfig]]"
+              search-parameters="{{searchParameters}}"
+              network-expansion-parameters="{{networkExpansionParameters}}"
+              process-request="{{processRequest}}">
+            </search-fields-dialog>
           </div>
-        </iron-dropdown>
-      </paper-toolbar>
 
-      <paper-drawer-panel drawer-width="320px">
+          <a slot="top" href="[[getURLWithProject(domain)]]" style="color: #ffffff;">
+            <paper-icon-button icon="clear" title="Reset Page"></paper-icon-button>
+          </a>
 
-        <!-- Sidebar on left side -->
-        <facet-panel drawer
-          facets-query="[[facetsQuery]]"
-          network-expansion-parameters="[[networkExpansionParameters]]"
-          process-request="{{processRequest}}"
-          search-endpoint="[[esConfig.searchEndpoint]]"
-          search-keys="[[searchKeys]]"
-          search-fields="[[searchFields]]"
-          search-parameters="{{searchParameters}}">
+          <similar-image-search id="similarImageSearchDialog"
+            logger="[[logger]]"
+            blur="[[blurImages]]"
+            image-service-auth="[[serverConfig.imageServiceAuth]]"
+            image-service-host="[[serverConfig.imageServiceHost]]"
+            link-function="[[transforms.entity.externalImageLink]]">
+          </similar-image-search>
+          <!-- TODO: add logger, update transform when we're ready to link to image entity pages -->
 
-          <info-facets></info-facets>
-        </facet-panel>
+          <paper-icon-button icon="menu" slot="top" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
-        <!-- Main content on right side -->
-        <paper-header-panel main id="searchPanel">
-          <template is="dom-if" if="[[clientConfigLoading]]">
-            <loading-spinner class="layout horizontal" style="margin: 10px 20px;" show type="Configuration"></loading-spinner>
-          </template>
+          <iron-dropdown id="menuDropdown" slot="top" horizontal-align="right" vertical-align="top" vertical-offset="60">
+            <div slot="dropdown-content">
+              <paper-icon-item title="View Database Information" on-tap="openDataInfoDialog">
+                <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
+                View Database Information
+              </paper-icon-item>
 
-          <template is="dom-if" if="[[clientConfig]]">
-            <div id="searchTitle" class="layout horizontal">
-              <div class="layout vertical flex">
-                <template is="dom-if" if="[[!searchError]]">
-                  <div class="layout horizontal flex">
-                    <div class="paper-font-title">[[resultListHeader]]</div>
+              <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
+                <iron-icon slot="item-icon" icon="history" item-icon></iron-icon>
+                View Search State History
+              </paper-icon-item>
 
-                    <template is="dom-if" if="[[resultsTotalCount]]">
-                      <info-search search-parameters="[[searchParameters]]"></info-search>
-                    </template>
-                  </div>
-                </template>
+              <paper-icon-item title="View Training Options" on-tap="openTagsDialog">
+                <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
+                View Training Options
+              </paper-icon-item>
 
-                <template is="dom-if" if="[[searchError]]">
-                  <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
-                  <div class="paper-font-title flex">
-                    [[searchErrorMessage]]
-                  </div>
-                </template>
+              <paper-icon-item title="Search on an Image URL or Uploaded Image" on-tap="openSimilarImageSearchDialog">
+                <iron-icon slot="item-icon" icon="image:compare" item-icon></iron-icon>
+                Similar Image Search
+              </paper-icon-item>
 
-                <template is="dom-if" if="[[resultsTotalCount]]">
-                  <div class="note">Please note that only the top 10 extractions of each type are shown in the result list.</div>
-                </template>
+              <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+                <iron-icon slot="item-icon" icon="open-in-new" item-icon></iron-icon>
+                Open a DIG Search Page in a New Tab
+              </paper-icon-item>
+
+              <paper-icon-item title="Contact DIG Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+                <iron-icon slot="item-icon" icon="communication:contact-mail" item-icon></iron-icon>
+                Contact DIG Support
+              </paper-icon-item>
+            </div>
+          </iron-dropdown>
+        </paper-toolbar>
+
+        <paper-drawer-panel drawer-width="320px">
+          <facet-panel slot="drawer"
+            facets-query="[[facetsQuery]]"
+            network-expansion-parameters="[[networkExpansionParameters]]"
+            process-request="{{processRequest}}"
+            search-endpoint="[[esConfig.searchEndpoint]]"
+            search-keys="[[searchKeys]]"
+            search-fields="[[searchFields]]"
+            search-parameters="{{searchParameters}}">
+
+            <info-facets></info-facets>
+          </facet-panel>
+
+          <paper-header-panel slot="main" id="searchPanel">
+            <template is="dom-if" if="[[clientConfigLoading]]">
+              <loading-spinner class="layout horizontal" style="margin: 10px 20px;" show type="Configuration"></loading-spinner>
+            </template>
+
+            <template is="dom-if" if="[[clientConfig]]">
+              <div id="searchTitle" class="layout horizontal">
+                <div class="layout vertical flex">
+                  <template is="dom-if" if="[[!searchError]]">
+                    <div class="layout horizontal">
+                      <div class="paper-font-title">[[resultListHeader]]</div>
+
+                      <template is="dom-if" if="[[resultsTotalCount]]">
+                        <info-search search-parameters="[[searchParameters]]"></info-search>
+                      </template>
+                    </div>
+                  </template>
+
+                  <template is="dom-if" if="[[searchError]]">
+                    <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
+                    <div class="paper-font-title flex">
+                      [[searchErrorMessage]]
+                    </div>
+                  </template>
+
+                  <template is="dom-if" if="[[resultsTotalCount]]">
+                    <div class="note">Please note that only the top 10 extractions of each type are shown in the result list.</div>
+                  </template>
+                </div>
+
+                <export-button
+                  client="[[esClient]]"
+                  data="[[shownResults]]"
+                  filter-list="[]"
+                  index-name="[[esConfig.esIndex]]"
+                  index-types="[[esConfig.esType]]"
+                  search-fields="[[searchFields]]"
+                  search-parameters="[[searchParameters]]"
+                  source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+                  transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                  transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
+                  transform-search-input-function="[[transforms.export.createBulkSearchData]]"
+                  transform-search-results-function="[[transforms.entity.documents]]">
+                </export-button>
               </div>
-              
-              <export-button
+
+              <result-list
+                id="searchResults"
+                new-tab
+                text-property="title"
+                query-results="[[results]]"
+                total-results="[[resultsTotalCount]]"
+                shown-results="{{shownResults}}"
+                page="{{resultPage}}"
+                page-size="25"
+                loading="[[searchLoading]]"
+                header="{{resultListHeader}}"
+                cache-transform="[[transforms.entity.cache]]"
                 client="[[esClient]]"
-                data="[[shownResults]]"
-                filter-list="[]"
                 index-name="[[esConfig.esIndex]]"
                 index-types="[[esConfig.esType]]"
                 search-fields="[[searchFields]]"
-                search-parameters="[[searchParameters]]"
-                source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-                transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
-                transform-search-input-function="[[transforms.export.createBulkSearchData]]"
-                transform-search-results-function="[[transforms.entity.documents]]">
-              </export-button>
-            </div>
+                source-include='["raw_content"]'
+                tag-manager="[[tagManager]]">
+              </result-list>
+            </template>
+          </paper-header-panel>
+        </paper-drawer-panel>
+      </paper-header-panel>
+    </template>
 
-            <result-list
-              id="searchResults"
-              new-tab
-              text-property="title"
-              query-results="[[results]]"
-              total-results="[[resultsTotalCount]]"
-              shown-results="{{shownResults}}"
-              page="{{resultPage}}"
-              page-size="25"
-              loading="[[searchLoading]]"
-              header="{{resultListHeader}}"
-              cache-transform="[[transforms.entity.cache]]"
-              client="[[esClient]]"
-              index-name="[[esConfig.esIndex]]"
-              index-types="[[esConfig.esType]]"
-              search-fields="[[searchFields]]"
-              source-include='["raw_content"]'
-              tag-manager="[[tagManager]]">
-            </result-list>
-          </template>
-        </paper-header-panel>
+    <!-- Need to include dependencies here for IE -->
+    <script src="bower_components/lodash/dist/lodash.js"></script>
 
-      </paper-drawer-panel>
-
-    </paper-header-panel>
-
-  </template>
-
-  <!-- Need to include dependencies here for IE -->
-  <script src="bower_components/lodash/dist/lodash.js"></script>
-  <script src="behaviors/browser-behavior.js"></script>
-
-  <script>
+    <script>
     (function(document) {
-      /* globals _, DigBehaviors */
-      var app = document.querySelector('#app');
+      /* globals _ */
+      var app = document.querySelector('dom-bind');
 
-      app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
+      app.getUrlParameters = function(parameterInput) {
+        var parameters = {};
+        if(parameterInput && parameterInput !== '?') {
+          (parameterInput.indexOf('?') === 0 ? parameterInput.slice(1) : parameterInput).split('&').forEach(function(parameter) {
+            var parameterSplit = parameter.split('=');
+            parameters[parameterSplit[0]] = (parameterSplit.length > 1 ? parameterSplit[1] : true);
+          });
+        }
+        return parameters;
+      };
+
+      app.params = app.getUrlParameters(window.location.search);
 
       app.concat = function(a, b) {
         return a + b;
@@ -517,7 +521,8 @@ limitations under the License.
       };
       /************************** END STATE HISTORY **************************/
     })(document);
-  </script>
+    </script>
+  </dom-bind>
 </body>
 
 </html>

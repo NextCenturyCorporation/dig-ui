@@ -20,10 +20,10 @@ limitations under the License.
 
 <head>
   <meta charset="utf-8">
-  <meta name="description" content="">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
   <title>DIG</title>
+  <meta name="description" content="DIG">
 
   <link rel="icon" href="favicon.ico"/>
 
@@ -33,288 +33,286 @@ limitations under the License.
   <link rel="stylesheet" href="styles/main.css">
   <!-- endbuild-->
 
+  <link rel="stylesheet" href="styles/colors.css">
+
   <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
-  <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
   <!-- endbuild -->
 
   <!-- will be replaced with elements/elements.vulcanized.html -->
   <link rel="import" href="elements/elements.html">
   <!-- endreplace-->
 
-  <link rel="import" href="styles/entity-styles.html">
+  <link rel="import" href="styles/app-theme.html">
   <link rel="import" href="styles/entity-page-styles.html">
-  <style is="custom-style" include="entity-styles"></style>
-  <style is="custom-style" include="entity-page-styles"></style>
 </head>
 
 <body unresolved class="fullbleed layout vertical">
   <span id="browser-sync-binding"></span>
 
-  <template is="dom-bind" id="app">
-    <iron-ajax
-      auto
-      handle-as="json"
-      url="/serverConfig"
-      last-response="{{serverConfig}}">
-    </iron-ajax>
+  <dom-bind id="app">
+    <template is="dom-bind">
+      <iron-ajax
+        auto
+        handle-as="json"
+        url="/serverConfig"
+        last-response="{{serverConfig}}">
+      </iron-ajax>
 
-    <json-combine
-      data-in1="[[params]]"
-      data-in2="[[serverConfig]]"
-      data-out="{{domain}}"
-      combine-function="[[findDomain]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[params]]"
+        data-in2="[[serverConfig]]"
+        data-out="{{domain}}"
+        combine-function="[[findDomain]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[serverConfig.configUsername]]"
-      data-in2="[[serverConfig.configPassword]]"
-      data-out="{{configHeader}}"
-      combine-function="[[createAuthHeader]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[serverConfig.configUsername]]"
+        data-in2="[[serverConfig.configPassword]]"
+        data-out="{{configHeader}}"
+        combine-function="[[createAuthHeader]]">
+      </json-combine>
 
-    <iron-ajax
-      auto="[[exists(configHeader)]]"
-      handle-as="json"
-      headers="[[configHeader]]"
-      url="[[concat(serverConfig.configEndpoint, domain)]]"
-      with-credentials
-      loading="{{clientConfigLoading}}"
-      last-error="{{clientConfigError}}"
-      last-response="{{clientConfig}}">
-    </iron-ajax>
+      <iron-ajax
+        auto="[[exists(configHeader)]]"
+        handle-as="json"
+        headers="[[configHeader]]"
+        url="[[concat(serverConfig.configEndpoint, domain)]]"
+        with-credentials
+        loading="{{clientConfigLoading}}"
+        last-error="{{clientConfigError}}"
+        last-response="{{clientConfig}}">
+      </iron-ajax>
 
-    <transform-functions
-      client-config="[[clientConfig]]"
-      domain="[[domain]]"
-      server-config="[[serverConfig]]"
-      es-config="{{esConfig}}"
-      transforms="{{transforms}}">
-    </transform-functions>
+      <transform-functions
+        client-config="[[clientConfig]]"
+        domain="[[domain]]"
+        server-config="[[serverConfig]]"
+        es-config="{{esConfig}}"
+        transforms="{{transforms}}">
+      </transform-functions>
 
-    <json-combine
-      data-in1="[[clientConfig]]"
-      data-in2="{}"
-      data-out="{{clientConfigFields}}"
-      combine-function="[[transforms.config.fields]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[clientConfig]]"
+        data-in2="{}"
+        data-out="{{clientConfigFields}}"
+        combine-function="[[transforms.config.fields]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[clientConfigFields]]"
-      data-in2="{}"
-      data-out="{{searchFields}}"
-      combine-function="[[transforms.config.searchFields]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[clientConfigFields]]"
+        data-in2="{}"
+        data-out="{{searchFields}}"
+        combine-function="[[transforms.config.searchFields]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{aggregationFields}}"
-      combine-function="[[transforms.config.aggregationFields]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{aggregationFields}}"
+        combine-function="[[transforms.config.aggregationFields]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{dateConfig}}"
-      combine-function="[[transforms.config.dateConfig]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{dateConfig}}"
+        combine-function="[[transforms.config.dateConfig]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{dateFields}}"
-      combine-function="[[transforms.config.dateFields]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{dateFields}}"
+        combine-function="[[transforms.config.dateFields]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{filterCollection}}"
-      combine-function="[[transforms.config.filterCollection]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{filterCollection}}"
+        combine-function="[[transforms.config.filterCollection]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{filtersBuilderConfig}}"
-      combine-function="[[transforms.config.filtersBuilderConfig]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{filtersBuilderConfig}}"
+        combine-function="[[transforms.config.filtersBuilderConfig]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[params.id]]"
-      data-in2="[[params.type]]"
-      data-out="{{pageId}}"
-      combine-function="[[transforms.config.formatId]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[params.id]]"
+        data-in2="[[params.type]]"
+        data-out="{{pageId}}"
+        combine-function="[[transforms.config.formatId]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[pageId]]"
-      data-in2="[[params.type]]"
-      data-out="{{pageName}}"
-      combine-function="[[transforms.config.formatName]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[pageId]]"
+        data-in2="[[params.type]]"
+        data-out="{{pageName}}"
+        combine-function="[[transforms.config.formatName]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{histogramFields}}"
-      combine-function="[[transforms.config.histogramFields]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{histogramFields}}"
+        combine-function="[[transforms.config.histogramFields]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{imageFields}}"
-      combine-function="[[transforms.config.imageFields]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{imageFields}}"
+        combine-function="[[transforms.config.imageFields]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{mapFields}}"
-      combine-function="[[transforms.config.mapFields]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{mapFields}}"
+        combine-function="[[transforms.config.mapFields]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="[[params.type]]"
-      data-out="{{pageConfig}}"
-      combine-function="[[transforms.config.pageConfig]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="[[params.type]]"
+        data-out="{{pageConfig}}"
+        combine-function="[[transforms.config.pageConfig]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{sortField}}"
-      combine-function="[[transforms.config.sortField]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{sortField}}"
+        combine-function="[[transforms.config.sortField]]">
+      </json-combine>
 
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{entityFilters}}"
-      combine-function="[[transforms.config.entityFilters]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchFields]]"
+        data-in2="{}"
+        data-out="{{entityFilters}}"
+        combine-function="[[transforms.config.entityFilters]]">
+      </json-combine>
 
-    <elastic-client
-      config="[[serverConfig.esHost]]"
-      client="{{esClient}}">
-    </elastic-client>
+      <elastic-client
+        config="[[serverConfig.esHost]]"
+        client="{{esClient}}">
+      </elastic-client>
 
-     <!-- Logger for Filter Terms -->
-    <dig-logger
-      es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
-      type="Filter-SubmitSearch"
-      data="[[logMessage]]"
-      username="defaultUser">
-    </dig-logger>
+       <!-- Logger for Filter Terms -->
+      <dig-logger
+        es-client="[[esClient]]"
+        es-index="[[serverConfig.logIndex]]"
+        es-type="[[serverConfig.logType]]"
+        type="Filter-SubmitSearch"
+        data="[[logMessage]]"
+        username="defaultUser">
+      </dig-logger>
 
-     <!-- Logger for Pagination -->
-    <dig-logger
-      es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
-      type="Entity-Filter"
-      data="[[documentPage]]"
-      username="defaultUser">
-    </dig-logger>
+       <!-- Logger for Pagination -->
+      <dig-logger
+        es-client="[[esClient]]"
+        es-index="[[serverConfig.logIndex]]"
+        es-type="[[serverConfig.logType]]"
+        type="Entity-Filter"
+        data="[[documentPage]]"
+        username="defaultUser">
+      </dig-logger>
 
-    <!-- Logger for Page View -->
-    <dig-logger log-page-view
-      es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
-      username="defaultUser"
-      logger="{{logger}}">
-    </dig-logger>
+      <!-- Logger for Page View -->
+      <dig-logger log-page-view
+        es-client="[[esClient]]"
+        es-index="[[serverConfig.logIndex]]"
+        es-type="[[serverConfig.logType]]"
+        username="defaultUser"
+        logger="{{logger}}">
+      </dig-logger>
 
-    <log-creator
-      object="{{filterCollection}}"
-      log-message="{{logMessage}}">
-    </log-creator>
+      <log-creator
+        object="{{filterCollection}}"
+        log-message="{{logMessage}}">
+      </log-creator>
 
-    <build-and-run-query
-      fields="[[pageConfig.field]]"
-      values="[[pageId]]"
-      client="[[esClient]]"
-      index-name="[[esConfig.esIndex]]"
-      index-types="[[esConfig.esType]]"
-      aggregations="[]"
-      filters="[[filterList]]"
-      page="{{documentPage}}"
-      page-size="25"
-      properties-ready="{{processRequest}}"
-      sort-field="[[sortField]]"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-      transform-config="[[searchFields]]"
-      transform-function="[[transforms.entity.documents]]"
-      error="{{documentsError}}"
-      loading="{{documentsLoading}}"
-      results="{{documents}}"
-      total="{{documentsTotal}}">
-    </build-and-run-query>
+      <build-and-run-query
+        fields="[[pageConfig.field]]"
+        values="[[pageId]]"
+        client="[[esClient]]"
+        index-name="[[esConfig.esIndex]]"
+        index-types="[[esConfig.esType]]"
+        aggregations="[]"
+        filters="[[filterList]]"
+        page="{{documentPage}}"
+        page-size="25"
+        properties-ready="{{processRequest}}"
+        sort-field="[[sortField]]"
+        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+        transform-config="[[searchFields]]"
+        transform-function="[[transforms.entity.documents]]"
+        error="{{documentsError}}"
+        loading="{{documentsLoading}}"
+        results="{{documents}}"
+        total="{{documentsTotal}}">
+      </build-and-run-query>
 
-    <filters-builder
-      callback="[[filtersBuilderCallback]]"
-      config="[[filtersBuilderConfig]]"
-      data="[[filterCollection]]"
-      filters="{{filterList}}">
-    </filters-builder>
+      <filters-builder
+        callback="[[filtersBuilderCallback]]"
+        config="[[filtersBuilderConfig]]"
+        data="[[filterCollection]]"
+        filters="{{filterList}}">
+      </filters-builder>
 
-    <tag-manager
-      id="tagManager"
-      auth-username="[[serverConfig.configUsername]]"
-      auth-password="[[serverConfig.configPassword]]"
-      entity-endpoint="[[serverConfig.tagsEntityEndpoint]]"
-      extraction-endpoint="[[serverConfig.tagsExtractionEndpoint]]"
-      list-endpoint="[[serverConfig.tagsListEndpoint]]"
-      project="[[domain]]"
-      tag-manager="{{tagManager}}">
-    </tag-manager>
+      <tag-manager
+        id="tagManager"
+        auth-username="[[serverConfig.configUsername]]"
+        auth-password="[[serverConfig.configPassword]]"
+        entity-endpoint="[[serverConfig.tagsEntityEndpoint]]"
+        extraction-endpoint="[[serverConfig.tagsExtractionEndpoint]]"
+        list-endpoint="[[serverConfig.tagsListEndpoint]]"
+        project="[[domain]]"
+        tag-manager="{{tagManager}}">
+      </tag-manager>
 
-    <state-manager id="stateManager"
-      build-popup-data-function="[[transforms.config.filterTerms]]"
-      build-state-data-function="[[transforms.config.filterState]]"
-      client="[[esClient]]"
-      function-config="[[searchFields]]"
-      state-index="[[serverConfig.stateIndexName]]"
-      state-type="[[serverConfig.stateIndexType]]"
-      state-id="[[params.state]]"
-      collection="{{filterCollection}}"
-      process-request="{{processRequest}}"
-      state-history="{{stateHistory}}"
-      has-history="{{hasHistory}}">
-    </state-manager>
+      <state-manager id="stateManager"
+        build-popup-data-function="[[transforms.config.filterTerms]]"
+        build-state-data-function="[[transforms.config.filterState]]"
+        client="[[esClient]]"
+        function-config="[[searchFields]]"
+        state-index="[[serverConfig.stateIndexName]]"
+        state-type="[[serverConfig.stateIndexType]]"
+        state-id="[[params.state]]"
+        collection="{{filterCollection}}"
+        process-request="{{processRequest}}"
+        state-history="{{stateHistory}}"
+        has-history="{{hasHistory}}">
+      </state-manager>
 
-    <info-data
-      id="dataInfoDialog"
-      client="[[esClient]]"
-      index-name="[[esConfig.esIndex]]"
-      index-types="[[esConfig.esType]]"
-      domain="[[domain]]"
-      sort-field="timestamp_crawl">
-    </info-data>
+      <info-data
+        id="dataInfoDialog"
+        client="[[esClient]]"
+        index-name="[[esConfig.esIndex]]"
+        index-types="[[esConfig.esType]]"
+        domain="[[domain]]"
+        sort-field="timestamp_crawl">
+      </info-data>
 
-    <!-- Main Content -->
-    <div class="entity">
-
-      <paper-header-panel class="flex" mode="waterfall-tall">
-        <template is="dom-if" if="[[!document.id]]">
-          <loading-spinner show type="Page"></loading-spinner>
+      <div class="entity">
+        <template is="dom-if" if="[[!pageConfig]]">
+          <div class="layout horizontal center-justified flex">
+            <loading-spinner show type="Page"></loading-spinner>
+          </div>
         </template>
 
-        <!-- Entity header -->
-        <div class="paper-header layout vertical">
-          <div class="layout horizontal">
-            <!-- Entity title -->
-            <template is="dom-if" if="[[pageConfig]]">
-              <div class="layout horizontal flex center">
+        <template is="dom-if" if="[[pageConfig]]">
+          <paper-header-panel class="flex" mode="waterfall-tall">
+            <div slot="header" class="paper-header layout vertical">
+              <div class="layout horizontal center">
                 <div class$="iron-icon-huge [[pageConfig.styleClass]]">
                   <iron-icon icon="[[pageConfig.icon]]"></iron-icon>
                 </div>
-                <div class="page-name">
+                <div class="page-name flex">
                   <div class="paper-font-headline">
                     [[pageConfig.title]]: <span>[[pageName]]</span>
                   </div>
@@ -333,116 +331,63 @@ limitations under the License.
                   </div>
                 </div>
 
-                <div class="layout horizontal flex end-justified">
-                  <paper-icon-button icon="menu" class="bottom dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+                <div class="layout horizontal end-justified">
+                  <paper-icon-button icon="menu" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
                 </div>
+
+                <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="40">
+                  <div slot="dropdown-content">
+                    <paper-icon-item title="View Database Information" on-tap="openDataInfoDialog">
+                      <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
+                      View Database Information
+                    </paper-icon-item>
+
+                    <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
+                      <iron-icon slot="item-icon" icon="history" item-icon></iron-icon>
+                      View Search State History
+                    </paper-icon-item>
+
+                    <paper-icon-item title="View Training Options" on-tap="openTagsDialog">
+                      <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
+                      View Training Options
+                    </paper-icon-item>
+
+                    <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+                      <iron-icon slot="item-icon" icon="open-in-new" item-icon></iron-icon>
+                      Open a DIG Search Page in a New Tab
+                    </paper-icon-item>
+
+                    <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+                      <iron-icon slot="item-icon" icon="communication:contact-mail" item-icon></iron-icon>
+                      Contact DIG Support
+                    </paper-icon-item>
+                  </div>
+                </iron-dropdown>
               </div>
-            </template>
 
-            <iron-dropdown id="menuDropdown" class="bottom" horizontal-align="right" vertical-align="top" vertical-offset="40">
-              <div class="dropdown-content">
-                <paper-icon-item title="View Database Information" on-tap="openDataInfoDialog">
-                  <iron-icon icon="fa:database" item-icon></iron-icon>
-                  View Database Information
-                </paper-icon-item>
-
-                <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
-                  <iron-icon icon="history" item-icon></iron-icon>
-                  View Search State History
-                </paper-icon-item>
-
-                <paper-icon-item title="View Training Options" on-tap="openTagsDialog">
-                  <iron-icon icon="fa:check-circle" item-icon></iron-icon>
-                  View Training Options
-                </paper-icon-item>
-
-                <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-                  <iron-icon icon="open-in-new" item-icon></iron-icon>
-                  Open a DIG Search Page in a New Tab
-                </paper-icon-item>
-
-                <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
-                  <iron-icon icon="communication:contact-mail" item-icon></iron-icon>
-                  Contact DIG Support
-                </paper-icon-item>
-              </div>
-            </iron-dropdown>
-          </div>
-
-          <div class="layout horizontal wrap">
-            <!-- Selected facets displays -->
-            <template is="dom-repeat" items="[[searchFields]]">
-              <selected-facets-display
-                facets="[[entityFilters]]"
-                facet-key="[[item.key]]"
-                hide-remove-button>
-              </selected-facets-display>
-            </template>
-          </div>
-        </div>
-
-        <template is="dom-if" if="[[pageConfig]]">
-          <!-- Entity body -->
-          <div class="entity-page">
-
-            <div class="content">
-
-              <!-- Left Pane -->
-              <div class="flex layout vertical">
-                <template is="dom-repeat" items="[[mapFields]]">
-                  <section-and-map
-                    show-copy
-                    icon="[[item.icon]]"
-                    style-class="[[item.styleClass]]"
-                    text-property="textAndCount"
-                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
-                    transform-function="[[getSectionTitleTransformFunction]]"
-                    data="[[item.mapData]]">
-
-                    <aggregation-query-and-display
-                      aggregation-name="[[item.key]]"
-                      aggregation-field="[[item.field]]"
-                      selected-property="[[item.key]]"
-                      selected="{{filterCollection}}"
-                      query-field="[[pageConfig.field]]"
-                      query-value="[[pageId]]"
-                      client="[[esClient]]"
-                      index-name="[[esConfig.esIndex]]"
-                      index-types="[[esConfig.esType]]"
-                      filter-list="[[filterList]]"
-                      properties-ready="[[processRequest]]"
-                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
-                      transform-function="[[transforms.entity.extractions]]"
-                      data="{{item.mapData}}"
-                      header-data-name="[[item.title]]"
-                      header-counts-name="Results"
-                      header-entity-name="[[pageName]]"
-                      show-checkboxes
-                      show-double-bar-chart="[[showDoubleBarChart(item)]]">
-                    </aggregation-query-and-display>
-
-                    <template is="dom-if" if="[[item.mapData.length]]">
-                      <terms-transformer
-                        category="[[item.title]]"
-                        object="{{entityFilters}}"
-                        object-property="[[item.key]]"
-                        list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
-                        text-function="[[getTextFunction(item.mapData)]]">
-                      </terms-transformer>
-                    </template>
-                  </section-and-map>
+              <div class="layout horizontal wrap">
+                <template is="dom-repeat" items="[[searchFields]]">
+                  <selected-facets-display
+                    facets="[[entityFilters]]"
+                    facet-key="[[item.key]]"
+                    hide-remove-button>
+                  </selected-facets-display>
                 </template>
+              </div>
+            </div>
 
-                <template is="dom-repeat" items="[[aggregationFields]]">
-                  <template is="dom-if" if="[[item.result]]">
-                    <section-and-title
+            <div class="entity-page">
+              <div class="content">
+                <div class="flex layout vertical">
+                  <template is="dom-repeat" items="[[mapFields]]">
+                    <section-and-map
                       show-copy
-                      copy-type="[[item.titlePlural]]"
                       icon="[[item.icon]]"
                       style-class="[[item.styleClass]]"
+                      text-property="textAndCount"
                       transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
                       transform-function="[[getSectionTitleTransformFunction]]"
-                      data="[[item.aggregationData]]">
+                      data="[[item.mapData]]">
 
                       <aggregation-query-and-display
                         aggregation-name="[[item.key]]"
@@ -458,7 +403,7 @@ limitations under the License.
                         properties-ready="[[processRequest]]"
                         transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
                         transform-function="[[transforms.entity.extractions]]"
-                        data="{{item.aggregationData}}"
+                        data="{{item.mapData}}"
                         header-data-name="[[item.title]]"
                         header-counts-name="Results"
                         header-entity-name="[[pageName]]"
@@ -466,190 +411,243 @@ limitations under the License.
                         show-double-bar-chart="[[showDoubleBarChart(item)]]">
                       </aggregation-query-and-display>
 
-                      <template is="dom-if" if="[[item.aggregationData.length]]">
+                      <template is="dom-if" if="[[item.mapData.length]]">
                         <terms-transformer
                           category="[[item.title]]"
                           object="{{entityFilters}}"
                           object-property="[[item.key]]"
                           list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
-                          text-function="[[getTextFunction(item.aggregationData)]]">
+                          text-function="[[getTextFunction(item.mapData)]]">
                         </terms-transformer>
-
-                        <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
                       </template>
-                    </section-and-title>
-                  </template>
-                </template>
-
-                <template is="dom-repeat" items="[[imageFields]]">
-                  <section-and-title
-                    icon="[[item.icon]]"
-                    style-class="[[item.styleClass]]"
-                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item, item.imageData.length)]]"
-                    transform-function="[[getSectionTitleTransformFunction]]"
-                    data="[[item.loadedImageData]]">
-
-                    <image-query-and-display
-                      aggregation-field="[[item.field]]"
-                      aggregation-name="[[item.key]]"
-                      client="[[esClient]]"
-                      filter-list="[]"
-                      header-data-name="[[item.title]]"
-                      header-counts-name="Results"
-                      header-entity-name="[[pageName]]"
-                      image-id-property="source"
-                      index-name="[[esConfig.esIndex]]"
-                      index-types="[[esConfig.esType]]"
-                      properties-ready="[[processRequest]]"
-                      query-fields="[[pageConfig.field]]"
-                      query-values="[[pageId]]"
-                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
-                      transform-function="[[transforms.entity.extractions]]"
-                      small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-                      large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                      images="{{item.imageData}}"
-                      loaded-images="{{item.loadedImageData}}"
-                      selected-property="[[item.key]]"
-                      selected="{{filterCollection}}">
-                    </image-query-and-display>
-                  </section-and-title>
-                </template>
-              </div>
-
-              <!-- Right Pane -->
-              <div class="flex layout vertical">
-                <template is="dom-repeat" items="[[histogramFields]]">
-                  <elastic-client-aggregation-builder
-                    name="[[item.entity.key]]"
-                    type="terms"
-                    count="0"
-                    order="_term"
-                    direction="asc"
-                    field="[[item.entity.field]]"
-                    ejs-aggregation="{{item.entityAggregation}}">
-                  </elastic-client-aggregation-builder>
-
-                  <template is="dom-if" if="[[item.entityAggregation]]">
-                    <elastic-client-aggregation-builder
-                      name="[[item.date.key]]"
-                      type="date_histogram"
-                      count="0"
-                      field="[[item.date.field]]"
-                      interval="week"
-                      nested-aggregations="[[buildArray(item.entityAggregation)]]"
-                      ejs-aggregation="{{item.dateAggregation}}">
-                    </elastic-client-aggregation-builder>
-
-                    <template is="dom-if" if="[[item.dateAggregation]]">
-                      <build-and-run-query
-                        type="terms"
-                        fields="[[pageConfig.field]]"
-                        values="[[pageId]]"
-                        client="[[esClient]]"
-                        index-name="[[esConfig.esIndex]]"
-                        index-types="[[esConfig.esType]]"
-                        aggregations="[[buildArray(item.dateAggregation)]]"
-                        filters="[[filterList]]"
-                        page-size="0"
-                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
-                        source-exclude='["knowledge_graph.*.provenance"]'
-                        transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
-                        transform-function="[[transforms.entity.histogram]]"
-                        error="{{item.histogramError}}"
-                        loading="{{item.histogramLoading}}"
-                        results="{{item.histogramResults}}">
-                      </build-and-run-query>
-                    </template>
+                    </section-and-map>
                   </template>
 
-                  <template is="dom-if" if="[[documents.length]]">      
-                    <template is="dom-if" if="[[item.histogramResults.length]]">
+                  <template is="dom-repeat" items="[[aggregationFields]]">
+                    <template is="dom-if" if="[[item.result]]">
                       <section-and-title
-                        error="[[item.histogramError]]"
-                        icon="editor:insert-chart"
-                        section-title="[[getBarTimelineSectionTitle(item.entity.title, item.date.title)]]">
+                        show-copy
+                        copy-type="[[item.titlePlural]]"
+                        icon="[[item.icon]]"
+                        style-class="[[item.styleClass]]"
+                        transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
+                        transform-function="[[getSectionTitleTransformFunction]]"
+                        data="[[item.aggregationData]]">
 
-                        <zoomable-bar-chart timeline
-                          selected-property="[[item.date.key]]"
+                        <aggregation-query-and-display
+                          aggregation-name="[[item.key]]"
+                          aggregation-field="[[item.field]]"
+                          selected-property="[[item.key]]"
                           selected="{{filterCollection}}"
-                          bar-property="date"
-                          label-property="text"
-                          stack-property="data"
-                          interval="week"
-                          data="[[item.histogramResults]]"
-                          default-label="Unidentified [[item.entity.titlePlural]]"
-                          source="Results"
-                          loading="[[item.histogramLoading]]"
-                          display-filter-text>
-                        </zoomable-bar-chart>
+                          query-field="[[pageConfig.field]]"
+                          query-value="[[pageId]]"
+                          client="[[esClient]]"
+                          index-name="[[esConfig.esIndex]]"
+                          index-types="[[esConfig.esType]]"
+                          filter-list="[[filterList]]"
+                          properties-ready="[[processRequest]]"
+                          transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
+                          transform-function="[[transforms.entity.extractions]]"
+                          data="{{item.aggregationData}}"
+                          header-data-name="[[item.title]]"
+                          header-counts-name="Results"
+                          header-entity-name="[[pageName]]"
+                          show-checkboxes
+                          show-double-bar-chart="[[showDoubleBarChart(item)]]">
+                        </aggregation-query-and-display>
+
+                        <template is="dom-if" if="[[item.aggregationData.length]]">
+                          <terms-transformer
+                            category="[[item.title]]"
+                            object="{{entityFilters}}"
+                            object-property="[[item.key]]"
+                            list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
+                            text-function="[[getTextFunction(item.aggregationData)]]">
+                          </terms-transformer>
+
+                          <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
+                        </template>
                       </section-and-title>
                     </template>
                   </template>
-                </template>
 
-                <section-container>
-                  <section-title
-                    icon="icons:assignment"
-                    style-class="entity-grey"
-                    section-title="[[documentsHeader]]">
+                  <template is="dom-repeat" items="[[imageFields]]">
+                    <section-and-title
+                      icon="[[item.icon]]"
+                      style-class="[[item.styleClass]]"
+                      transform-config="[[getSectionTitleTransformConfig(pageConfig, item, item.imageData.length)]]"
+                      transform-function="[[getSectionTitleTransformFunction]]"
+                      data="[[item.loadedImageData]]">
 
-                    <export-button
-                      data="[[shownResults]]"
+                      <image-query-and-display
+                        aggregation-field="[[item.field]]"
+                        aggregation-name="[[item.key]]"
+                        client="[[esClient]]"
+                        filter-list="[]"
+                        header-data-name="[[item.title]]"
+                        header-counts-name="Results"
+                        header-entity-name="[[pageName]]"
+                        image-id-property="source"
+                        index-name="[[esConfig.esIndex]]"
+                        index-types="[[esConfig.esType]]"
+                        properties-ready="[[processRequest]]"
+                        query-fields="[[pageConfig.field]]"
+                        query-values="[[pageId]]"
+                        transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
+                        transform-function="[[transforms.entity.extractions]]"
+                        small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                        large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                        images="{{item.imageData}}"
+                        loaded-images="{{item.loadedImageData}}"
+                        selected-property="[[item.key]]"
+                        selected="{{filterCollection}}">
+                      </image-query-and-display>
+                    </section-and-title>
+                  </template>
+                </div>
+
+                <div class="flex layout vertical">
+                  <template is="dom-repeat" items="[[histogramFields]]">
+                    <elastic-client-aggregation-builder
+                      name="[[item.entity.key]]"
+                      type="terms"
+                      count="0"
+                      order="_term"
+                      direction="asc"
+                      field="[[item.entity.field]]"
+                      ejs-aggregation="{{item.entityAggregation}}">
+                    </elastic-client-aggregation-builder>
+
+                    <template is="dom-if" if="[[item.entityAggregation]]">
+                      <elastic-client-aggregation-builder
+                        name="[[item.date.key]]"
+                        type="date_histogram"
+                        count="0"
+                        field="[[item.date.field]]"
+                        interval="week"
+                        nested-aggregations="[[buildArray(item.entityAggregation)]]"
+                        ejs-aggregation="{{item.dateAggregation}}">
+                      </elastic-client-aggregation-builder>
+
+                      <template is="dom-if" if="[[item.dateAggregation]]">
+                        <build-and-run-query
+                          type="terms"
+                          fields="[[pageConfig.field]]"
+                          values="[[pageId]]"
+                          client="[[esClient]]"
+                          index-name="[[esConfig.esIndex]]"
+                          index-types="[[esConfig.esType]]"
+                          aggregations="[[buildArray(item.dateAggregation)]]"
+                          filters="[[filterList]]"
+                          page-size="0"
+                          source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+                          source-exclude='["knowledge_graph.*.provenance"]'
+                          transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
+                          transform-function="[[transforms.entity.histogram]]"
+                          error="{{item.histogramError}}"
+                          loading="{{item.histogramLoading}}"
+                          results="{{item.histogramResults}}">
+                        </build-and-run-query>
+                      </template>
+                    </template>
+
+                    <template is="dom-if" if="[[documents.length]]">      
+                      <template is="dom-if" if="[[item.histogramResults.length]]">
+                        <section-and-title
+                          error="[[item.histogramError]]"
+                          icon="editor:insert-chart"
+                          section-title="[[getBarTimelineSectionTitle(item.entity.title, item.date.title)]]">
+
+                          <zoomable-bar-chart timeline
+                            selected-property="[[item.date.key]]"
+                            selected="{{filterCollection}}"
+                            bar-property="date"
+                            label-property="text"
+                            stack-property="data"
+                            interval="week"
+                            data="[[item.histogramResults]]"
+                            default-label="Unidentified [[item.entity.titlePlural]]"
+                            source="Results"
+                            loading="[[item.histogramLoading]]"
+                            display-filter-text>
+                          </zoomable-bar-chart>
+                        </section-and-title>
+                      </template>
+                    </template>
+                  </template>
+
+                  <section-container>
+                    <section-title
+                      icon="icons:assignment"
+                      style-class="entity-grey"
+                      section-title="[[documentsHeader]]">
+
+                      <export-button
+                        data="[[shownResults]]"
+                        search-fields="[[searchFields]]"
+                        transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                        transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
+                      </export-button>
+                    </section-title>
+
+                    <template is="dom-if" if="[[documentsError]]">
+                      <elastic-error error="[[documentsError]]" message="{{documentsErrorMessage}}"></elastic-error>
+                      <div>[[documentsErrorMessage]]</div>
+                    </template>
+
+                    <template is="dom-if" if="[[documentsTotal]]">
+                      <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
+                    </template>
+
+                    <result-list
+                      text-property="title"
+                      query-results="[[documents]]"
+                      total-results="{{documentsTotal}}"
+                      shown-results="{{shownResults}}"
+                      page="{{documentPage}}"
+                      page-size="25"
+                      loading="[[documentsLoading]]"
+                      header="{{documentsHeader}}"
+                      cache-transform="[[transforms.entity.cache]]"
+                      client="[[esClient]]"
+                      index-name="[[esConfig.esIndex]]"
+                      index-types="[[esConfig.esType]]"
                       search-fields="[[searchFields]]"
-                      transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                      transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
-                    </export-button>
-                  </section-title>
-
-                  <template is="dom-if" if="[[documentsError]]">
-                    <elastic-error error="[[documentsError]]" message="{{documentsErrorMessage}}"></elastic-error>
-                    <div>[[documentsErrorMessage]]</div>
-                  </template>
-
-                  <template is="dom-if" if="[[documentsTotal]]">
-                    <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
-                  </template>
-
-                  <result-list
-                    text-property="title"
-                    query-results="[[documents]]"
-                    total-results="{{documentsTotal}}"
-                    shown-results="{{shownResults}}"
-                    page="{{documentPage}}"
-                    page-size="25"
-                    loading="[[documentsLoading]]"
-                    header="{{documentsHeader}}"
-                    cache-transform="[[transforms.entity.cache]]"
-                    client="[[esClient]]"
-                    index-name="[[esConfig.esIndex]]"
-                    index-types="[[esConfig.esType]]"
-                    search-fields="[[searchFields]]"
-                    source-include='["raw_content"]'
-                    tag-manager="[[tagManager]]">
-                  </result-list>
-                </section-container>
+                      source-include='["raw_content"]'
+                      tag-manager="[[tagManager]]">
+                    </result-list>
+                  </section-container>
+                </div>
               </div>
             </div>
-          </div>
+          </paper-header-panel>
         </template>
-      </paper-header-panel>
-    </div>
-  </template>
+      </div>
+    </template>
 
-  <!-- Need to include dependencies here for IE -->
-  <script src="bower_components/array-behavior/array-behavior.js"></script>
-  <script src="behaviors/browser-behavior.js"></script>
-  <script src="bower_components/filter-behavior/filter-behavior.js"></script>
+    <!-- Need to include dependencies here for IE -->
+    <script src="bower_components/array-behavior/array-behavior.js"></script>
 
-  <script>
+    <script>
     (function(document) {
       /* globals DigBehaviors */
-      var app = document.querySelector('#app');
+      var app = document.querySelector('dom-bind');
 
       app.blurImages = false;
       app.processRequest = false;
 
-      app.params = DigBehaviors.BrowserBehavior.getUrlParameters(window.location.search);
+      app.getUrlParameters = function(parameterInput) {
+        var parameters = {};
+        if(parameterInput && parameterInput !== '?') {
+          (parameterInput.indexOf('?') === 0 ? parameterInput.slice(1) : parameterInput).split('&').forEach(function(parameter) {
+            var parameterSplit = parameter.split('=');
+            parameters[parameterSplit[0]] = (parameterSplit.length > 1 ? parameterSplit[1] : true);
+          });
+        }
+        return parameters;
+      };
+
+      app.params = app.getUrlParameters(window.location.search);
 
       if(!app.params.state) {
         app.processRequest = true;
@@ -657,9 +655,13 @@ limitations under the License.
 
       app.buildArray = DigBehaviors.ArrayBehavior.buildArray;
 
+      app.getEntityPageFilterItems = function(items) {
+        return items;
+      };
+
       app.filtersBuilderCallback = {
-        terms: DigBehaviors.FilterBehavior.getEntityPageFilterItems,
-        dates: DigBehaviors.FilterBehavior.getEntityPageFilterItems
+        terms: app.getEntityPageFilterItems,
+        dates: app.getEntityPageFilterItems
       };
 
       app.concat = function(a, b) {
@@ -799,7 +801,8 @@ limitations under the License.
       };
       /************************** END STATE HISTORY **************************/
     })(document);
-  </script>
+    </script>
+  </dom-bind>
 </body>
 
 </html>

@@ -1,0 +1,9 @@
+{
+  "root": "app/",
+  "verbose": false,
+  "plugins": {
+    "local": {
+      "browsers": ["chrome", "firefox"]
+    }
+  }
+}

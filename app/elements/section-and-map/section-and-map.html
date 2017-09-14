@@ -24,16 +24,6 @@ limitations under the License.
         display: block;
       }
 
-      section-and-title {
-        --section-and-title-padding: var(--section-and-map-padding, 20px 0);
-      }
-
-      section-and-title ::content paper-material > div > *:not(leaflet-wrapper) {
-        /* Do not overwrite top or bottom margin! */
-        margin-left: 20px;
-        margin-right: 20px;
-      }
-
       leaflet-wrapper {
         margin-bottom: 10px;
         min-height: 300px;
@@ -64,7 +54,7 @@ limitations under the License.
         </leaflet-wrapper>
       </template>
 
-      <content></content>
+      <slot></slot>
     </section-and-title>
   </template>
 

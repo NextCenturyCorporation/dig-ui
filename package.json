@@ -1,6 +1,6 @@
 {
   "name": "dig-ui",
-  "version": "0.0.57",
+  "version": "0.1.1",
   "description": "Customizable DIG search and visualization interface for any domain",
   "license": "Apache-2.0",
   "author": "Next Century Corporation",
@@ -60,7 +60,7 @@
     "require-dir": "^0.3.0",
     "run-sequence": "^1.0.2",
     "vulcanize": ">= 1.4.2",
-    "web-component-tester": "^5.0.1"
+    "web-component-tester": "^6.1.5"
   },
   "engines": {
     "node": ">=0.10.0"

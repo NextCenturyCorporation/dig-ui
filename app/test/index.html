@@ -22,7 +22,7 @@ limitations under the License.
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <title>Elements Test Runner</title>
     <meta charset="UTF-8">
-    <script src="../bower_components/webcomponentsjs/webcomponents.min.js"></script>
+    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
     <script src="../bower_components/web-component-tester/browser.js"></script>
   </head>
 
@@ -31,16 +31,13 @@ limitations under the License.
     <script>
       /* globals WCT */
       WCT.loadSuites([
-        // BEHAVIORS
-        'browser-behavior-basic.html',
-        // TRANSFORMS
         'transform-functions-config-test.html',
         'transform-functions-entity-test.html',
         'transform-functions-export-test.html',
-        'transform-functions-search-test.html',
+        'transform-functions-search-test.html'
         // ELEMENTS -- TODO
-        'similar-image-search-test.html',
-        'similar-image-search-test.html?dom=shadow'
+        //'similar-image-search-test.html',
+        //'similar-image-search-test.html?dom=shadow'
       ]);
     </script>
 

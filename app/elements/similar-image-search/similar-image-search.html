@@ -16,7 +16,6 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/button-action/button-action.html">
-<link rel="import" href="../../bower_components/file-upload/file-upload.html">
 <link rel="import" href="../../bower_components/image-gallery/image-gallery.html">
 <link rel="import" href="../../bower_components/image-thumbnail/image-thumbnail.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
@@ -26,13 +25,14 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paginated-image-gallery/paginated-image-gallery.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
-<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../../bower_components/styled-dialog/styled-dialog.html">
-<link rel="import" href="../lodash.html">
+<link rel="import" href="../../bower_components/styled-dialog/styled-dialog-styles.html">
+<link rel="import" href="../../bower_components/vaadin-upload/vaadin-upload.html">
 
 <dom-module id="similar-image-search">
   <template>
     <style include="iron-flex iron-flex-alignment"></style>
+    <style include="styled-dialog-styles"></style>
 
     <style>
       :host {
@@ -41,7 +41,7 @@ limitations under the License.
 
       /* Apply DIG Element button styling to the file upload button. */
       file-upload ::content paper-button {
-        @apply(--shadow-elevation-4dp);
+        @apply --shadow-elevation-4dp;
         font-size: 14px;
         line-height: 20px;
         margin: 0;
@@ -50,7 +50,7 @@ limitations under the License.
 
       /* Apply DIG Element button styling to the file upload button. */
       file-upload ::content paper-button:hover {
-        @apply(--shadow-elevation-8dp);
+        @apply --shadow-elevation-8dp;
       }
 
       file-upload ::content #UploadBorder {
@@ -58,11 +58,11 @@ limitations under the License.
       }
 
       file-upload ::content .name {
-        @apply(--layout-horizontal);
+        @apply --layout-horizontal;
       }
 
       file-upload ::content .name > span {
-        @apply(--layout-flex);
+        @apply --layout-flex;
         line-height: 22px;
       }
 
@@ -143,17 +143,13 @@ limitations under the License.
       <div class="styled-dialog-note">Upload image files by clicking the Upload Images button and selecting one or more files or by dropping one or more files into the drop box.</div>
 
       <div class="layout horizontal center">
-        <file-upload
+        <vaadin-upload
           id="fileUpload"
           accept="image/*"
-          droppable
-          method="POST"
-          multi
-          raised
           target="/uploadImage"
-          on-error="_setUploadErrorMessage"
-          on-success="_saveUploadedInputImage">Upload Images...
-        </file-upload>
+          on-upload-error="_setUploadErrorMessage"
+          on-upload-success="_saveUploadedInputImage">Upload Images...
+        </vaadin-upload>
 
         <span class="styled-dialog-text">[[_error]]</span>
       </div>
@@ -254,31 +250,29 @@ limitations under the License.
           </template>
         </div>
 
-        <iron-pages selected="[[_selectedResultsIndex]]">
-          <template is="dom-repeat" items="[[_results]]" as="result">
-            <div>
-              <div class="styled-dialog-bold styled-dialog-tall">Your Image</div>
+        <template is="dom-repeat" items="[[_results]]" as="result">
+          <div>
+            <div class="styled-dialog-bold styled-dialog-tall">Your Image</div>
 
-              <div class="layout horizontal center">
-                <image-gallery
-                  images="[[result.imageList]]"
-                  image-source-property="data"
-                  blur="[[blur]]">
-                </image-gallery>
-              </div>
-
-              <div class="styled-dialog-bold styled-dialog-tall">[[_getImageResultsHeaderText(result.resultsList.length, result.nearDuplicates)]]</div>
-
-              <paginated-image-gallery
-                blur="[[blur]]"
-                new-tab
-                load-type="Similar Images"
-                image-items="[[result.resultsList]]"
-                total-items="[[result.resultsList.length]]">
-              </paginated-image-gallery>
+            <div class="layout horizontal center">
+              <image-gallery
+                images="[[result.imageList]]"
+                image-source-property="data"
+                blur="[[blur]]">
+              </image-gallery>
             </div>
-          </template>
-        </iron-pages>
+
+            <div class="styled-dialog-bold styled-dialog-tall">[[_getImageResultsHeaderText(result.resultsList.length, result.nearDuplicates)]]</div>
+
+            <paginated-image-gallery
+              blur="[[blur]]"
+              new-tab
+              load-type="Similar Images"
+              image-items="[[result.resultsList]]"
+              total-items="[[result.resultsList.length]]">
+            </paginated-image-gallery>
+          </div>
+        </template>
       </template>
 
       <template is="dom-if" if="[[!_results.length]]">

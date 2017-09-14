@@ -15,8 +15,8 @@
  */
 
 body {
-  background: #ECEFF1;
-  color: #37474F;
+  background: #f5f5f5; /* paper-grey-100 */
+  color: #424242; /* paper-grey-800 */
   font-family: 'Roboto', 'Noto', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -29,4 +29,9 @@ body {
 .large-blur {
   -webkit-filter: blur(25px);
   filter: blur(25px);
+}
+
+/* Reduce the z-index for the leaflet controls so that they do not overlap the other dialogs. */
+.leaflet-top, .leaflet-bottom {
+  z-index: 100 !important;
 }
