@@ -11,6 +11,7 @@
     "app-layout": "PolymerElements/app-layout#^2.0.0",
     "array-behavior": "DigElements/array-behavior#1.0.2",
     "build-and-run-query": "DigElements/build-and-run-query#2.1.1",
+    "bulk-search": "DigElements/bulk-search#2.0.0",
     "button-action": "DigElements/button-action#2.0.0",
     "clipboard": "^1.5.15",
     "confidence-marker": "DigElements/confidence-marker#2.1.1",

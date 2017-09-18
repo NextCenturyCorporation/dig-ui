@@ -246,6 +246,15 @@ limitations under the License.
       sort-field="timestamp_crawl">
     </info-data>
 
+    <bulk-search
+      id="bulkSearchDialog"
+      search-fields="[[searchFields]]"
+      parameter-key="[[searchFields.0.key]]"
+      search-parameters="{{searchParameters}}"
+      process-request="{{processRequest}}"
+      build-search-state="[[buildSearchState]]">
+    </bulk-search>
+
     <paper-header-panel id="pagePanel" class="flex" mode="waterfall">
       <paper-toolbar slot="header" id="navbar">
         <img slot="top" src="images/dig-logo.png" alt="">
@@ -278,6 +287,11 @@ limitations under the License.
 
         <iron-dropdown id="menuDropdown" slot="top" horizontal-align="right" vertical-align="top" vertical-offset="60">
           <div slot="dropdown-content">
+            <paper-icon-item title="Upload a File with Search Terms or Copy & Paste Text" on-tap="openBulkSearchDialog">
+              <iron-icon slot="item-icon" icon="file-upload" item-icon></iron-icon>
+              Bulk Search from File or Text
+            </paper-icon-item>
+
             <paper-icon-item title="View Database Information" on-tap="openDataInfoDialog">
               <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
               View Database Information
@@ -561,6 +575,14 @@ limitations under the License.
         };
       },
 
+      buildSearchState: function(config, oldConfig) {
+        var state = {};
+        _.keys(oldConfig).forEach(function(key) {
+          state[key] = config[key] || {};
+        });
+        return state;
+      },
+
       concat: function(a, b) {
         if(a && b) {
           return a + b;
@@ -627,6 +649,11 @@ limitations under the License.
       /************* MENU *************/
       emailSupport: function() {
         window.open('mailto:dig-support@nextcentury.com');
+      },
+
+      openBulkSearchDialog: function() {
+        this.$.menuDropdown.close();
+        this.$.bulkSearchDialog.open();
       },
 
       openDataInfoDialog: function() {

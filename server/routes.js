@@ -85,6 +85,10 @@ module.exports = function(app) {
     }
   });
 
+  app.post('/upload', upload.array('file'), function(req, res) {
+    res.status(200).send(req.files[0].buffer.toString());
+  });
+
   app.post('/uploadImage', upload.array('file'), function(req, res) {
       res.status(200).send({mimeType: req.files[0].mimetype, base64: req.files[0].buffer.toString('base64')});
   });
