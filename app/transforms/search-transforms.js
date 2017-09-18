@@ -264,6 +264,14 @@ var searchTransforms = (function(_) {
               fields[clause.predicate] = fields[clause.predicate] || {};
               fields[clause.predicate][('' + clause.constraint).toLowerCase()] = clause._id;
             }
+            if(clause.clauses) {
+              clause.clauses.forEach(function(nestedClause) {
+                if(nestedClause.predicate && nestedClause.constraint && nestedClause._id) {
+                  fields[nestedClause.predicate] = fields[nestedClause.predicate] || {};
+                  fields[nestedClause.predicate][('' + nestedClause.constraint).toLowerCase()] = nestedClause._id;
+                }
+              });
+            }
           });
         }
 
