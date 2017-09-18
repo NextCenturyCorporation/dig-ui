@@ -166,13 +166,6 @@ limitations under the License.
     <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
-      data-out="{{imageFields}}"
-      combine-function="[[transforms.config.imageFields]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
       data-out="{{mapFields}}"
       combine-function="[[transforms.config.mapFields]]">
     </json-combine>
@@ -249,7 +242,7 @@ limitations under the License.
       page-size="25"
       properties-ready="{{processRequest}}"
       sort-field="[[sortField]]"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.documents]]"
       error="{{searchError}}"
@@ -472,35 +465,34 @@ limitations under the License.
                   </template>
                 </template>
 
-                <template is="dom-repeat" items="[[imageFields]]">
+                <template is="dom-if" if="[[esConfig.imageField]]">
                   <section-and-title
-                    icon="[[item.icon]]"
-                    style-class="[[item.styleClass]]"
-                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item, item.imageData.length)]]"
+                    icon="[[esConfig.imageField.icon]]"
+                    style-class="[[esConfig.imageField.styleClass]]"
+                    transform-config="[[getSectionTitleTransformConfig(pageConfig, esConfig.imageField, images.length)]]"
                     transform-function="[[getSectionTitleTransformFunction]]"
-                    data="[[item.loadedImageData]]">
+                    data="[[imagesLoaded]]">
 
                     <image-query-and-display
-                      aggregation-field="[[item.field]]"
-                      aggregation-name="[[item.key]]"
+                      aggregation-field="[[esConfig.imageField.field]]"
+                      aggregation-name="[[esConfig.imageField.key]]"
                       client="[[esClient]]"
                       filter-list="[[filterList]]"
-                      header-data-name="[[item.title]]"
+                      header-data-name="[[esConfig.imageField.title]]"
                       header-counts-name="Results"
                       header-entity-name="[[pageName]]"
-                      image-id-property="source"
                       index-name="[[esConfig.esIndex]]"
                       index-types="[[esConfig.esType]]"
                       properties-ready="[[processRequest]]"
                       query-fields="[[pageConfig.field]]"
                       query-values="[[pageId]]"
-                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
+                      transform-config="[[createExtractionsConfig(esConfig.imageField, pageConfig, pageId)]]"
                       transform-function="[[transforms.entity.extractions]]"
                       small-image-style-class="[[getBlurStyleClass(blurImages)]]"
                       large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                      images="{{item.imageData}}"
-                      loaded-images="{{item.loadedImageData}}"
-                      selected-property="[[item.key]]"
+                      images="{{images}}"
+                      loaded-images="{{imagesLoaded}}"
+                      selected-property="[[esConfig.imageField.key]]"
                       selected="{{filterCollection}}"
                       show-checkboxes>
                     </image-query-and-display>
@@ -542,7 +534,7 @@ limitations under the License.
                         aggregations="[[buildArray(item.dateAggregation)]]"
                         filters="[[filterList]]"
                         page-size="0"
-                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "timestamp_crawl", "tld", "url"]'
+                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
                         source-exclude='["knowledge_graph.*.provenance"]'
                         transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
                         transform-function="[[transforms.entity.histogram]]"
@@ -736,7 +728,11 @@ limitations under the License.
           type: Array
         },
 
-        imageFields: {
+        images: {
+          type: Array
+        },
+
+        imagesLoaded: {
           type: Array
         },
 

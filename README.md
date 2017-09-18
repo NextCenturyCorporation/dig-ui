@@ -41,9 +41,11 @@ CONFIG_PASSWORD | The password for the config REST service. | ''
 CONFIG_USERNAME | The username for the config REST service. | ''
 DATABASE_TYPE | The database type:  either 'full' or 'sample'. | 'sample'
 DEFAULT_PROJECT | The default project. | undefined
+DOWNLOAD_IMAGE_URL | The download endpoint to get the image data for the image URLs for the PDF export. | 'downloadImage'
 ES_HOST | The stringified object containing the location of elasticsearch. | '{"host": "http://localhost:9200"}'
 IMAGE_SERVICE_AUTH | The stringified object containing the username and password authorization for the similar image REST service. | '{"user": "", "password": ""}'
 IMAGE_SERVICE_HOST | The stringified object containing the location for the similar image REST service.  The "url" property is for GET requests sending a specific image URL.  The "base64" property is for POST requests sending specific image base64 data.  | {"url": "", "base64": ""}
+IMAGE_URL_PREFIX | The prefix added to the start of image URLs. | ''
 LOG_INDEX | The elasticsearch log index name. | 'dig-logs'
 LOG_TYPE | The elasticsearch log index type. | 'log'
 OVERRIDE_SEARCH_ENDPOINT | The stringified object containing the project names mapped to the endpoints for the search and facets REST services.  Overrides the endpoints from the project configs. | undefined

@@ -168,7 +168,7 @@ limitations under the License.
       filters="[]"
       page-size="1"
       properties-ready="{{processRequest}}"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.document]]"
       error="{{documentError}}"
@@ -204,7 +204,7 @@ limitations under the License.
       page-size="25"
       sort-field="[[sortField]]"
       sort-order="desc"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       loading="{{revisionLoading}}"
       last-error="{{revisionError}}"
       results="{{revisionResults}}"
@@ -237,7 +237,7 @@ limitations under the License.
       filters="[[buildArray(notThisDocFilter)]]"
       page="{{moreLikeThisPage}}"
       page-size="25"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       loading="{{moreLikeThisLoading}}"
       last-error="{{moreLikeThisError}}"
       results="{{moreLikeThisResults}}"
@@ -344,22 +344,6 @@ limitations under the License.
                         extractions="[[item.data]]">
                       </detail-subsection>
                     </section-and-map>
-                  </template>
-
-                  <template is="dom-if" if="[[isImage(item.config.type)]]">
-                    <section-and-title
-                      icon="[[item.config.icon]]"
-                      style-class="[[item.config.styleClass]]"
-                      transform-config="[[getSectionTitleTransformConfig(item.config, item.data.length)]]"
-                      transform-function="[[getSectionTitleTransformFunction]]"
-                      data="[[item.data]]">
-
-                      <image-gallery
-                        small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-                        large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                        images="[[item.data]]">
-                      </image-gallery>
-                    </section-and-title>
                   </template>
 
                   <template is="dom-if" if="[[isOther(item.config.type)]]">
@@ -763,16 +747,12 @@ limitations under the License.
         return parameters;
       },
 
-      isImage: function(type) {
-        return type === 'image';
-      },
-
       isLocation: function(type) {
         return type === 'location';
       },
 
       isOther: function(type) {
-        return !this.isImage(type) && !this.isLocation(type);
+        return type !== 'image' && type !== 'location';
       },
 
       /******** VISUALIZATIONS ********/
