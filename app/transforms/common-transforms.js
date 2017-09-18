@@ -89,7 +89,7 @@ var commonTransforms = (function(_, moment, domain) {
    * Returns the style class for the given color.
    */
   function getStyleClass(color) {
-    return color ? ('entity-' + color.replace(/ /g, '-')) : '';
+    return color ? (color.replace(/ /g, '-')) : '';
   }
 
   /**

@@ -1,0 +1,667 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<!--
+<link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
+-->
+<link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
+<link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
+<link rel="import" href="../../bower_components/export-button/export-button.html">
+<link rel="import" href="../../bower_components/facet-panel/facet-panel.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/json-combine/json-combine.html">
+<link rel="import" href="../../bower_components/loading-spinner/loading-spinner.html">
+<link rel="import" href="../../bower_components/lodash-import/lodash.html">
+<link rel="import" href="../../bower_components/log-creator/log-creator.html">
+<link rel="import" href="../../bower_components/paper-drawer-panel/paper-drawer-panel.html">
+<link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
+<link rel="import" href="../../bower_components/query-transformer/query-transformer.html">
+<link rel="import" href="../../bower_components/result-list/result-list.html">
+<link rel="import" href="../../bower_components/search-fields-dialog/search-fields-dialog.html">
+<link rel="import" href="../../bower_components/state-manager/state-manager.html">
+<link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
+<link rel="import" href="../../elements/info-data/info-data.html">
+<link rel="import" href="../../elements/info-facets/info-facets.html">
+<link rel="import" href="../../elements/info-search/info-search.html">
+<link rel="import" href="../../elements/similar-image-search/similar-image-search.html">
+<link rel="import" href="../../elements/transform-functions/transform-functions.html">
+<link rel="import" href="../../styles/app-theme.html">
+
+<dom-module id="search-page">
+  <template>
+    <style include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning"></style>
+    <style include="app-theme"></style>
+
+    <style>
+      :host {
+        display: block;
+        @apply --layout-fullbleed;
+      }
+    </style>
+
+    <iron-ajax
+      auto
+      handle-as="json"
+      url="/serverConfig"
+      last-response="{{serverConfig}}">
+    </iron-ajax>
+
+    <iron-ajax
+      auto="[[exists(configHeader)]]"
+      handle-as="json"
+      headers="[[configHeader]]"
+      url="[[concat(serverConfig.configEndpoint, domain)]]"
+      with-credentials
+      loading="{{clientConfigLoading}}"
+      last-error="{{clientConfigError}}"
+      last-response="{{clientConfig}}">
+    </iron-ajax>
+
+    <transform-functions
+      client-config="[[clientConfig]]"
+      domain="[[domain]]"
+      server-config="[[serverConfig]]"
+      es-config="{{esConfig}}"
+      transforms="{{transforms}}">
+    </transform-functions>
+
+    <json-combine
+      data-in1="[[clientConfig]]"
+      data-in2="{}"
+      data-out="{{clientConfigFields}}"
+      combine-function="[[transforms.config.fields]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[clientConfigFields]]"
+      data-in2="{}"
+      data-out="{{searchFields}}"
+      combine-function="[[transforms.config.searchFields]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{dateConfig}}"
+      combine-function="[[transforms.config.dateConfig]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{searchFieldsDialogConfig}}"
+      combine-function="[[transforms.config.searchFieldsDialogConfig]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{searchParameters}}"
+      combine-function="[[transforms.config.searchParameters]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{searchKeys}}"
+      combine-function="[[transforms.config.searchKeys]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{networkExpansionParameters}}"
+      combine-function="[[transforms.config.networkExpansionParameters]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[dateConfig]]"
+      data-in2="{}"
+      data-out="{{searchQuery}}"
+      combine-function="[[transforms.search.createSearchQuery]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[dateConfig]]"
+      data-in2="{}"
+      data-out="{{facetsQuery}}"
+      combine-function="[[transforms.search.createFacetsQuery]]">
+    </json-combine>
+
+    <query-transformer
+      error="{{searchError}}"
+      loading="{{searchLoading}}"
+      page="{{searchPage}}"
+      page-size="25"
+      process-request="[[processRequest]]"
+      result-config="[[createSearchResultConfig(networkExpansionParameters, networkExpansionParameters.*)]]"
+      result-function="[[transforms.search.searchResults]]"
+      results="{{searchResults}}"
+      search-parameters="[[searchParameters]]"
+      search-config="[[networkExpansionParameters]]"
+      search-function="[[searchQuery]]"
+      total-count-function="[[createTotalCountFunction()]]"
+      total="{{searchTotal}}"
+      url="[[esConfig.searchEndpoint]]">
+    </query-transformer>
+
+    <json-combine
+      data-in1="[[searchResults]]"
+      data-in2="[[searchFields]]"
+      data-out="{{documents}}"
+      combine-function="[[transforms.entity.documents]]">
+    </json-combine>
+
+    <elastic-client
+      config="[[serverConfig.esHost]]"
+      client="{{esClient}}">
+    </elastic-client>
+
+    <!-- Logger for Search Terms -->
+    <dig-logger
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
+      type="Search-SubmitSearch"
+      data="[[logMessage]]"
+      username="defaultUser">
+    </dig-logger>
+
+    <!-- Logger for Pagination -->
+    <dig-logger
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
+      type="Search-ShowResultPageNumber"
+      data="[[searchPage]]"
+      username="defaultUser">
+    </dig-logger>
+
+    <!-- Logger for Page View -->
+    <dig-logger log-page-view
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndex]]"
+      es-type="[[serverConfig.logType]]"
+      type="Search-Open"
+      data=""
+      username="defaultUser"
+      logger="{{logger}}">
+    </dig-logger>
+
+    <log-creator
+      object="{{searchParameters}}"
+      log-message="{{logMessage}}">
+    </log-creator>
+
+    <tag-manager
+      id="tagManager"
+      auth-username="[[serverConfig.configUsername]]"
+      auth-password="[[serverConfig.configPassword]]"
+      entity-endpoint="[[serverConfig.tagsEntityEndpoint]]"
+      extraction-endpoint="[[serverConfig.tagsExtractionEndpoint]]"
+      list-endpoint="[[serverConfig.tagsListEndpoint]]"
+      project="[[domain]]"
+      tag-manager="{{tagManager}}">
+    </tag-manager>
+
+    <state-manager id="stateManager"
+      build-popup-data-function="[[transforms.config.searchTerms]]"
+      build-state-data-function="[[transforms.config.searchState]]"
+      client="[[esClient]]"
+      function-config="[[searchFields]]"
+      state-index="[[serverConfig.stateIndexName]]"
+      state-type="[[serverConfig.stateIndexType]]"
+      state-id="[[parameters.state]]"
+      collection="{{searchParameters}}"
+      process-request="{{processRequest}}"
+      state-history="{{stateHistory}}"
+      has-history="{{hasHistory}}">
+    </state-manager>
+
+    <info-data
+      id="dataInfoDialog"
+      client="[[esClient]]"
+      index-name="[[esConfig.esIndex]]"
+      index-types="[[esConfig.esType]]"
+      domain="[[domain]]"
+      sort-field="timestamp_crawl">
+    </info-data>
+
+    <paper-header-panel id="pagePanel" class="flex" mode="waterfall">
+      <paper-toolbar slot="header" id="navbar">
+        <img slot="top" src="images/dig-logo.png" alt="">
+        <div slot="top" class="drawer-spacer"></div>
+
+        <div slot="top" class="flex">
+          <search-fields-dialog
+            date-config="[[dateConfig]]"
+            search-fields-config="[[searchFieldsDialogConfig]]"
+            search-parameters="{{searchParameters}}"
+            network-expansion-parameters="{{networkExpansionParameters}}"
+            process-request="{{processRequest}}">
+          </search-fields-dialog>
+        </div>
+
+        <a slot="top" href="[[getUrlWithProject(domain)]]" style="color: #ffffff;">
+          <paper-icon-button icon="clear" title="Reset Page"></paper-icon-button>
+        </a>
+
+        <similar-image-search id="similarImageSearchDialog"
+          logger="[[logger]]"
+          blur="[[blurImages]]"
+          image-service-auth="[[serverConfig.imageServiceAuth]]"
+          image-service-host="[[serverConfig.imageServiceHost]]"
+          link-function="[[transforms.entity.externalImageLink]]">
+        </similar-image-search>
+        <!-- TODO: add logger, update transform when we're ready to link to image entity pages -->
+
+        <paper-icon-button icon="menu" slot="top" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+
+        <iron-dropdown id="menuDropdown" slot="top" horizontal-align="right" vertical-align="top" vertical-offset="60">
+          <div slot="dropdown-content">
+            <paper-icon-item title="View Database Information" on-tap="openDataInfoDialog">
+              <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
+              View Database Information
+            </paper-icon-item>
+
+            <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
+              <iron-icon slot="item-icon" icon="history" item-icon></iron-icon>
+              View Search State History
+            </paper-icon-item>
+
+            <paper-icon-item title="View Training Options" on-tap="openTagsDialog">
+              <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
+              View Training Options
+            </paper-icon-item>
+
+            <paper-icon-item title="Search on an Image URL or Uploaded Image" on-tap="openSimilarImageSearchDialog">
+              <iron-icon slot="item-icon" icon="image:compare" item-icon></iron-icon>
+              Similar Image Search
+            </paper-icon-item>
+
+            <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+              <iron-icon slot="item-icon" icon="open-in-new" item-icon></iron-icon>
+              Open a DIG Search Page in a New Tab
+            </paper-icon-item>
+
+            <paper-icon-item title="Contact DIG Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+              <iron-icon slot="item-icon" icon="communication:contact-mail" item-icon></iron-icon>
+              Contact DIG Support
+            </paper-icon-item>
+          </div>
+        </iron-dropdown>
+      </paper-toolbar>
+
+      <paper-drawer-panel drawer-width="320px">
+        <facet-panel slot="drawer"
+          facets-query="[[facetsQuery]]"
+          network-expansion-parameters="[[networkExpansionParameters]]"
+          process-request="{{processRequest}}"
+          search-endpoint="[[esConfig.searchEndpoint]]"
+          search-keys="[[searchKeys]]"
+          search-fields="[[searchFields]]"
+          search-parameters="{{searchParameters}}">
+
+          <info-facets></info-facets>
+        </facet-panel>
+
+        <paper-header-panel slot="main" id="searchPanel">
+          <template is="dom-if" if="[[clientConfigLoading]]">
+            <loading-spinner class="layout horizontal" style="margin: 10px 20px;" show type="Configuration"></loading-spinner>
+          </template>
+
+          <template is="dom-if" if="[[clientConfig]]">
+            <div id="searchTitle" class="layout horizontal">
+              <div class="layout vertical flex">
+                <template is="dom-if" if="[[!searchError]]">
+                  <div class="layout horizontal">
+                    <div class="paper-font-title">[[searchTitle]]</div>
+
+                    <template is="dom-if" if="[[searchTotal]]">
+                      <info-search search-parameters="[[searchParameters]]"></info-search>
+                    </template>
+                  </div>
+                </template>
+
+                <template is="dom-if" if="[[searchError]]">
+                  <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
+                  <div class="paper-font-title flex">
+                    [[searchErrorMessage]]
+                  </div>
+                </template>
+
+                <template is="dom-if" if="[[searchTotal]]">
+                  <div class="note">Please note that only the top 10 extractions of each type are shown in the result list.</div>
+                </template>
+              </div>
+
+              <export-button
+                client="[[esClient]]"
+                data="[[documentsShown]]"
+                filter-list="[]"
+                index-name="[[esConfig.esIndex]]"
+                index-types="[[esConfig.esType]]"
+                search-fields="[[searchFields]]"
+                search-parameters="[[searchParameters]]"
+                source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+                transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
+                transform-search-input-function="[[transforms.export.createBulkSearchData]]"
+                transform-search-results-function="[[transforms.entity.documents]]">
+              </export-button>
+            </div>
+
+            <result-list
+              id="searchResults"
+              new-tab
+              text-property="title"
+              query-results="[[documents]]"
+              total-results="[[searchTotal]]"
+              shown-results="{{documentsShown}}"
+              page="{{searchPage}}"
+              page-size="25"
+              loading="[[searchLoading]]"
+              header="{{searchTitle}}"
+              cache-transform="[[transforms.entity.cache]]"
+              client="[[esClient]]"
+              index-name="[[esConfig.esIndex]]"
+              index-types="[[esConfig.esType]]"
+              search-fields="[[searchFields]]"
+              source-include='["raw_content"]'
+              tag-manager="[[tagManager]]">
+            </result-list>
+          </template>
+        </paper-header-panel>
+      </paper-drawer-panel>
+    </paper-header-panel>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      /* globals _ */
+      is: 'search-page',
+
+      properties: {
+        clientConfig: {
+          type: Object
+        },
+
+        clientConfigError: {
+          type: Object
+        },
+
+        clientConfigFields: {
+          type: Object
+        },
+
+        clientConfigLoading: {
+          type: Boolean
+        },
+
+        configHeader: {
+          computed: 'createAuthHeader(serverConfig)',
+          type: Object
+        },
+
+        dateConfig: {
+          type: Object
+        },
+
+        documents: {
+          type: Array
+        },
+
+        documentsShown: {
+          type: Array
+        },
+
+        domain: {
+          computed: 'findDomain(parameters, serverConfig)',
+          type: String
+        },
+
+        esClient: {
+          type: Object
+        },
+
+        esConfig: {
+          type: Object
+        },
+
+        facetsQuery: {
+          type: Object
+        },
+
+        hasHistory: {
+          type: Boolean
+        },
+
+        logger: {
+          type: Object
+        },
+
+        logMessage: {
+          type: Object
+        },
+
+        networkExpansionParameters: {
+          type: Object
+        },
+
+        parameters: {
+          computed: 'getUrlParameters()',
+          type: Object
+        },
+
+        processRequest: {
+          type: Boolean
+        },
+
+        searchError: {
+          type: Object
+        },
+
+        searchErrorMessage: {
+          type: String
+        },
+
+        searchFields: {
+          type: Array
+        },
+
+        searchFieldsDialogConfig: {
+          type: Object
+        },
+
+        searchKeys: {
+          type: Array
+        },
+
+        searchLoading: {
+          type: Boolean
+        },
+
+        searchPage: {
+          type: Number
+        },
+
+        searchParameters: {
+          type: Object
+        },
+
+        searchQuery: {
+          type: Object
+        },
+
+        searchResults: {
+          type: Object
+        },
+
+        searchTitle: {
+          type: String
+        },
+
+        searchTotal: {
+          type: Number
+        },
+
+        serverConfig: {
+          type: Object
+        },
+
+        stateHistory: {
+          type: Array
+        },
+
+        tagManager: {
+          type: Object
+        },
+
+        transforms: {
+          type: Object
+        }
+      },
+
+      attached: function() {
+        var self = this;
+
+        window.onpopstate = function() {
+          // TODO: refreshing for now. Need to address issues with interrupting logging entries -- perhaps a better
+          // approach would to be not to reload the page, but to rerun the query with the changed parameters + make
+          // sure logging is done correctly in this case, which may involve adding processRequest to create-log-message.
+          window.location.reload();
+        };
+
+        window.onload = function() {
+          if(window.history.state && window.history.state.stateHistory) {
+            self.set('stateHistory', window.history.state.stateHistory);
+          }
+        };
+      },
+
+      concat: function(a, b) {
+        if(a && b) {
+          return a + b;
+        }
+        return undefined;
+      },
+
+      createAuthHeader: function(serverConfig) {
+        if(serverConfig.configUsername && serverConfig.configPassword) {
+          return {
+            'Authorization': 'Basic ' + btoa(serverConfig.configUsername + ':' + serverConfig.configPassword)
+          };
+        }
+        return {};
+      },
+
+      createSearchResultConfig: function(networkExpansionParameters) {
+        return {
+          isNetworkExpansion: !!(_.findKey(networkExpansionParameters, function(key) {
+            return key;
+          }))
+        };
+      },
+
+      createTotalCountFunction: function() {
+        return function(response) {
+          if(response && response.length && response[0] && response[0].result) {
+            if(_.isArray(response[0].result)) {
+              return (response[0].result.length && response[0].result[1].hits && response[0].result[1].hits.total ? response[0].result[1].hits.total : 0);
+            }
+            return (response[0].result.hits && response[0].result.hits.total ? response[0].result.hits.total : 0);
+          }
+          return 0;
+        };
+      },
+
+      exists: function(object) {
+        return typeof object !== 'undefined';
+      },
+
+      findDomain: function(parameters, serverConfig) {
+        if(parameters && serverConfig) {
+          return parameters.domain || parameters.project || serverConfig.defaultProject;
+        }
+        return undefined;
+      },
+
+      getUrlParameters: function() {
+        var parameterInput = window.location.search;
+        var parameters = {};
+        if(parameterInput && parameterInput !== '?') {
+          (parameterInput.indexOf('?') === 0 ? parameterInput.slice(1) : parameterInput).split('&').forEach(function(parameter) {
+            var parameterSplit = parameter.split('=');
+            parameters[parameterSplit[0]] = (parameterSplit.length > 1 ? parameterSplit[1] : true);
+          });
+        }
+        return parameters;
+      },
+
+      getUrlWithProject: function(domain) {
+        return './?project=' + domain;
+      },
+
+      /************* MENU *************/
+      emailSupport: function() {
+        window.open('mailto:dig-support@nextcentury.com');
+      },
+
+      openDataInfoDialog: function() {
+        this.$.menuDropdown.close();
+        this.$.dataInfoDialog.open();
+      },
+
+      openNewTab: function() {
+        window.open('./?project=' + this.domain);
+      },
+
+      openSimilarImageSearchDialog: function() {
+        this.$.menuDropdown.close();
+        this.$.similarImageSearchDialog.open();
+      },
+
+      openStateHistoryDialog: function() {
+        this.$.menuDropdown.close();
+        this.$.stateManager.openStateHistory();
+      },
+
+      openTagsDialog: function() {
+        this.$.menuDropdown.close();
+        this.$.tagManager.openDialog();
+      },
+
+      toggleMenu: function() {
+        if(this.$.menuDropdown.style.display === 'none') {
+          this.$.menuDropdown.open();
+        } else {
+          this.$.menuDropdown.close();
+        }
+      }
+      /********************************/
+    });
+  })();
+  </script>
+</dom-module>

@@ -14,266 +14,267 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<custom-style>
-  <style is="custom-style">
-    /*
-     Polymer includes a shim for CSS Custom Properties that we can use for application theming.
-     Below, you'll find the default palette for the Polymer Starter Kit layout. Feel free to play
-     with changing the colors used or generate your own palette of colours at MaterialPalette.com.
+<dom-module id="app-theme">
+  <template>
+    <style>
+      /*
+       Polymer includes a shim for CSS Custom Properties that we can use for application theming.
+       Below, you'll find the default palette for the Polymer Starter Kit layout. Feel free to play
+       with changing the colors used or generate your own palette of colours at MaterialPalette.com.
 
-     See https://www.polymer-project.org/1.0/docs/devguide/styling.html#xscope-styling-details
-     for further information on custom CSS properties.
-     */
+       See https://www.polymer-project.org/1.0/docs/devguide/styling.html#xscope-styling-details
+       for further information on custom CSS properties.
+       */
 
-    /* Application theme */
+      /* Application theme */
 
-    :root {
-      --primary-color: #757575; /* paper-grey-600 */
-      --primary-background-color: #e0e0e0; /* paper-grey-200 */
-      --primary-text-color: #424242; /* paper-grey-800 */
-      --secondary-text-color: #757575; /* paper-grey-600 */
-      --disabled-text-color: #bdbdbd; /* paper-grey-400 */
-      --navbar-color: #424242; /* paper-grey-800 */
-    }
-
-    body {
-      /* Flexbox can cause scrollbars to be shown in IE when not needed so hide them. */
-      overflow: hidden;
-    }
-
-    search-fields-dialog {
-      /* Center with the screen.  Left:  320px facets drawer.  Right:  10px navbar padding + 40px per navbar icon. */
-      margin-right: 230px;
-    }
-
-    paper-material {
-      background-color: #FFFFFF;
-    }
-
-    .content {
-      @apply --layout-horizontal;
-      margin: 0 10px;
-    }
-
-    .content > * {
-      margin: 0 10px;
-    }
-
-    /* General styles */
-
-    .container {
-      @apply --layout-horizontal;
-      @apply --layout-wrap;
-    }
-
-    .flexchild {
-      @apply --layout-flex;
-      background-color: #dddddd;
-    }
-
-    ul {
-      list-style: none;
-    }
-
-    hr {
-      background: none;
-      border-width: 1px 0 0;
-      border-style: solid;
-      border-color: rgba(0,0,0,var(--dark-divider-opacity));
-      margin: 10px 0;
-    }
-
-    /*********************************************************
-    /*
-    /*  New stuff for index.html. Maybe it goes in its own page style,
-    /*  because right now this breaks the entity page style.
-    /*
-    /*********************************************************/
-
-    paper-drawer-panel {
-      --paper-drawer-panel-left-drawer-container: {
-        background-color: var(--primary-background-color);
-        border-right: 1px solid rgba(0,0,0,var(--dark-divider-opacity));
-      };
-    }
-
-    #navbar {
-      background-color: var(--navbar-color);
-      color: var(--text-primary-color);
-      --paper-toolbar-height: 60px;
-      --paper-toolbar-content: {
-        padding: 0 10px;
-      };
-    }
-
-    #navbar modal-icon {
-      --paper-icon-button: {
-        margin: 20px 0 0;
+      :root {
+        --primary-color: #757575; /* paper-grey-600 */
+        --primary-background-color: #e0e0e0; /* paper-grey-200 */
+        --primary-text-color: #424242; /* paper-grey-800 */
+        --secondary-text-color: #757575; /* paper-grey-600 */
+        --disabled-text-color: #bdbdbd; /* paper-grey-400 */
+        --navbar-color: #424242; /* paper-grey-800 */
       }
-    }
 
-    .show-fields {
-      color: yellowgreen;
-    }
-
-    #navbar paper-icon-button[icon=menu] {
-      /* Override default style */
-      margin-right: 0px;
-    }
-
-    #navbar paper-icon-button {
-      --paper-icon-button: {
-        padding: 5px;
+      body {
+        /* Flexbox can cause scrollbars to be shown in IE when not needed so hide them. */
+        overflow: hidden;
       }
-    }
 
-    /* Spacer to match drawer width */
-    #navbar .drawer-spacer {
-      width: 220px;
-    }
-
-    #menuDropdown div[slot="dropdown-content"] {
-      background-color: var(--navbar-color);
-      border: 1px solid var(--navbar-color);
-      border-radius: 2px;
-      color: var(--text-primary-color);
-    }
-
-    #menuDropdown div[slot="dropdown-content"] paper-icon-item {
-      --paper-item-icon-width: 24px;
-      --paper-item-icon: {
-        margin-right: 10px;
+      search-fields-dialog {
+        /* Center with the screen.  Left:  320px facets drawer.  Right:  10px navbar padding + 40px per navbar icon. */
+        margin-right: 230px;
       }
-      --paper-icon-item: {
-        border: 1px solid var(--text-primary-color);
-        cursor: pointer;
-        /* Below is needed for IE */
-        line-height: 48px;
-        min-width: 300px;
-        /* Above is needed for IE */
+
+      paper-material {
+        background-color: #FFFFFF;
       }
-    }
 
-    facet-panel {
-      --facet-panel-selected-facet-background-color: var(--facet-background-color);
-      --facet-panel-selected-facet-text-color: var(--primary-text-color);
-      --facet-panel-selected-facet-icon-hover-color: #fff;
-    }
+      .content {
+        @apply --layout-horizontal;
+        margin: 0 10px;
+      }
 
-    #searchPanel {
-      --paper-header-panel-container: {
-        background-color: #ffffff;
-      };
-    }
+      .content > * {
+        margin: 0 10px;
+      }
 
-    #searchTitle {
-      border-bottom: 1px solid var(--primary-background-color);
-      padding: 15px 25px;
-    }
+      /* General styles */
 
-    #searchTitle .paper-font-title {
-      /* Match the height of the export button. */
-      line-height: 30px;
-    }
+      .container {
+        @apply --layout-horizontal;
+        @apply --layout-wrap;
+      }
 
-    #searchResults {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      .flexchild {
+        @apply --layout-flex;
+        background-color: #dddddd;
+      }
 
-      --result-list-scroll-threshold: {
-        height: auto;
-        max-height: none;
+      ul {
+        list-style: none;
+      }
+
+      hr {
+        background: none;
+        border-width: 1px 0 0;
+        border-style: solid;
+        border-color: rgba(0,0,0,var(--dark-divider-opacity));
+        margin: 10px 0;
+      }
+
+      /*********************************************************
+      /*
+      /*  New stuff for index.html. Maybe it goes in its own page style,
+      /*  because right now this breaks the entity page style.
+      /*
+      /*********************************************************/
+
+      paper-drawer-panel {
+        --paper-drawer-panel-left-drawer-container: {
+          background-color: var(--primary-background-color);
+          border-right: 1px solid rgba(0,0,0,var(--dark-divider-opacity));
+        };
+      }
+
+      #navbar {
+        background-color: var(--navbar-color);
+        color: var(--text-primary-color);
+        --paper-toolbar-height: 60px;
+        --paper-toolbar-content: {
+          padding: 0 10px;
+        };
+      }
+
+      #navbar modal-icon {
+        --paper-icon-button: {
+          margin: 20px 0 0;
+        }
+      }
+
+      .show-fields {
+        color: yellowgreen;
+      }
+
+      #navbar paper-icon-button[icon=menu] {
+        /* Override default style */
+        margin-right: 0px;
+      }
+
+      #navbar paper-icon-button {
+        --paper-icon-button: {
+          padding: 5px;
+        }
+      }
+
+      /* Spacer to match drawer width */
+      #navbar .drawer-spacer {
+        width: 220px;
+      }
+
+      #menuDropdown div[slot="dropdown-content"] {
+        background-color: var(--navbar-color);
+        border: 1px solid var(--navbar-color);
+        border-radius: 2px;
+        color: var(--text-primary-color);
+      }
+
+      #menuDropdown div[slot="dropdown-content"] paper-icon-item {
+        --paper-item-icon-width: 24px;
+        --paper-item-icon: {
+          margin-right: 10px;
+        }
+        --paper-icon-item: {
+          border: 1px solid var(--text-primary-color);
+          cursor: pointer;
+          /* Below is needed for IE */
+          line-height: 48px;
+          min-width: 300px;
+          /* Above is needed for IE */
+        }
+      }
+
+      facet-panel {
+        --facet-panel-selected-facet-background-color: var(--facet-background-color);
+        --facet-panel-selected-facet-text-color: var(--primary-text-color);
+        --facet-panel-selected-facet-icon-hover-color: #fff;
+      }
+
+      #searchPanel {
+        --paper-header-panel-container: {
+          background-color: #ffffff;
+        };
+      }
+
+      #searchTitle {
+        border-bottom: 1px solid var(--primary-background-color);
+        padding: 15px 25px;
+      }
+
+      #searchTitle .paper-font-title {
+        /* Match the height of the export button. */
+        line-height: 30px;
+      }
+
+      #searchResults {
         position: absolute;
-        bottom: 70px;
-        top: 90px;
-        /*top: 60px;*/
+        top: 0;
+        bottom: 0;
         left: 0;
         right: 0;
-      };
 
-      --result-list-loading-spinner: {
-        border-top: 1px solid var(--primary-background-color);
-        position: absolute;
-        bottom: 20px;
-        left: 0;
-        right: 0;
-        padding: 25px 0 5px;
-      };
+        --result-list-scroll-threshold: {
+          height: auto;
+          max-height: none;
+          position: absolute;
+          bottom: 70px;
+          top: 90px;
+          left: 0;
+          right: 0;
+        };
 
-      --result-list-show-more-button: {
-        border-top: 1px solid var(--primary-background-color);
-        position: absolute;
-        bottom: 20px;
-        left: 0;
-        right: 0;
-        padding: 20px 0 0;
-      };
-    }
+        --result-list-loading-spinner: {
+          border-top: 1px solid var(--primary-background-color);
+          position: absolute;
+          bottom: 20px;
+          left: 0;
+          right: 0;
+          padding: 25px 0 5px;
+        };
 
-    image-gallery-popup ::slotted(paper-dialog) {
-      /* Needed for images in the similar image search dialog. */
-      background: rgba(0, 0, 0, 0.5);
-    }
+        --result-list-show-more-button: {
+          border-top: 1px solid var(--primary-background-color);
+          position: absolute;
+          bottom: 20px;
+          left: 0;
+          right: 0;
+          padding: 20px 0 0;
+        };
+      }
 
-    .note {
-      font-style: italic;
-      color: var(--secondary-text-color);
-      font-size: 14px;
-      line-height: 20px;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
+      image-gallery-popup ::slotted(paper-dialog) {
+        /* Needed for images in the similar image search dialog. */
+        background: rgba(0, 0, 0, 0.5);
+      }
 
-    #searchTitle .note {
-      margin-bottom: 0;
-      margin-top: 10px;
-    }
+      .note {
+        font-style: italic;
+        color: var(--secondary-text-color);
+        font-size: 14px;
+        line-height: 20px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
 
-    /*********************************************************/
+      #searchTitle .note {
+        margin-bottom: 0;
+        margin-top: 10px;
+      }
 
-    /* Material Design Adaptive Breakpoints */
-    /*
-      Below you'll find CSS media queries based on the breakpoint guidance
-      published by the Material Design team. You can choose to use, customise
-      or remove these breakpoints based on your needs.
+      /*********************************************************/
 
-      http://www.google.com/design/spec/layout/adaptive-ui.html#adaptive-ui-breakpoints
-     */
+      /* Material Design Adaptive Breakpoints */
+      /*
+        Below you'll find CSS media queries based on the breakpoint guidance
+        published by the Material Design team. You can choose to use, customise
+        or remove these breakpoints based on your needs.
 
-    /* mobile-small */
-    @media all and (min-width: 0) and (max-width: 360px) and (orientation: portrait) { }
-    /* mobile-large */
-    @media all and (min-width: 361px) and (orientation: portrait) { }
-    /* mobile-small-landscape */
-    @media all and (min-width: 0) and (max-width: 480px) and (orientation: landscape) { }
-    /* mobile-large-landscape */
-    @media all and (min-width: 481px) and (orientation: landscape) { }
-    /* tablet-small-landscape */
-    @media all and (min-width: 600px) and (max-width: 960px) and (orientation: landscape) { }
-    /* tablet-large-landscape */
-    @media all and (min-width: 961px) and (orientation: landscape) { }
-    /* tablet-small */
-    @media all and (min-width: 600px) and (orientation: portrait) { }
-    /* tablet-large */
-    @media all and (min-width: 601px) and (max-width: 840px) and (orientation : portrait) { }
-    /* desktop-x-small-landscape */
-    @media all and (min-width: 0) and (max-width: 480px) and (orientation: landscape) { }
-    /* desktop-x-small */
-    @media all and (min-width: 0) and (max-width: 480px) and (max-aspect-ratio: 4/3) { }
-    /* desktop-small-landscape */
-    @media all and (min-width: 481px) and (max-width: 840px) and (orientation: landscape) { }
-    /* desktop-small */
-    @media all and (min-width: 481px) and (max-width: 840px) and (max-aspect-ratio: 4/3) { }
-    /* desktop-medium-landscape */
-    @media all and (min-width: 841px) and (max-width: 1280px) and (orientation: landscape) { }
-    /* desktop-medium */
-    @media all and (min-width: 841px) and (max-width: 1280px) and (max-aspect-ratio: 4/3) { }
-    /* desktop-large */
-    @media all and (min-width: 1281px) and (max-width: 1600px) { }
-    /* desktop-xlarge */
-    @media all and (min-width: 1601px) and (max-width: 1920px) { }
-  </style>
-</custom-style>
+        http://www.google.com/design/spec/layout/adaptive-ui.html#adaptive-ui-breakpoints
+       */
+
+      /* mobile-small */
+      @media all and (min-width: 0) and (max-width: 360px) and (orientation: portrait) { }
+      /* mobile-large */
+      @media all and (min-width: 361px) and (orientation: portrait) { }
+      /* mobile-small-landscape */
+      @media all and (min-width: 0) and (max-width: 480px) and (orientation: landscape) { }
+      /* mobile-large-landscape */
+      @media all and (min-width: 481px) and (orientation: landscape) { }
+      /* tablet-small-landscape */
+      @media all and (min-width: 600px) and (max-width: 960px) and (orientation: landscape) { }
+      /* tablet-large-landscape */
+      @media all and (min-width: 961px) and (orientation: landscape) { }
+      /* tablet-small */
+      @media all and (min-width: 600px) and (orientation: portrait) { }
+      /* tablet-large */
+      @media all and (min-width: 601px) and (max-width: 840px) and (orientation : portrait) { }
+      /* desktop-x-small-landscape */
+      @media all and (min-width: 0) and (max-width: 480px) and (orientation: landscape) { }
+      /* desktop-x-small */
+      @media all and (min-width: 0) and (max-width: 480px) and (max-aspect-ratio: 4/3) { }
+      /* desktop-small-landscape */
+      @media all and (min-width: 481px) and (max-width: 840px) and (orientation: landscape) { }
+      /* desktop-small */
+      @media all and (min-width: 481px) and (max-width: 840px) and (max-aspect-ratio: 4/3) { }
+      /* desktop-medium-landscape */
+      @media all and (min-width: 841px) and (max-width: 1280px) and (orientation: landscape) { }
+      /* desktop-medium */
+      @media all and (min-width: 841px) and (max-width: 1280px) and (max-aspect-ratio: 4/3) { }
+      /* desktop-large */
+      @media all and (min-width: 1281px) and (max-width: 1600px) { }
+      /* desktop-xlarge */
+      @media all and (min-width: 1601px) and (max-width: 1920px) { }
+    </style>
+  </template>
+</dom-module>
