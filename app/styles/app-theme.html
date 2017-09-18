@@ -172,9 +172,19 @@ limitations under the License.
         padding: 15px 25px;
       }
 
-      #searchTitle .paper-font-title {
+      #searchTitle .search-results-title {
+        font-size: 24px;
+        font-weight: 500;
         /* Match the height of the export button. */
         line-height: 30px;
+        /* Needed to fix flexbox layout issues in newer browsers. */
+        display: -webkit-box;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        word-break: break-word;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
       }
 
       #searchResults {

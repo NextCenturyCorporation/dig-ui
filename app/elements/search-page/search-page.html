@@ -334,7 +334,7 @@ limitations under the License.
               <div class="layout vertical flex">
                 <template is="dom-if" if="[[!searchError]]">
                   <div class="layout horizontal">
-                    <div class="paper-font-title">[[searchTitle]]</div>
+                    <div class="search-results-title">[[searchTitle]]</div>
 
                     <template is="dom-if" if="[[searchTotal]]">
                       <info-search search-parameters="[[searchParameters]]"></info-search>
@@ -344,7 +344,7 @@ limitations under the License.
 
                 <template is="dom-if" if="[[searchError]]">
                   <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
-                  <div class="paper-font-title flex">
+                  <div class="search-results-title flex">
                     [[searchErrorMessage]]
                   </div>
                 </template>
