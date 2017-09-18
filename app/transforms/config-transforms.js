@@ -329,6 +329,8 @@ var configTransforms = (function(_, commonTransforms) {
           facets: fields[id].show_in_facets || false,
           // The aggregation field.
           field: 'knowledge_graph.' + id + '.key',
+          // The group for the searchFieldsDialogConfig.
+          group: fields[id].group_name,
           // A polymer or fontawesome icon.
           icon: fields[id].icon || 'icons:text-format',
           // Either entity, text, or undefined.
@@ -353,42 +355,23 @@ var configTransforms = (function(_, commonTransforms) {
         // Add style class (e.g. 'entity-grey').
         searchFieldsObject.styleClass = commonTransforms.getStyleClass(searchFieldsObject.color);
 
-        // Add sort properties based on fields config to use in sorting the searchFields and searchFieldsDialogConfig.
-        // Sort the searchFields in the order:  entity fields, extraction (non-entity) fields, title fields, description fields, website fields, date fields, image fields.
-        searchFieldsObject.sort = {
-          sortId: 2,
-          sortType: 'extraction'
-        };
+        // Sort for the facets and the search fields dialog.
         if(searchFieldsObject.type === 'date') {
-          searchFieldsObject.sort = {
-            sortId: 6,
-            sortType: 'date'
-          };
+          searchFieldsObject.sort = 5;
         } else if(searchFieldsObject.type === 'image') {
-          searchFieldsObject.sort = {
-            sortId: 7,
-            sortType: 'image'
-          };
-        } else if(searchFieldsObject.link === 'entity') {
-          searchFieldsObject.sort = {
-            sortId: 1,
-            sortType: 'entity'
-          };
+          searchFieldsObject.sort = 6;
         } else if(searchFieldsObject.result === 'title') {
-          searchFieldsObject.sort = {
-            sortId: 3,
-            sortType: 'document'
-          };
+          searchFieldsObject.sort = 2;
+          searchFieldsObject.group = searchFieldsObject.group || 'Document';
         } else if(searchFieldsObject.result === 'description') {
-          searchFieldsObject.sort = {
-            sortId: 4,
-            sortType: 'document'
-          };
-        } else if(searchFieldsObject.result === 'tld' || searchFieldsObject.key === 'website') {
-          searchFieldsObject.sort = {
-            sortId: 5,
-            sortType: 'document'
-          };
+          searchFieldsObject.sort = 3;
+          searchFieldsObject.group = searchFieldsObject.group || 'Document';
+        } else if(searchFieldsObject.result === 'tld' || searchFieldsObject.key === 'url' || searchFieldsObject.key === 'website') {
+          searchFieldsObject.sort = 4;
+          searchFieldsObject.group = searchFieldsObject.group || 'Document';
+        } else {
+          searchFieldsObject.sort = 1;
+          searchFieldsObject.group = searchFieldsObject.group || (searchFieldsObject.link === 'entity' ? 'Entity' : 'Extraction');
         }
 
         // Properties for the date facets.
@@ -396,13 +379,30 @@ var configTransforms = (function(_, commonTransforms) {
 
         return searchFieldsObject;
       }).sort(function(a, b) {
-        if(a.sort.sortId < b.sort.sortId) {
+        if(a.sort < b.sort) {
           return -1;
         }
-        if(a.sort.sortId > b.sort.sortId) {
+        if(a.sort > b.sort) {
           return 1;
         }
         return a.title > b.title ? 1 : (a.title < b.title ? -1 : 0);
+      });
+
+      // Add image field.
+      searchFields.push({
+        key: 'image',
+        color: 'grey',
+        facets: true,
+        field: 'objects.obj_stored_url',
+        group: 'Image',
+        icon: 'image:photo',
+        link: 'entity',
+        queryField: 'objects.obj_stored_url',
+        result: 'image',
+        search: true,
+        title: 'Image',
+        titlePlural: 'Images',
+        type: 'image'
       });
 
       console.log('searchFields', searchFields);
@@ -419,9 +419,8 @@ var configTransforms = (function(_, commonTransforms) {
     searchFieldsDialogConfig: function(searchFields) {
       var config = [];
 
-      // Add the searchFields to the config in the order:  date fields, entity fields, extraction (non-entity) fields, document fields.
       searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'date';
+        return searchFieldsObject.search && searchFieldsObject.type === 'date';
       }).forEach(function(searchFieldsObject) {
         var dateProperties = createDateProperties(searchFieldsObject);
         config.push({
@@ -434,45 +433,26 @@ var configTransforms = (function(_, commonTransforms) {
         });
       });
 
-      config.push({
-        name: 'Entity',
-        data: searchFields.filter(function(searchFieldsObject) {
-          return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'entity';
-        }).map(function(searchFieldsObject) {
-          return {
-            key: searchFieldsObject.key,
-            field: searchFieldsObject.field,
-            title: searchFieldsObject.title,
-            // Enable network expansion for the entity fields.
-            enableNetworkExpansion: true
-          };
-        })
-      });
+      var groups = searchFields.reduce(function(groups, searchFieldsObject) {
+        if(searchFieldsObject.search && searchFieldsObject.type !== 'date' && searchFieldsObject.type !== 'image') {
+          groups[searchFieldsObject.group] = groups[searchFieldsObject.group] || [];
+          groups[searchFieldsObject.group].push(searchFieldsObject);
+        }
+        return groups;
+      }, {});
 
-      config.push({
-        name: 'Extraction',
-        data: searchFields.filter(function(searchFieldsObject) {
-          return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'extraction';
-        }).map(function(searchFieldsObject) {
-          return {
-            key: searchFieldsObject.key,
-            field: searchFieldsObject.field,
-            title: searchFieldsObject.title
-          };
-        })
-      });
-
-      config.push({
-        name: 'Document',
-        data: searchFields.filter(function(searchFieldsObject) {
-          return searchFieldsObject.search && searchFieldsObject.sort.sortType === 'document';
-        }).map(function(searchFieldsObject) {
-          return {
-            key: searchFieldsObject.key,
-            field: searchFieldsObject.field,
-            title: searchFieldsObject.title
-          };
-        })
+      _.keys(groups).sort().forEach(function(group) {
+        config.push({
+          name: group,
+          data: groups[group].map(function(searchFieldsObject) {
+            return {
+              key: searchFieldsObject.key,
+              field: searchFieldsObject.field,
+              title: searchFieldsObject.title,
+              enableNetworkExpansion: (searchFieldsObject.link === 'entity')
+            };
+          })
+        });
       });
 
       return config;
