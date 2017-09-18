@@ -258,7 +258,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return undefined;
     }
 
-    var rank = _.get(result, '_score');
+    // var rank = _.get(result, '_score');
+    var time = commonTransforms.getFormattedDate(_.get(result, 'timestamp_crawl'));
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
     var title = getTitleOrDescription('title', searchFields, result, '_source.content_extraction.title.text', highlightMapping);
@@ -267,7 +268,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var documentObject = {
       id: id,
       url: _.get(result, '_source.url'),
-      rank: rank ? rank.toFixed(2) : rank,
+      // rank: rank ? rank.toFixed(2) : rank,
+      time: time,
       type: 'ad',
       icon: '',
       link: commonTransforms.getLink(id, 'ad'),

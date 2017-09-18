@@ -168,7 +168,7 @@ limitations under the License.
       filters="[]"
       page-size="1"
       properties-ready="{{processRequest}}"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "timestamp_crawl", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.document]]"
       error="{{documentError}}"
@@ -204,7 +204,7 @@ limitations under the License.
       page-size="25"
       sort-field="[[sortField]]"
       sort-order="desc"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "timestamp_crawl", "tld", "url"]'
       loading="{{revisionLoading}}"
       last-error="{{revisionError}}"
       results="{{revisionResults}}"
@@ -237,7 +237,7 @@ limitations under the License.
       filters="[[buildArray(notThisDocFilter)]]"
       page="{{moreLikeThisPage}}"
       page-size="25"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "timestamp_crawl", "tld", "url"]'
       loading="{{moreLikeThisLoading}}"
       last-error="{{moreLikeThisError}}"
       results="{{moreLikeThisResults}}"
@@ -290,6 +290,7 @@ limitations under the License.
                   [[document.title]]
                 </div>
                 <div class="page-detail">
+                  Crawl Date [[document.time]]
                 </div>
               </div>
 
@@ -428,7 +429,7 @@ limitations under the License.
               </div>
 
               <div class="flex layout vertical">
-                <section-container>
+                <section-container class="details-section">
                   <build-and-run-query
                     fields='"doc_id"'
                     values="[[document.id]]"
@@ -450,7 +451,6 @@ limitations under the License.
                     open
                     cached-page="[[cachedPage]]"
                     icon="[[document.icon]]"
-                    link="[[document.link]]"
                     result-id="[[document.id]]"
                     style-class="[[document.styleClass]]"
                     tags="[[document.tags]]"
