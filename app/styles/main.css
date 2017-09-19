@@ -21,8 +21,3 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
 }
-
-/* Reduce the z-index for the leaflet controls so that they do not overlap the other dialogs. */
-.leaflet-top, .leaflet-bottom {
-  z-index: 100 !important;
-}
