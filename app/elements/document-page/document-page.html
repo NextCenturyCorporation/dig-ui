@@ -31,7 +31,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../../bower_components/json-combine/json-combine.html">
 <link rel="import" href="../../bower_components/loading-spinner/loading-spinner.html">
-<link rel="import" href="../../bower_components/lodash-import/lodash.html">
 <link rel="import" href="../../bower_components/log-creator/log-creator.html">
 <link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
@@ -75,31 +74,50 @@ limitations under the License.
       last-response="{{serverConfig}}">
     </iron-ajax>
 
-    <iron-ajax
-      auto="[[exists(configHeader)]]"
-      handle-as="json"
-      headers="[[configHeader]]"
-      url="[[concat(serverConfig.configEndpoint, domain)]]"
-      with-credentials
-      loading="{{clientConfigLoading}}"
-      last-error="{{clientConfigError}}"
-      last-response="{{clientConfig}}">
-    </iron-ajax>
+    <template is="dom-if" if="[[serverConfig.overrideConfig]]">
+      <transform-functions
+        client-config="[[serverConfig.overrideConfig]]"
+        domain="[[domain]]"
+        server-config="[[serverConfig]]"
+        es-config="{{esConfig}}"
+        transforms="{{transforms}}">
+      </transform-functions>
 
-    <transform-functions
-      client-config="[[clientConfig]]"
-      domain="[[domain]]"
-      server-config="[[serverConfig]]"
-      es-config="{{esConfig}}"
-      transforms="{{transforms}}">
-    </transform-functions>
+      <json-combine
+        data-in1="[[serverConfig.overrideConfig]]"
+        data-in2="{}"
+        data-out="{{clientConfigFields}}"
+        combine-function="[[transforms.config.fields]]">
+      </json-combine>
+    </template>
 
-    <json-combine
-      data-in1="[[clientConfig]]"
-      data-in2="{}"
-      data-out="{{clientConfigFields}}"
-      combine-function="[[transforms.config.fields]]">
-    </json-combine>
+    <template is="dom-if" if="[[!serverConfig.overrideConfig]]">
+      <iron-ajax
+        auto="[[exists(configHeader)]]"
+        handle-as="json"
+        headers="[[configHeader]]"
+        url="[[concat(serverConfig.configEndpoint, domain)]]"
+        with-credentials
+        loading="{{clientConfigLoading}}"
+        last-error="{{clientConfigError}}"
+        last-response="{{clientConfig}}">
+      </iron-ajax>
+
+      <transform-functions
+        client-config="[[clientConfig]]"
+        domain="[[domain]]"
+        server-config="[[serverConfig]]"
+        es-config="{{esConfig}}"
+        transforms="{{transforms}}">
+      </transform-functions>
+
+      <json-combine
+        data-in1="[[clientConfig]]"
+        data-in2="{}"
+        data-out="{{clientConfigFields}}"
+        combine-function="[[transforms.config.fields]]">
+      </json-combine>
+    </template>
 
     <json-combine
       data-in1="[[clientConfigFields]]"
@@ -169,7 +187,7 @@ limitations under the License.
       filters="[]"
       page-size="1"
       properties-ready="{{processRequest}}"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.document]]"
       error="{{documentError}}"
@@ -205,7 +223,7 @@ limitations under the License.
       page-size="25"
       sort-field="[[sortField]]"
       sort-order="desc"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       loading="{{revisionLoading}}"
       last-error="{{revisionError}}"
       results="{{revisionResults}}"
@@ -238,7 +256,7 @@ limitations under the License.
       filters="[[buildArray(notThisDocFilter)]]"
       page="{{moreLikeThisPage}}"
       page-size="25"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       loading="{{moreLikeThisLoading}}"
       last-error="{{moreLikeThisError}}"
       results="{{moreLikeThisResults}}"
@@ -281,14 +299,17 @@ limitations under the License.
 
       <template is="dom-if" if="[[document.id]]">
         <paper-header-panel class="flex" mode="waterfall-tall">
-          <div slot="header" class="paper-header layout vertical">
+          <div slot="header" class="page-header layout vertical">
             <div class="layout horizontal center">
-              <div class="iron-icon-huge">
+              <div class="iron-icon-header">
                 <iron-icon class="grey" icon="icons:assignment"></iron-icon>
               </div>
-              <div class="page-name flex">
-                <div class="paper-font-headline">
+              <div class="page-info flex">
+                <div class="page-name">
                   [[document.title]]
+                </div>
+                <div class="page-detail">
+                  Crawl Date [[document.time]]
                 </div>
               </div>
 
@@ -342,22 +363,6 @@ limitations under the License.
                         extractions="[[item.data]]">
                       </detail-subsection>
                     </section-and-map>
-                  </template>
-
-                  <template is="dom-if" if="[[isImage(item.config.type)]]">
-                    <section-and-title
-                      icon="[[item.config.icon]]"
-                      style-class="[[item.config.styleClass]]"
-                      transform-config="[[getSectionTitleTransformConfig(item.config, item.data.length)]]"
-                      transform-function="[[getSectionTitleTransformFunction]]"
-                      data="[[item.data]]">
-
-                      <image-gallery
-                        small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-                        large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                        images="[[item.data]]">
-                      </image-gallery>
-                    </section-and-title>
                   </template>
 
                   <template is="dom-if" if="[[isOther(item.config.type)]]">
@@ -421,13 +426,15 @@ limitations under the License.
                     index-types="[[esConfig.esType]]"
                     search-fields="[[searchFields]]"
                     source-include='["raw_content"]'
+                    small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                    large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
                     tag-manager="[[tagManager]]">
                   </result-list>
                 </section-container>
               </div>
 
               <div class="flex layout vertical">
-                <section-container>
+                <section-container class="details-section">
                   <build-and-run-query
                     fields='"doc_id"'
                     values="[[document.id]]"
@@ -449,7 +456,6 @@ limitations under the License.
                     open
                     cached-page="[[cachedPage]]"
                     icon="[[document.icon]]"
-                    link="[[document.link]]"
                     result-id="[[document.id]]"
                     style-class="[[document.styleClass]]"
                     tags="[[document.tags]]"
@@ -511,6 +517,8 @@ limitations under the License.
                     index-types="[[esConfig.esType]]"
                     search-fields="[[searchFields]]"
                     source-include='["raw_content"]'
+                    small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                    large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
                     tag-manager="[[tagManager]]">
                   </result-list>
                 </section-container>
@@ -527,7 +535,7 @@ limitations under the License.
     'use strict';
 
     Polymer({
-      /* globals _ */
+      /* globals DigBehaviors */
       is: 'document-page',
 
       behaviors: [
@@ -536,7 +544,8 @@ limitations under the License.
 
       properties: {
         blurImages: {
-          type: Boolean
+          type: Boolean,
+          value: true
         },
 
         cachedPage: {
@@ -745,9 +754,16 @@ limitations under the License.
 
       findDomain: function(parameters, serverConfig) {
         if(parameters && serverConfig) {
-          return parameters.domain || parameters.project || serverConfig.defaultProject;
+          /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+          var override = serverConfig.overrideConfig ? serverConfig.overrideConfig.project_name : '';
+          /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+          return override || parameters.domain || parameters.project || serverConfig.defaultProject;
         }
         return undefined;
+      },
+
+      getBlurStyleClass: function(blur, large) {
+        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
       },
 
       getUrlParameters: function() {
@@ -762,16 +778,12 @@ limitations under the License.
         return parameters;
       },
 
-      isImage: function(type) {
-        return type === 'image';
-      },
-
       isLocation: function(type) {
         return type === 'location';
       },
 
       isOther: function(type) {
-        return !this.isImage(type) && !this.isLocation(type);
+        return type !== 'image' && type !== 'location';
       },
 
       /******** VISUALIZATIONS ********/

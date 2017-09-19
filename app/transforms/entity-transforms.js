@@ -76,7 +76,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
 
     if(config.type === 'image') {
-      extraction.source = item.key;
+      extraction.downloadSource = (esConfig ? '/' + esConfig.downloadImageUrl || '' : '') + '/' + encodeURIComponent(item.key);
+      extraction.source = (esConfig ? esConfig.imageUrlPrefix || '' : '') + item.key;
     }
 
     extraction.textAndCount = extraction.text + (extraction.count ? (' (' + extraction.count + ')') : '');
@@ -258,7 +259,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return undefined;
     }
 
-    var rank = _.get(result, '_score');
+    // var rank = _.get(result, '_score');
+    var time = commonTransforms.getFormattedDate(_.get(result, 'timestamp_crawl'));
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
     var title = getTitleOrDescription('title', searchFields, result, '_source.content_extraction.title.text', highlightMapping);
@@ -267,7 +269,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var documentObject = {
       id: id,
       url: _.get(result, '_source.url'),
-      rank: rank ? rank.toFixed(2) : rank,
+      // rank: rank ? rank.toFixed(2) : rank,
+      time: time,
       type: 'ad',
       icon: '',
       link: commonTransforms.getLink(id, 'ad'),
@@ -330,16 +333,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       text: documentObject.description
     });
 
-    // TODO Will the images be moved from _source.objects to _source.knowledge_graph?
-    var images = _.get(result, '_source.objects', []);
-    documentObject.images = images.map(function(image) {
+    documentObject.images = getExtractionsFromList(_.get(result, '_source.objects', []).map(function(object) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-      var source = image.obj_stored_url;
+      var source = object.obj_stored_url;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
       return {
-        source: (esConfig ? esConfig.imagePrefix || '' : '') + source
+        key: source
       };
-    });
+    }), esConfig.imageField || {});
 
     return documentObject;
   }
@@ -445,31 +446,31 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Object}
      */
     documentInfo: function(document, searchFields) {
-      var searchKeys = searchFields.map(function(searchFieldsObject) {
-        return searchFieldsObject.key;
+      if(!document || !document.headerExtractions || !document.detailExtractions) {
+        return undefined;
+      }
+
+      var resultFields = searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.result === 'header' || searchFieldsObject.result === 'detail';
       });
 
-      var headerExtractions = (document.headerExtractions || []).filter(function(extraction) {
-        return extraction.key !== '_domain';
-      }).map(function(extraction) {
-        var index = searchKeys.indexOf(extraction.key);
-        var config = index >= 0 ? searchFields[index] : {};
-        return {
-          config: config,
+      return resultFields.reduce(function(info, searchFieldsObject) {
+        var headerIndex = _.findIndex(document.headerExtractions, function(extraction) {
+          return extraction.key === searchFieldsObject.key;
+        });
+        var detailIndex = _.findIndex(document.detailExtractions, function(extraction) {
+          return extraction.key === searchFieldsObject.key;
+        });
+
+        var extraction = (headerIndex >= 0 ? document.headerExtractions[headerIndex] : (detailIndex >= 0 ? document.detailExtractions[detailIndex] : {}));
+
+        info.push({
+          config: searchFieldsObject,
           data: extraction.data
-        };
-      });
+        });
 
-      var detailExtractions = (document.detailExtractions || []).map(function(extraction) {
-        var index = searchKeys.indexOf(extraction.key);
-        var config = index >= 0 ? searchFields[index] : {};
-        return {
-          config: config,
-          data: extraction.data
-        };
-      });
-
-      return headerExtractions.concat(detailExtractions);
+        return info;
+      }, []);
     },
 
     /**

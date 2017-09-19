@@ -113,7 +113,7 @@ var searchTransforms = (function(_) {
       });
 
       _.keys(predicates).forEach(function(predicate) {
-        for(var i = 1; i <= predicates[predicate].number; ++i) {
+        for(var i = 1; i <= predicates[predicate].length; ++i) {
           // If network expansion is disabled...
           if(!networkExpansionParameters) {
             template.clauses.push({

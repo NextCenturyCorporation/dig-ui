@@ -30,12 +30,16 @@ limitations under the License.
       }
 
       .section-title-icon {
-        /* Same height as paper-font-title */
-        --iron-icon-height: 28px;
-        --iron-icon-width: 28px;
+        /* Same height as section-title */
+        --iron-icon-height: 30px;
+        --iron-icon-width: 30px;
+        min-width: 30px;
       }
 
-      .paper-font-title {
+      .section-title-text {
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 30px;
         margin-left: 10px;
         margin-right: 10px;
         /* Needed to fix flexbox layout issues in newer browsers. */
@@ -165,7 +169,7 @@ limitations under the License.
         combine-function="[[transformFunction]]">
       </json-combine>
 
-      <div class="paper-font-title flex">[[sectionTitle]]</div>
+      <div class="section-title-text flex">[[sectionTitle]]</div>
 
       <template is="dom-if" if="[[_showClipboardElement(showCopy, data)]]">
         <div class="layout horizontal center copy-button" id="clipboard" title$="Copy [[copyType]] to Clipboard" data-clipboard-text$="[[_getClipboardText(data, textFunction)]]">

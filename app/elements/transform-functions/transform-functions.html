@@ -58,6 +58,23 @@ limitations under the License.
         }
       },
 
+      _createImageFieldConfig: function() {
+        return {
+          key: 'image',
+          color: 'grey',
+          facets: true,
+          field: 'objects.obj_stored_url',
+          group: 'Image',
+          icon: 'image:photo',
+          link: 'entity',
+          result: 'image',
+          search: true,
+          title: 'Image',
+          titlePlural: 'Images',
+          type: 'image'
+        };
+      },
+
       _initializeEsConfig: function(domain, clientConfig, serverConfig) {
         if(!domain || !clientConfig || !serverConfig) {
           return undefined;
@@ -65,9 +82,11 @@ limitations under the License.
 
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var esConfig = {
+          downloadImageUrl: serverConfig.downloadImageUrl || '',
           esIndex: (clientConfig.index && serverConfig.databaseType ? clientConfig.index[serverConfig.databaseType] : undefined),
           esType: clientConfig.root_name,
-          imagePrefix: clientConfig.image_prefix || 'http://memex-summer2017-domain1.s3.amazonaws.com/'
+          imageField: this._createImageFieldConfig(),
+          imageUrlPrefix: clientConfig.image_prefix || serverConfig.imageUrlPrefix || ''
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
@@ -109,7 +128,7 @@ limitations under the License.
 
         var transforms = {};
 
-        transforms.config = configTransforms(_, util);
+        transforms.config = configTransforms(_, util, esConfig);
         transforms.entity = entityTransforms(_, util, esConfig);
         transforms.export = exportTransforms(_);
         transforms.search = searchTransforms(_);

@@ -29,52 +29,44 @@ limitations under the License.
 
       /* Entity page header */
 
-      .paper-header {
+      .page-header {
+        min-height: 30px;
         padding: 20px;
         transition: height 0.2s;
       }
 
-      .paper-font-caption {
-        color: var(--disabled-text-color);
-        text-transform: uppercase;
-      }
-
-      .paper-header .paper-font-headline {
-        font-weight: 500;
-        transition: all 0.2s;
-        word-break: break-word;
-      }
-
-      .paper-header .paper-font-subhead {
-        transition: font-size 0.2s;
-      }
-
-      .paper-header .page-name {
+      .page-header .page-info {
         padding: 0 10px;
         transition: padding 0.2s;
       }
 
-      .paper-header .paper-font-subhead {
-        color: var(--secondary-text-color);
+      .page-header .page-name {
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 30px;
+        transition: all 0.2s;
+        word-break: break-word;
       }
 
-      .paper-header selected-facets-display {
+      .page-header .page-detail {
+        color: var(--secondary-text-color);
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 20px;
+        transition: font-size 0.2s;
+      }
+
+      .page-header selected-facets-display {
         --selected-facet-item-style-mixin: {
           margin-top: 10px;
         };
       }
 
-      .iron-icon-big iron-icon {
-        /* Same height as paper-font-title */
-        --iron-icon-height: 28px;
-        --iron-icon-width: 28px;
-      }
-
-      .iron-icon-huge iron-icon {
-        /* Same height as paper-font-headline */
-        --iron-icon-height: 32px;
-        --iron-icon-width: 32px;
-        min-width: 32px;
+      .iron-icon-header iron-icon {
+        /* Same height as page-header */
+        --iron-icon-height: 30px;
+        --iron-icon-width: 30px;
+        min-width: 30px;
       }
 
       .image-section {
@@ -90,6 +82,10 @@ limitations under the License.
 
       .image-section iron-image ::content img {
         max-height: 400px;
+      }
+
+      .details-section {
+        --section-container-padding: 0;
       }
 
       /* Other */
@@ -173,7 +169,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .paper-header .page-name {
+        .page-header .page-info {
           @apply --layout-flex;
         }
       }
@@ -182,7 +178,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .paper-header .page-name {
+        .page-header .page-info {
           @apply --layout-flex;
         }
       }
@@ -191,7 +187,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .paper-header .page-name {
+        .page-header .page-info {
           @apply --layout-flex;
         }
       }
@@ -200,7 +196,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .paper-header .page-name {
+        .page-header .page-info {
           @apply --layout-flex;
         }
       }
@@ -209,7 +205,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .paper-header .page-name {
+        .page-header .page-info {
           @apply --layout-flex;
         }
       }
@@ -218,7 +214,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .paper-header .page-name {
+        .page-header .page-info {
           @apply --layout-flex;
         }
       }

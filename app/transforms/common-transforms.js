@@ -22,7 +22,7 @@ var commonTransforms = (function(_, moment, domain) {
    * Returns the formatted string for the given date number/string in UTC format.
    */
   function getFormattedDate(date) {
-    return date ? moment.utc(new Date(date)).format('MMM D, YYYY') : 'No Date';
+    return date ? moment.utc(new Date(date)).format('MMM D, YYYY') : 'None';
   }
 
   /**
@@ -73,7 +73,7 @@ var commonTransforms = (function(_, moment, domain) {
     var country = keySplit.length > 2 ? keySplit[2] : undefined;
     var longitude = keySplit.length > 3 ? keySplit[3] : undefined;
     var latitude = keySplit.length > 4 ? keySplit[4] : undefined;
-    var text = city ? (city + (state ? (', ' + state) : '')) : 'No Location';
+    var text = city ? (city + (state ? (', ' + state) : '')) : 'None';
 
     return {
       city: city,
