@@ -58,7 +58,7 @@
     "pdfmake": "^0.1.25",
     "polymer": "Polymer/polymer#^2.0.2",
     "query-transformer": "DigElements/query-transformer#2.1.0",
-    "result-list": "DigElements/result-list#2.2.3",
+    "result-list": "DigElements/result-list#2.2.4",
     "search-fields-dialog": "DigElements/search-fields-dialog#2.2.0",
     "selected-facets-display": "DigElements/selected-facets-display#2.0.2",
     "state-manager": "DigElements/state-manager#2.1.1",

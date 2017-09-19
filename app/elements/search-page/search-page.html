@@ -56,6 +56,40 @@ limitations under the License.
         display: block;
         @apply --layout-fullbleed;
       }
+
+      #searchResultsImages {
+        position: absolute;
+        top: 115px;
+        bottom: 0px;
+        left: 0;
+        right: 0;
+        overflow-y: scroll;
+      }
+
+      #searchResultsTabBar {
+        position: absolute;
+        top: 90px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 25px;
+      }
+
+      paper-tab {
+        color: var(--secondary-text-color);
+        font-weight: 600;
+        height: 25px;
+      }
+
+      paper-tab:hover {
+        background-color: rgba(0,0,0,0.05);
+        color: var(--primary-text-color);
+      }
+
+      paper-tab.iron-selected {
+        background-color: rgba(0,0,0,0.1);
+        color: var(--primary-text-color);
+      }
     </style>
 
     <iron-ajax
@@ -369,7 +403,8 @@ limitations under the License.
                 </template>
 
                 <template is="dom-if" if="[[searchTotal]]">
-                  <div class="note">Please note that only the top 10 extractions of each type are shown in the result list.</div>
+                  <div class="note" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  Please note that only the top 10 extractions of each type are shown in the result list.</div>
                 </template>
               </div>
 
@@ -389,27 +424,47 @@ limitations under the License.
               </export-button>
             </div>
 
-            <result-list
-              id="searchResults"
-              new-tab
-              text-property="title"
-              query-results="[[documents]]"
-              total-results="[[searchTotal]]"
-              shown-results="{{documentsShown}}"
-              page="{{searchPage}}"
-              page-size="25"
-              loading="[[searchLoading]]"
-              header="{{searchTitle}}"
-              cache-transform="[[transforms.entity.cache]]"
-              client="[[esClient]]"
-              index-name="[[esConfig.esIndex]]"
-              index-types="[[esConfig.esType]]"
-              search-fields="[[searchFields]]"
-              source-include='["raw_content"]'
-              small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-              large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-              tag-manager="[[tagManager]]">
-            </result-list>
+            <template is="dom-if" if="[[documentsShown.length]]">
+              <paper-material>
+                <paper-tabs class="flex" no-bar no-ink selected="{{selectedSearchTab}}">
+                  <paper-tab>Document Results</paper-tab>
+                  <paper-tab>Image Results</paper-tab>
+                </paper-tabs>
+              </paper-material>
+            </template>
+
+            <template is="dom-if" if="[[_equals(0, selectedSearchTab)]]">
+              <result-list
+                id="searchResults"
+                new-tab
+                text-property="title"
+                query-results="[[documents]]"
+                total-results="[[searchTotal]]"
+                shown-results="{{documentsShown}}"
+                page="{{searchPage}}"
+                page-size="25"
+                loading="[[searchLoading]]"
+                header="{{searchTitle}}"
+                cache-transform="[[transforms.entity.cache]]"
+                client="[[esClient]]"
+                index-name="[[esConfig.esIndex]]"
+                index-types="[[esConfig.esType]]"
+                search-fields="[[searchFields]]"
+                source-include='["raw_content"]'
+                small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                tag-manager="[[tagManager]]">
+              </result-list>
+            </template>
+
+            <template is="dom-if" if="[[_equals(1, selectedSearchTab)]]">
+              <image-gallery
+                id="searchResultsImages"
+                images="[[shownImages]]"
+                small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]">
+              </image-gallery>
+            </template>
           </template>
         </paper-header-panel>
       </paper-drawer-panel>
@@ -553,8 +608,19 @@ limitations under the License.
           type: Number
         },
 
+        selectedSearchTab: {
+          notify: true,
+          type: Number,
+          value: 0
+        },
+
         serverConfig: {
           type: Object
+        },
+
+        shownImages: {
+          computed: 'getShownImages(documentsShown)',
+          type: Array
         },
 
         stateHistory: {
@@ -623,6 +689,18 @@ limitations under the License.
         };
       },
 
+      /**
+       * Returns whether the two arguments are equal.
+       *
+       * @param {Number} one
+       * @param {Number} two
+       * @return {Boolean}
+       * @private
+       */
+      _equals: function(one, two) {
+        return one === two;
+      },
+
       exists: function(object) {
         return typeof object !== 'undefined';
       },
@@ -639,6 +717,16 @@ limitations under the License.
 
       getBlurStyleClass: function(blur, large) {
         return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+      },
+
+      getShownImages: function(documents) {
+        var images = [];
+        documents.forEach( function(document) {
+          document['images'].forEach( function(image) {
+            images.push(image);
+          });
+        });
+        return images;
       },
 
       getUrlParameters: function() {
