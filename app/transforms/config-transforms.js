@@ -17,7 +17,7 @@
 /* exported configTransforms */
 /* jshint camelcase:false */
 
-var configTransforms = (function(_, commonTransforms) {
+var configTransforms = (function(_, commonTransforms, esConfig) {
   function createDateProperties(searchFieldsObject) {
     return {
       start: {
@@ -256,20 +256,6 @@ var configTransforms = (function(_, commonTransforms) {
     },
 
     /**
-     * Returns the fields for which to show image galleries in the entity pages.
-     *
-     * @param {Object} searchFields
-     * @return {Array}
-     */
-    imageFields: function(searchFields) {
-      return searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'image' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
-      }).map(function(searchFieldsObject) {
-        return _.cloneDeep(searchFieldsObject);
-      });
-    },
-
-    /**
      * Returns the fields for which to show maps in the entity pages.
      *
      * @param {Object} searchFields
@@ -358,8 +344,6 @@ var configTransforms = (function(_, commonTransforms) {
         // Sort for the facets and the search fields dialog.
         if(searchFieldsObject.type === 'date') {
           searchFieldsObject.sort = 5;
-        } else if(searchFieldsObject.type === 'image') {
-          searchFieldsObject.sort = 6;
         } else if(searchFieldsObject.result === 'title') {
           searchFieldsObject.sort = 2;
           searchFieldsObject.group = searchFieldsObject.group || 'Document';
@@ -388,22 +372,8 @@ var configTransforms = (function(_, commonTransforms) {
         return a.title > b.title ? 1 : (a.title < b.title ? -1 : 0);
       });
 
-      // Add image field.
-      searchFields.push({
-        key: 'image',
-        color: 'grey',
-        facets: true,
-        field: 'objects.obj_stored_url',
-        group: 'Image',
-        icon: 'image:photo',
-        link: 'entity',
-        queryField: 'objects.obj_stored_url',
-        result: 'image',
-        search: true,
-        title: 'Image',
-        titlePlural: 'Images',
-        type: 'image'
-      });
+      // Add the image field to show in the facets.
+      searchFields.push(esConfig.imageField);
 
       return searchFields;
     },

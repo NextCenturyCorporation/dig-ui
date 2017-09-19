@@ -28,9 +28,9 @@
     "highlighted-text": "DigElements/highlighted-text#2.0.1",
     "horizontal-bar": "DigElements/horizontal-bar#2.2.0",
     "icon-label": "DigElements/icon-label#2.1.0",
-    "image-gallery": "DigElements/image-gallery#2.0.0",
+    "image-gallery": "DigElements/image-gallery#2.0.1",
     "image-query-and-display": "DigElements/image-query-and-display#2.1.1",
-    "image-thumbnail": "DigElements/image-thumbnail#2.0.0",
+    "image-thumbnail": "DigElements/image-thumbnail#2.0.1",
     "iron-ajax": "PolymerElements/iron-ajax#^2.0.0",
     "iron-dropdown": "PolymerElements/iron-dropdown#^2.0.0",
     "iron-flex-layout": "PolymerElements/iron-flex-layout#^2.0.0",
@@ -58,7 +58,7 @@
     "pdfmake": "^0.1.25",
     "polymer": "Polymer/polymer#^2.0.2",
     "query-transformer": "DigElements/query-transformer#2.1.0",
-    "result-list": "DigElements/result-list#2.2.1",
+    "result-list": "DigElements/result-list#2.2.3",
     "search-fields-dialog": "DigElements/search-fields-dialog#2.2.0",
     "selected-facets-display": "DigElements/selected-facets-display#2.0.2",
     "sparkline-list": "DigElements/sparkline-list#^2.0.1",
@@ -79,6 +79,7 @@
     "highlighted-text": "2.0.1",
     "horizontal-bar": "2.2.0",
     "icon-label": "2.1.0",
+    "image-gallery": "2.0.1",
     "lodash": "~4.17.2",
     "styled-dialog": "2.1.0"
   }

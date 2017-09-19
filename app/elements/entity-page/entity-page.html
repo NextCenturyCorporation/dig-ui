@@ -74,31 +74,50 @@ limitations under the License.
       last-response="{{serverConfig}}">
     </iron-ajax>
 
-    <iron-ajax
-      auto="[[exists(configHeader)]]"
-      handle-as="json"
-      headers="[[configHeader]]"
-      url="[[concat(serverConfig.configEndpoint, domain)]]"
-      with-credentials
-      loading="{{clientConfigLoading}}"
-      last-error="{{clientConfigError}}"
-      last-response="{{clientConfig}}">
-    </iron-ajax>
+    <template is="dom-if" if="[[serverConfig.overrideConfig]]">
+      <transform-functions
+        client-config="[[serverConfig.overrideConfig]]"
+        domain="[[domain]]"
+        server-config="[[serverConfig]]"
+        es-config="{{esConfig}}"
+        transforms="{{transforms}}">
+      </transform-functions>
 
-    <transform-functions
-      client-config="[[clientConfig]]"
-      domain="[[domain]]"
-      server-config="[[serverConfig]]"
-      es-config="{{esConfig}}"
-      transforms="{{transforms}}">
-    </transform-functions>
+      <json-combine
+        data-in1="[[serverConfig.overrideConfig]]"
+        data-in2="{}"
+        data-out="{{clientConfigFields}}"
+        combine-function="[[transforms.config.fields]]">
+      </json-combine>
+    </template>
 
-    <json-combine
-      data-in1="[[clientConfig]]"
-      data-in2="{}"
-      data-out="{{clientConfigFields}}"
-      combine-function="[[transforms.config.fields]]">
-    </json-combine>
+    <template is="dom-if" if="[[!serverConfig.overrideConfig]]">
+      <iron-ajax
+        auto="[[exists(configHeader)]]"
+        handle-as="json"
+        headers="[[configHeader]]"
+        url="[[concat(serverConfig.configEndpoint, domain)]]"
+        with-credentials
+        loading="{{clientConfigLoading}}"
+        last-error="{{clientConfigError}}"
+        last-response="{{clientConfig}}">
+      </iron-ajax>
+
+      <transform-functions
+        client-config="[[clientConfig]]"
+        domain="[[domain]]"
+        server-config="[[serverConfig]]"
+        es-config="{{esConfig}}"
+        transforms="{{transforms}}">
+      </transform-functions>
+
+      <json-combine
+        data-in1="[[clientConfig]]"
+        data-in2="{}"
+        data-out="{{clientConfigFields}}"
+        combine-function="[[transforms.config.fields]]">
+      </json-combine>
+    </template>
 
     <json-combine
       data-in1="[[clientConfigFields]]"
@@ -161,13 +180,6 @@ limitations under the License.
       data-in2="{}"
       data-out="{{histogramFields}}"
       combine-function="[[transforms.config.histogramFields]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{imageFields}}"
-      combine-function="[[transforms.config.imageFields]]">
     </json-combine>
 
     <json-combine
@@ -249,7 +261,7 @@ limitations under the License.
       page-size="25"
       properties-ready="{{processRequest}}"
       sort-field="[[sortField]]"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.documents]]"
       error="{{searchError}}"
@@ -472,35 +484,34 @@ limitations under the License.
                   </template>
                 </template>
 
-                <template is="dom-repeat" items="[[imageFields]]">
+                <template is="dom-if" if="[[esConfig.imageField]]">
                   <section-and-title
-                    icon="[[item.icon]]"
-                    style-class="[[item.styleClass]]"
-                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item, item.imageData.length)]]"
+                    icon="[[esConfig.imageField.icon]]"
+                    style-class="[[esConfig.imageField.styleClass]]"
+                    transform-config="[[getSectionTitleTransformConfig(pageConfig, esConfig.imageField, images.length)]]"
                     transform-function="[[getSectionTitleTransformFunction]]"
-                    data="[[item.loadedImageData]]">
+                    data="[[imagesLoaded]]">
 
                     <image-query-and-display
-                      aggregation-field="[[item.field]]"
-                      aggregation-name="[[item.key]]"
+                      aggregation-field="[[esConfig.imageField.field]]"
+                      aggregation-name="[[esConfig.imageField.key]]"
                       client="[[esClient]]"
                       filter-list="[[filterList]]"
-                      header-data-name="[[item.title]]"
+                      header-data-name="[[esConfig.imageField.title]]"
                       header-counts-name="Results"
                       header-entity-name="[[pageName]]"
-                      image-id-property="source"
                       index-name="[[esConfig.esIndex]]"
                       index-types="[[esConfig.esType]]"
                       properties-ready="[[processRequest]]"
                       query-fields="[[pageConfig.field]]"
                       query-values="[[pageId]]"
-                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
+                      transform-config="[[createExtractionsConfig(esConfig.imageField, pageConfig, pageId)]]"
                       transform-function="[[transforms.entity.extractions]]"
                       small-image-style-class="[[getBlurStyleClass(blurImages)]]"
                       large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                      images="{{item.imageData}}"
-                      loaded-images="{{item.loadedImageData}}"
-                      selected-property="[[item.key]]"
+                      images="{{images}}"
+                      loaded-images="{{imagesLoaded}}"
+                      selected-property="[[esConfig.imageField.key]]"
                       selected="{{filterCollection}}"
                       show-checkboxes>
                     </image-query-and-display>
@@ -550,7 +561,7 @@ limitations under the License.
                         aggregations="[[buildArray(item.dateAggregation)]]"
                         filters="[[filterList]]"
                         page-size="0"
-                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "timestamp_crawl", "tld", "url"]'
+                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
                         source-exclude='["knowledge_graph.*.provenance"]'
                         transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
                         transform-function="[[transforms.entity.histogram]]"
@@ -648,6 +659,8 @@ limitations under the License.
                     index-types="[[esConfig.esType]]"
                     search-fields="[[searchFields]]"
                     source-include='["raw_content"]'
+                    small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                    large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
                     tag-manager="[[tagManager]]">
                   </result-list>
                 </section-container>
@@ -680,7 +693,8 @@ limitations under the License.
         },
 
         blurImages: {
-          type: Boolean
+          type: Boolean,
+          value: true
         },
 
         clientConfig: {
@@ -771,7 +785,11 @@ limitations under the License.
           type: Array
         },
 
-        imageFields: {
+        images: {
+          type: Array
+        },
+
+        imagesLoaded: {
           type: Array
         },
 
@@ -917,9 +935,16 @@ limitations under the License.
 
       findDomain: function(parameters, serverConfig) {
         if(parameters && serverConfig) {
-          return parameters.domain || parameters.project || serverConfig.defaultProject;
+          /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+          var override = serverConfig.overrideConfig ? serverConfig.overrideConfig.project_name : '';
+          /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+          return override || parameters.domain || parameters.project || serverConfig.defaultProject;
         }
         return undefined;
+      },
+
+      getBlurStyleClass: function(blur, large) {
+        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
       },
 
       getUrlParameters: function() {
@@ -970,10 +995,6 @@ limitations under the License.
 
       getBarTimelineSectionTitle: function(entity, date) {
         return (entity && date) ? (entity + ' by ' + date + ' Timeline') : undefined;
-      },
-
-      getBlurStyleClass: function(blur, large) {
-        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
       },
 
       createToggleTimelineListener: function(index) {
