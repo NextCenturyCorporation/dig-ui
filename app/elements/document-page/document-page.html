@@ -821,8 +821,8 @@ limitations under the License.
       },
 
       openDataInfoDialog: function() {
-        this.$.menuDropdown.close();
-        this.$.dataInfoDialog.open();
+        this.$$('#menuDropdown').close();
+        this.$$('#dataInfoDialog').open();
       },
 
       openNewTab: function() {
@@ -830,15 +830,15 @@ limitations under the License.
       },
 
       openTagsDialog: function() {
-        this.$.menuDropdown.close();
-        this.$.tagManager.openDialog();
+        this.$$('#menuDropdown').close();
+        this.$$('#tagManager').openDialog();
       },
 
       toggleMenu: function() {
-        if(this.$.menuDropdown.style.display === 'none') {
-          this.$.menuDropdown.open();
+        if(this.$$('#menuDropdown').style.display === 'none') {
+          this.$$('#menuDropdown').open();
         } else {
-          this.$.menuDropdown.close();
+          this.$$('#menuDropdown').close();
         }
       }
       /********************************/
