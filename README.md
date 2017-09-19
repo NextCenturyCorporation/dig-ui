@@ -48,6 +48,7 @@ IMAGE_SERVICE_HOST | The stringified object containing the location for the simi
 IMAGE_URL_PREFIX | The prefix added to the start of image URLs. | ''
 LOG_INDEX | The elasticsearch log index name. | 'dig-logs'
 LOG_TYPE | The elasticsearch log index type. | 'log'
+OVERRIDE_CONFIG | The stringified config object.  Overrides the domain/project and the config from the CONFIG_ENDPOINT | undefined
 OVERRIDE_SEARCH_ENDPOINT | The stringified object containing the project names mapped to the endpoints for the search and facets REST services.  Overrides the endpoints from the project configs. | undefined
 SEARCH_CONFIG | The stringified object containing locations for the search REST service (from project configs) mapped to replacement locations. | undefined
 STATE_INDEX | The elasticsearch state index name. | 'dig-states'

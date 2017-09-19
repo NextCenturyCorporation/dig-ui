@@ -49,6 +49,7 @@ module.exports = function(app) {
       imageUrlPrefix: serverConfig.imageUrlPrefix,
       logIndex: serverConfig.logIndex,
       logType: serverConfig.logType,
+      overrideConfig: serverConfig.overrideConfig,
       overrideSearchEndpoint: serverConfig.overrideSearchEndpoint,
       searchConfig: serverConfig.searchConfig,
       stateIndexName: serverConfig.stateIndexName,
