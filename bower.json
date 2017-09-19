@@ -59,8 +59,8 @@
     "polymer": "Polymer/polymer#^2.0.2",
     "query-transformer": "DigElements/query-transformer#2.1.0",
     "result-list": "DigElements/result-list#2.2.3",
-    "search-fields-dialog": "DigElements/search-fields-dialog#2.2.0",
-    "selected-facets-display": "DigElements/selected-facets-display#2.0.2",
+    "search-fields-dialog": "DigElements/search-fields-dialog#2.2.1",
+    "selected-facets-display": "DigElements/selected-facets-display#2.0.4",
     "state-manager": "DigElements/state-manager#2.1.1",
     "styled-dialog": "DigElements/styled-dialog#2.1.0",
     "tag-entity-buttons": "DigElements/tag-entity-buttons#2.0.1",
@@ -74,12 +74,14 @@
     "web-component-tester": "^6.1.5"
   },
   "resolutions": {
+    "breadbox-item": "2.0.4",
     "elastic-client-search": "2.1.0",
     "highlighted-text": "2.0.1",
     "horizontal-bar": "2.2.0",
     "icon-label": "2.1.0",
     "image-gallery": "2.0.1",
     "lodash": "~4.17.2",
+    "selected-facets-display": "2.0.4",
     "styled-dialog": "2.1.0"
   }
 }

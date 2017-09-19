@@ -281,7 +281,7 @@ limitations under the License.
         </div>
 
         <a slot="top" href="[[getUrlWithProject(domain)]]" style="color: #ffffff;">
-          <paper-icon-button icon="clear" title="Reset Page"></paper-icon-button>
+          <paper-icon-button icon="fa:times" title="Reset Page"></paper-icon-button>
         </a>
 
         <similar-image-search id="similarImageSearchDialog"
@@ -293,7 +293,7 @@ limitations under the License.
         </similar-image-search>
         <!-- TODO: add logger, update transform when we're ready to link to image entity pages -->
 
-        <paper-icon-button icon="menu" slot="top" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+        <paper-icon-button icon="fa:bars" slot="top" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
         <iron-dropdown id="menuDropdown" slot="top" horizontal-align="right" vertical-align="top" vertical-offset="60">
           <div slot="dropdown-content">
@@ -303,7 +303,7 @@ limitations under the License.
             </paper-icon-item>
 
             <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
-              <iron-icon slot="item-icon" icon="history" item-icon></iron-icon>
+              <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
               View Search State History
             </paper-icon-item>
 
@@ -313,17 +313,17 @@ limitations under the License.
             </paper-icon-item>
 
             <paper-icon-item title="Search on an Image URL or Uploaded Image" on-tap="openSimilarImageSearchDialog">
-              <iron-icon slot="item-icon" icon="image:compare" item-icon></iron-icon>
+              <iron-icon slot="item-icon" icon="fa:picture-o" item-icon></iron-icon>
               Similar Image Search
             </paper-icon-item>
 
             <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-              <iron-icon slot="item-icon" icon="open-in-new" item-icon></iron-icon>
+              <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
               Open a DIG Search Page in a New Tab
             </paper-icon-item>
 
             <paper-icon-item title="Contact DIG Support (dig-support@nextcentury.com)" on-tap="emailSupport">
-              <iron-icon slot="item-icon" icon="communication:contact-mail" item-icon></iron-icon>
+              <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
               Contact DIG Support
             </paper-icon-item>
           </div>
