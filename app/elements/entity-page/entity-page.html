@@ -509,7 +509,15 @@ limitations under the License.
               </div>
 
               <div class="flex layout vertical">
-                <template is="dom-repeat" items="[[histogramFields]]">
+
+                <json-combine
+                  data-in1="[[histogramFields]]"
+                  data-in2="{}"
+                  data-out="{{sortedHistogramFields}}"
+                  combine-function="[[mergeHistograms]]">
+                </json-combine>
+
+                <template is="dom-repeat" items="[[sortedHistogramFields]]">
                   <elastic-client-aggregation-builder
                     name="[[item.entity.key]]"
                     type="terms"
@@ -553,29 +561,51 @@ limitations under the License.
                     </template>
                   </template>
 
-                  <template is="dom-if" if="[[documents.length]]">      
-                    <template is="dom-if" if="[[item.histogramResults.length]]">
-                      <section-and-title
-                        error="[[item.histogramError]]"
-                        icon="editor:insert-chart"
-                        section-title="[[getBarTimelineSectionTitle(item.entity.title, item.date.title)]]">
+                  <section-and-title
+                    error="[[item.histogramError]]"
+                    icon="editor:insert-chart"
+                    section-title="[[item.entity.title]] Bar Timeline"
+                    style="word-break: break-word;">
 
-                        <zoomable-bar-chart timeline
-                          selected-property="[[item.date.key]]"
-                          selected="{{filterCollection}}"
-                          bar-property="date"
-                          label-property="text"
-                          stack-property="data"
-                          interval="week"
-                          data="[[item.histogramResults]]"
-                          default-label="Unidentified [[item.entity.titlePlural]]"
-                          source="Results"
-                          loading="[[item.histogramLoading]]"
-                          display-filter-text>
-                        </zoomable-bar-chart>
-                      </section-and-title>
+                    <template is="dom-if" if="[[!documents.length]]">
+                      <div>No Results</div>
                     </template>
-                  </template>
+
+                    <template is="dom-if" if="[[!item.histogramLoading]]">
+                      <template is="dom-if" if="[[!item.histogramResults.length]]">
+                        <div>No [[item.date.titlePlural]] and/or [[item.entity.titlePlural]]</div>
+                      </template>
+
+                      <template is="dom-if" if="[[item.histogramResults.length]]">
+                        <sparkline-list
+                          results="[[item.histogramResults]]"
+                          convert-function="[[makeConvertHistograms()]]"
+                          x-prop="formattedDate"
+                          y-prop="count">
+                        </sparkline-list>
+
+                        <div class="layout horizontal center-justified" style="margin: 10px 0;">
+                          <button-action text="[[getButtonText(item.shouldShowChart)]]" click-listener="[[createToggleTimelineListener(index)]]"></button-action>
+                        </div>
+
+                        <template is="dom-if" if="[[item.shouldShowChart]]">
+                          <zoomable-bar-chart timeline
+                            selected-property="[[item.date.key]]"
+                            selected="{{filterCollection}}"
+                            bar-property="date"
+                            label-property="text"
+                            stack-property="data"
+                            interval="week"
+                            data="[[item.histogramResults]]"
+                            default-label="Unidentified [[item.entity.titlePlural]]"
+                            source="Results"
+                            loading="[[item.histogramLoading]]"
+                            display-filter-text>
+                          </zoomable-bar-chart>
+                        </template>
+                      </template>
+                    </template>
+                  </section-and-title>
                 </template>
 
                 <section-container>
@@ -630,6 +660,9 @@ limitations under the License.
   <script>
   (function() {
     'use strict';
+    Array.prototype.flatMap = function(lambda) {
+      return Array.prototype.concat.apply([], this.map(lambda));
+    };
 
     Polymer({
       /* globals DigBehaviors */
@@ -821,7 +854,26 @@ limitations under the License.
 
         transforms: {
           type: Object
+        },
+
+        xscale: {
+          type: Object,
+          value: function () {
+            return d3.time.scale()
+              .domain([new Date(2000, 1, 7), new Date(2000, 1, 14)])
+              .range([0,1]);
+          }
+        },
+
+        xunscale:{
+          type: Object,
+          value: function () {
+            return d3.time.scale()
+              .domain([0,1])
+              .range([new Date(2000, 1, 7), new Date(2000, 1, 14)])
+          }
         }
+
       },
 
       attached: function() {
@@ -910,12 +962,25 @@ limitations under the License.
         };
       },
 
+      getButtonText: function(shown) {
+        return (shown ? 'Hide' : 'Show') + ' Bar Chart';
+      },
+
       getBarTimelineSectionTitle: function(entity, date) {
         return (entity && date) ? (entity + ' by ' + date + ' Timeline') : undefined;
       },
 
       getBlurStyleClass: function(blur, large) {
         return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+      },
+
+      createToggleTimelineListener: function(index) {
+        var self = this;
+        return {
+          onClick: function() {
+            self.set(['sortedHistogramFields', index, 'shouldShowChart'], !self.sortedHistogramFields[index].shouldShowChart);
+          }
+        };
       },
 
       getSectionTitleTransformConfig: function(pageConfig, searchFieldsObject, totalCount) {
@@ -940,6 +1005,148 @@ limitations under the License.
         return searchFieldsConfig.link === 'entity';
       },
       /********************************/
+
+      /******* Histogram Charts *******/
+      mergeHistograms: function(extractions) {
+        return extractions.sort(function (a,b) {
+          if( (a.entity.type.includes('date') && b.entity.type.includes('date')) ||
+              (!a.entity.type.includes('date') && !b.entity.type.includes('date'))) {
+            if(a.entity.key < b.entity.key) {
+              return -1;
+            } else if (a.entity.key > b.entity.key) {
+              return 1;
+            } else {
+              return 0;
+            }
+          }
+          else if (a.entity.type.includes('date')) {
+            return -1;
+          }
+          else if (b.entity.type.includes('date')) {
+            return 1;
+          }
+        });
+      },
+
+      parseHistograms: function(results) {
+        if(Array.isArray(results)) {
+          var newResults = results.flatMap( function(r) {
+            return r.data.map( function(d) {
+              d.date = r.date;
+              d.formattedDate = d3.time.format("%b %e, %Y").parse(d.date);
+              return d;
+            });
+          });
+          var splitResults = {};
+          newResults.forEach( function (nr) {
+            var sortKey;
+            if(nr.type.indexOf('date') > -1 || nr.type.indexOf('Date') > -1) {
+              sortKey = nr.type.replace("_"," ");
+            } else {
+              sortKey = nr.text;
+            }
+            if(!splitResults[sortKey]){
+              splitResults[sortKey]= [];
+            }
+            splitResults[sortKey].push(nr);
+          });
+          var pointsMapArray = Object.keys(splitResults).map( function(key) {
+            var pointMap = splitResults[key].flatMap( function(e) {
+              return {
+                date:e.date,
+                count:e.count,
+                formattedDate: e.formattedDate
+              };
+            })
+            .sort(function (a,b) {
+              return (a.formattedDate - b.formattedDate);
+            });
+            if(pointMap.length >0)  {
+              return {key: key, pointArray: pointMap};
+            }
+          });
+          return pointsMapArray;
+        }
+        return undefined;
+      },
+
+      scaleHistograms: function(histograms) {
+        var overallRange = undefined;
+        var ranges = histograms.map( function (histogram) {
+          var range =  d3.extent(histogram.pointArray, function (point) {
+            return point.formattedDate;
+          });
+
+          if (overallRange == undefined) {
+            overallRange = [range[0],range[1]];
+          } 
+          if (range[0] < overallRange[0]) {
+            overallRange[0] = range[0];
+          }
+          if (range[1] > overallRange[1]) {
+            overallRange[1] = range[1];
+          }
+          return range;
+        });
+        var scaledHistograms = ranges.map( function (range, index) {
+          var newHistogram = {key: histograms[index].key, pointArray: []};
+          if (range[0].toString() !== overallRange[0].toString()) {
+            newHistogram.pointArray.push({
+              formattedDate: overallRange[0],
+              count: 0
+            });
+          }
+          newHistogram.pointArray = newHistogram.pointArray.concat(histograms[index].pointArray);
+          if (range[1].toString() !== overallRange[1].toString()) {
+            newHistogram.pointArray.push({
+              formattedDate: overallRange[1],
+              count: 0
+            });
+          }
+          return newHistogram;
+        });
+        return scaledHistograms;
+      },
+
+      padHistograms: function(histograms, target) {
+        var paddedHistograms = histograms.map( function(histogram) {
+          var newpointArray  = [];
+          newpointArray.push(histogram.pointArray[0]);
+          for(var i = 1; i < histogram.pointArray.length; i++) {
+            var leftPoint = histogram.pointArray[i-1];
+            var rightPoint = histogram.pointArray[i];
+            var diff = Math.round(target.xscale(rightPoint.formattedDate) - target.xscale(leftPoint.formattedDate));
+            if(target.xscale(rightPoint.formattedDate) - target.xscale(leftPoint.formattedDate) > 1) {
+              newpointArray.push({
+                count: 0,
+                formattedDate: new Date(target.xunscale(target.xscale(leftPoint.formattedDate) + 1))
+              });
+            }
+            if(target.xscale(rightPoint.formattedDate) - target.xscale(leftPoint.formattedDate) > 2) {
+              newpointArray.push({
+                count: 0,
+                formattedDate: new Date(target.xunscale(target.xscale(rightPoint.formattedDate) - 1))
+              });
+            }
+            newpointArray.push(rightPoint);
+          }
+          return {key: histogram.key, pointArray: newpointArray};
+        });
+        return paddedHistograms;
+      },
+
+      makeConvertHistograms: function() {
+        var target = this;
+        if(target) {
+          return function(histograms) {
+            var parsedHistograms = target.parseHistograms(histograms);
+            var scaledHistograms = target.scaleHistograms(parsedHistograms);
+            var paddedHistograms = target.padHistograms(scaledHistograms, target);
+            return paddedHistograms;
+          }
+        }
+      },
+      /*******************************/
 
       /************ TERMS ************/
       getFacetProperty: function(collection, key) {
