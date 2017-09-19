@@ -405,8 +405,6 @@ var configTransforms = (function(_, commonTransforms) {
         type: 'image'
       });
 
-      console.log('searchFields', searchFields);
-
       return searchFields;
     },
 
