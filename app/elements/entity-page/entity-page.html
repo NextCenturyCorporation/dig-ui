@@ -675,9 +675,6 @@ limitations under the License.
   <script>
   (function() {
     'use strict';
-    Array.prototype.flatMap = function(lambda) {
-      return Array.prototype.concat.apply([], this.map(lambda));
-    };
 
     Polymer({
       /* globals DigBehaviors */
@@ -1032,8 +1029,8 @@ limitations under the License.
       /******* Histogram Charts *******/
       mergeHistograms: function(extractions) {
         return extractions.sort(function (a,b) {
-          if( (a.entity.type.includes('date') && b.entity.type.includes('date')) ||
-              (!a.entity.type.includes('date') && !b.entity.type.includes('date'))) {
+          if( (a.entity.type === ('date') && b.entity.type === ('date')) ||
+              (!a.entity.type === ('date') && !b.entity.type === ('date'))) {
             if(a.entity.key < b.entity.key) {
               return -1;
             } else if (a.entity.key > b.entity.key) {
@@ -1042,10 +1039,10 @@ limitations under the License.
               return 0;
             }
           }
-          else if (a.entity.type.includes('date')) {
+          else if (a.entity.type === ('date')) {
             return -1;
           }
-          else if (b.entity.type.includes('date')) {
+          else if (b.entity.type === ('date')) {
             return 1;
           }
         });
@@ -1053,13 +1050,17 @@ limitations under the License.
 
       parseHistograms: function(results) {
         if(Array.isArray(results)) {
-          var newResults = results.flatMap( function(r) {
+          var newResults = results.map( function(r) {
             return r.data.map( function(d) {
               d.date = r.date;
               d.formattedDate = d3.time.format("%b %e, %Y").parse(d.date);
               return d;
             });
+          })
+          .reduce( function(a,b) {
+            return a.concat(b);
           });
+
           var splitResults = {};
           newResults.forEach( function (nr) {
             var sortKey;
@@ -1073,8 +1074,9 @@ limitations under the License.
             }
             splitResults[sortKey].push(nr);
           });
+
           var pointsMapArray = Object.keys(splitResults).map( function(key) {
-            var pointMap = splitResults[key].flatMap( function(e) {
+            var pointMap = splitResults[key].map( function(e) {
               return {
                 date:e.date,
                 count:e.count,
@@ -1084,6 +1086,7 @@ limitations under the License.
             .sort(function (a,b) {
               return (a.formattedDate - b.formattedDate);
             });
+
             if(pointMap.length >0)  {
               return {key: key, pointArray: pointMap};
             }
