@@ -378,8 +378,6 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       // Add the image field to show in the facets.
       searchFields.push(esConfig.imageField);
 
-      console.log('searchFields', searchFields);
-
       return searchFields;
     },
 
