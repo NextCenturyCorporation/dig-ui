@@ -276,19 +276,22 @@ limitations under the License.
       tag-manager="{{tagManager}}">
     </tag-manager>
 
-    <state-manager id="stateManager"
-      build-popup-data-function="[[transforms.config.searchTerms]]"
-      build-state-data-function="[[transforms.config.searchState]]"
-      client="[[esClient]]"
-      function-config="[[searchFields]]"
-      state-index="[[serverConfig.stateIndexName]]"
-      state-type="[[serverConfig.stateIndexType]]"
-      state-id="[[parameters.state]]"
-      collection="{{searchParameters}}"
-      process-request="{{processRequest}}"
-      state-history="{{stateHistory}}"
-      has-history="{{hasHistory}}">
-    </state-manager>
+    <!-- Must wait for the searchParameters to be defined. -->
+    <template is="dom-if" if="[[searchParameters]]">
+      <state-manager id="stateManager"
+        build-popup-data-function="[[transforms.config.searchTerms]]"
+        build-state-data-function="[[transforms.config.searchState]]"
+        client="[[esClient]]"
+        function-config="[[searchFields]]"
+        state-index="[[serverConfig.stateIndexName]]"
+        state-type="[[serverConfig.stateIndexType]]"
+        state-id="[[parameters.state]]"
+        collection="{{searchParameters}}"
+        process-request="{{processRequest}}"
+        state-history="{{stateHistory}}"
+        has-history="{{hasHistory}}">
+      </state-manager>
+    </template>
 
     <info-data
       id="dataInfoDialog"
@@ -495,8 +498,7 @@ limitations under the License.
 
       properties: {
         blurImages: {
-          type: Boolean,
-          value: true
+          type: Boolean
         },
 
         clientConfig: {
