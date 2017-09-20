@@ -55,6 +55,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
           text: provenance.source && provenance.source.context ? provenance.source.context.text : 'Not Available'
         };
       });
+      // Set the confidence to zero if it is undefined.
+      extraction.confidence = extraction.confidence || 0;
     }
 
     if(config.type !== 'url') {

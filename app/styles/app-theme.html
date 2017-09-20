@@ -122,7 +122,8 @@ limitations under the License.
         margin-right: 0px;
       }
 
-      #navbar paper-icon-button {
+      #navbar paper-icon-button,
+      .page-header paper-icon-button {
         --paper-icon-button: {
           padding: 5px;
         }
@@ -141,13 +142,16 @@ limitations under the License.
       }
 
       #menuDropdown div[slot="dropdown-content"] paper-icon-item {
-        --paper-item-icon-width: 24px;
+        --paper-item-icon-width: 20px;
         --paper-item-icon: {
+          --iron-icon-height: 20px;
+          --iron-icon-width: 20px;
           margin-right: 10px;
         }
         --paper-icon-item: {
           border: 1px solid var(--text-primary-color);
           cursor: pointer;
+          padding: 0 15px;
           /* Below is needed for IE */
           line-height: 48px;
           min-width: 300px;
@@ -189,7 +193,7 @@ limitations under the License.
 
       #searchResults {
         position: absolute;
-        top: 0;
+        top: 115px;
         bottom: 0;
         left: 0;
         right: 0;
@@ -199,7 +203,7 @@ limitations under the License.
           max-height: none;
           position: absolute;
           bottom: 70px;
-          top: 90px;
+          top: 0;
           left: 0;
           right: 0;
         };

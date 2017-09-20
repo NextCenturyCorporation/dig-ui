@@ -21,18 +21,3 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
 }
-
-.small-blur {
-  -webkit-filter: blur(5px);
-  filter: blur(5px);
-}
-
-.large-blur {
-  -webkit-filter: blur(25px);
-  filter: blur(25px);
-}
-
-/* Reduce the z-index for the leaflet controls so that they do not overlap the other dialogs. */
-.leaflet-top, .leaflet-bottom {
-  z-index: 100 !important;
-}

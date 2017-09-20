@@ -343,15 +343,18 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
 
         // Sort for the facets and the search fields dialog.
         if(searchFieldsObject.type === 'date') {
-          searchFieldsObject.sort = 5;
+          searchFieldsObject.sort = 6;
         } else if(searchFieldsObject.result === 'title') {
           searchFieldsObject.sort = 2;
           searchFieldsObject.group = searchFieldsObject.group || 'Document';
         } else if(searchFieldsObject.result === 'description') {
           searchFieldsObject.sort = 3;
           searchFieldsObject.group = searchFieldsObject.group || 'Document';
-        } else if(searchFieldsObject.result === 'tld' || searchFieldsObject.key === 'url' || searchFieldsObject.key === 'website') {
+        } else if(searchFieldsObject.result === 'tld' || searchFieldsObject.key === 'website') {
           searchFieldsObject.sort = 4;
+          searchFieldsObject.group = searchFieldsObject.group || 'Document';
+        } else if(searchFieldsObject.key === 'url') {
+          searchFieldsObject.sort = 5;
           searchFieldsObject.group = searchFieldsObject.group || 'Document';
         } else {
           searchFieldsObject.sort = 1;
@@ -374,6 +377,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
 
       // Add the image field to show in the facets.
       searchFields.push(esConfig.imageField);
+
+      console.log('searchFields', searchFields);
 
       return searchFields;
     },

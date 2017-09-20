@@ -100,7 +100,8 @@ limitations under the License.
           }]
         }],
         images: [{
-          source: 'https://s3.amazonaws.com/image'
+          downloadSource: 'downloadImage',
+          source: 'image'
         }],
         description: 'A quick brown fox\njumped over the lazy dog.'
       }], [{
@@ -181,11 +182,14 @@ limitations under the License.
           }]
         }],
         images: [{
-          source: 'https://s3.amazonaws.com/image1'
+          downloadSource: 'downloadImage1',
+          source: 'image1'
         }, {
-          source: 'https://s3.amazonaws.com/image2'
+          downloadSource: 'downloadImage2',
+          source: 'image2'
         }, {
-          source: 'https://s3.amazonaws.com/image3'
+          downloadSource: 'downloadImage3',
+          source: 'image3'
         }],
         description: 'A quick brown fox\njumped over the lazy dog.'
       }], [{
@@ -271,7 +275,8 @@ limitations under the License.
           }]
         }],
         images: [{
-          source: 'https://s3.amazonaws.com/image'
+          downloadSource: 'downloadImage',
+          source: 'image'
         }],
         description: 'A quick brown fox\njumped over the lazy dog.'
       }], [{
@@ -294,8 +299,8 @@ limitations under the License.
       expect(output[0].images.length).to.equal(1);
       expect(output[0].images).deep.equal([{
         id: 'image1',
-        source: 'image',
-        text: 'https://s3.amazonaws.com/image'
+        source: 'downloadImage',
+        text: 'image'
       }]);
       expect(output[0].paragraphs).to.be.an('Array');
       expect(output[0].paragraphs.length).to.equal(8);
@@ -378,11 +383,14 @@ limitations under the License.
           }]
         }],
         images: [{
-          source: 'https://s3.amazonaws.com/image1'
+          downloadSource: 'downloadImage1',
+          source: 'image1'
         }, {
-          source: 'https://s3.amazonaws.com/image2'
+          downloadSource: 'downloadImage2',
+          source: 'image2'
         }, {
-          source: 'https://s3.amazonaws.com/image3'
+          downloadSource: 'downloadImage3',
+          source: 'image3'
         }],
         description: 'A quick brown fox\njumped over the lazy dog.'
       }], [{
@@ -405,16 +413,16 @@ limitations under the License.
       expect(output[0].images.length).to.equal(3);
       expect(output[0].images).deep.equal([{
         id: 'image1',
-        source: 'image1',
-        text: 'https://s3.amazonaws.com/image1'
+        source: 'downloadImage1',
+        text: 'image1'
       }, {
         id: 'image2',
-        source: 'image2',
-        text: 'https://s3.amazonaws.com/image2'
+        source: 'downloadImage2',
+        text: 'image2'
       }, {
         id: 'image3',
-        source: 'image3',
-        text: 'https://s3.amazonaws.com/image3'
+        source: 'downloadImage3',
+        text: 'image3'
       }]);
       expect(output[0].paragraphs).to.be.an('Array');
       expect(output[0].paragraphs.length).to.equal(8);

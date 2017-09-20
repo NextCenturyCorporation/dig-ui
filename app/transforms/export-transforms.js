@@ -64,8 +64,7 @@ var exportTransforms = (function(_) {
 
       searchData.forEach(function(result) {
         var imageLinks = (result.images || []).map(function(image) {
-
-          return image.source.replace('https://s3.amazonaws.com/', '');
+          return image.source;
         }).join('; ');
         var exportDataBody = [
             result.url,
@@ -107,7 +106,7 @@ var exportTransforms = (function(_) {
           images: (result.images || []).map(function(image) {
             return {
               id: 'image' + nextId++,
-              source: encodeURIComponent(image.source.replace('https://s3.amazonaws.com/', '')),
+              source: image.downloadSource,
               text: image.source
             };
           }),

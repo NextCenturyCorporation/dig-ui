@@ -56,6 +56,40 @@ limitations under the License.
         display: block;
         @apply --layout-fullbleed;
       }
+
+      #searchResultsImages {
+        position: absolute;
+        top: 115px;
+        bottom: 0px;
+        left: 0;
+        right: 0;
+        overflow-y: scroll;
+      }
+
+      #searchResultsTabBar {
+        position: absolute;
+        top: 90px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 25px;
+      }
+
+      paper-tab {
+        color: var(--secondary-text-color);
+        font-weight: 600;
+        height: 25px;
+      }
+
+      paper-tab:hover {
+        background-color: rgba(0,0,0,0.05);
+        color: var(--primary-text-color);
+      }
+
+      paper-tab.iron-selected {
+        background-color: rgba(0,0,0,0.1);
+        color: var(--primary-text-color);
+      }
     </style>
 
     <iron-ajax
@@ -265,6 +299,15 @@ limitations under the License.
       sort-field="timestamp_crawl">
     </info-data>
 
+    <bulk-search
+      id="bulkSearchDialog"
+      search-fields="[[searchFields]]"
+      parameter-key="[[searchFields.0.key]]"
+      search-parameters="{{searchParameters}}"
+      process-request="{{processRequest}}"
+      build-search-state="[[buildSearchState]]">
+    </bulk-search>
+
     <paper-header-panel id="pagePanel" class="flex" mode="waterfall">
       <paper-toolbar slot="header" id="navbar">
         <img slot="top" src="images/dig-logo.png" alt="">
@@ -281,7 +324,7 @@ limitations under the License.
         </div>
 
         <a slot="top" href="[[getUrlWithProject(domain)]]" style="color: #ffffff;">
-          <paper-icon-button icon="clear" title="Reset Page"></paper-icon-button>
+          <paper-icon-button icon="fa:times" title="Reset Page"></paper-icon-button>
         </a>
 
         <similar-image-search id="similarImageSearchDialog"
@@ -293,7 +336,7 @@ limitations under the License.
         </similar-image-search>
         <!-- TODO: add logger, update transform when we're ready to link to image entity pages -->
 
-        <paper-icon-button icon="menu" slot="top" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+        <paper-icon-button icon="fa:bars" slot="top" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
         <iron-dropdown id="menuDropdown" slot="top" horizontal-align="right" vertical-align="top" vertical-offset="60">
           <div slot="dropdown-content">
@@ -303,7 +346,7 @@ limitations under the License.
             </paper-icon-item>
 
             <paper-icon-item disabled="[[!hasHistory]]" title="View Search State History" on-tap="openStateHistoryDialog">
-              <iron-icon slot="item-icon" icon="history" item-icon></iron-icon>
+              <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
               View Search State History
             </paper-icon-item>
 
@@ -312,18 +355,23 @@ limitations under the License.
               View Training Options
             </paper-icon-item>
 
+            <paper-icon-item title="Upload a File with Search Terms or Copy & Paste Text" on-tap="openBulkSearchDialog">
+              <iron-icon slot="item-icon" icon="fa:upload" item-icon></iron-icon>
+              Bulk Search from Uploaded File or Text
+            </paper-icon-item>
+
             <paper-icon-item title="Search on an Image URL or Uploaded Image" on-tap="openSimilarImageSearchDialog">
-              <iron-icon slot="item-icon" icon="image:compare" item-icon></iron-icon>
+              <iron-icon slot="item-icon" icon="fa:picture-o" item-icon></iron-icon>
               Similar Image Search
             </paper-icon-item>
 
             <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-              <iron-icon slot="item-icon" icon="open-in-new" item-icon></iron-icon>
+              <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
               Open a DIG Search Page in a New Tab
             </paper-icon-item>
 
             <paper-icon-item title="Contact DIG Support (dig-support@nextcentury.com)" on-tap="emailSupport">
-              <iron-icon slot="item-icon" icon="communication:contact-mail" item-icon></iron-icon>
+              <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
               Contact DIG Support
             </paper-icon-item>
           </div>
@@ -369,7 +417,8 @@ limitations under the License.
                 </template>
 
                 <template is="dom-if" if="[[searchTotal]]">
-                  <div class="note">Please note that only the top 10 extractions of each type are shown in the result list.</div>
+                  <div class="note" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  Please note that only the top 10 extractions of each type are shown in the result list.</div>
                 </template>
               </div>
 
@@ -389,27 +438,47 @@ limitations under the License.
               </export-button>
             </div>
 
-            <result-list
-              id="searchResults"
-              new-tab
-              text-property="title"
-              query-results="[[documents]]"
-              total-results="[[searchTotal]]"
-              shown-results="{{documentsShown}}"
-              page="{{searchPage}}"
-              page-size="25"
-              loading="[[searchLoading]]"
-              header="{{searchTitle}}"
-              cache-transform="[[transforms.entity.cache]]"
-              client="[[esClient]]"
-              index-name="[[esConfig.esIndex]]"
-              index-types="[[esConfig.esType]]"
-              search-fields="[[searchFields]]"
-              source-include='["raw_content"]'
-              small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-              large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-              tag-manager="[[tagManager]]">
-            </result-list>
+            <template is="dom-if" if="[[documentsShown.length]]">
+              <paper-material>
+                <paper-tabs class="flex" no-bar no-ink selected="{{selectedSearchTab}}">
+                  <paper-tab>Document Results</paper-tab>
+                  <paper-tab>Image Results</paper-tab>
+                </paper-tabs>
+              </paper-material>
+            </template>
+
+            <template is="dom-if" if="[[_equals(0, selectedSearchTab)]]">
+              <result-list
+                id="searchResults"
+                new-tab
+                text-property="title"
+                query-results="[[documents]]"
+                total-results="[[searchTotal]]"
+                shown-results="{{documentsShown}}"
+                page="{{searchPage}}"
+                page-size="25"
+                loading="[[searchLoading]]"
+                header="{{searchTitle}}"
+                cache-transform="[[transforms.entity.cache]]"
+                client="[[esClient]]"
+                index-name="[[esConfig.esIndex]]"
+                index-types="[[esConfig.esType]]"
+                search-fields="[[searchFields]]"
+                source-include='["raw_content"]'
+                small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                tag-manager="[[tagManager]]">
+              </result-list>
+            </template>
+
+            <template is="dom-if" if="[[_equals(1, selectedSearchTab)]]">
+              <image-gallery
+                id="searchResultsImages"
+                images="[[shownImages]]"
+                small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]">
+              </image-gallery>
+            </template>
           </template>
         </paper-header-panel>
       </paper-drawer-panel>
@@ -553,8 +622,19 @@ limitations under the License.
           type: Number
         },
 
+        selectedSearchTab: {
+          notify: true,
+          type: Number,
+          value: 0
+        },
+
         serverConfig: {
           type: Object
+        },
+
+        shownImages: {
+          computed: 'getShownImages(documentsShown)',
+          type: Array
         },
 
         stateHistory: {
@@ -585,6 +665,14 @@ limitations under the License.
             self.set('stateHistory', window.history.state.stateHistory);
           }
         };
+      },
+
+      buildSearchState: function(config, oldConfig) {
+        var state = {};
+        _.keys(oldConfig).forEach(function(key) {
+          state[key] = config[key] || {};
+        });
+        return state;
       },
 
       concat: function(a, b) {
@@ -623,6 +711,18 @@ limitations under the License.
         };
       },
 
+      /**
+       * Returns whether the two arguments are equal.
+       *
+       * @param {Number} one
+       * @param {Number} two
+       * @return {Boolean}
+       * @private
+       */
+      _equals: function(one, two) {
+        return one === two;
+      },
+
       exists: function(object) {
         return typeof object !== 'undefined';
       },
@@ -639,6 +739,16 @@ limitations under the License.
 
       getBlurStyleClass: function(blur, large) {
         return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+      },
+
+      getShownImages: function(documents) {
+        var images = [];
+        documents.forEach(function(document) {
+          document.images.forEach(function(image) {
+            images.push(image);
+          });
+        });
+        return images;
       },
 
       getUrlParameters: function() {
@@ -662,9 +772,14 @@ limitations under the License.
         window.open('mailto:dig-support@nextcentury.com');
       },
 
+      openBulkSearchDialog: function() {
+        this.$$('#menuDropdown').close();
+        this.$$('#bulkSearchDialog').open();
+      },
+
       openDataInfoDialog: function() {
-        this.$.menuDropdown.close();
-        this.$.dataInfoDialog.open();
+        this.$$('#menuDropdown').close();
+        this.$$('#dataInfoDialog').open();
       },
 
       openNewTab: function() {
@@ -672,25 +787,25 @@ limitations under the License.
       },
 
       openSimilarImageSearchDialog: function() {
-        this.$.menuDropdown.close();
-        this.$.similarImageSearchDialog.open();
+        this.$$('#menuDropdown').close();
+        this.$$('#similarImageSearchDialog').open();
       },
 
       openStateHistoryDialog: function() {
-        this.$.menuDropdown.close();
-        this.$.stateManager.openStateHistory();
+        this.$$('#menuDropdown').close();
+        this.$$('#stateManager').openStateHistory();
       },
 
       openTagsDialog: function() {
-        this.$.menuDropdown.close();
-        this.$.tagManager.openDialog();
+        this.$$('#menuDropdown').close();
+        this.$$('#tagManager').openDialog();
       },
 
       toggleMenu: function() {
-        if(this.$.menuDropdown.style.display === 'none') {
-          this.$.menuDropdown.open();
+        if(this.$$('#menuDropdown').style.display === 'none') {
+          this.$$('#menuDropdown').open();
         } else {
-          this.$.menuDropdown.close();
+          this.$$('#menuDropdown').close();
         }
       }
       /********************************/
