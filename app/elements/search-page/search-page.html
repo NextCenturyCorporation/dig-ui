@@ -525,6 +525,7 @@ limitations under the License.
         },
 
         documents: {
+          observer: 'resetSearchTab',
           type: Array
         },
 
@@ -595,6 +596,7 @@ limitations under the License.
         },
 
         searchLoading: {
+          notify: true,
           type: Boolean
         },
 
@@ -799,6 +801,12 @@ limitations under the License.
       openTagsDialog: function() {
         this.$$('#menuDropdown').close();
         this.$$('#tagManager').openDialog();
+      },
+
+      resetSearchTab: function() {
+        if(!this.documents.length) {
+          this.set('selectedSearchTab',0);
+        }
       },
 
       toggleMenu: function() {
