@@ -144,13 +144,14 @@ limitations under the License.
       #menuDropdown div[slot="dropdown-content"] paper-icon-item {
         --paper-item-icon-width: 20px;
         --paper-item-icon: {
-          height: 20px;
-          width: 20px;
+          --iron-icon-height: 20px;
+          --iron-icon-width: 20px;
           margin-right: 10px;
         }
         --paper-icon-item: {
           border: 1px solid var(--text-primary-color);
           cursor: pointer;
+          padding: 0 15px;
           /* Below is needed for IE */
           line-height: 48px;
           min-width: 300px;
