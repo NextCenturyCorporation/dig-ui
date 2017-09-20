@@ -17,6 +17,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/aggregation-query-and-display/aggregation-query-and-display.html">
 <link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
+<link rel="import" href="../../bower_components/d3-import/d3.html">
 <!--
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
 -->
@@ -878,19 +879,19 @@ limitations under the License.
 
         xscale: {
           type: Object,
-          value: function () {
+          value: function() {
             return d3.time.scale()
               .domain([new Date(2000, 1, 7), new Date(2000, 1, 14)])
               .range([0,1]);
           }
         },
 
-        xunscale:{
+        xunscale: {
           type: Object,
-          value: function () {
+          value: function() {
             return d3.time.scale()
               .domain([0,1])
-              .range([new Date(2000, 1, 7), new Date(2000, 1, 14)])
+              .range([new Date(2000, 1, 7), new Date(2000, 1, 14)]);
           }
         }
 
@@ -1031,21 +1032,19 @@ limitations under the License.
 
       /******* Histogram Charts *******/
       mergeHistograms: function(extractions) {
-        return extractions.sort(function (a,b) {
-          if( (a.entity.type.includes('date') && b.entity.type.includes('date')) ||
+        return extractions.sort(function(a, b) {
+          if((a.entity.type.includes('date') && b.entity.type.includes('date')) ||
               (!a.entity.type.includes('date') && !b.entity.type.includes('date'))) {
             if(a.entity.key < b.entity.key) {
               return -1;
-            } else if (a.entity.key > b.entity.key) {
+            } else if(a.entity.key > b.entity.key) {
               return 1;
             } else {
               return 0;
             }
-          }
-          else if (a.entity.type.includes('date')) {
+          } else if(a.entity.type.includes('date')) {
             return -1;
-          }
-          else if (b.entity.type.includes('date')) {
+          } else if(b.entity.type.includes('date')) {
             return 1;
           }
         });
@@ -1053,38 +1052,38 @@ limitations under the License.
 
       parseHistograms: function(results) {
         if(Array.isArray(results)) {
-          var newResults = results.flatMap( function(r) {
-            return r.data.map( function(d) {
+          var newResults = results.flatMap(function(r) {
+            return r.data.map(function(d) {
               d.date = r.date;
-              d.formattedDate = d3.time.format("%b %e, %Y").parse(d.date);
+              d.formattedDate = d3.time.format('%b %e, %Y').parse(d.date);
               return d;
             });
           });
           var splitResults = {};
-          newResults.forEach( function (nr) {
+          newResults.forEach(function(nr) {
             var sortKey;
             if(nr.type.indexOf('date') > -1 || nr.type.indexOf('Date') > -1) {
-              sortKey = nr.type.replace("_"," ");
+              sortKey = nr.type.replace('_', ' ');
             } else {
               sortKey = nr.text;
             }
-            if(!splitResults[sortKey]){
-              splitResults[sortKey]= [];
+            if(!splitResults[sortKey]) {
+              splitResults[sortKey] = [];
             }
             splitResults[sortKey].push(nr);
           });
-          var pointsMapArray = Object.keys(splitResults).map( function(key) {
-            var pointMap = splitResults[key].flatMap( function(e) {
+          var pointsMapArray = Object.keys(splitResults).map(function(key) {
+            var pointMap = splitResults[key].flatMap(function(e) {
               return {
-                date:e.date,
-                count:e.count,
+                date: e.date,
+                count: e.count,
                 formattedDate: e.formattedDate
               };
             })
-            .sort(function (a,b) {
+            .sort(function(a, b) {
               return (a.formattedDate - b.formattedDate);
             });
-            if(pointMap.length >0)  {
+            if(pointMap.length > 0)  {
               return {key: key, pointArray: pointMap};
             }
           });
@@ -1094,33 +1093,33 @@ limitations under the License.
       },
 
       scaleHistograms: function(histograms) {
-        var overallRange = undefined;
-        var ranges = histograms.map( function (histogram) {
-          var range =  d3.extent(histogram.pointArray, function (point) {
+        var overallRange;
+        var ranges = histograms.map(function(histogram) {
+          var range =  d3.extent(histogram.pointArray, function(point) {
             return point.formattedDate;
           });
 
-          if (overallRange == undefined) {
+          if(overallRange === undefined) {//Ryan
             overallRange = [range[0],range[1]];
           }
-          if (range[0] < overallRange[0]) {
+          if(range[0] < overallRange[0]) {
             overallRange[0] = range[0];
           }
-          if (range[1] > overallRange[1]) {
+          if(range[1] > overallRange[1]) {
             overallRange[1] = range[1];
           }
           return range;
         });
-        var scaledHistograms = ranges.map( function (range, index) {
+        var scaledHistograms = ranges.map(function(range, index) {
           var newHistogram = {key: histograms[index].key, pointArray: []};
-          if (range[0].toString() !== overallRange[0].toString()) {
+          if(range[0].toString() !== overallRange[0].toString()) {
             newHistogram.pointArray.push({
               formattedDate: overallRange[0],
               count: 0
             });
           }
           newHistogram.pointArray = newHistogram.pointArray.concat(histograms[index].pointArray);
-          if (range[1].toString() !== overallRange[1].toString()) {
+          if(range[1].toString() !== overallRange[1].toString()) {
             newHistogram.pointArray.push({
               formattedDate: overallRange[1],
               count: 0
@@ -1132,13 +1131,12 @@ limitations under the License.
       },
 
       padHistograms: function(histograms, target) {
-        var paddedHistograms = histograms.map( function(histogram) {
+        var paddedHistograms = histograms.map(function(histogram) {
           var newpointArray  = [];
           newpointArray.push(histogram.pointArray[0]);
           for(var i = 1; i < histogram.pointArray.length; i++) {
-            var leftPoint = histogram.pointArray[i-1];
+            var leftPoint = histogram.pointArray[i - 1];
             var rightPoint = histogram.pointArray[i];
-            var diff = Math.round(target.xscale(rightPoint.formattedDate) - target.xscale(leftPoint.formattedDate));
             if(target.xscale(rightPoint.formattedDate) - target.xscale(leftPoint.formattedDate) > 1) {
               newpointArray.push({
                 count: 0,
@@ -1166,7 +1164,7 @@ limitations under the License.
             var scaledHistograms = target.scaleHistograms(parsedHistograms);
             var paddedHistograms = target.padHistograms(scaledHistograms, target);
             return paddedHistograms;
-          }
+          };
         }
       },
       /*******************************/
