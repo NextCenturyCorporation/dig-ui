@@ -59,34 +59,36 @@ limitations under the License.
 
       #searchResultsImages {
         position: absolute;
-        top: 115px;
+        top: 130px;
         bottom: 0px;
         left: 0;
         right: 0;
         overflow-y: scroll;
       }
 
-      #searchResultsTabBar {
+      #searchResultsTabs {
+        border-bottom: 1px solid var(--primary-background-color);
         position: absolute;
         top: 90px;
         bottom: 0;
         left: 0;
         right: 0;
-        height: 25px;
+        height: 40px;
       }
 
-      paper-tab {
+      #searchResultsTabs paper-tab {
         color: var(--secondary-text-color);
-        font-weight: 600;
-        height: 25px;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 0 15px;
       }
 
-      paper-tab:hover {
+      #searchResultsTabs paper-tab:hover {
         background-color: rgba(0,0,0,0.05);
         color: var(--primary-text-color);
       }
 
-      paper-tab.iron-selected {
+      #searchResultsTabs paper-tab.iron-selected {
         background-color: rgba(0,0,0,0.1);
         color: var(--primary-text-color);
       }
@@ -443,9 +445,9 @@ limitations under the License.
 
             <template is="dom-if" if="[[documentsShown.length]]">
               <paper-material>
-                <paper-tabs class="flex" no-bar no-ink selected="{{selectedSearchTab}}">
-                  <paper-tab>Document Results</paper-tab>
-                  <paper-tab>Image Results</paper-tab>
+                <paper-tabs id="searchResultsTabs" class="flex" no-bar no-ink selected="{{selectedSearchTab}}">
+                  <paper-tab class="flex-1">Document Results</paper-tab>
+                  <paper-tab class="flex-1">Image Results</paper-tab>
                 </paper-tabs>
               </paper-material>
             </template>
