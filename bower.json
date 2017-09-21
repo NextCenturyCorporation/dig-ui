@@ -59,7 +59,7 @@
     "result-list": "DigElements/result-list#2.3.1",
     "search-fields-dialog": "DigElements/search-fields-dialog#2.2.1",
     "selected-facets-display": "DigElements/selected-facets-display#2.0.4",
-    "sparkline-list": "DigElements/sparkline-list#^2.0.1",
+    "sparkline-list": "DigElements/sparkline-list#^2.0.2",
     "state-manager": "DigElements/state-manager#2.1.1",
     "styled-dialog": "DigElements/styled-dialog#2.1.1",
     "tag-entity-buttons": "DigElements/tag-entity-buttons#2.0.2",
