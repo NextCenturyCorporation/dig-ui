@@ -320,14 +320,14 @@ limitations under the License.
 
             <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="40">
               <div slot="dropdown-content">
-                <paper-icon-item title="View Database Information" on-tap="openDataInfoDialog">
+                <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
                   <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
-                  View Database Information
+                  View DIG Database Information
                 </paper-icon-item>
 
-                <paper-icon-item title="View Training Options" on-tap="openTagsDialog">
+                <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
                   <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
-                  View Training Options
+                  View DIG Data Training Options
                 </paper-icon-item>
 
                 <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
@@ -335,9 +335,14 @@ limitations under the License.
                   Open a DIG Search Page in a New Tab
                 </paper-icon-item>
 
-                <paper-icon-item title="Contact Support (dig-support@nextcentury.com)" on-tap="emailSupport">
+                <paper-icon-item title="Open DIG Help Page" on-tap="openHelpPage">
+                  <iron-icon slot="item-icon" icon="fa:question-circle" item-icon></iron-icon>
+                  Open the DIG Help Page
+                </paper-icon-item>
+
+                <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="emailSupport">
                   <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
-                  Contact DIG Support
+                  Contact DIG / Memex Support
                 </paper-icon-item>
               </div>
             </iron-dropdown>
@@ -812,12 +817,17 @@ limitations under the License.
 
       /************* MENU *************/
       emailSupport: function() {
-        window.open('mailto:dig-support@nextcentury.com');
+        window.open('mailto:support@memex.software');
       },
 
       openDataInfoDialog: function() {
         this.$$('#menuDropdown').close();
         this.$$('#dataInfoDialog').open();
+      },
+
+      openHelpPage: function() {
+        this.$$('#menuDropdown').close();
+        window.open('./help.html');
       },
 
       openNewTab: function() {
