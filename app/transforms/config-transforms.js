@@ -237,22 +237,33 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     histogramFields: function(searchFields) {
       var entityFields = searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.link === 'entity' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
+        return searchFieldsObject.type !== 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       });
       var dateFields = searchFields.filter(function(searchFieldsObject) {
         return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
       });
-      var histogramFields = dateFields.reduce(function(fields, dateFieldsObject) {
-        return fields.concat(entityFields.map(function(entityFieldsObject) {
-          return {
-            date: dateFieldsObject,
-            entity: entityFieldsObject
+      if(dateFields.length && entityFields.length) {
+        return entityFields.map(function(entityFieldsObject) {
+          var object = {
+            dateCollection: dateFields.reduce(function(dates, dateFieldsObject) {
+              dates[dateFieldsObject.key] = _.cloneDeep(dateFieldsObject);
+              return dates;
+            }, {}),
+            dateList: dateFields.reduce(function(dateChoices, dateFieldsObject) {
+              dateChoices.push({
+                key: dateFieldsObject.key,
+                title: dateFieldsObject.title
+              });
+              return dateChoices;
+            }, []),
+            dateSelected: dateFields[0].key,
+            entity: _.cloneDeep(entityFieldsObject),
+            showDateMenu: dateFields.length > 1
           };
-        }));
-      }, []);
-      return histogramFields.map(function(searchFieldsObject) {
-        return _.cloneDeep(searchFieldsObject);
-      });
+          return object;
+        });
+      }
+      return [];
     },
 
     /**

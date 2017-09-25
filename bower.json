@@ -36,7 +36,7 @@
     "iron-icons": "PolymerElements/iron-icons#^2.0.0",
     "iron-scroll-threshold": "PolymerElements/iron-scroll-threshold#^2.0.0",
     "json-combine": "DigElements/json-combine#2.1.1",
-    "leaflet-map": "DigElements/leaflet-map#2.1.1",
+    "leaflet-map": "DigElements/leaflet-map#2.1.2",
     "leaflet-wrapper": "DigElements/leaflet-wrapper#2.0.1",
     "loading-spinner": "DigElements/loading-spinner#2.0.0",
     "lodash": "~4.17.2",
@@ -59,14 +59,14 @@
     "result-list": "DigElements/result-list#2.3.1",
     "search-fields-dialog": "DigElements/search-fields-dialog#2.2.1",
     "selected-facets-display": "DigElements/selected-facets-display#2.0.4",
-    "sparkline-list": "DigElements/sparkline-list#^2.0.2",
+    "sparkline-list": "DigElements/sparkline-list#2.1.0",
     "state-manager": "DigElements/state-manager#2.1.1",
     "styled-dialog": "DigElements/styled-dialog#2.1.1",
     "tag-entity-buttons": "DigElements/tag-entity-buttons#2.0.2",
     "tag-manager": "DigElements/tag-manager#2.1.1",
     "terms-transformer": "DigElements/terms-transformer#2.0.0",
     "vaadin-upload": "vaadin/vaadin-upload#2.1.0",
-    "zoomable-bar-chart": "DigElements/zoomable-bar-chart#2.1.0"
+    "zoomable-bar-chart": "DigElements/zoomable-bar-chart#2.1.2"
   },
   "devDependencies": {
     "test-fixture": "PolymerElements/test-fixture#^3.0.0",
@@ -76,7 +76,6 @@
     "breadbox-item": "2.0.4",
     "build-and-run-query": "2.2.0",
     "elastic-client-search": "2.1.0",
-    "highlighted-text": "2.0.1",
     "horizontal-bar": "2.2.1",
     "icon-label": "2.1.1",
     "image-gallery": "2.0.1",

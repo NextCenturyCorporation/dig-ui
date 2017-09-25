@@ -66,6 +66,38 @@ limitations under the License.
         display: block;
         @apply --layout-fullbleed;
       }
+
+      .date-menu {
+        margin-bottom: 10px;
+      }
+
+      .date-menu > div {
+        color: var(--secondary-text-color);
+        line-height: 24px;
+        margin-bottom: 2px;
+        margin-right: 10px;
+      }
+
+      .date-menu paper-dropdown-menu {
+        --paper-input-container: {
+          padding: 0 !important;
+        }
+      }
+
+      .date-menu paper-listbox {
+        --paper-listbox: {
+          padding: 0;
+        }
+      }
+
+      .date-menu paper-item {
+        --paper-item-min-height: 30px;
+        --paper-item: {
+          cursor: pointer;
+          padding: 0 10px;
+          white-space: nowrap;
+        }
+      }
     </style>
 
     <iron-ajax
@@ -400,7 +432,7 @@ limitations under the License.
 
           <div class="entity-page">
             <div class="content">
-              <div class="flex layout vertical">
+              <div>
                 <template is="dom-repeat" items="[[mapFields]]">
                   <section-and-map
                     show-copy
@@ -408,7 +440,7 @@ limitations under the License.
                     style-class="[[item.styleClass]]"
                     text-property="textAndCount"
                     transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
-                    transform-function="[[getSectionTitleTransformFunction]]"
+                    transform-function="[[getAggregationTitleTransformFunction]]"
                     data="[[item.mapData]]">
 
                     <aggregation-query-and-display
@@ -453,7 +485,7 @@ limitations under the License.
                       icon="[[item.icon]]"
                       style-class="[[item.styleClass]]"
                       transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
-                      transform-function="[[getSectionTitleTransformFunction]]"
+                      transform-function="[[getAggregationTitleTransformFunction]]"
                       data="[[item.aggregationData]]">
 
                       <aggregation-query-and-display
@@ -498,7 +530,7 @@ limitations under the License.
                     icon="[[esConfig.imageField.icon]]"
                     style-class="[[esConfig.imageField.styleClass]]"
                     transform-config="[[getSectionTitleTransformConfig(pageConfig, esConfig.imageField, images.length)]]"
-                    transform-function="[[getSectionTitleTransformFunction]]"
+                    transform-function="[[getAggregationTitleTransformFunction]]"
                     data="[[imagesLoaded]]">
 
                     <image-query-and-display
@@ -528,16 +560,8 @@ limitations under the License.
                 </template>
               </div>
 
-              <div class="flex layout vertical">
-
-                <json-combine
-                  data-in1="[[histogramFields]]"
-                  data-in2="{}"
-                  data-out="{{sortedHistogramFields}}"
-                  combine-function="[[mergeHistograms]]">
-                </json-combine>
-
-                <template is="dom-repeat" items="[[sortedHistogramFields]]">
+              <div>
+                <template is="dom-repeat" items="[[histogramFields]]">
                   <elastic-client-aggregation-builder
                     name="[[item.entity.key]]"
                     type="terms"
@@ -550,10 +574,10 @@ limitations under the License.
 
                   <template is="dom-if" if="[[item.entityAggregation]]">
                     <elastic-client-aggregation-builder
-                      name="[[item.date.key]]"
+                      name="[[getDateProperty(item.dateCollection, item.dateSelected, 'key')]]"
                       type="date_histogram"
                       count="0"
-                      field="[[item.date.field]]"
+                      field="[[getDateProperty(item.dateCollection, item.dateSelected, 'field')]]"
                       interval="week"
                       nested-aggregations="[[buildArray(item.entityAggregation)]]"
                       ejs-aggregation="{{item.dateAggregation}}">
@@ -572,7 +596,7 @@ limitations under the License.
                         page-size="0"
                         source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
                         source-exclude='["knowledge_graph.*.provenance"]'
-                        transform-config="[[createHistogramConfig(item.date, item.entity, pageConfig, pageId)]]"
+                        transform-config="[[createHistogramConfig(item.dateCollection, item.dateSelected, item.entity, pageConfig, pageId)]]"
                         transform-function="[[transforms.entity.histogram]]"
                         error="{{item.histogramError}}"
                         loading="{{item.histogramLoading}}"
@@ -583,17 +607,31 @@ limitations under the License.
 
                   <section-and-title
                     error="[[item.histogramError]]"
-                    icon="editor:insert-chart"
-                    section-title="[[item.entity.title]] Bar Timeline"
-                    style="word-break: break-word;">
+                    icon="[[item.entity.icon]]"
+                    style-class="[[item.entity.styleClass]]"
+                    section-title="[[getHistogramTitle(pageConfig, item.entity)]]">
 
-                    <template is="dom-if" if="[[!documents.length]]">
-                      <div>No Results</div>
+                    <template is="dom-if" if="[[item.histogramLoading]]">
+                      <div>Loading Timelines...</div>
                     </template>
 
                     <template is="dom-if" if="[[!item.histogramLoading]]">
+                      <template is="dom-if" if="[[item.showDateMenu]]">
+                        <div class="layout horizontal center date-menu">
+                          <div>Date Field</div>
+
+                          <paper-dropdown-menu label="Date" no-label-float>
+                            <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{item.dateSelected}}">
+                              <template is="dom-repeat" items="[[item.dateList]]" as="dateListItem">
+                                <paper-item id$="[[dateListItem.key]]" value="[[dateListItem.key]]">[[dateListItem.title]]</paper-item>
+                              </template>
+                            </paper-listbox>
+                          </paper-dropdown-menu>
+                        </div>
+                      </template>
+
                       <template is="dom-if" if="[[!item.histogramResults.length]]">
-                        <div>No [[item.date.titlePlural]] and/or [[item.entity.titlePlural]]</div>
+                        <div>No Timelines of [[item.entity.title]] vs. [[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]</div>
                       </template>
 
                       <template is="dom-if" if="[[item.histogramResults.length]]">
@@ -602,17 +640,18 @@ limitations under the License.
                           convert-function="[[makeConvertHistograms()]]"
                           x-prop="formattedDate"
                           y-prop="count"
-                          max-overall-height="250px"
-                          chart-widths="250px">
+                          icon="[[item.entity.icon]]"
+                          style-class="[[item.entity.styleClass]]">
                         </sparkline-list>
 
                         <div class="layout horizontal center-justified" style="margin: 10px 0;">
-                          <button-action text="[[getButtonText(item.shouldShowChart)]]" click-listener="[[createToggleTimelineListener(index)]]"></button-action>
+                          <button-action text="[[getButtonText(item.shouldShowChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
                         </div>
 
                         <template is="dom-if" if="[[item.shouldShowChart]]">
-                          <zoomable-bar-chart timeline
-                            selected-property="[[item.date.key]]"
+                          <zoomable-bar-chart
+                            timeline
+                            selected-property="[[getDateProperty(item.dateCollection, item.dateSelected, 'key')]]"
                             selected="{{filterCollection}}"
                             bar-property="date"
                             label-property="text"
@@ -982,12 +1021,12 @@ limitations under the License.
         };
       },
 
-      createHistogramConfig: function(dateConfig, entityConfig, pageConfig, id) {
-        if(!dateConfig || !entityConfig || !pageConfig || !id) {
+      createHistogramConfig: function(dateCollection, dateSelected, entityConfig, pageConfig, id) {
+        if(!dateCollection || !dateSelected || !entityConfig || !pageConfig || !id) {
           return undefined;
         }
         return {
-          date: dateConfig,
+          date: dateCollection[dateSelected],
           entity: entityConfig,
           page: pageConfig,
           id: id
@@ -1002,11 +1041,18 @@ limitations under the License.
         return (entity && date) ? (entity + ' by ' + date + ' Timeline') : undefined;
       },
 
-      createToggleTimelineListener: function(index) {
+      getDateProperty: function(collection, selected, property) {
+        if(!collection || !selected || !property) {
+          return undefined;
+        }
+        return collection[selected][property];
+      },
+
+      createToggleBarChartListener: function(index) {
         var self = this;
         return {
           onClick: function() {
-            self.set(['sortedHistogramFields', index, 'shouldShowChart'], !self.sortedHistogramFields[index].shouldShowChart);
+            self.set(['histogramFields', index, 'shouldShowChart'], !self.histogramFields[index].shouldShowChart);
           }
         };
       },
@@ -1018,15 +1064,22 @@ limitations under the License.
         return {
           name: searchFieldsObject.title,
           namePlural: searchFieldsObject.titlePlural,
-          sayOther: (pageConfig && pageConfig.key === searchFieldsObject.key),
+          sayOther: (pageConfig.key === searchFieldsObject.key),
           totalCount: totalCount
         };
       },
 
-      getSectionTitleTransformFunction: function(size, config) {
+      getAggregationTitleTransformFunction: function(size, config) {
         var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         var totalCountString = config.totalCount !== undefined && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
         return sizeString + totalCountString + (config.sayOther ? ' Other ' : ' ') + (size === 1 ? config.name : config.namePlural);
+      },
+
+      getHistogramTitle: function(pageConfig, entityObject) {
+        if(!pageConfig || !entityObject) {
+          return undefined;
+        }
+        return entityObject.title + ' Timeline';
       },
 
       showDoubleBarChart: function(searchFieldsConfig) {
@@ -1035,70 +1088,71 @@ limitations under the License.
       /********************************/
 
       /******* Histogram Charts *******/
-      mergeHistograms: function(extractions) {
-        return extractions.sort(function(a, b) {
-          if((a.entity.type === ('date') && b.entity.type === ('date')) ||
-              !(a.entity.type === ('date') || b.entity.type === ('date'))) {
-            if(a.entity.key < b.entity.key) {
-              return -1;
-            } else if(a.entity.key > b.entity.key) {
-              return 1;
-            } else {
-              return 0;
-            }
-          } else if(a.entity.type === ('date')) {
-            return -1;
-          } else if(b.entity.type === ('date')) {
-            return 1;
-          }
-        });
-      },
-
       parseHistograms: function(results) {
-        if(Array.isArray(results)) {
-          var newResults = results.map(function(r) {
-            return r.data.map(function(d) {
-              d.date = r.date;
-              d.formattedDate = d3.time.format('%b %e, %Y').parse(d.date);
-              return d;
+        if(_.isArray(results)) {
+          var resultsWithDates = results.map(function(result) {
+            return result.data.map(function(item) {
+              item.date = result.date;
+              item.formattedDate = d3.time.format('%b %e, %Y').parse(item.date);
+              return item;
             });
-          })
-          .reduce(function(a, b) {
+          }).reduce(function(a, b) {
             return a.concat(b);
           });
 
-          var splitResults = {};
-          newResults.forEach(function(nr) {
-            var sortKey;
-            if(nr.type.indexOf('date') > -1 || nr.type.indexOf('Date') > -1) {
-              sortKey = nr.type.replace('_', ' ');
+          var unidentifiedData = [];
+          var resultTextToData = {};
+          resultsWithDates.forEach(function(result) {
+            if(!result.id) {
+              unidentifiedData.push(result);
             } else {
-              sortKey = nr.text;
+              if(!resultTextToData[result.text]) {
+                resultTextToData[result.text] = [];
+              }
+              resultTextToData[result.text].push(result);
             }
-            if(!splitResults[sortKey]) {
-              splitResults[sortKey] = [];
-            }
-            splitResults[sortKey].push(nr);
           });
 
-          var pointsMapArray = Object.keys(splitResults).map(function(key) {
-            var pointMap = splitResults[key].map(function(e) {
+          var pointsMapArray = _.keys(resultTextToData).map(function(text) {
+            var link;
+            var pointMap = resultTextToData[text].map(function(item) {
+              link = item.link;
               return {
-                date: e.date,
-                count: e.count,
-                formattedDate: e.formattedDate
+                count: item.count,
+                date: item.date,
+                formattedDate: item.formattedDate
               };
-            })
-            .sort(function(a, b) {
+            }).sort(function(a, b) {
               return (a.formattedDate - b.formattedDate);
             });
 
             if(pointMap.length > 0)  {
-              return {key: key, pointArray: pointMap};
+              return {
+                key: text,
+                link: link,
+                pointArray: pointMap
+              };
             }
           });
+
+          if(unidentifiedData.length) {
+            pointsMapArray.push({
+              key: 'Unidentified',
+              pointArray: unidentifiedData.map(function(item) {
+                return {
+                  count: item.count,
+                  date: item.date,
+                  formattedDate: item.formattedDate
+                };
+              }).sort(function(a, b) {
+                return (a.formattedDate - b.formattedDate);
+              })
+            });
+          }
+
           return pointsMapArray;
         }
+
         return undefined;
       },
 
@@ -1121,7 +1175,11 @@ limitations under the License.
           return range;
         });
         var scaledHistograms = ranges.map(function(range, index) {
-          var newHistogram = {key: histograms[index].key, pointArray: []};
+          var newHistogram = {
+            key: histograms[index].key,
+            link: histograms[index].link,
+            pointArray: []
+          };
           if(range[0].toString() !== overallRange[0].toString()) {
             newHistogram.pointArray.push({
               formattedDate: overallRange[0],
@@ -1140,39 +1198,43 @@ limitations under the License.
         return scaledHistograms;
       },
 
-      padHistograms: function(histograms, target) {
+      padHistograms: function(histograms, self) {
         var paddedHistograms = histograms.map(function(histogram) {
           var newpointArray  = [];
           newpointArray.push(histogram.pointArray[0]);
           for(var i = 1; i < histogram.pointArray.length; i++) {
             var leftPoint = histogram.pointArray[i - 1];
             var rightPoint = histogram.pointArray[i];
-            if(target.xscale(rightPoint.formattedDate) - target.xscale(leftPoint.formattedDate) > 1) {
+            if(self.xscale(rightPoint.formattedDate) - self.xscale(leftPoint.formattedDate) > 1) {
               newpointArray.push({
                 count: 0,
-                formattedDate: new Date(target.xunscale(target.xscale(leftPoint.formattedDate) + 1))
+                formattedDate: new Date(self.xunscale(self.xscale(leftPoint.formattedDate) + 1))
               });
             }
-            if(target.xscale(rightPoint.formattedDate) - target.xscale(leftPoint.formattedDate) > 2) {
+            if(self.xscale(rightPoint.formattedDate) - self.xscale(leftPoint.formattedDate) > 2) {
               newpointArray.push({
                 count: 0,
-                formattedDate: new Date(target.xunscale(target.xscale(rightPoint.formattedDate) - 1))
+                formattedDate: new Date(self.xunscale(self.xscale(rightPoint.formattedDate) - 1))
               });
             }
             newpointArray.push(rightPoint);
           }
-          return {key: histogram.key, pointArray: newpointArray};
+          return {
+            key: histogram.key,
+            link: histogram.link,
+            pointArray: newpointArray
+          };
         });
         return paddedHistograms;
       },
 
       makeConvertHistograms: function() {
-        var target = this;
-        if(target) {
+        var self = this;
+        if(self) {
           return function(histograms) {
-            var parsedHistograms = target.parseHistograms(histograms);
-            var scaledHistograms = target.scaleHistograms(parsedHistograms);
-            var paddedHistograms = target.padHistograms(scaledHistograms, target);
+            var parsedHistograms = self.parseHistograms(histograms);
+            var scaledHistograms = self.scaleHistograms(parsedHistograms);
+            var paddedHistograms = self.padHistograms(scaledHistograms, self);
             return paddedHistograms;
           };
         }

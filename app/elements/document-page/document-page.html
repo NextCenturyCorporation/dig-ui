@@ -350,7 +350,7 @@ limitations under the License.
 
           <div class="document-page">
             <div class="content">
-              <div class="flex layout vertical">
+              <div>
                 <template is="dom-repeat" items="[[documentInfo]]">
                   <template is="dom-if" if="[[isLocation(item.config.type)]]">
                     <section-and-map
@@ -438,7 +438,7 @@ limitations under the License.
                 </section-container>
               </div>
 
-              <div class="flex layout vertical">
+              <div>
                 <section-container class="details-section">
                   <build-and-run-query
                     fields='"doc_id"'
