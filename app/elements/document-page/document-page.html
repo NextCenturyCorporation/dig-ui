@@ -49,14 +49,14 @@ limitations under the License.
 <link rel="import" href="../../elements/section-container/section-container.html">
 <link rel="import" href="../../elements/section-title/section-title.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
-<link rel="import" href="../../styles/app-theme.html">
 <link rel="import" href="../../styles/entity-page-styles.html">
 <link rel="import" href="../../styles/icon-styles.html">
+<link rel="import" href="../../styles/page-styles.html">
 
 <dom-module id="document-page">
   <template>
     <style include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning"></style>
-    <style include="app-theme"></style>
+    <style include="page-styles"></style>
     <style include="entity-page-styles"></style>
     <style include="icon-styles"></style>
 
@@ -64,6 +64,20 @@ limitations under the License.
       :host {
         display: block;
         @apply --layout-fullbleed;
+      }
+
+      tag-entity-buttons ::content .background {
+        background-color: var(--paper-grey-400);
+        border-radius: 5px;
+        display: inline-block;
+        line-height: 30px;
+        margin-top: 10px;
+        max-height: 60px;
+        padding: 5px;
+      }
+
+      .details-section {
+        --section-container-padding: 0;
       }
     </style>
 
@@ -290,249 +304,245 @@ limitations under the License.
       sort-field="timestamp_crawl">
     </info-data>
 
-    <div class="entity">
-      <template is="dom-if" if="[[!document.id]]">
-        <div class="layout horizontal center-justified flex">
-          <loading-spinner show type="Page"></loading-spinner>
+    <template is="dom-if" if="[[!document.id]]">
+      <div class="layout horizontal center-justified flex">
+        <loading-spinner show type="Page"></loading-spinner>
+      </div>
+    </template>
+
+    <template is="dom-if" if="[[document.id]]">
+      <paper-header-panel class="flex" mode="waterfall-tall">
+        <div slot="header" class="page-head layout vertical">
+          <div class="layout horizontal center">
+            <div class="iron-icon-head">
+              <iron-icon class="grey" icon="icons:assignment"></iron-icon>
+            </div>
+            <div class="page-info flex">
+              <div class="page-name">
+                [[document.title]]
+              </div>
+              <div class="page-detail">
+                Crawl Date [[document.time]]
+              </div>
+            </div>
+
+            <div class="layout horizontal end-justified">
+              <paper-icon-button icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+            </div>
+          </div>
+
+          <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="40">
+            <div slot="dropdown-content">
+              <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
+                <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
+                View DIG Database Information
+              </paper-icon-item>
+
+              <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
+                <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
+                View DIG Data Training Options
+              </paper-icon-item>
+
+              <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+                <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
+                Open a DIG Search Page in a New Tab
+              </paper-icon-item>
+
+              <paper-icon-item title="Open DIG Help Page" on-tap="openHelpPage">
+                <iron-icon slot="item-icon" icon="fa:question-circle" item-icon></iron-icon>
+                Open the DIG Help Page
+              </paper-icon-item>
+
+              <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="emailSupport">
+                <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
+                Contact DIG / Memex Support
+              </paper-icon-item>
+            </div>
+          </iron-dropdown>
         </div>
-      </template>
 
-      <template is="dom-if" if="[[document.id]]">
-        <paper-header-panel class="flex" mode="waterfall-tall">
-          <div slot="header" class="page-header layout vertical">
-            <div class="layout horizontal center">
-              <div class="iron-icon-header">
-                <iron-icon class="grey" icon="icons:assignment"></iron-icon>
-              </div>
-              <div class="page-info flex">
-                <div class="page-name">
-                  [[document.title]]
-                </div>
-                <div class="page-detail">
-                  Crawl Date [[document.time]]
-                </div>
-              </div>
+        <div class="page-body">
+          <div class="page-column">
+            <template is="dom-repeat" items="[[documentInfo]]">
+              <template is="dom-if" if="[[isLocation(item.config.type)]]">
+                <section-and-map
+                  show-copy
+                  icon="[[item.config.icon]]"
+                  style-class="[[item.config.styleClass]]"
+                  text-property="textAndCount"
+                  transform-config="[[getSectionTitleTransformConfig(item.config)]]"
+                  transform-function="[[getSectionTitleTransformFunction]]"
+                  data="[[item.data]]">
 
-              <div class="layout horizontal end-justified">
-                <paper-icon-button icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
-              </div>
-            </div>
-
-            <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="40">
-              <div slot="dropdown-content">
-                <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
-                  <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
-                  View DIG Database Information
-                </paper-icon-item>
-
-                <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
-                  <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
-                  View DIG Data Training Options
-                </paper-icon-item>
-
-                <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-                  <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
-                  Open a DIG Search Page in a New Tab
-                </paper-icon-item>
-
-                <paper-icon-item title="Open DIG Help Page" on-tap="openHelpPage">
-                  <iron-icon slot="item-icon" icon="fa:question-circle" item-icon></iron-icon>
-                  Open the DIG Help Page
-                </paper-icon-item>
-
-                <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="emailSupport">
-                  <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
-                  Contact DIG / Memex Support
-                </paper-icon-item>
-              </div>
-            </iron-dropdown>
-          </div>
-
-          <div class="document-page">
-            <div class="content">
-              <div>
-                <template is="dom-repeat" items="[[documentInfo]]">
-                  <template is="dom-if" if="[[isLocation(item.config.type)]]">
-                    <section-and-map
-                      show-copy
-                      icon="[[item.config.icon]]"
-                      style-class="[[item.config.styleClass]]"
-                      text-property="textAndCount"
-                      transform-config="[[getSectionTitleTransformConfig(item.config)]]"
-                      transform-function="[[getSectionTitleTransformFunction]]"
-                      data="[[item.data]]">
-
-                      <detail-subsection
-                        entity-id="[[document.id]]"
-                        icon-style-class-property="styleClass"
-                        extractions="[[item.data]]">
-                      </detail-subsection>
-                    </section-and-map>
-                  </template>
-
-                  <template is="dom-if" if="[[isOther(item.config.type)]]">
-                    <section-and-title
-                      show-copy
-                      icon="[[item.config.icon]]"
-                      style-class="[[item.config.styleClass]]"
-                      transform-config="[[getSectionTitleTransformConfig(item.config)]]"
-                      transform-function="[[getSectionTitleTransformFunction]]"
-                      data="[[item.data]]">
-
-                      <detail-subsection
-                        entity-id="[[document.id]]"
-                        icon-style-class-property="styleClass"
-                        extractions="[[item.data]]">
-                      </detail-subsection>
-                    </section-and-title>
-                  </template>
-                </template>
-
-                <section-container>
-                  <section-title
-                    icon="icons:assignment"
-                    style-class="entity-grey"
-                    section-title="[[revisionTitle]]">
-
-                    <template is="dom-if" if="[[revisionDocumentsShown]]">
-                      <export-button
-                        data="[[revisionDocumentsShown]]"
-                        search-fields="[[searchFields]]"
-                        transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                        transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
-                      </export-button>
-                    </template>
-                  </section-title>
-
-                  <template is="dom-if" if="[[revisionError]]">
-                    <elastic-error error="[[revisionError]]" message="{{revisionErrorMessage}}"></elastic-error>
-                    <div>[[revisionErrorMessage]]</div>
-                  </template>
-
-                  <template is="dom-if" if="[[revisionTotal]]">
-                    <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
-                    <info-revisions></info-revisions>
-                  </template>
-
-                  <result-list
-                    text-property="title"
-                    query-results="[[revisionDocuments]]"
-                    total-results="{{revisionTotal}}"
-                    shown-results="{{revisionDocumentsShown}}"
-                    page="{{revisionPage}}"
-                    page-size="25"
-                    loading="[[revisionLoading]]"
-                    pretty-name="Revisions"
-                    pretty-name-singular="Revision"
-                    header="{{revisionTitle}}"
-                    cache-transform="[[transforms.entity.cache]]"
-                    client="[[esClient]]"
-                    index-name="[[esConfig.esIndex]]"
-                    index-types="[[esConfig.esType]]"
-                    search-fields="[[searchFields]]"
-                    source-include='["raw_content"]'
-                    small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-                    large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                    tag-manager="[[tagManager]]">
-                  </result-list>
-                </section-container>
-              </div>
-
-              <div>
-                <section-container class="details-section">
-                  <build-and-run-query
-                    fields='"doc_id"'
-                    values="[[document.id]]"
-                    client="[[esClient]]"
-                    index-name="[[esConfig.esIndex]]"
-                    index-types="[[esConfig.esType]]"
-                    aggregations="[]"
-                    filters="[]"
-                    source-include='["raw_content"]'
-                    transform-config="[[searchFields]]"
-                    transform-function="[[transforms.entity.cache]]"
-                    error="{{cachedPageError}}"
-                    loading="{{cachedPageLoading}}"
-                    results="{{cachedPage}}">
-                  </build-and-run-query>
-
-                  <single-result
-                    hide-header
-                    open
-                    cached-page="[[cachedPage]]"
-                    icon="[[document.icon]]"
-                    result-id="[[document.id]]"
-                    style-class="[[document.styleClass]]"
-                    tags="[[document.tags]]"
-                    type="[[document.type]]"
-                    details="[[document.details]]"
-                    images="[[document.images]]"
-                    small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-                    large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                    tag-manager="[[tagManager]]">
-                  </single-result>
-
-                  <tag-entity-buttons
-                    class="layout horizontal center-justified"
+                  <detail-subsection
                     entity-id="[[document.id]]"
-                    entity-type="[[document.type]]"
-                    tag-manager="[[tagManager]]"
-                    tags="[[document.tags]]">
-                  </tag-entity-buttons>
-                </section-container>
+                    icon-style-class-property="styleClass"
+                    extractions="[[item.data]]">
+                  </detail-subsection>
+                </section-and-map>
+              </template>
 
-                <section-container>
-                  <section-title
-                    icon="icons:assignment"
-                    style-class="entity-grey"
-                    section-title="[[moreLikeThisTitle]]">
+              <template is="dom-if" if="[[isOther(item.config.type)]]">
+                <section-and-title
+                  show-copy
+                  icon="[[item.config.icon]]"
+                  style-class="[[item.config.styleClass]]"
+                  transform-config="[[getSectionTitleTransformConfig(item.config)]]"
+                  transform-function="[[getSectionTitleTransformFunction]]"
+                  data="[[item.data]]">
 
-                    <export-button
-                      data="[[moreLikeThisDocumentsShown]]"
-                      search-fields="[[searchFields]]"
-                      transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                      transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
-                    </export-button>
-                  </section-title>
+                  <detail-subsection
+                    entity-id="[[document.id]]"
+                    icon-style-class-property="styleClass"
+                    extractions="[[item.data]]">
+                  </detail-subsection>
+                </section-and-title>
+              </template>
+            </template>
 
-                  <template is="dom-if" if="[[moreLikeThisError]]">
-                    <elastic-error error="[[moreLikeThisError]]" message="{{moreLikeThisErrorMessage}}"></elastic-error>
-                    <div>[[moreLikeThisErrorMessage]]</div>
-                  </template>
+            <section-container>
+              <section-title
+                icon="icons:assignment"
+                style-class="entity-grey"
+                section-title="[[revisionTitle]]">
 
-                  <template is="dom-if" if="[[moreLikeThisTotal]]">
-                    <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
-                    <info-similar-documents></info-similar-documents>
-                  </template>
-
-                  <result-list
-                    text-property="title"
-                    query-results="[[moreLikeThisDocuments]]"
-                    total-results="{{moreLikeThisTotal}}"
-                    shown-results="{{moreLikeThisDocumentsShown}}"
-                    page="{{moreLikeThisPage}}"
-                    page-size="25"
-                    loading="[[moreLikeThisLoading]]"
-                    pretty-name="Similar Results"
-                    pretty-name-singular="Similar Result"
-                    header="{{moreLikeThisTitle}}"
-                    cache-transform="[[transforms.entity.cache]]"
-                    client="[[esClient]]"
-                    index-name="[[esConfig.esIndex]]"
-                    index-types="[[esConfig.esType]]"
+                <template is="dom-if" if="[[revisionDocumentsShown]]">
+                  <export-button
+                    data="[[revisionDocumentsShown]]"
                     search-fields="[[searchFields]]"
-                    source-include='["raw_content"]'
-                    small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-                    large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                    tag-manager="[[tagManager]]">
-                  </result-list>
-                </section-container>
-              </div>
-            </div>
+                    transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                    transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
+                  </export-button>
+                </template>
+              </section-title>
+
+              <template is="dom-if" if="[[revisionError]]">
+                <elastic-error error="[[revisionError]]" message="{{revisionErrorMessage}}"></elastic-error>
+                <div>[[revisionErrorMessage]]</div>
+              </template>
+
+              <template is="dom-if" if="[[revisionTotal]]">
+                <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
+                <info-revisions></info-revisions>
+              </template>
+
+              <result-list
+                text-property="title"
+                query-results="[[revisionDocuments]]"
+                total-results="{{revisionTotal}}"
+                shown-results="{{revisionDocumentsShown}}"
+                page="{{revisionPage}}"
+                page-size="25"
+                loading="[[revisionLoading]]"
+                pretty-name="Revisions"
+                pretty-name-singular="Revision"
+                header="{{revisionTitle}}"
+                cache-transform="[[transforms.entity.cache]]"
+                client="[[esClient]]"
+                index-name="[[esConfig.esIndex]]"
+                index-types="[[esConfig.esType]]"
+                search-fields="[[searchFields]]"
+                source-include='["raw_content"]'
+                small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                tag-manager="[[tagManager]]">
+              </result-list>
+            </section-container>
           </div>
-        </paper-header-panel>
-      </template>
-    </div>
+
+          <div class="page-column">
+            <section-container class="details-section">
+              <build-and-run-query
+                fields='"doc_id"'
+                values="[[document.id]]"
+                client="[[esClient]]"
+                index-name="[[esConfig.esIndex]]"
+                index-types="[[esConfig.esType]]"
+                aggregations="[]"
+                filters="[]"
+                source-include='["raw_content"]'
+                transform-config="[[searchFields]]"
+                transform-function="[[transforms.entity.cache]]"
+                error="{{cachedPageError}}"
+                loading="{{cachedPageLoading}}"
+                results="{{cachedPage}}">
+              </build-and-run-query>
+
+              <single-result
+                hide-header
+                open
+                cached-page="[[cachedPage]]"
+                icon="[[document.icon]]"
+                result-id="[[document.id]]"
+                style-class="[[document.styleClass]]"
+                tags="[[document.tags]]"
+                type="[[document.type]]"
+                details="[[document.details]]"
+                images="[[document.images]]"
+                small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                tag-manager="[[tagManager]]">
+              </single-result>
+
+              <tag-entity-buttons
+                class="layout horizontal center-justified"
+                entity-id="[[document.id]]"
+                entity-type="[[document.type]]"
+                tag-manager="[[tagManager]]"
+                tags="[[document.tags]]">
+              </tag-entity-buttons>
+            </section-container>
+
+            <section-container>
+              <section-title
+                icon="icons:assignment"
+                style-class="entity-grey"
+                section-title="[[moreLikeThisTitle]]">
+
+                <export-button
+                  data="[[moreLikeThisDocumentsShown]]"
+                  search-fields="[[searchFields]]"
+                  transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                  transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
+                </export-button>
+              </section-title>
+
+              <template is="dom-if" if="[[moreLikeThisError]]">
+                <elastic-error error="[[moreLikeThisError]]" message="{{moreLikeThisErrorMessage}}"></elastic-error>
+                <div>[[moreLikeThisErrorMessage]]</div>
+              </template>
+
+              <template is="dom-if" if="[[moreLikeThisTotal]]">
+                <div class="note">Please note that only the top 10 extractions of each type are shown in the list.</div>
+                <info-similar-documents></info-similar-documents>
+              </template>
+
+              <result-list
+                text-property="title"
+                query-results="[[moreLikeThisDocuments]]"
+                total-results="{{moreLikeThisTotal}}"
+                shown-results="{{moreLikeThisDocumentsShown}}"
+                page="{{moreLikeThisPage}}"
+                page-size="25"
+                loading="[[moreLikeThisLoading]]"
+                pretty-name="Similar Results"
+                pretty-name-singular="Similar Result"
+                header="{{moreLikeThisTitle}}"
+                cache-transform="[[transforms.entity.cache]]"
+                client="[[esClient]]"
+                index-name="[[esConfig.esIndex]]"
+                index-types="[[esConfig.esType]]"
+                search-fields="[[searchFields]]"
+                source-include='["raw_content"]'
+                small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                tag-manager="[[tagManager]]">
+              </result-list>
+            </section-container>
+          </div>
+        </div>
+      </paper-header-panel>
+    </template>
   </template>
 
   <script>

@@ -17,30 +17,18 @@ limitations under the License.
 <dom-module id="entity-page-styles">
   <template>
     <style>
-      .entity {
-        height: 100%;
-        @apply --layout-horizontal;
-      }
-
-      .document-page,
-      .entity-page {
-        @apply --layout-vertical;
-      }
-
-      /* Entity page header */
-
-      .page-header {
+      .page-head {
         min-height: 30px;
         padding: 20px;
         transition: height 0.2s;
       }
 
-      .page-header .page-info {
+      .page-head .page-info {
         padding: 0 10px;
         transition: padding 0.2s;
       }
 
-      .page-header .page-name {
+      .page-head .page-name {
         font-size: 24px;
         font-weight: 500;
         line-height: 30px;
@@ -48,7 +36,7 @@ limitations under the License.
         word-break: break-word;
       }
 
-      .page-header .page-detail {
+      .page-head .page-detail {
         color: var(--secondary-text-color);
         font-size: 16px;
         font-weight: 500;
@@ -56,87 +44,38 @@ limitations under the License.
         transition: font-size 0.2s;
       }
 
-      .page-header selected-facets-display {
+      .page-head selected-facets-display {
         --selected-facet-item-style-mixin: {
           margin-top: 10px;
         };
       }
 
-      .iron-icon-header iron-icon {
-        /* Same height as page-header */
+      .page-head .iron-icon-head iron-icon {
+        /* Same height as page-head */
         --iron-icon-height: 30px;
         --iron-icon-width: 30px;
         min-width: 30px;
       }
 
-      .image-section {
-        --section-container-padding: 0;
+      .page-body {
+        @apply --layout-horizontal;
+        margin: 0 10px;
       }
 
-      .image-section iron-image {
-        --iron-image-height: auto;
-        --iron-image-width: auto;
-        padding: 0;
-        margin: 0;
+      .page-body > * {
+        @apply --layout-vertical;
+        @apply --layout-flex;
+        display: block;
+        margin: 0 10px;
       }
 
-      .image-section iron-image ::content img {
-        max-height: 400px;
-      }
-
-      .details-section {
-        --section-container-padding: 0;
-      }
-
-      /* Other */
-
-      time {
-        margin-left: 5px;
-      }
-
-      result-list {
+      .page-body result-list {
         icon-label {
          --extraction-text: {
             max-width: 115px;
             white-space: nowrap;
           }
         }
-      }
-
-      image-query-and-display {
-        --image-query-and-display-max-height: 800px;
-      }
-
-      .info-link {
-        color: var(--secondary-text-color);
-        cursor: pointer;
-        line-height: 30px;
-      }
-
-      .info-link:hover {
-        color: var(--primary-text-color);
-      }
-
-      .info-link iron-icon {
-        --iron-icon-height: 20px;
-        --iron-icon-width: 20px;
-        padding-bottom: 4px;
-      }
-
-      .info-link span {
-        font-size: 14px;
-        font-style: italic;
-        text-decoration: underline;
-      }
-
-      .document-page tag-entity-buttons ::content .background {
-        background-color: var(--paper-grey-400);
-        border-radius: 5px;
-        display: inline-block;
-        line-height: 30px;
-        margin-top: 10px;
-        max-height: 60px;
-        padding: 5px;
       }
 
       /* Material Design Adaptive Breakpoints */
@@ -169,7 +108,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .page-header .page-info {
+        .page-head .page-info {
           @apply --layout-flex;
         }
       }
@@ -178,7 +117,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .page-header .page-info {
+        .page-head .page-info {
           @apply --layout-flex;
         }
       }
@@ -187,7 +126,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .page-header .page-info {
+        .page-head .page-info {
           @apply --layout-flex;
         }
       }
@@ -196,7 +135,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .page-header .page-info {
+        .page-head .page-info {
           @apply --layout-flex;
         }
       }
@@ -205,7 +144,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .page-header .page-info {
+        .page-head .page-info {
           @apply --layout-flex;
         }
       }
@@ -214,7 +153,7 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .page-header .page-info {
+        .page-head .page-info {
           @apply --layout-flex;
         }
       }

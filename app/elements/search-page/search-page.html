@@ -44,17 +44,134 @@ limitations under the License.
 <link rel="import" href="../../elements/info-search/info-search.html">
 <link rel="import" href="../../elements/similar-image-search/similar-image-search.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
-<link rel="import" href="../../styles/app-theme.html">
+<link rel="import" href="../../styles/page-styles.html">
 
 <dom-module id="search-page">
   <template>
     <style include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning"></style>
-    <style include="app-theme"></style>
+    <style include="page-styles"></style>
 
     <style>
       :host {
         display: block;
         @apply --layout-fullbleed;
+      }
+
+      search-fields-dialog {
+        /* Center with the screen.  Left:  320px facets drawer.  Right:  10px navbar padding + 40px per navbar icon. */
+        margin-right: 230px;
+      }
+
+      paper-drawer-panel {
+        --paper-drawer-panel-left-drawer-container: {
+          background-color: var(--primary-background-color);
+          border-right: 1px solid rgba(0,0,0,var(--dark-divider-opacity));
+        };
+      }
+
+      #navbar {
+        background-color: var(--navbar-color);
+        color: var(--text-primary-color);
+        --paper-toolbar-height: 60px;
+        --paper-toolbar-content: {
+          padding: 0 10px;
+        };
+      }
+
+      #navbar modal-icon {
+        --paper-icon-button: {
+          margin: 20px 0 0;
+        }
+      }
+
+      #navbar paper-icon-button[icon=menu] {
+        /* Override default style */
+        margin-right: 0px;
+      }
+
+      #navbar paper-icon-button,
+      .page-header paper-icon-button {
+        --paper-icon-button: {
+          padding: 5px;
+        }
+      }
+
+      /* Spacer to match drawer width */
+      #navbar .drawer-spacer {
+        width: 220px;
+      }
+
+      facet-panel {
+        --facet-panel-selected-facet-background-color: var(--facet-background-color);
+        --facet-panel-selected-facet-text-color: var(--primary-text-color);
+        --facet-panel-selected-facet-icon-hover-color: #fff;
+      }
+
+      #searchPanel {
+        --paper-header-panel-container: {
+          background-color: #ffffff;
+        };
+      }
+
+      #searchTitle {
+        border-bottom: 1px solid var(--primary-background-color);
+        padding: 15px 25px;
+      }
+
+      #searchTitle .note {
+        margin-bottom: 0;
+        margin-top: 10px;
+      }
+
+      #searchTitle .search-results-title {
+        font-size: 24px;
+        font-weight: 500;
+        /* Match the height of the export button. */
+        line-height: 30px;
+        /* Needed to fix flexbox layout issues in newer browsers. */
+        display: -webkit-box;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        word-break: break-word;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+      }
+
+      #searchResults {
+        position: absolute;
+        top: 130px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+
+        --result-list-scroll-threshold: {
+          height: auto;
+          max-height: none;
+          position: absolute;
+          bottom: 70px;
+          top: 0;
+          left: 0;
+          right: 0;
+        };
+
+        --result-list-loading-spinner: {
+          border-top: 1px solid var(--primary-background-color);
+          position: absolute;
+          bottom: 20px;
+          left: 0;
+          right: 0;
+          padding: 25px 0 5px;
+        };
+
+        --result-list-show-more-button: {
+          border-top: 1px solid var(--primary-background-color);
+          position: absolute;
+          bottom: 20px;
+          left: 0;
+          right: 0;
+          padding: 20px 0 0;
+        };
       }
 
       #searchResultsImages {
