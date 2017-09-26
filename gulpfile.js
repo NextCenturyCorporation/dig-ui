@@ -204,6 +204,7 @@ gulp.task('copy', function() {
 
   var sourceMaps = gulp.src([
     'app/bower_components/web-animations-js/web-animations-next-lite.min.js.map',
+    'app/bower_components/shadycss/*.min.js.map',
     'app/bower_components/pdfmake/build/pdfmake.min.js.map'
   ]).pipe(gulp.dest(dist('elements')));
 
