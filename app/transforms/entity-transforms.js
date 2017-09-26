@@ -294,10 +294,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         }
         return ('' + a.text).toLowerCase() - ('' + b.text).toLowerCase();
       });
-      if(!documentPage) {
-        // TODO Don't truncate the extractions once the data can support it.
-        extractionObject.data = extractionObject.data.slice(0, 10);
-      }
       return extractionObject;
     };
 
