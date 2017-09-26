@@ -7,6 +7,7 @@
   "license": "Apache-2.0",
   "private": false,
   "dependencies": {
+    "aggregation-dialog": "DigElements/aggregation-dialog#2.2.2",
     "aggregation-query-and-display": "DigElements/aggregation-query-and-display#2.2.0",
     "app-layout": "PolymerElements/app-layout#^2.0.0",
     "array-behavior": "DigElements/array-behavior#1.0.2",
@@ -74,6 +75,7 @@
     "web-component-tester": "^6.1.5"
   },
   "resolutions": {
+    "aggregation-dialog": "2.2.2",
     "breadbox-item": "2.0.4",
     "build-and-run-query": "2.2.0",
     "elastic-client-search": "2.1.0",
