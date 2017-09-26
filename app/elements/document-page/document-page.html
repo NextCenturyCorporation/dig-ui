@@ -16,9 +16,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
-<!--
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
--->
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
 <link rel="import" href="../../bower_components/elastic-client-filter-builder/elastic-client-filter-builder.html">
 <link rel="import" href="../../bower_components/elastic-client-query-builder/elastic-client-query-builder.html">
@@ -159,21 +157,22 @@ limitations under the License.
       client="{{esClient}}">
     </elastic-client>
 
-    <!-- Logger for Pagination -->
+    <!-- Logger for Revisions Pagination -->
     <dig-logger
       es-client="[[esClient]]"
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
-      type="Document-ShowRevisionPageNumber"
+      type="Document-RevisionPage"
       data="[[revisionPageNumber]]"
       username="defaultUser">
     </dig-logger>
 
+    <!-- Logger for Similar Documents Pagination -->
     <dig-logger
       es-client="[[esClient]]"
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
-      type="Document-ShowSimilarDocPageNumber"
+      type="Document-SimilarDocPage"
       data="[[moreLikeThisPageNumber]]"
       username="defaultUser">
     </dig-logger>
@@ -184,7 +183,6 @@ limitations under the License.
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
       type="Document-Open"
-      data=""
       username="defaultUser"
       logger="{{logger}}">
     </dig-logger>

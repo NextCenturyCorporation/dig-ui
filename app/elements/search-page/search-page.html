@@ -15,9 +15,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<!--
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
--->
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
 <link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
 <link rel="import" href="../../bower_components/export-button/export-button.html">
@@ -363,7 +361,7 @@ limitations under the License.
       es-client="[[esClient]]"
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
-      type="Search-ShowResultPageNumber"
+      type="Search-ResultPage"
       data="[[searchPage]]"
       username="defaultUser">
     </dig-logger>
@@ -374,7 +372,6 @@ limitations under the License.
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
       type="Search-Open"
-      data=""
       username="defaultUser"
       logger="{{logger}}">
     </dig-logger>

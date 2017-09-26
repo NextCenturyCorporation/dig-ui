@@ -18,9 +18,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/aggregation-query-and-display/aggregation-query-and-display.html">
 <link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
 <link rel="import" href="../../bower_components/d3-import/d3.html">
-<!--
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
--->
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
 <link rel="import" href="../../bower_components/elastic-client-aggregation-builder/elastic-client-aggregation-builder.html">
 <link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
@@ -272,7 +270,7 @@ limitations under the License.
       es-client="[[esClient]]"
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
-      type="Filter-SubmitSearch"
+      type="Entity-Filter"
       data="[[logMessage]]"
       username="defaultUser">
     </dig-logger>
@@ -282,7 +280,7 @@ limitations under the License.
       es-client="[[esClient]]"
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
-      type="Entity-Filter"
+      type="Entity-ResultPage"
       data="[[searchPage]]"
       username="defaultUser">
     </dig-logger>
