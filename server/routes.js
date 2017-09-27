@@ -51,6 +51,8 @@ module.exports = function(app) {
       logType: serverConfig.logType,
       overrideConfig: serverConfig.overrideConfig,
       overrideSearchEndpoint: serverConfig.overrideSearchEndpoint,
+      profileIndexName: serverConfig.profileIndexName,
+      profileIndexType: serverConfig.profileIndexType,
       searchConfig: serverConfig.searchConfig,
       stateIndexName: serverConfig.stateIndexName,
       stateIndexType: serverConfig.stateIndexType,

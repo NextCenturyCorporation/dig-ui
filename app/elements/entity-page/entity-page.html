@@ -33,11 +33,13 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/profile-manager/profile-manager.html">
 <link rel="import" href="../../bower_components/result-list/result-list.html">
 <link rel="import" href="../../bower_components/selected-facets-display/selected-facets-display.html">
 <link rel="import" href="../../bower_components/state-manager/state-manager.html">
 <link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
 <link rel="import" href="../../bower_components/terms-transformer/terms-transformer.html">
+<link rel="import" href="../../bower_components/user-settings-dialog/user-settings-dialog.html">
 <link rel="import" href="../../bower_components/zoomable-bar-chart/zoomable-bar-chart.html">
 <!--
 <link rel="import" href="../../elements/info-aggregations/info-aggregations.html">
@@ -79,13 +81,13 @@ limitations under the License.
       .date-menu paper-dropdown-menu {
         --paper-input-container: {
           padding: 0 !important;
-        }
+        };
       }
 
       .date-menu paper-listbox {
         --paper-listbox: {
           padding: 0;
-        }
+        };
       }
 
       .date-menu paper-item {
@@ -94,7 +96,7 @@ limitations under the License.
           cursor: pointer;
           padding: 0 10px;
           white-space: nowrap;
-        }
+        };
       }
 
       image-query-and-display {
@@ -171,8 +173,8 @@ limitations under the License.
     <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
-      data-out="{{dateConfig}}"
-      combine-function="[[transforms.config.dateConfig]]">
+      data-out="{{dateFieldsToProperties}}"
+      combine-function="[[transforms.config.dateFieldsToProperties]]">
     </json-combine>
 
     <json-combine
@@ -243,7 +245,7 @@ limitations under the License.
       es-type="[[serverConfig.logType]]"
       type="Entity-Filter"
       data="[[logMessage]]"
-      username="defaultUser">
+      username="[[serverConfig.username]]">
     </dig-logger>
 
      <!-- Logger for Pagination -->
@@ -253,7 +255,7 @@ limitations under the License.
       es-type="[[serverConfig.logType]]"
       type="Entity-ResultPage"
       data="[[searchPage]]"
-      username="defaultUser">
+      username="[[serverConfig.username]]">
     </dig-logger>
 
     <!-- Logger for Page View -->
@@ -261,7 +263,7 @@ limitations under the License.
       es-client="[[esClient]]"
       es-index="[[serverConfig.logIndex]]"
       es-type="[[serverConfig.logType]]"
-      username="defaultUser"
+      username="[[serverConfig.username]]"
       logger="{{logger}}">
     </dig-logger>
 
@@ -269,6 +271,25 @@ limitations under the License.
       object="{{filterCollection}}"
       log-message="{{logMessage}}">
     </log-creator>
+
+    <profile-manager
+      build-search-state-function="[[transforms.config.searchState]]"
+      client="[[esClient]]"
+      index-name="[[serverConfig.profileIndexName]]"
+      index-type="[[serverConfig.profileIndexType]]"
+      query-builder-config="[[searchFields]]"
+      query-builder-date-fields="[[dateFieldsToProperties]]"
+      search-parameters="[[searchParameters]]"
+      username="[[serverConfig.username]]"
+      blur-images="{{blurImages}}"
+      cases="{{cases}}"
+      email-address="{{emailAddress}}"
+      notifications="{{notifications}}"
+      notification-interval="{{notificationInterval}}"
+      profile-manager="{{profileManager}}"
+      user-id="{{userId}}"
+      user-loading="{{userLoading}}">
+    </profile-manager>
 
     <build-and-run-query
       fields="[[pageConfig.field]]"
@@ -394,6 +415,22 @@ limitations under the License.
               </template>
             </div>
           </div>
+
+          <user-settings-dialog
+            build-search-state-function="[[transforms.config.searchState]]"
+            build-search-terms-function="[[transforms.config.searchTerms]]"
+            reset-search-dates-function="[[createResetDatesFunction(searchFields)]]"
+            cases="[[cases]]"
+            user-id="[[userId]]"
+            user-loading="[[userLoading]]"
+            username="[[serverConfig.username]]"
+            blur-images="{{blurImages}}"
+            email-address="{{emailAddress}}"
+            notifications="{{notifications}}"
+            notification-date="{{notificationDate}}"
+            notification-interval="{{notificationInterval}}"
+            search-parameters="{{searchParameters}}">
+          </user-settings-dialog>
 
           <paper-icon-button icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
@@ -738,6 +775,10 @@ limitations under the License.
           type: Boolean
         },
 
+        cases: {
+          type: Array
+        },
+
         clientConfig: {
           type: Object
         },
@@ -759,7 +800,7 @@ limitations under the License.
           type: Object
         },
 
-        dateConfig: {
+        dateFieldsToProperties: {
           type: Object
         },
 
@@ -773,6 +814,10 @@ limitations under the License.
 
         domain: {
           computed: 'findDomain(parameters, serverConfig)',
+          type: String
+        },
+
+        emailAddress: {
           type: String
         },
 
@@ -838,6 +883,14 @@ limitations under the License.
           type: Object
         },
 
+        notifications: {
+          type: Boolean
+        },
+
+        notificationInterval: {
+          type: String
+        },
+
         pageConfig: {
           type: Object
         },
@@ -859,6 +912,10 @@ limitations under the License.
         processRequest: {
           type: Boolean,
           value: false
+        },
+
+        profileManager: {
+          type: Object
         },
 
         searchError: {
@@ -907,6 +964,14 @@ limitations under the License.
 
         transforms: {
           type: Object
+        },
+
+        userId: {
+          type: String
+        },
+
+        userLoading: {
+          type: Boolean
         },
 
         xscale: {
@@ -960,6 +1025,31 @@ limitations under the License.
           };
         }
         return {};
+      },
+
+      createResetDatesFunction: function(searchFields) {
+        return function(searchParameters, startDateString, endDateString) {
+          searchFields.forEach(function(searchFieldsObject) {
+            if(searchFieldsObject.isDate) {
+              searchParameters[searchFieldsObject.key] = {};
+              searchParameters[searchFieldsObject.key][searchFieldsObject.dateProperties.start.key] = startDateString ? {
+                key: searchFieldsObject.dateProperties.start.key,
+                category: searchFieldsObject.dateProperties.start.title,
+                date: new Date(startDateString),
+                enabled: true,
+                text: startDateString
+              } : undefined;
+              searchParameters[searchFieldsObject.key][searchFieldsObject.dateProperties.end.key] = endDateString ? {
+                key: searchFieldsObject.dateProperties.end.key,
+                category: searchFieldsObject.dateProperties.end.title,
+                date: new Date(endDateString),
+                enabled: true,
+                text: endDateString
+              } : undefined;
+            }
+          });
+          return searchParameters;
+        };
       },
 
       exists: function(object) {

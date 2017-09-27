@@ -83,21 +83,39 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
-     * Returns the config for the date fields needed for the other transforms.
+     * Returns the date fields mapped to the start and end properties needed for the other elements.
      *
      * @param {Object} searchFields
      * @return {Object}
      */
-    dateConfig: function(searchFields) {
-      var dateConfig = {};
+    dateFieldsToProperties: function(searchFields) {
+      var dateFieldsToProperties = {};
       searchFields.forEach(function(searchFieldsObject) {
         if(searchFieldsObject.isDate) {
-          var dateProperties = createDateProperties(searchFieldsObject);
-          dateConfig[dateProperties.start.key] = searchFieldsObject.key;
-          dateConfig[dateProperties.end.key] = searchFieldsObject.key;
+          dateFieldsToProperties[searchFieldsObject.field] = {
+            start: searchFieldsObject.dateProperties.start.key,
+            end: searchFieldsObject.dateProperties.end.key
+          };
         }
       });
-      return dateConfig;
+      return dateFieldsToProperties;
+    },
+
+    /**
+     * Returns the properties of the date fields mapped to the date keys needed for the other transforms.
+     *
+     * @param {Object} searchFields
+     * @return {Object}
+     */
+    datePropertiesToKeys: function(searchFields) {
+      var datePropertiesToKeys = {};
+      searchFields.forEach(function(searchFieldsObject) {
+        if(searchFieldsObject.isDate) {
+          datePropertiesToKeys[searchFieldsObject.dateProperties.start.key] = searchFieldsObject.key;
+          datePropertiesToKeys[searchFieldsObject.dateProperties.end.key] = searchFieldsObject.key;
+        }
+      });
+      return datePropertiesToKeys;
     },
 
     /**
@@ -404,13 +422,12 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       searchFields.filter(function(searchFieldsObject) {
         return searchFieldsObject.search && searchFieldsObject.isDate;
       }).forEach(function(searchFieldsObject) {
-        var dateProperties = createDateProperties(searchFieldsObject);
         dialogConfig.push({
           type: 'date',
           name: searchFieldsObject.title,
           data: [
-            dateProperties.start,
-            dateProperties.end
+            searchFieldsObject.dateProperties.start,
+            searchFieldsObject.dateProperties.end
           ]
         });
       });

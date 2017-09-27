@@ -48,6 +48,8 @@ module.exports = {
     logType: process.env.LOG_TYPE || 'log',
     overrideConfig: process.env.OVERRIDE_CONFIG ? JSON.parse(process.env.OVERRIDE_CONFIG) : undefined,
     overrideSearchEndpoint: process.env.OVERRIDE_SEARCH_ENDPOINT ? JSON.parse(process.env.OVERRIDE_SEARCH_ENDPOINT) : undefined,
+    profileIndexName: process.env.STATE_INDEX_NAME || 'dig-profiles',
+    profileIndexType: process.env.STATE_INDEX_TYPE || 'profile',
     searchConfig: process.env.SEARCH_CONFIG ? JSON.parse(process.env.SEARCH_CONFIG) : undefined,
     stateIndexName: process.env.STATE_INDEX_NAME || 'dig-states',
     stateIndexType: process.env.STATE_INDEX_TYPE || 'state',
