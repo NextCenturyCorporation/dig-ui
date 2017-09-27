@@ -362,39 +362,41 @@ limitations under the License.
         <div class="page-body">
           <div class="page-column">
             <template is="dom-repeat" items="[[documentInfo]]">
-              <template is="dom-if" if="[[isLocation(item.config.type)]]">
-                <section-and-map
-                  show-copy
-                  icon="[[item.config.icon]]"
-                  style-class="[[item.config.styleClass]]"
-                  text-property="textAndCount"
-                  transform-config="[[getSectionTitleTransformConfig(item.config)]]"
-                  transform-function="[[getSectionTitleTransformFunction]]"
-                  data="[[item.data]]">
+              <template is="dom-if" if="[[!item.config.isImage)]]">
+                <template is="dom-if" if="[[item.config.isLocation]]">
+                  <section-and-map
+                    show-copy
+                    icon="[[item.config.icon]]"
+                    style-class="[[item.config.styleClass]]"
+                    text-property="textAndCount"
+                    transform-config="[[getSectionTitleTransformConfig(item.config)]]"
+                    transform-function="[[getSectionTitleTransformFunction]]"
+                    data="[[item.data]]">
 
-                  <detail-subsection
-                    entity-id="[[document.id]]"
-                    icon-style-class-property="styleClass"
-                    extractions="[[item.data]]">
-                  </detail-subsection>
-                </section-and-map>
-              </template>
+                    <detail-subsection
+                      entity-id="[[document.id]]"
+                      icon-style-class-property="styleClass"
+                      extractions="[[item.data]]">
+                    </detail-subsection>
+                  </section-and-map>
+                </template>
 
-              <template is="dom-if" if="[[isOther(item.config.type)]]">
-                <section-and-title
-                  show-copy
-                  icon="[[item.config.icon]]"
-                  style-class="[[item.config.styleClass]]"
-                  transform-config="[[getSectionTitleTransformConfig(item.config)]]"
-                  transform-function="[[getSectionTitleTransformFunction]]"
-                  data="[[item.data]]">
+                <template is="dom-if" if="[[!item.config.isLocation)]]">
+                  <section-and-title
+                    show-copy
+                    icon="[[item.config.icon]]"
+                    style-class="[[item.config.styleClass]]"
+                    transform-config="[[getSectionTitleTransformConfig(item.config)]]"
+                    transform-function="[[getSectionTitleTransformFunction]]"
+                    data="[[item.data]]">
 
-                  <detail-subsection
-                    entity-id="[[document.id]]"
-                    icon-style-class-property="styleClass"
-                    extractions="[[item.data]]">
-                  </detail-subsection>
-                </section-and-title>
+                    <detail-subsection
+                      entity-id="[[document.id]]"
+                      icon-style-class-property="styleClass"
+                      extractions="[[item.data]]">
+                    </detail-subsection>
+                  </section-and-title>
+                </template>
               </template>
             </template>
 
@@ -782,14 +784,6 @@ limitations under the License.
           });
         }
         return parameters;
-      },
-
-      isLocation: function(type) {
-        return type === 'location';
-      },
-
-      isOther: function(type) {
-        return type !== 'image' && type !== 'location';
       },
 
       /******** VISUALIZATIONS ********/

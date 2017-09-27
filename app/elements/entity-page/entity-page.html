@@ -193,13 +193,6 @@ limitations under the License.
     <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
-      data-out="{{dateFields}}"
-      combine-function="[[transforms.config.dateFields]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
       data-out="{{filterCollection}}"
       combine-function="[[transforms.config.filterCollection]]">
     </json-combine>
@@ -230,13 +223,6 @@ limitations under the License.
       data-in2="{}"
       data-out="{{histogramFields}}"
       combine-function="[[transforms.config.histogramFields]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{mapFields}}"
-      combine-function="[[transforms.config.mapFields]]">
     </json-combine>
 
     <json-combine
@@ -448,95 +434,97 @@ limitations under the License.
 
         <div class="page-body">
           <div class="page-column">
-            <template is="dom-repeat" items="[[mapFields]]">
-              <section-and-map
-                show-copy
-                icon="[[item.icon]]"
-                style-class="[[item.styleClass]]"
-                text-property="textAndCount"
-                transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
-                transform-function="[[getAggregationTitleTransformFunction]]"
-                data="[[item.mapData]]">
-
-                <aggregation-query-and-display
-                  aggregation-name="[[item.key]]"
-                  aggregation-field="[[item.field]]"
-                  selected-property="[[item.key]]"
-                  selected="{{filterCollection}}"
-                  query-field="[[pageConfig.field]]"
-                  query-value="[[pageId]]"
-                  client="[[esClient]]"
-                  index-name="[[esConfig.esIndex]]"
-                  index-types="[[esConfig.esType]]"
-                  filter-list="[[filterList]]"
-                  properties-ready="[[processRequest]]"
-                  transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
-                  transform-function="[[transforms.entity.extractions]]"
-                  data="{{item.mapData}}"
-                  header-data-name="[[item.title]]"
-                  header-counts-name="Results"
-                  header-entity-name="[[pageName]]"
-                  show-checkboxes
-                  show-double-bar-chart="[[showDoubleBarChart(item)]]">
-                </aggregation-query-and-display>
-
-                <template is="dom-if" if="[[item.mapData.length]]">
-                  <terms-transformer
-                    category="[[item.title]]"
-                    object="{{entityFilters}}"
-                    object-property="[[item.key]]"
-                    list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
-                    text-function="[[getTextFunction(item.mapData)]]">
-                  </terms-transformer>
-                </template>
-              </section-and-map>
-            </template>
-
             <template is="dom-repeat" items="[[aggregationFields]]">
               <template is="dom-if" if="[[item.result]]">
-                <section-and-title
-                  show-copy
-                  copy-type="[[item.titlePlural]]"
-                  icon="[[item.icon]]"
-                  style-class="[[item.styleClass]]"
-                  transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
-                  transform-function="[[getAggregationTitleTransformFunction]]"
-                  data="[[item.aggregationData]]">
+                <template is="dom-if" if="[[item.isLocation]]">
+                  <section-and-map
+                    show-copy
+                    icon="[[item.icon]]"
+                    style-class="[[item.styleClass]]"
+                    text-property="textAndCount"
+                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
+                    transform-function="[[getAggregationTitleTransformFunction]]"
+                    data="[[item.mapData]]">
 
-                  <aggregation-query-and-display
-                    aggregation-name="[[item.key]]"
-                    aggregation-field="[[item.field]]"
-                    selected-property="[[item.key]]"
-                    selected="{{filterCollection}}"
-                    query-field="[[pageConfig.field]]"
-                    query-value="[[pageId]]"
-                    client="[[esClient]]"
-                    index-name="[[esConfig.esIndex]]"
-                    index-types="[[esConfig.esType]]"
-                    filter-list="[[filterList]]"
-                    properties-ready="[[processRequest]]"
-                    transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
-                    transform-function="[[transforms.entity.extractions]]"
-                    data="{{item.aggregationData}}"
-                    header-data-name="[[item.title]]"
-                    header-counts-name="Results"
-                    header-entity-name="[[pageName]]"
-                    show-checkboxes
-                    show-double-bar-chart="[[showDoubleBarChart(item)]]">
-                  </aggregation-query-and-display>
+                    <aggregation-query-and-display
+                      aggregation-name="[[item.key]]"
+                      aggregation-field="[[item.field]]"
+                      selected-property="[[item.key]]"
+                      selected="{{filterCollection}}"
+                      query-field="[[pageConfig.field]]"
+                      query-value="[[pageId]]"
+                      client="[[esClient]]"
+                      index-name="[[esConfig.esIndex]]"
+                      index-types="[[esConfig.esType]]"
+                      filter-list="[[filterList]]"
+                      properties-ready="[[processRequest]]"
+                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
+                      transform-function="[[transforms.entity.extractions]]"
+                      data="{{item.mapData}}"
+                      header-data-name="[[item.title]]"
+                      header-counts-name="Results"
+                      header-entity-name="[[pageName]]"
+                      show-checkboxes
+                      show-double-bar-chart="[[showDoubleBarChart(item)]]">
+                    </aggregation-query-and-display>
 
-                  <template is="dom-if" if="[[item.aggregationData.length]]">
-                    <terms-transformer
-                      category="[[item.title]]"
-                      object="{{entityFilters}}"
-                      object-property="[[item.key]]"
-                      list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
-                      text-function="[[getTextFunction(item.aggregationData)]]">
-                    </terms-transformer>
+                    <template is="dom-if" if="[[item.mapData.length]]">
+                      <terms-transformer
+                        category="[[item.title]]"
+                        object="{{entityFilters}}"
+                        object-property="[[item.key]]"
+                        list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
+                        text-function="[[getTextFunction(item.mapData)]]">
+                      </terms-transformer>
+                    </template>
+                  </section-and-map>
+                </template>
 
-                    <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
-                  </template>
-                </section-and-title>
+                <template is="dom-if" if="[[!item.isLocation]]">
+                  <section-and-title
+                    show-copy
+                    copy-type="[[item.titlePlural]]"
+                    icon="[[item.icon]]"
+                    style-class="[[item.styleClass]]"
+                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
+                    transform-function="[[getAggregationTitleTransformFunction]]"
+                    data="[[item.aggregationData]]">
+
+                    <aggregation-query-and-display
+                      aggregation-name="[[item.key]]"
+                      aggregation-field="[[item.field]]"
+                      selected-property="[[item.key]]"
+                      selected="{{filterCollection}}"
+                      query-field="[[pageConfig.field]]"
+                      query-value="[[pageId]]"
+                      client="[[esClient]]"
+                      index-name="[[esConfig.esIndex]]"
+                      index-types="[[esConfig.esType]]"
+                      filter-list="[[filterList]]"
+                      properties-ready="[[processRequest]]"
+                      transform-config="[[createExtractionsConfig(item, pageConfig, pageId)]]"
+                      transform-function="[[transforms.entity.extractions]]"
+                      data="{{item.aggregationData}}"
+                      header-data-name="[[item.title]]"
+                      header-counts-name="Results"
+                      header-entity-name="[[pageName]]"
+                      show-checkboxes
+                      show-double-bar-chart="[[showDoubleBarChart(item)]]">
+                    </aggregation-query-and-display>
+
+                    <template is="dom-if" if="[[item.aggregationData.length]]">
+                      <terms-transformer
+                        category="[[item.title]]"
+                        object="{{entityFilters}}"
+                        object-property="[[item.key]]"
+                        list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
+                        text-function="[[getTextFunction(item.aggregationData)]]">
+                      </terms-transformer>
+
+                      <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
+                    </template>
+                  </section-and-title>
+                </template>
               </template>
             </template>
 
@@ -734,7 +722,7 @@ limitations under the License.
     'use strict';
 
     Polymer({
-      /* globals DigBehaviors, d3 */
+      /* globals _, DigBehaviors, d3 */
       is: 'entity-page',
 
       behaviors: [
@@ -773,10 +761,6 @@ limitations under the License.
 
         dateConfig: {
           type: Object
-        },
-
-        dateFields: {
-          type: Array
         },
 
         documents: {
@@ -852,10 +836,6 @@ limitations under the License.
 
         logMessage: {
           type: Object
-        },
-
-        mapFields: {
-          type: Array
         },
 
         pageConfig: {

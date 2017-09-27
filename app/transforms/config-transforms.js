@@ -76,8 +76,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     aggregationFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
-        // Dates will be shown in the histograms, images in the galleries, and locations in the maps.
-        return searchFieldsObject.type !== 'date' && searchFieldsObject.type !== 'image' && searchFieldsObject.type !== 'location' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
+        return !searchFieldsObject.isDate && !searchFieldsObject.isImage && !searchFieldsObject.isText;
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
@@ -92,27 +91,13 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     dateConfig: function(searchFields) {
       var dateConfig = {};
       searchFields.forEach(function(searchFieldsObject) {
-        if(searchFieldsObject.type === 'date') {
+        if(searchFieldsObject.isDate) {
           var dateProperties = createDateProperties(searchFieldsObject);
           dateConfig[dateProperties.start.key] = searchFieldsObject.key;
           dateConfig[dateProperties.end.key] = searchFieldsObject.key;
         }
       });
       return dateConfig;
-    },
-
-    /**
-     * Returns the fields for which to show date facets in the search page and timelines in the entity pages.
-     *
-     * @param {Object} searchFields
-     * @return {Array}
-     */
-    dateFields: function(searchFields) {
-      return searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
-      }).map(function(searchFieldsObject) {
-        return _.cloneDeep(searchFieldsObject);
-      });
     },
 
     /**
@@ -193,7 +178,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     filterTerms: function(filterCollection, searchFields) {
       return searchFields.reduce(function(terms, searchFieldsObject) {
         var filterCollectionObject = filterCollection[searchFieldsObject.key];
-        if(searchFieldsObject.type === 'date') {
+        if(searchFieldsObject.isDate) {
           if(_.isArray(filterCollectionObject) && filterCollectionObject.length === 2) {
             terms['Start ' + searchFieldsObject.title] = [filterCollectionObject[0]];
             terms['End ' + searchFieldsObject.title] = [filterCollectionObject[1]];
@@ -237,10 +222,10 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     histogramFields: function(searchFields) {
       var entityFields = searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type !== 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
+        return !searchFieldsObject.isDate && !searchFieldsObject.isText;
       });
       var dateFields = searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
+        return searchFieldsObject.isDate && !searchFieldsObject.isText;
       });
       if(dateFields.length && entityFields.length) {
         return entityFields.map(function(entityFieldsObject) {
@@ -264,20 +249,6 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         });
       }
       return [];
-    },
-
-    /**
-     * Returns the fields for which to show maps in the entity pages.
-     *
-     * @param {Object} searchFields
-     * @return {Array}
-     */
-    mapFields: function(searchFields) {
-      return searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.type === 'location' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
-      }).map(function(searchFieldsObject) {
-        return _.cloneDeep(searchFieldsObject);
-      });
     },
 
     /**
@@ -314,6 +285,9 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Object}
      */
     searchFields: function(fields) {
+      var maxField = 0;
+      var maxGroup = 0;
+
       var searchFields =  _.keys(fields || {}).filter(function(id) {
         return !!fields[id].type;
       }).map(function(id) {
@@ -325,9 +299,13 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           // Whether to show in the facets.
           facets: fields[id].show_in_facets || false,
           // The aggregation field.
-          field: 'knowledge_graph.' + id + '.key',
-          // The group for the searchFieldsDialogConfig.
-          group: fields[id].group_name,
+          field: fields[id].field || 'knowledge_graph.' + id + '.key',
+          // The field order within a group.
+          fieldOrder: fields[id].field_order,
+          // The group for the facets, searchFieldsDialogConfig, and entity pages.
+          group: fields[id].group_name || 'Other',
+          // The group order.
+          groupOrder: fields[id].group_order,
           // A polymer or fontawesome icon.
           icon: fields[id].icon || 'icons:text-format',
           // Either entity, text, or undefined.
@@ -336,8 +314,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           queryField: 'knowledge_graph.' + id + '.value',
           // Either header, detail, title, description, or undefined.
           result: fields[id].show_in_result !== 'no' ? fields[id].show_in_result : undefined,
-          // Whether to show in the search fields.
-          search: fields[id].show_in_search || false,
+          // Whether to show in the search fields.  Must be shown in the search fields if shown in the facets.
+          search: fields[id].show_in_search || fields[id].show_in_facets || false,
           // The singular pretty name to show.
           title: fields[id].screen_label || 'Extraction',
           // The plural pretty name to show.
@@ -347,40 +325,32 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-        // The facet aggregation transform function.
-        searchFieldsObject.facetTransform = createFacetTransform(searchFieldsObject.link, searchFieldsObject.type, searchFieldsObject.key);
-        // Add style class (e.g. 'entity-grey').
-        searchFieldsObject.styleClass = commonTransforms.getStyleClass(searchFieldsObject.color);
-
-        // Sort for the facets and the search fields dialog.
-        if(searchFieldsObject.type === 'date') {
-          searchFieldsObject.sort = 6;
-        } else if(searchFieldsObject.result === 'title') {
-          searchFieldsObject.sort = 2;
-          searchFieldsObject.group = searchFieldsObject.group || 'Document';
-        } else if(searchFieldsObject.result === 'description') {
-          searchFieldsObject.sort = 3;
-          searchFieldsObject.group = searchFieldsObject.group || 'Document';
-        } else if(searchFieldsObject.result === 'tld' || searchFieldsObject.key === 'website') {
-          searchFieldsObject.sort = 4;
-          searchFieldsObject.group = searchFieldsObject.group || 'Document';
-        } else if(searchFieldsObject.key === 'url') {
-          searchFieldsObject.sort = 5;
-          searchFieldsObject.group = searchFieldsObject.group || 'Document';
-        } else {
-          searchFieldsObject.sort = 1;
-          searchFieldsObject.group = searchFieldsObject.group || (searchFieldsObject.link === 'entity' ? 'Entity' : 'Extraction');
-        }
-
-        // Properties for the date facets.
-        searchFieldsObject.dateProperties = fields[id].type === 'date' ? createDateProperties(searchFieldsObject) : {};
+        maxField = Math.max(maxField, searchFieldsObject.fieldOrder || 0);
+        maxGroup = Math.max(maxGroup, searchFieldsObject.groupOrder || 0);
 
         return searchFieldsObject;
+      }).map(function(searchFieldsObject) {
+        if(searchFieldsObject.isDate) {
+          searchFieldsObject.groupOrder = maxGroup + 1;
+        }
+        if(_.isUndefined(searchFieldsObject.groupOrder)) {
+          searchFieldsObject.groupOrder = maxGroup + 1;
+        }
+        if(_.isUndefined(searchFieldsObject.fieldOrder)) {
+          searchFieldsObject.fieldOrder = maxField + 1;
+        }
+        return searchFieldsObject;
       }).sort(function(a, b) {
-        if(a.sort < b.sort) {
+        if(a.groupOrder < b.groupOrder) {
           return -1;
         }
-        if(a.sort > b.sort) {
+        if(a.groupOrder > b.groupOrder) {
+          return 1;
+        }
+        if(a.fieldOrder < b.fieldOrder) {
+          return -1;
+        }
+        if(a.fieldOrder > b.fieldOrder) {
           return 1;
         }
         return a.title > b.title ? 1 : (a.title < b.title ? -1 : 0);
@@ -388,6 +358,25 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
 
       // Add the image field to show in the facets.
       searchFields.push(esConfig.imageField);
+
+      // Add additional properties after the image field is added.
+      searchFields.forEach(function(searchFieldsObject) {
+        searchFieldsObject.isDate = (searchFieldsObject.type === 'date');
+        searchFieldsObject.isEntity = (searchFieldsObject.link === 'entity');
+        searchFieldsObject.isImage = (searchFieldsObject.type === 'image');
+        searchFieldsObject.isLocation = (searchFieldsObject.type === 'location');
+        searchFieldsObject.isText = (searchFieldsObject.result === 'title' || searchFieldsObject.result === 'description');
+        searchFieldsObject.isUrl = (searchFieldsObject.type === 'tld' || searchFieldsObject.type === 'url');
+
+        // The facet aggregation transform function.
+        searchFieldsObject.facetTransform = createFacetTransform(searchFieldsObject.link, searchFieldsObject.type, searchFieldsObject.key);
+        // Add style class (e.g. 'entity-grey').
+        searchFieldsObject.styleClass = commonTransforms.getStyleClass(searchFieldsObject.color);
+        // Properties for the date facets.
+        searchFieldsObject.dateProperties = searchFieldsObject.isDate ? createDateProperties(searchFieldsObject) : {};
+      });
+
+      console.log('fields', searchFields);
 
       return searchFields;
     },
@@ -399,15 +388,15 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Object}
      */
     searchFieldsDialogConfig: function(searchFields) {
-      var config = [];
+      var dialogConfig = [];
 
       searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.search && searchFieldsObject.type === 'date';
+        return searchFieldsObject.search && searchFieldsObject.isDate;
       }).forEach(function(searchFieldsObject) {
         var dateProperties = createDateProperties(searchFieldsObject);
-        config.push({
-          name: searchFieldsObject.title,
+        dialogConfig.push({
           type: 'date',
+          name: searchFieldsObject.title,
           data: [
             dateProperties.start,
             dateProperties.end
@@ -415,29 +404,30 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         });
       });
 
-      var groups = searchFields.reduce(function(groups, searchFieldsObject) {
-        if(searchFieldsObject.search && searchFieldsObject.type !== 'date' && searchFieldsObject.type !== 'image') {
-          groups[searchFieldsObject.group] = groups[searchFieldsObject.group] || [];
-          groups[searchFieldsObject.group].push(searchFieldsObject);
-        }
-        return groups;
-      }, {});
+      searchFields.forEach(function(searchFieldsObject) {
+        if(searchFieldsObject.search && !searchFieldsObject.isDate && !searchFieldsObject.isImage) {
+          var index = _.findIndex(dialogConfig, function(configObject) {
+            return configObject.name === searchFieldsObject.group;
+          });
 
-      _.keys(groups).sort().forEach(function(group) {
-        config.push({
-          name: group,
-          data: groups[group].map(function(searchFieldsObject) {
-            return {
-              key: searchFieldsObject.key,
-              field: searchFieldsObject.field,
-              title: searchFieldsObject.title,
-              enableNetworkExpansion: (searchFieldsObject.link === 'entity')
-            };
-          })
-        });
+          if(index < 0) {
+            dialogConfig.push({
+              name: searchFieldsObject.group,
+              data: []
+            });
+            index = dialogConfig.length - 1;
+          }
+
+          dialogConfig[index].data.push({
+            key: searchFieldsObject.key,
+            field: searchFieldsObject.field,
+            title: searchFieldsObject.title,
+            enableNetworkExpansion: (searchFieldsObject.isEntity)
+          });
+        }
       });
 
-      return config;
+      return dialogConfig;
     },
 
     /**
@@ -489,7 +479,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     searchTerms: function(searchParameters, searchFields) {
       return searchFields.reduce(function(terms, searchFieldsObject) {
         var searchParametersObject = searchParameters[searchFieldsObject.key];
-        if(searchFieldsObject.type === 'date') {
+        if(searchFieldsObject.isDate) {
           var startKey = searchFieldsObject.dateProperties.start.key;
           if(searchParametersObject[startKey] && searchParametersObject[startKey].enabled) {
             terms['Start ' + searchFieldsObject.title] = [searchParametersObject[startKey].text];
@@ -518,7 +508,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     sortField: function(searchFields) {
       var index = _.findIndex(searchFields, function(searchFieldsObject) {
-        return searchFieldsObject.type === 'date' && searchFieldsObject.result !== 'title' && searchFieldsObject.result !== 'description';
+        return searchFieldsObject.isDate && !searchFieldsObject.isText;
       });
       return index >= 0 ? searchFields[index].field : '';
     }
