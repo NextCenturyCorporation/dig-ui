@@ -97,21 +97,6 @@ limitations under the License.
         }
       }
 
-      .image-section {
-        --section-container-padding: 0;
-      }
-
-      .image-section iron-image {
-        --iron-image-height: auto;
-        --iron-image-width: auto;
-        padding: 0;
-        margin: 0;
-      }
-
-      .image-section iron-image ::content img {
-        max-height: 400px;
-      }
-
       image-query-and-display {
         --image-query-and-display-max-height: 800px;
       }
@@ -324,8 +309,8 @@ limitations under the License.
       tag-manager="{{tagManager}}">
     </tag-manager>
 
-    <!-- Must wait for the searchParameters to be defined. -->
-    <template is="dom-if" if="[[searchParameters]]">
+    <!-- Must wait for the filterCollection to be defined. -->
+    <template is="dom-if" if="[[filterCollection]]">
       <state-manager id="stateManager"
         build-popup-data-function="[[transforms.config.filterTerms]]"
         build-state-data-function="[[transforms.config.filterState]]"
@@ -358,78 +343,93 @@ limitations under the License.
 
     <template is="dom-if" if="[[pageConfig]]">
       <paper-header-panel class="flex" mode="waterfall-tall">
-        <div slot="header" class="page-head layout vertical">
-          <div class="layout horizontal center">
-            <div class="iron-icon-head">
+        <div slot="header" class="page-head layout horizontal">
+          <div class="layout vertical flex">
+            <div class="page-name layout horizontal center">
               <iron-icon class$="[[pageConfig.styleClass]]" icon="[[pageConfig.icon]]"></iron-icon>
+
+              [[pageConfig.title]]:
+
+              <template is="dom-if" if="[[!pageConfig.isImage]]">
+                <span>[[pageName]]</span>
+              </template>
+
+              <template is="dom-if" if="[[pageConfig.isImage]]">
+                <json-combine
+                  data-in1="[[pageId]]"
+                  data-in2="[[esConfig]]"
+                  data-out="{{imageSrc}}"
+                  combine-function="[[transforms.config.imageSrc]]">
+                </json-combine>
+
+                <a href="[[imageSrc]]" target="_blank" title="Open Image">
+                  <iron-image class$="[[getBlurStyleClass(blurImages, 'small')]]" src="[[imageSrc]]"></iron-image>
+                </a>
+              </template>
             </div>
-            <div class="page-info flex">
-              <div class="page-name">
-                [[pageConfig.title]]: <span>[[pageName]]</span>
-              </div>
-              <div class="page-detail">
-                <template is="dom-if" if="[[searchLoading]]">
-                  Loading Results...
+
+            <div class="page-info layout horizontal center">
+              <template is="dom-if" if="[[searchLoading]]">
+                Loading Results...
+              </template>
+
+              <template is="dom-if" if="[[!searchLoading]]">
+                <template is="dom-if" if="[[!searchTotal]]">
+                  No Results
                 </template>
-                <template is="dom-if" if="[[!searchLoading]]">
-                  <template is="dom-if" if="[[!searchTotal]]">
-                    No Results
-                  </template>
-                  <template is="dom-if" if="[[searchTotal]]">
-                    [[searchTotal]] Results
-                  </template>
+
+                <template is="dom-if" if="[[searchTotal]]">
+                  [[searchTotal]] Results
                 </template>
-              </div>
+              </template>
             </div>
 
-            <div class="layout horizontal end-justified">
-              <paper-icon-button icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+            <div class="layout horizontal wrap">
+              <template is="dom-repeat" items="[[searchFields]]">
+                <selected-facets-display
+                  facets="[[entityFilters]]"
+                  facet-key="[[item.key]]"
+                  hide-remove-button>
+                </selected-facets-display>
+              </template>
             </div>
-
-            <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="40">
-              <div slot="dropdown-content">
-                <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
-                  <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
-                  View DIG Database Information
-                </paper-icon-item>
-
-                <paper-icon-item disabled="[[!hasHistory]]" title="View This Page's Filter History" on-tap="openStateHistoryDialog">
-                  <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
-                  View This Page's Filter History
-                </paper-icon-item>
-
-                <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
-                  <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
-                  View DIG Data Training Options
-                </paper-icon-item>
-
-                <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-                  <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
-                  Open a DIG Search Page in a New Tab
-                </paper-icon-item>
-
-                <paper-icon-item title="Open DIG Help Page" on-tap="openHelpPage">
-                  <iron-icon slot="item-icon" icon="fa:question-circle" item-icon></iron-icon>
-                  Open the DIG Help Page
-                </paper-icon-item>
-
-                <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="emailSupport">
-                  <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
-                  Contact DIG / Memex Support
-                </paper-icon-item>
-              </div>
-            </iron-dropdown>
           </div>
 
-          <div class="layout horizontal wrap">
-            <template is="dom-repeat" items="[[searchFields]]">
-              <selected-facets-display
-                facets="[[entityFilters]]"
-                facet-key="[[item.key]]"
-                hide-remove-button>
-              </selected-facets-display>
-            </template>
-          </div>
+          <paper-icon-button icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+
+          <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="40">
+            <div slot="dropdown-content">
+              <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
+                <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
+                View DIG Database Information
+              </paper-icon-item>
+
+              <paper-icon-item disabled="[[!hasHistory]]" title="View This Page's Filter History" on-tap="openStateHistoryDialog">
+                <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
+                View This Page's Filter History
+              </paper-icon-item>
+
+              <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
+                <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
+                View DIG Data Training Options
+              </paper-icon-item>
+
+              <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+                <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
+                Open a DIG Search Page in a New Tab
+              </paper-icon-item>
+
+              <paper-icon-item title="Open DIG Help Page" on-tap="openHelpPage">
+                <iron-icon slot="item-icon" icon="fa:question-circle" item-icon></iron-icon>
+                Open the DIG Help Page
+              </paper-icon-item>
+
+              <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="emailSupport">
+                <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
+                Contact DIG / Memex Support
+              </paper-icon-item>
+            </div>
+          </iron-dropdown>
         </div>
 
         <div class="page-body">

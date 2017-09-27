@@ -310,24 +310,19 @@ limitations under the License.
 
     <template is="dom-if" if="[[document.id]]">
       <paper-header-panel class="flex" mode="waterfall-tall">
-        <div slot="header" class="page-head layout vertical">
-          <div class="layout horizontal center">
-            <div class="iron-icon-head">
+        <div slot="header" class="page-head layout horizontal">
+          <div class="layout vertical flex">
+            <div class="page-name layout horizontal center">
               <iron-icon class="grey" icon="icons:assignment"></iron-icon>
-            </div>
-            <div class="page-info flex">
-              <div class="page-name">
-                [[document.title]]
-              </div>
-              <div class="page-detail">
-                Crawl Date [[document.time]]
-              </div>
+              [[document.title]]
             </div>
 
-            <div class="layout horizontal end-justified">
-              <paper-icon-button icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+            <div class="page-info layout horizontal center">
+              Crawl Date [[document.time]]
             </div>
           </div>
+
+          <paper-icon-button icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
           <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="40">
             <div slot="dropdown-content">

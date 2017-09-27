@@ -23,38 +23,61 @@ limitations under the License.
         transition: height 0.2s;
       }
 
-      .page-head .page-info {
-        padding: 0 10px;
-        transition: padding 0.2s;
-      }
-
       .page-head .page-name {
         font-size: 24px;
         font-weight: 500;
         line-height: 30px;
+        margin-right: 10px;
         transition: all 0.2s;
         word-break: break-word;
       }
 
-      .page-head .page-detail {
+      .page-head .page-name iron-icon {
+        /* Same height as page-head */
+        --iron-icon-height: 30px;
+        --iron-icon-width: 30px;
+        margin-right: 10px;
+        min-width: 30px;
+      }
+
+      .page-head .page-name a {
+        /* Same height as page-head */
+        height: 30px;
+      }
+
+      .page-head .page-name iron-image {
+        /* Same height as page-head */
+        --iron-image-height: 30px;
+        --iron-image-width: auto;
+        margin-left: 10px;
+        min-width: 30px;
+      }
+
+      .page-head .page-info {
         color: var(--secondary-text-color);
         font-size: 16px;
         font-weight: 500;
         line-height: 20px;
+        margin-left: 40px;
+        margin-right: 10px;
+        margin-top: 10px;
         transition: font-size 0.2s;
       }
 
+      .page-head paper-icon-button {
+        --paper-icon-button: {
+          height: 30px;
+          width: 30px;
+          padding: 0px;
+        }
+      }
+
       .page-head selected-facets-display {
+        @apply --layout-horizontal;
+        @apply --layout-wrap;
         --selected-facet-item-style-mixin: {
           margin-top: 10px;
         };
-      }
-
-      .page-head .iron-icon-head iron-icon {
-        /* Same height as page-head */
-        --iron-icon-height: 30px;
-        --iron-icon-width: 30px;
-        min-width: 30px;
       }
 
       .page-body {
@@ -108,17 +131,11 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .page-head .page-info {
-          @apply --layout-flex;
-        }
       }
       /* desktop-x-small */
       @media all and (min-width: 0) and (max-width: 480px) and (max-aspect-ratio: 4/3) {
         .content {
           @apply --layout-vertical;
-        }
-        .page-head .page-info {
-          @apply --layout-flex;
         }
       }
       /* desktop-small-landscape */
@@ -126,17 +143,11 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .page-head .page-info {
-          @apply --layout-flex;
-        }
       }
       /* desktop-small */
       @media all and (min-width: 481px) and (max-width: 840px) and (max-aspect-ratio: 4/3) {
         .content {
           @apply --layout-vertical;
-        }
-        .page-head .page-info {
-          @apply --layout-flex;
         }
       }
       /* desktop-medium-landscape */
@@ -144,17 +155,11 @@ limitations under the License.
         .content {
           @apply --layout-vertical;
         }
-        .page-head .page-info {
-          @apply --layout-flex;
-        }
       }
       /* desktop-medium */
       @media all and (min-width: 841px) and (max-width: 1280px) and (max-aspect-ratio: 4/3) {
         .content {
           @apply --layout-vertical;
-        }
-        .page-head .page-info {
-          @apply --layout-flex;
         }
       }
       /* desktop-large */

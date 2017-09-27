@@ -252,6 +252,17 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
+     * Returns the image source for the image with the given ID using the given config.
+     *
+     * @param {String} id
+     * @param {Object} esConfig
+     * @return {String}
+     */
+    imageSrc: function(id, esConfig) {
+      return (esConfig ? esConfig.imageUrlPrefix || '' : '') + id;
+    },
+
+    /**
      * Returns a new network expansion parameters object for the search page.
      *
      * @param {Object} searchFields
