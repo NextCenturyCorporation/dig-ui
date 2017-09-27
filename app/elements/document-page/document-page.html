@@ -340,13 +340,15 @@ limitations under the License.
       <paper-header-panel class="flex" mode="waterfall-tall">
         <div slot="header" class="page-head layout horizontal">
           <div class="layout vertical flex">
-            <div class="page-name layout horizontal center">
+            <div class="page-data layout horizontal center">
               <iron-icon class="grey" icon="icons:assignment"></iron-icon>
-              [[document.title]]
-            </div>
+              <div class="page-name">
+                [[document.title]]
+              </div>
 
-            <div class="page-info layout horizontal center">
-              Crawl Date [[document.time]]
+              <div class="page-info layout horizontal flex end-justified">
+                Crawl Date [[document.time]]
+              </div>
             </div>
           </div>
 

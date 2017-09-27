@@ -366,14 +366,16 @@ limitations under the License.
       <paper-header-panel class="flex" mode="waterfall-tall">
         <div slot="header" class="page-head layout horizontal">
           <div class="layout vertical flex">
-            <div class="page-name layout horizontal center">
+            <div class="page-data layout horizontal center">
               <iron-icon class$="[[pageConfig.styleClass]]" icon="[[pageConfig.icon]]"></iron-icon>
 
-              [[pageConfig.title]]:
+              <div class="page-name">
+                [[pageConfig.title]]:
 
-              <template is="dom-if" if="[[!pageConfig.isImage]]">
-                <span>[[pageName]]</span>
-              </template>
+                <template is="dom-if" if="[[!pageConfig.isImage]]">
+                  [[pageName]]
+                </template>
+              </div>
 
               <template is="dom-if" if="[[pageConfig.isImage]]">
                 <json-combine
@@ -384,25 +386,25 @@ limitations under the License.
                 </json-combine>
 
                 <a href="[[imageSrc]]" target="_blank" title="Open Image">
-                  <iron-image class$="[[getBlurStyleClass(blurImages, 'small')]]" src="[[imageSrc]]"></iron-image>
+                  <iron-image class$="[[getBlurStyleClass(blurImages)]]" src="[[imageSrc]]"></iron-image>
                 </a>
               </template>
-            </div>
 
-            <div class="page-info layout horizontal center">
-              <template is="dom-if" if="[[searchLoading]]">
-                Loading Results...
-              </template>
-
-              <template is="dom-if" if="[[!searchLoading]]">
-                <template is="dom-if" if="[[!searchTotal]]">
-                  No Results
+              <div class="page-info layout horizontal flex end-justified">
+                <template is="dom-if" if="[[searchLoading]]">
+                  Loading Results...
                 </template>
 
-                <template is="dom-if" if="[[searchTotal]]">
-                  [[searchTotal]] Results
+                <template is="dom-if" if="[[!searchLoading]]">
+                  <template is="dom-if" if="[[!searchTotal]]">
+                    No Results
+                  </template>
+
+                  <template is="dom-if" if="[[searchTotal]]">
+                    [[searchTotal]] Results
+                  </template>
                 </template>
-              </template>
+              </div>
             </div>
 
             <div class="layout horizontal wrap">

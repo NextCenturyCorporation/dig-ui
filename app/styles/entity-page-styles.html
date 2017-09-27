@@ -19,11 +19,15 @@ limitations under the License.
     <style>
       .page-head {
         min-height: 30px;
-        padding: 20px;
+        padding: 15px;
         transition: height 0.2s;
       }
 
-      .page-head .page-name {
+      .page-head .page-data {
+        padding: 5px;
+      }
+
+      .page-head .page-data .page-name {
         font-size: 24px;
         font-weight: 500;
         line-height: 30px;
@@ -32,7 +36,7 @@ limitations under the License.
         word-break: break-word;
       }
 
-      .page-head .page-name iron-icon {
+      .page-head .page-data iron-icon {
         /* Same height as page-head */
         --iron-icon-height: 30px;
         --iron-icon-width: 30px;
@@ -40,36 +44,26 @@ limitations under the License.
         min-width: 30px;
       }
 
-      .page-head .page-name a {
+      .page-head .page-data a {
         /* Same height as page-head */
         height: 30px;
       }
 
-      .page-head .page-name iron-image {
+      .page-head .page-data iron-image {
         /* Same height as page-head */
         --iron-image-height: 30px;
         --iron-image-width: auto;
-        margin-left: 10px;
+        margin-right: 10px;
         min-width: 30px;
       }
 
-      .page-head .page-info {
+      .page-head .page-data .page-info {
         color: var(--secondary-text-color);
         font-size: 16px;
         font-weight: 500;
         line-height: 20px;
-        margin-left: 40px;
         margin-right: 10px;
-        margin-top: 10px;
         transition: font-size 0.2s;
-      }
-
-      .page-head paper-icon-button {
-        --paper-icon-button: {
-          height: 30px;
-          width: 30px;
-          padding: 0px;
-        }
       }
 
       .page-head selected-facets-display {
@@ -101,6 +95,16 @@ limitations under the License.
         }
       }
 
+      .small-blur {
+        -webkit-filter: blur(5px);
+        filter: blur(5px);
+      }
+
+      .large-blur {
+        -webkit-filter: blur(25px);
+        filter: blur(25px);
+      }
+
       /* Material Design Adaptive Breakpoints */
       /*
         Below you'll find CSS media queries based on the breakpoint guidance
@@ -128,37 +132,37 @@ limitations under the License.
       @media all and (min-width: 601px) and (max-width: 840px) and (orientation : portrait) { }
       /* desktop-x-small-landscape */
       @media all and (min-width: 0) and (max-width: 480px) and (orientation: landscape) {
-        .content {
+        .page-body {
           @apply --layout-vertical;
         }
       }
       /* desktop-x-small */
       @media all and (min-width: 0) and (max-width: 480px) and (max-aspect-ratio: 4/3) {
-        .content {
+        .page-body {
           @apply --layout-vertical;
         }
       }
       /* desktop-small-landscape */
       @media all and (min-width: 481px) and (max-width: 840px) and (orientation: landscape) {
-        .content {
+        .page-body {
           @apply --layout-vertical;
         }
       }
       /* desktop-small */
       @media all and (min-width: 481px) and (max-width: 840px) and (max-aspect-ratio: 4/3) {
-        .content {
+        .page-body {
           @apply --layout-vertical;
         }
       }
       /* desktop-medium-landscape */
       @media all and (min-width: 841px) and (max-width: 1280px) and (orientation: landscape) {
-        .content {
+        .page-body {
           @apply --layout-vertical;
         }
       }
       /* desktop-medium */
       @media all and (min-width: 841px) and (max-width: 1280px) and (max-aspect-ratio: 4/3) {
-        .content {
+        .page-body {
           @apply --layout-vertical;
         }
       }
