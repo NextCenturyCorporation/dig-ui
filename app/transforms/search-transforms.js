@@ -112,6 +112,10 @@ var searchTransforms = (function(_) {
         }
       });
 
+      if(andFilter.clauses.length) {
+        template.filters.push(andFilter);
+      }
+
       _.keys(predicates).forEach(function(predicate) {
         for(var i = 1; i <= predicates[predicate].length; ++i) {
           // If network expansion is disabled...
