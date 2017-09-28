@@ -333,7 +333,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           // The field order within a group.
           fieldOrder: fields[id].field_order,
           // The group for the facets, searchFieldsDialogConfig, and entity pages.
-          group: fields[id].group_name || 'Other',
+          group: fields[id].group_name,
           // The group order.
           groupOrder: fields[id].group_order,
           // A polymer or fontawesome icon.
@@ -360,13 +360,14 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
 
         return searchFieldsObject;
       }).map(function(searchFieldsObject) {
-        if(searchFieldsObject.isDate) {
-          searchFieldsObject.groupOrder = maxGroup + 1;
+        if(searchFieldsObject.type === 'date') {
+          searchFieldsObject.groupOrder = maxGroup + 3;
+          return searchFieldsObject;
         }
-        if(_.isUndefined(searchFieldsObject.groupOrder)) {
-          searchFieldsObject.groupOrder = maxGroup + 1;
+        if(!searchFieldsObject.groupOrder) {
+          searchFieldsObject.groupOrder = maxGroup + (searchFieldsObject.group ? 1 : 2);
         }
-        if(_.isUndefined(searchFieldsObject.fieldOrder)) {
+        if(!searchFieldsObject.fieldOrder) {
           searchFieldsObject.fieldOrder = maxField + 1;
         }
         return searchFieldsObject;
@@ -436,12 +437,12 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       searchFields.forEach(function(searchFieldsObject) {
         if(searchFieldsObject.search && !searchFieldsObject.isDate && !searchFieldsObject.isImage) {
           var index = _.findIndex(dialogConfig, function(configObject) {
-            return configObject.name === searchFieldsObject.group;
+            return configObject.name === (searchFieldsObject.group || 'Other');
           });
 
           if(index < 0) {
             dialogConfig.push({
-              name: searchFieldsObject.group,
+              name: searchFieldsObject.group || 'Other',
               data: []
             });
             index = dialogConfig.length - 1;
