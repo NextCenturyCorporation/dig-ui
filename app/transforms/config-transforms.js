@@ -59,6 +59,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
             count: count,
             id: id,
             link: commonTransforms.getLink(bucket.key, linkType, fieldType, fieldId),
+            source: (fieldType === 'image' ? ((esConfig ? esConfig.imageUrlPrefix || '' : '') + bucket.key) : undefined),
             text: commonTransforms.getFacetsDataText(bucket.key, fieldType)
           });
         }

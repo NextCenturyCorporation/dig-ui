@@ -166,6 +166,9 @@ var commonTransforms = (function(_, moment, domain) {
       var keySplit = key.split('-');
       return keySplit.length ? keySplit[0] : '';
     }
+    if(type === 'image') {
+      return key;
+    }
     if(type === 'location') {
       // Return just the city rather than the complete formatted location key.
       return getLocationDataFromKey(key).city;
@@ -190,6 +193,9 @@ var commonTransforms = (function(_, moment, domain) {
     }
     if(type === 'hyphenated') {
       return getTextFromHyphenatedKey(key);
+    }
+    if(type === 'image') {
+      return key.substring(key.lastIndexOf('/') + 1);
     }
     if(type === 'location') {
       return getLocationDataFromKey(key).text;

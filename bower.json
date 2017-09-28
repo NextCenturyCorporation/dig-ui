@@ -7,6 +7,7 @@
   "license": "Apache-2.0",
   "private": false,
   "dependencies": {
+    "aggregation-display": "DigElements/aggregation-display#2.2.2",
     "aggregation-query-and-display": "DigElements/aggregation-query-and-display#2.2.0",
     "array-behavior": "DigElements/array-behavior#1.0.2",
     "build-and-run-query": "DigElements/build-and-run-query#2.2.0",
@@ -25,7 +26,6 @@
     "facet-panel": "DigElements/facet-panel#2.1.2",
     "filters-builder": "DigElements/filters-builder#2.0.1",
     "fontawesome-iconset": "https://github.com/vangware/fontawesome-iconset.git#09ac70f619bb44d73fefc5f9524ae29ab217ed15",
-    "horizontal-bar": "DigElements/horizontal-bar#2.2.1",
     "image-gallery": "DigElements/image-gallery#2.0.1",
     "image-query-and-display": "DigElements/image-query-and-display#2.1.1",
     "image-thumbnail": "DigElements/image-thumbnail#2.0.1",
@@ -75,10 +75,13 @@
     "web-component-tester": "^6.1.5"
   },
   "resolutions": {
+    "aggregation-display": "2.2.2",
     "breadbox-item": "2.0.4",
     "build-and-run-query": "2.2.0",
+    "double-bar-chart": "2.3.0",
     "elastic-client-search": "2.1.0",
-    "horizontal-bar": "2.2.1",
+    "horizontal-bar-chart": "2.2.0",
+    "horizontal-bar": "2.2.2",
     "icon-label": "2.1.1",
     "image-gallery": "2.0.1",
     "lodash": "~4.17.2",
