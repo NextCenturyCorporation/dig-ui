@@ -19,7 +19,6 @@
 
 var searchTransforms = (function(_) {
   function getTemplateFromSearchParameters(searchParameters, dateConfig, networkExpansionParameters) {
-    var predicates = {};
     var template = {
       clauses: !networkExpansionParameters ? [] : [{
         clauses: [],
@@ -28,118 +27,123 @@ var searchTransforms = (function(_) {
       }],
       filters: []
     };
+
+    if(_.isEmpty(searchParameters)) {
+      return template;
+    }
+
     var andFilter = {
       clauses: [],
       operator: 'and'
     };
+
     var notFilter = {
       clauses: [],
       operator: 'not exists'
     };
 
-    if(!_.isEmpty(searchParameters)) {
-      _.keys(searchParameters).forEach(function(type) {
-        var unionClause = {
-          clauses: [],
-          operator: 'union'
-        };
+    _.keys(searchParameters).forEach(function(type) {
+      var unionClause = {
+        clauses: [],
+        operator: 'union'
+      };
 
-        _.keys(searchParameters[type]).forEach(function(term) {
-          if(searchParameters[type][term].enabled) {
-            if(dateConfig[term]) {
-              // Each date field has only one date variable.
-              predicates[type] = [{
-                optional: false
-              }];
-
-              andFilter.clauses.push({
-                constraint: searchParameters[type][term].date,
-                operator: term.includes('start') ? '>=' : '<=',
-                variable: '?' + type + '1'
-              });
-            } else if(searchParameters[type][term].search === 'excluded') {
-              notFilter.clauses.push({
-                constraint: searchParameters[type][term].key,
-                predicate: type
-              });
-            } else if(searchParameters[type][term].search === 'union') {
-              unionClause.clauses.push({
-                constraint: searchParameters[type][term].key,
-                isOptional: false,
-                predicate: type
-              });
-            } else {
-              var optional = (searchParameters[type][term].search !== 'required');
-              // If network expansion is disabled...
-              if(!networkExpansionParameters) {
-                predicates[type] = predicates[type] || [];
-                predicates[type].push({
-                  optional: optional
-                });
-
-                template.clauses.push({
-                  constraint: searchParameters[type][term].key,
-                  isOptional: optional,
-                  predicate: type
-                });
-              } else {
-                template.clauses[0].clauses.push({
-                  constraint: searchParameters[type][term].key,
-                  isOptional: optional,
-                  predicate: type
-                });
-
-                // If network expansion is disabled for the current type...
-                if(!networkExpansionParameters[type]) {
-                  template.clauses.push({
-                    constraint: searchParameters[type][term].key,
-                    isOptional: optional,
-                    predicate: type
-                  });
-                } else {
-                  // TODO Should predicate variables for network expansion queries always be required?
-                  predicates[type] = [{
-                    optional: false
-                  }];
-                }
-              }
-            }
-          }
-        });
-
-        if(unionClause.clauses.length) {
-          template.clauses.push(unionClause);
-        }
-      });
-
-      if(andFilter.clauses.length) {
-        template.filters.push(andFilter);
-      }
-
-      _.keys(predicates).forEach(function(predicate) {
-        for(var i = 1; i <= predicates[predicate].length; ++i) {
-          // If network expansion is disabled...
-          if(!networkExpansionParameters) {
-            template.clauses.push({
-              isOptional: predicates[predicate][i - 1].optional,
-              predicate: predicate,
-              variable: '?' + predicate + i
+      _.keys(searchParameters[type]).forEach(function(term) {
+        if(searchParameters[type][term].enabled) {
+          if(dateConfig[term]) {
+            andFilter.clauses.push({
+              constraint: searchParameters[type][term].date,
+              operator: term.includes('start') ? '>=' : '<=',
+              variable: '?' + type + '1'
+            });
+          } else if(searchParameters[type][term].search === 'excluded') {
+            notFilter.clauses.push({
+              constraint: searchParameters[type][term].key,
+              predicate: type
+            });
+          } else if(searchParameters[type][term].search === 'union') {
+            unionClause.clauses.push({
+              constraint: searchParameters[type][term].key,
+              isOptional: false,
+              predicate: type
+            });
+          } else if(searchParameters[type][term].search === 'union') {
+            unionClause.clauses.push({
+              constraint: searchParameters[type][term].key,
+              isOptional: false,
+              predicate: type
             });
           } else {
+            var optional = (searchParameters[type][term].search !== 'required');
+
             template.clauses.push({
-              isOptional: predicates[predicate][i - 1].optional,
-              predicate: predicate,
-              variable: '?' + predicate + i
+              constraint: searchParameters[type][term].key,
+              isOptional: networkExpansionParameters && networkExpansionParameters[type] ? true : optional,
+              predicate: type
             });
 
-            template.clauses[0].clauses.push({
-              isOptional: predicates[predicate][i - 1].optional,
-              predicate: predicate,
-              variable: '?' + predicate + i
-            });
+            // If network expansion is enabled for any type...
+            if(networkExpansionParameters) {
+              template.clauses[0].clauses.push({
+                constraint: searchParameters[type][term].key,
+                isOptional: optional,
+                predicate: type
+              });
+            }
           }
         }
       });
+
+      if(unionClause.clauses.length === 1) {
+        template.clauses.push(unionClause.clauses[0]);
+        if(networkExpansionParameters) {
+          template.clauses[0].clauses.push(unionClause.clauses[0]);
+        }
+      }
+
+      if(unionClause.clauses.length > 1) {
+        template.clauses.push(unionClause);
+        if(networkExpansionParameters) {
+          template.clauses[0].clauses.push({
+            clauses: unionClause.clauses,
+            isOptional: true,
+            operator: 'union'
+          });
+        }
+      }
+    });
+
+    if(andFilter.clauses.length) {
+      template.filters.push(andFilter);
+    }
+
+    var unionNetworkExpansion = {
+      clauses: [],
+      operator: 'union'
+    };
+
+    _.keys(networkExpansionParameters || {}).forEach(function(type) {
+      if(networkExpansionParameters[type]) {
+        unionNetworkExpansion.clauses.push({
+          isOptional: false,
+          predicate: type,
+          variable: '?' + type
+        });
+
+        template.clauses[0].clauses.push({
+          isOptional: false,
+          predicate: type,
+          variable: '?' + type
+        });
+      }
+    });
+
+    if(unionNetworkExpansion.clauses.length === 1) {
+      template.clauses.push(unionNetworkExpansion.clauses[0]);
+    }
+
+    if(unionNetworkExpansion.clauses.length > 1) {
+      template.clauses.push(unionNetworkExpansion);
     }
 
     return template;

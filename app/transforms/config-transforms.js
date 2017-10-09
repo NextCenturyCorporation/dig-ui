@@ -435,13 +435,14 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       });
 
       searchFields.forEach(function(searchFieldsObject) {
-        if(searchFieldsObject.search && !searchFieldsObject.isDate && !searchFieldsObject.isImage) {
+        if(searchFieldsObject.search && !searchFieldsObject.isDate) {
           var index = _.findIndex(dialogConfig, function(configObject) {
             return configObject.name === (searchFieldsObject.group || 'Other');
           });
 
           if(index < 0) {
             dialogConfig.push({
+              type: searchFieldsObject.isImage ? 'image' : undefined,
               name: searchFieldsObject.group || 'Other',
               data: []
             });
@@ -494,7 +495,12 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     searchState: function(searchParameters, searchFields) {
       return searchFields.reduce(function(state, searchFieldsObject) {
-        state[searchFieldsObject.key] = searchParameters[searchFieldsObject.key] || {};
+        state[searchFieldsObject.key] = {};
+        _.keys(searchParameters[searchFieldsObject.key] || {}).forEach(function(term) {
+          if(searchParameters[searchFieldsObject.key][term].enabled) {
+            state[searchFieldsObject.key][term] = searchParameters[searchFieldsObject.key][term];
+          }
+        });
         return state;
       }, {});
     },
