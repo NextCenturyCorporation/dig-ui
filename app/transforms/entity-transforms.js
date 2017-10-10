@@ -344,6 +344,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function createDateHistogram(buckets, config) {
+    if(buckets.length < 2) {
+      return [];
+    }
+
     return buckets.reduce(function(histogram, dateBucket) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var count = dateBucket.doc_count;
@@ -398,6 +402,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function createItemHistograms(buckets, config) {
+    if(buckets.length < 2) {
+      return [];
+    }
+
     var unidentifiedHistogram = {
       icon: config.entity ? config.entity.icon : undefined,
       name: '(Unidentified)',
@@ -469,9 +477,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       });
     });
 
-    var temp = unidentifiedHistogram.points.length ? histograms.concat(unidentifiedHistogram) : histograms;
-    console.log('hist', temp);
-    return temp;
+    return unidentifiedHistogram.points.length ? histograms.concat(unidentifiedHistogram) : histograms;
   }
 
   return {
