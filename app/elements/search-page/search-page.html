@@ -15,6 +15,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/array-behavior/array-behavior.html">
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
 <link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
@@ -628,7 +629,7 @@ limitations under the License.
 
                 <export-button
                   client="[[esClient]]"
-                  data="[[documentsShown]]"
+                  data="[[documentsInList]]"
                   filter-list="[]"
                   index-name="[[esConfig.esIndex]]"
                   index-types="[[esConfig.esType]]"
@@ -645,7 +646,7 @@ limitations under the License.
               <sparkline-list time-interval="day" hide-name data="[[sparklineResults.items]]"></sparkline-list>
             </div>
 
-            <template is="dom-if" if="[[documentsShown.length]]">
+            <template is="dom-if" if="[[documentsInList.length]]">
               <paper-material>
                 <paper-tabs id="searchTab" class="flex" no-bar no-ink selected="{{selectedSearchTab}}">
                   <paper-tab class="flex-1">Document Results</paper-tab>
@@ -654,14 +655,14 @@ limitations under the License.
               </paper-material>
             </template>
 
-            <template is="dom-if" if="[[_equals(0, selectedSearchTab)]]">
+            <template is="dom-if" if="[[equals(0, selectedSearchTab)]]">
               <result-list
                 id="searchResults"
                 new-tab
                 text-property="title"
                 query-results="[[documents]]"
                 total-results="[[searchTotal]]"
-                shown-results="{{documentsShown}}"
+                shown-results="{{documentsInList}}"
                 page="{{searchPage}}"
                 page-size="25"
                 loading="[[searchLoading]]"
@@ -678,10 +679,10 @@ limitations under the License.
               </result-list>
             </template>
 
-            <template is="dom-if" if="[[_equals(1, selectedSearchTab)]]">
+            <template is="dom-if" if="[[equals(1, selectedSearchTab)]]">
               <image-gallery
                 id="searchGallery"
-                images="[[shownImages]]"
+                images="[[imagesFromDocuments]]"
                 small-image-style-class="[[getBlurStyleClass(blurImages)]]"
                 large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]">
               </image-gallery>
@@ -697,7 +698,7 @@ limitations under the License.
     'use strict';
 
     Polymer({
-      /* globals _ */
+      /* globals _, DigBehaviors */
       is: 'search-page',
 
       behaviors: [
@@ -747,7 +748,7 @@ limitations under the License.
           type: Array
         },
 
-        documentsShown: {
+        documentsInList: {
           type: Array
         },
 
@@ -776,6 +777,11 @@ limitations under the License.
           type: Boolean
         },
 
+        imagesFromDocuments: {
+          computed: 'findImagesFromDocuments(documentsInList)',
+          type: Array
+        },
+
         logger: {
           type: Object
         },
@@ -797,7 +803,7 @@ limitations under the License.
         },
 
         parameters: {
-          computed: 'getUrlParameters()',
+          computed: 'findUrlParameters()',
           type: Object
         },
 
@@ -868,11 +874,6 @@ limitations under the License.
           type: Object
         },
 
-        shownImages: {
-          computed: 'getShownImages(documentsShown)',
-          type: Array
-        },
-
         stateHistory: {
           type: Array
         },
@@ -909,14 +910,6 @@ limitations under the License.
             self.set('stateHistory', window.history.state.stateHistory);
           }
         };
-      },
-
-      buildSearchState: function(config, oldConfig) {
-        var state = {};
-        _.keys(oldConfig).forEach(function(key) {
-          state[key] = config[key] || {};
-        });
-        return state;
       },
 
       concat: function(a, b) {
@@ -960,6 +953,45 @@ limitations under the License.
         };
       },
 
+      exists: function(object) {
+        return typeof object !== 'undefined';
+      },
+
+      findDomain: function(parameters, serverConfig) {
+        if(parameters && serverConfig) {
+          /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+          var override = serverConfig.overrideConfig ? serverConfig.overrideConfig.project_name : '';
+          /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+          return override || parameters.domain || parameters.project || serverConfig.defaultProject;
+        }
+        return undefined;
+      },
+
+      findUrlParameters: function() {
+        var parameterInput = window.location.search;
+        var parameters = {};
+        if(parameterInput && parameterInput !== '?') {
+          (parameterInput.indexOf('?') === 0 ? parameterInput.slice(1) : parameterInput).split('&').forEach(function(parameter) {
+            var parameterSplit = parameter.split('=');
+            parameters[parameterSplit[0]] = (parameterSplit.length > 1 ? parameterSplit[1] : true);
+          });
+        }
+        return parameters;
+      },
+
+      getBlurStyleClass: function(blur, large) {
+        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+      },
+
+      /************* PAGE *************/
+      buildSearchState: function(config, oldConfig) {
+        var state = {};
+        _.keys(oldConfig).forEach(function(key) {
+          state[key] = config[key] || {};
+        });
+        return state;
+      },
+
       createSearchResultConfig: function(networkExpansionParameters) {
         return {
           isNetworkExpansion: !!(_.findKey(networkExpansionParameters, function(key) {
@@ -980,37 +1012,11 @@ limitations under the License.
         };
       },
 
-      /**
-       * Returns whether the two arguments are equal.
-       *
-       * @param {Number} one
-       * @param {Number} two
-       * @return {Boolean}
-       * @private
-       */
-      _equals: function(one, two) {
+      equals: function(one, two) {
         return one === two;
       },
 
-      exists: function(object) {
-        return typeof object !== 'undefined';
-      },
-
-      findDomain: function(parameters, serverConfig) {
-        if(parameters && serverConfig) {
-          /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-          var override = serverConfig.overrideConfig ? serverConfig.overrideConfig.project_name : '';
-          /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
-          return override || parameters.domain || parameters.project || serverConfig.defaultProject;
-        }
-        return undefined;
-      },
-
-      getBlurStyleClass: function(blur, large) {
-        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
-      },
-
-      getShownImages: function(documents) {
+      findImagesFromDocuments: function(documents) {
         var images = [];
         documents.forEach(function(document) {
           document.images.forEach(function(image) {
@@ -1020,21 +1026,10 @@ limitations under the License.
         return images;
       },
 
-      getUrlParameters: function() {
-        var parameterInput = window.location.search;
-        var parameters = {};
-        if(parameterInput && parameterInput !== '?') {
-          (parameterInput.indexOf('?') === 0 ? parameterInput.slice(1) : parameterInput).split('&').forEach(function(parameter) {
-            var parameterSplit = parameter.split('=');
-            parameters[parameterSplit[0]] = (parameterSplit.length > 1 ? parameterSplit[1] : true);
-          });
-        }
-        return parameters;
-      },
-
       getUrlWithProject: function(domain) {
         return './?project=' + domain;
       },
+      /********************************/
 
       /************* MENU *************/
       emailSupport: function() {

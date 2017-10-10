@@ -16,8 +16,8 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/aggregation-query-and-display/aggregation-query-and-display.html">
+<link rel="import" href="../../bower_components/array-behavior/array-behavior.html">
 <link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
-<link rel="import" href="../../bower_components/d3-import/d3.html">
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
 <link rel="import" href="../../bower_components/elastic-client-aggregation-builder/elastic-client-aggregation-builder.html">
@@ -481,8 +481,8 @@ limitations under the License.
                     icon="[[item.icon]]"
                     style-class="[[item.styleClass]]"
                     text-property="textAndCount"
-                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
-                    transform-function="[[getAggregationTitleTransformFunction]]"
+                    transform-config="[[createSectionTitleTransformConfig(pageConfig, item)]]"
+                    transform-function="[[findAggregationTitle]]"
                     data="[[item.mapData]]">
 
                     <aggregation-query-and-display
@@ -525,8 +525,8 @@ limitations under the License.
                     copy-type="[[item.titlePlural]]"
                     icon="[[item.icon]]"
                     style-class="[[item.styleClass]]"
-                    transform-config="[[getSectionTitleTransformConfig(pageConfig, item)]]"
-                    transform-function="[[getAggregationTitleTransformFunction]]"
+                    transform-config="[[createSectionTitleTransformConfig(pageConfig, item)]]"
+                    transform-function="[[findAggregationTitle]]"
                     data="[[item.aggregationData]]">
 
                     <aggregation-query-and-display
@@ -571,8 +571,8 @@ limitations under the License.
               <section-and-title
                 icon="[[esConfig.imageField.icon]]"
                 style-class="[[esConfig.imageField.styleClass]]"
-                transform-config="[[getSectionTitleTransformConfig(pageConfig, esConfig.imageField, images.length)]]"
-                transform-function="[[getAggregationTitleTransformFunction]]"
+                transform-config="[[createSectionTitleTransformConfig(pageConfig, esConfig.imageField, images.length)]]"
+                transform-function="[[findAggregationTitle]]"
                 data="[[imagesLoaded]]">
 
                 <image-query-and-display
@@ -651,7 +651,7 @@ limitations under the License.
                 error="[[item.histogramError]]"
                 icon="[[item.entity.icon]]"
                 style-class="[[item.entity.styleClass]]"
-                section-title="[[getHistogramTitle(pageConfig, item.entity)]]">
+                section-title="[[findHistogramTitle(pageConfig, item.entity)]]">
 
                 <template is="dom-if" if="[[item.histogramLoading]]">
                   <div>Loading Timelines...</div>
@@ -680,7 +680,7 @@ limitations under the License.
                     <sparkline-list data="[[item.histogramResults.items]]"></sparkline-list>
 
                     <div class="layout horizontal center-justified" style="margin: 10px 0;">
-                      <button-action text="[[getButtonText(item.showBarChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
+                      <button-action text="[[getBarChartButtonText(item.showBarChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
                     </div>
 
                     <zoomable-bar-chart
@@ -761,7 +761,7 @@ limitations under the License.
     'use strict';
 
     Polymer({
-      /* globals _, DigBehaviors, d3 */
+      /* globals DigBehaviors */
       is: 'entity-page',
 
       behaviors: [
@@ -906,7 +906,7 @@ limitations under the License.
         },
 
         parameters: {
-          computed: 'getUrlParameters()',
+          computed: 'findUrlParameters()',
           observer: 'updateProcessRequest',
           type: Object
         },
@@ -1049,11 +1049,7 @@ limitations under the License.
         return undefined;
       },
 
-      getBlurStyleClass: function(blur, large) {
-        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
-      },
-
-      getUrlParameters: function() {
+      findUrlParameters: function() {
         var parameterInput = window.location.search;
         var parameters = {};
         if(parameterInput && parameterInput !== '?') {
@@ -1065,13 +1061,11 @@ limitations under the License.
         return parameters;
       },
 
-      updateProcessRequest: function(parameters) {
-        if(!parameters.state) {
-          this.set('processRequest', true);
-        }
+      getBlurStyleClass: function(blur, large) {
+        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
       },
 
-      /******** VISUALIZATIONS ********/
+      /************* PAGE *************/
       createExtractionsConfig: function(entityConfig, pageConfig, id) {
         if(!entityConfig || !pageConfig || !id) {
           return undefined;
@@ -1095,31 +1089,7 @@ limitations under the License.
         };
       },
 
-      getButtonText: function(shown) {
-        return (shown ? 'Hide' : 'Show') + ' Bar Chart';
-      },
-
-      getBarTimelineSectionTitle: function(entity, date) {
-        return (entity && date) ? (entity + ' by ' + date + ' Timeline') : undefined;
-      },
-
-      getDateProperty: function(collection, selected, property) {
-        if(!collection || !selected || !property) {
-          return undefined;
-        }
-        return collection[selected][property];
-      },
-
-      createToggleBarChartListener: function(index) {
-        var self = this;
-        return {
-          onClick: function() {
-            self.set(['histogramFields', index, 'showBarChart'], !self.histogramFields[index].showBarChart);
-          }
-        };
-      },
-
-      getSectionTitleTransformConfig: function(pageConfig, searchFieldsObject, totalCount) {
+      createSectionTitleTransformConfig: function(pageConfig, searchFieldsObject, totalCount) {
         if(!pageConfig || !searchFieldsObject) {
           return undefined;
         }
@@ -1131,25 +1101,51 @@ limitations under the License.
         };
       },
 
-      getAggregationTitleTransformFunction: function(size, config) {
+      createToggleBarChartListener: function(index) {
+        var self = this;
+        return {
+          onClick: function() {
+            self.set(['histogramFields', index, 'showBarChart'], !self.histogramFields[index].showBarChart);
+          }
+        };
+      },
+
+      findAggregationTitle: function(size, config) {
         var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         var totalCountString = config.totalCount !== undefined && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
         return sizeString + totalCountString + (config.sayOther ? ' Other ' : ' ') + (size === 1 ? config.name : config.namePlural);
       },
 
-      getHistogramTitle: function(pageConfig, entityObject) {
+      findHistogramTitle: function(pageConfig, entityObject) {
         if(!pageConfig || !entityObject) {
           return undefined;
         }
         return entityObject.title + ' Timeline';
       },
 
+      getBarChartButtonText: function(shown) {
+        return (shown ? 'Hide' : 'Show') + ' Bar Chart';
+      },
+
+      getDateProperty: function(collection, selected, property) {
+        if(!collection || !selected || !property) {
+          return undefined;
+        }
+        return collection[selected][property];
+      },
+
       showDoubleBarChart: function(searchFieldsConfig) {
         return searchFieldsConfig.link === 'entity';
       },
+
+      updateProcessRequest: function(parameters) {
+        if(!parameters.state) {
+          this.set('processRequest', true);
+        }
+      },
       /********************************/
 
-      /************ TERMS ************/
+      /************ FILTER ************/
       getDateFacetProperty: function(facetsCollection, dateCollection, dateSelected, keyProperty) {
         if(!dateCollection || !dateSelected || !keyProperty) {
           return undefined;

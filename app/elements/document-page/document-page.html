@@ -15,6 +15,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/array-behavior/array-behavior.html">
 <link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
@@ -412,8 +413,8 @@ limitations under the License.
                     icon="[[item.config.icon]]"
                     style-class="[[item.config.styleClass]]"
                     text-property="textAndCount"
-                    transform-config="[[getSectionTitleTransformConfig(item.config)]]"
-                    transform-function="[[getSectionTitleTransformFunction]]"
+                    transform-config="[[createSectionTitleTransformConfig(item.config)]]"
+                    transform-function="[[findSectionTitleTransformFunction]]"
                     data="[[item.data]]">
 
                     <detail-subsection
@@ -429,8 +430,8 @@ limitations under the License.
                     show-copy
                     icon="[[item.config.icon]]"
                     style-class="[[item.config.styleClass]]"
-                    transform-config="[[getSectionTitleTransformConfig(item.config)]]"
-                    transform-function="[[getSectionTitleTransformFunction]]"
+                    transform-config="[[createSectionTitleTransformConfig(item.config)]]"
+                    transform-function="[[findSectionTitleTransformFunction]]"
                     data="[[item.data]]">
 
                     <detail-subsection
@@ -730,7 +731,7 @@ limitations under the License.
         },
 
         parameters: {
-          computed: 'getUrlParameters()',
+          computed: 'findUrlParameters()',
           type: Object
         },
 
@@ -862,7 +863,7 @@ limitations under the License.
         return undefined;
       },
 
-      getUrlParameters: function() {
+      findUrlParameters: function() {
         var parameterInput = window.location.search;
         var parameters = {};
         if(parameterInput && parameterInput !== '?') {
@@ -874,17 +875,17 @@ limitations under the License.
         return parameters;
       },
 
-      /******** VISUALIZATIONS ********/
+      getBlurStyleClass: function(blur, large) {
+        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+      },
+
+      /************* PAGE *************/
       buildMoreLikeThisValue: function(title, content) {
         // Remove special characters.
         return (title + ' ' + content).replace(/[^\w\s]/gi, '');
       },
 
-      getBlurStyleClass: function(blur, large) {
-        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
-      },
-
-      getSectionTitleTransformConfig: function(searchFieldsObject, totalCount) {
+      createSectionTitleTransformConfig: function(searchFieldsObject, totalCount) {
         if(!searchFieldsObject) {
           return undefined;
         }
@@ -896,7 +897,7 @@ limitations under the License.
         };
       },
 
-      getSectionTitleTransformFunction: function(size, config) {
+      findSectionTitleTransformFunction: function(size, config) {
         var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         var totalCountString = config.totalCount !== undefined && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
         return sizeString + totalCountString + (config.sayOther ? ' Other ' : ' ') + (size === 1 ? config.name : config.namePlural);
