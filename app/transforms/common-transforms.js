@@ -230,7 +230,7 @@ var commonTransforms = (function(_, moment, domain) {
       return getTextFromHyphenatedKey(key) || value;
     }
     if(type === 'image') {
-      return 'Image' + (index ? (' #' + (index + 1)) : '');
+      return 'Image' + (index >= 0 ? (' #' + (index + 1)) : '');
     }
     if(type === 'city' || type === 'location') {
       return getLocationDataFromKey(key).text || value;

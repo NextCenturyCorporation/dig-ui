@@ -413,6 +413,22 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
+     * Returns a collection of search field keys mapped to search field objects.
+     *
+     * @param {Object} searchFields
+     * @return {Object}
+     */
+    searchFieldsCollection: function(searchFields) {
+      return searchFields.reduce(function(object, searchFieldsObject) {
+        object[searchFieldsObject.key] = {
+          field: searchFieldsObject.queryField,
+          type: searchFieldsObject.type
+        };
+        return object;
+      }, {});
+    },
+
+    /**
      * Returns the config for the search fields dialog.
      *
      * @param {Object} searchFields

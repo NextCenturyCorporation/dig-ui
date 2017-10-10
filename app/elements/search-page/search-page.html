@@ -34,6 +34,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-styles/shadow.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
 <link rel="import" href="../../bower_components/profile-manager/profile-manager.html">
+<link rel="import" href="../../bower_components/query-builder/query-builder.html">
 <link rel="import" href="../../bower_components/query-transformer/query-transformer.html">
 <link rel="import" href="../../bower_components/result-list/result-list.html">
 <link rel="import" href="../../bower_components/search-fields-dialog/search-fields-dialog.html">
@@ -110,7 +111,7 @@ limitations under the License.
 
       #searchTitle {
         @apply --shadow-elevation-2dp;
-        padding: 15px 25px;
+        padding: 20px 30px;
       }
 
       #searchTitle .search-results-title {
@@ -128,9 +129,14 @@ limitations under the License.
         -webkit-box-orient: vertical;
       }
 
+      #searchTitle sparkline-list {
+        height: 25px;
+        margin-top: 15px;
+      }
+
       #searchResults {
         position: absolute;
-        top: 100px;
+        top: 150px;
         bottom: 0;
         left: 0;
         right: 0;
@@ -165,7 +171,7 @@ limitations under the License.
 
       #searchGallery {
         position: absolute;
-        top: 100px;
+        top: 150px;
         bottom: 0px;
         left: 0;
         right: 0;
@@ -175,7 +181,7 @@ limitations under the License.
       #searchTab {
         @apply --shadow-elevation-2dp;
         position: absolute;
-        top: 60px;
+        top: 110px;
         bottom: 0;
         left: 0;
         right: 0;
@@ -283,8 +289,8 @@ limitations under the License.
     <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
-      data-out="{{searchParameters}}"
-      combine-function="[[transforms.config.searchParameters]]">
+      data-out="{{searchFieldsCollection}}"
+      combine-function="[[transforms.config.searchFieldsCollection]]">
     </json-combine>
 
     <json-combine
@@ -292,6 +298,13 @@ limitations under the License.
       data-in2="{}"
       data-out="{{searchKeys}}"
       combine-function="[[transforms.config.searchKeys]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{searchParameters}}"
+      combine-function="[[transforms.config.searchParameters]]">
     </json-combine>
 
     <json-combine
@@ -384,7 +397,7 @@ limitations under the License.
       client="[[esClient]]"
       index-name="[[serverConfig.profileIndexName]]"
       index-type="[[serverConfig.profileIndexType]]"
-      query-builder-config="[[searchFields]]"
+      query-builder-config="[[searchFieldsCollection]]"
       query-builder-date-fields="[[dateFieldsToProperties]]"
       search-parameters="[[searchParameters]]"
       username="[[serverConfig.username]]"
@@ -443,6 +456,41 @@ limitations under the License.
       process-request="{{processRequest}}"
       build-search-state="[[buildSearchState]]">
     </bulk-search>
+
+    <query-builder
+      config="[[searchFieldsCollection]]"
+      data="[[searchParameters]]"
+      date-fields="[[dateFieldsToProperties]]"
+      query="{{esQuery}}">
+    </query-builder>
+
+    <elastic-client-aggregation-builder
+      name="timestamp_crawl"
+      type="date_histogram"
+      count="0"
+      field="timestamp_crawl"
+      interval="day"
+      ejs-aggregation="{{dateAggregation}}">
+    </elastic-client-aggregation-builder>
+
+    <template is="dom-if" if="[[dateAggregation]]">
+      <build-and-run-query
+        query="[[esQuery]]"
+        client="[[esClient]]"
+        index-name="[[esConfig.esIndex]]"
+        index-types="[[esConfig.esType]]"
+        aggregations="[[buildArray(dateAggregation)]]"
+        filters="[]"
+        page-size="0"
+        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+        source-exclude='["knowledge_graph.*.provenance"]'
+        transform-config='{"date":{"key":"timestamp_crawl"}}'
+        transform-function="[[transforms.entity.histograms]]"
+        error="{{sparklineError}}"
+        loading="{{sparklineLoading}}"
+        results="{{sparklineResults}}">
+      </build-and-run-query>
+    </template>
 
     <paper-header-panel class="flex" mode="waterfall">
       <paper-toolbar slot="header">
@@ -557,40 +605,44 @@ limitations under the License.
           </template>
 
           <template is="dom-if" if="[[esConfig]]">
-            <div id="searchTitle" class="layout horizontal">
-              <div class="layout vertical flex">
-                <template is="dom-if" if="[[!searchError]]">
-                  <div class="layout horizontal">
-                    <div class="search-results-title">[[searchTitle]]</div>
+            <div id="searchTitle" class="layout vertical">
+              <div class="layout horizontal">
+                <div class="layout vertical flex">
+                  <template is="dom-if" if="[[!searchError]]">
+                    <div class="layout horizontal">
+                      <div class="search-results-title">[[searchTitle]]</div>
 
-                    <template is="dom-if" if="[[searchTotal]]">
-                      <info-search search-parameters="[[searchParameters]]"></info-search>
-                    </template>
-                  </div>
-                </template>
+                      <template is="dom-if" if="[[searchTotal]]">
+                        <info-search search-parameters="[[searchParameters]]"></info-search>
+                      </template>
+                    </div>
+                  </template>
 
-                <template is="dom-if" if="[[searchError]]">
-                  <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
-                  <div class="search-results-title flex">
-                    [[searchErrorMessage]]
-                  </div>
-                </template>
+                  <template is="dom-if" if="[[searchError]]">
+                    <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
+                    <div class="search-results-title flex">
+                      [[searchErrorMessage]]
+                    </div>
+                  </template>
+                </div>
+
+                <export-button
+                  client="[[esClient]]"
+                  data="[[documentsShown]]"
+                  filter-list="[]"
+                  index-name="[[esConfig.esIndex]]"
+                  index-types="[[esConfig.esType]]"
+                  search-fields="[[searchFields]]"
+                  search-parameters="[[searchParameters]]"
+                  source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+                  transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                  transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
+                  transform-search-input-function="[[transforms.export.createBulkSearchData]]"
+                  transform-search-results-function="[[transforms.entity.documents]]">
+                </export-button>
               </div>
 
-              <export-button
-                client="[[esClient]]"
-                data="[[documentsShown]]"
-                filter-list="[]"
-                index-name="[[esConfig.esIndex]]"
-                index-types="[[esConfig.esType]]"
-                search-fields="[[searchFields]]"
-                search-parameters="[[searchParameters]]"
-                source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
-                transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
-                transform-search-input-function="[[transforms.export.createBulkSearchData]]"
-                transform-search-results-function="[[transforms.entity.documents]]">
-              </export-button>
+              <sparkline-list time-interval="day" hide-name data="[[sparklineResults.items]]"></sparkline-list>
             </div>
 
             <template is="dom-if" if="[[documentsShown.length]]">
@@ -647,6 +699,10 @@ limitations under the License.
     Polymer({
       /* globals _ */
       is: 'search-page',
+
+      behaviors: [
+        DigBehaviors.ArrayBehavior
+      ],
 
       properties: {
         blurImages: {

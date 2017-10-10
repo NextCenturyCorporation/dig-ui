@@ -639,7 +639,7 @@ limitations under the License.
                     source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
                     source-exclude='["knowledge_graph.*.provenance"]'
                     transform-config="[[createHistogramConfig(item.dateCollection, item.dateSelected, item.entity, pageConfig, pageId)]]"
-                    transform-function="[[transforms.entity.histogram]]"
+                    transform-function="[[transforms.entity.histograms]]"
                     error="{{item.histogramError}}"
                     loading="{{item.histogramLoading}}"
                     results="{{item.histogramResults}}">
@@ -672,19 +672,12 @@ limitations under the License.
                     </div>
                   </template>
 
-                  <template is="dom-if" if="[[!item.histogramResults.length]]">
+                  <template is="dom-if" if="[[!item.histogramResults.items.length]]">
                     <div>No Timelines of [[item.entity.title]] vs. [[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]</div>
                   </template>
 
-                  <template is="dom-if" if="[[item.histogramResults.length]]">
-                    <sparkline-list
-                      results="[[item.histogramResults]]"
-                      convert-function="[[makeConvertHistograms()]]"
-                      x-prop="formattedDate"
-                      y-prop="count"
-                      icon="[[item.entity.icon]]"
-                      style-class="[[item.entity.styleClass]]">
-                    </sparkline-list>
+                  <template is="dom-if" if="[[item.histogramResults.items.length]]">
+                    <sparkline-list data="[[item.histogramResults.items]]"></sparkline-list>
 
                     <div class="layout horizontal center-justified" style="margin: 10px 0;">
                       <button-action text="[[getButtonText(item.shouldShowChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
@@ -699,7 +692,7 @@ limitations under the License.
                         label-property="text"
                         stack-property="data"
                         interval="week"
-                        data="[[item.histogramResults]]"
+                        data="[[item.histogramResults.dates]]"
                         default-label="Unidentified [[item.entity.titlePlural]]"
                         source="Results"
                         loading="[[item.histogramLoading]]"
@@ -974,26 +967,7 @@ limitations under the License.
 
         userLoading: {
           type: Boolean
-        },
-
-        xscale: {
-          type: Object,
-          value: function() {
-            return d3.time.scale()
-              .domain([new Date(2000, 1, 7), new Date(2000, 1, 14)])
-              .range([0,1]);
-          }
-        },
-
-        xunscale: {
-          type: Object,
-          value: function() {
-            return d3.time.scale()
-              .domain([0,1])
-              .range([new Date(2000, 1, 7), new Date(2000, 1, 14)]);
-          }
         }
-
       },
 
       attached: function() {
@@ -1167,160 +1141,6 @@ limitations under the License.
         return searchFieldsConfig.link === 'entity';
       },
       /********************************/
-
-      /******* Histogram Charts *******/
-      parseHistograms: function(results) {
-        if(_.isArray(results)) {
-          var resultsWithDates = results.map(function(result) {
-            return result.data.map(function(item) {
-              item.date = result.date;
-              item.formattedDate = d3.time.format('%b %e, %Y').parse(item.date);
-              return item;
-            });
-          }).reduce(function(a, b) {
-            return a.concat(b);
-          });
-
-          var unidentifiedData = [];
-          var resultTextToData = {};
-          resultsWithDates.forEach(function(result) {
-            if(!result.id) {
-              unidentifiedData.push(result);
-            } else {
-              if(!resultTextToData[result.text]) {
-                resultTextToData[result.text] = [];
-              }
-              resultTextToData[result.text].push(result);
-            }
-          });
-
-          var pointsMapArray = _.keys(resultTextToData).map(function(text) {
-            var link;
-            var pointMap = resultTextToData[text].map(function(item) {
-              link = item.link;
-              return {
-                count: item.count,
-                date: item.date,
-                formattedDate: item.formattedDate
-              };
-            }).sort(function(a, b) {
-              return (a.formattedDate - b.formattedDate);
-            });
-
-            if(pointMap.length > 0)  {
-              return {
-                key: text,
-                link: link,
-                pointArray: pointMap
-              };
-            }
-          });
-
-          if(unidentifiedData.length) {
-            pointsMapArray.push({
-              key: 'Unidentified',
-              pointArray: unidentifiedData.map(function(item) {
-                return {
-                  count: item.count,
-                  date: item.date,
-                  formattedDate: item.formattedDate
-                };
-              }).sort(function(a, b) {
-                return (a.formattedDate - b.formattedDate);
-              })
-            });
-          }
-
-          return pointsMapArray;
-        }
-
-        return undefined;
-      },
-
-      scaleHistograms: function(histograms) {
-        var overallRange;
-        var ranges = histograms.map(function(histogram) {
-          var range =  d3.extent(histogram.pointArray, function(point) {
-            return point.formattedDate;
-          });
-
-          if(overallRange === undefined) {//Ryan
-            overallRange = [range[0],range[1]];
-          }
-          if(range[0] < overallRange[0]) {
-            overallRange[0] = range[0];
-          }
-          if(range[1] > overallRange[1]) {
-            overallRange[1] = range[1];
-          }
-          return range;
-        });
-        var scaledHistograms = ranges.map(function(range, index) {
-          var newHistogram = {
-            key: histograms[index].key,
-            link: histograms[index].link,
-            pointArray: []
-          };
-          if(range[0].toString() !== overallRange[0].toString()) {
-            newHistogram.pointArray.push({
-              formattedDate: overallRange[0],
-              count: 0
-            });
-          }
-          newHistogram.pointArray = newHistogram.pointArray.concat(histograms[index].pointArray);
-          if(range[1].toString() !== overallRange[1].toString()) {
-            newHistogram.pointArray.push({
-              formattedDate: overallRange[1],
-              count: 0
-            });
-          }
-          return newHistogram;
-        });
-        return scaledHistograms;
-      },
-
-      padHistograms: function(histograms, self) {
-        var paddedHistograms = histograms.map(function(histogram) {
-          var newpointArray  = [];
-          newpointArray.push(histogram.pointArray[0]);
-          for(var i = 1; i < histogram.pointArray.length; i++) {
-            var leftPoint = histogram.pointArray[i - 1];
-            var rightPoint = histogram.pointArray[i];
-            if(self.xscale(rightPoint.formattedDate) - self.xscale(leftPoint.formattedDate) > 1) {
-              newpointArray.push({
-                count: 0,
-                formattedDate: new Date(self.xunscale(self.xscale(leftPoint.formattedDate) + 1))
-              });
-            }
-            if(self.xscale(rightPoint.formattedDate) - self.xscale(leftPoint.formattedDate) > 2) {
-              newpointArray.push({
-                count: 0,
-                formattedDate: new Date(self.xunscale(self.xscale(rightPoint.formattedDate) - 1))
-              });
-            }
-            newpointArray.push(rightPoint);
-          }
-          return {
-            key: histogram.key,
-            link: histogram.link,
-            pointArray: newpointArray
-          };
-        });
-        return paddedHistograms;
-      },
-
-      makeConvertHistograms: function() {
-        var self = this;
-        if(self) {
-          return function(histograms) {
-            var parsedHistograms = self.parseHistograms(histograms);
-            var scaledHistograms = self.scaleHistograms(parsedHistograms);
-            var paddedHistograms = self.padHistograms(scaledHistograms, self);
-            return paddedHistograms;
-          };
-        }
-      },
-      /*******************************/
 
       /************ TERMS ************/
       getFacetProperty: function(collection, key) {
