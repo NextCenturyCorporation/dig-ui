@@ -213,6 +213,16 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
+     * Returns a formatted pretty date string.
+     *
+     * @param {String} dateString
+     * @return {String}
+     */
+    formatDate: function(dateString) {
+      return commonTransforms.getFormattedDate(dateString);
+    },
+
+    /**
      * Returns a formatted ID.
      *
      * @param {String} id

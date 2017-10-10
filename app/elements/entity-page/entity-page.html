@@ -680,25 +680,32 @@ limitations under the License.
                     <sparkline-list data="[[item.histogramResults.items]]"></sparkline-list>
 
                     <div class="layout horizontal center-justified" style="margin: 10px 0;">
-                      <button-action text="[[getButtonText(item.shouldShowChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
+                      <button-action text="[[getButtonText(item.showBarChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
                     </div>
 
-                    <template is="dom-if" if="[[item.shouldShowChart]]">
-                      <zoomable-bar-chart
-                        timeline
-                        selected-property="[[getDateProperty(item.dateCollection, item.dateSelected, 'key')]]"
-                        selected="{{filterCollection}}"
-                        bar-property="date"
-                        label-property="text"
-                        stack-property="data"
-                        interval="week"
-                        data="[[item.histogramResults.dates]]"
-                        default-label="Unidentified [[item.entity.titlePlural]]"
-                        source="Results"
-                        loading="[[item.histogramLoading]]"
-                        display-filter-text>
-                      </zoomable-bar-chart>
-                    </template>
+                    <zoomable-bar-chart
+                      load="[[item.showBarChart]]"
+                      timeline
+                      selected-property="[[getDateProperty(item.dateCollection, item.dateSelected, 'key')]]"
+                      selected="{{filterCollection}}"
+                      bar-property="date"
+                      label-property="text"
+                      stack-property="data"
+                      interval="week"
+                      data="[[item.histogramResults.dates]]"
+                      default-label="Unidentified [[item.entity.titlePlural]]"
+                      source="Results"
+                      loading="[[item.histogramLoading]]"
+                      display-filter-text>
+                    </zoomable-bar-chart>
+
+                    <terms-transformer
+                      category="[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]] Range"
+                      object="{{entityFilters}}"
+                      object-property="[[getDateProperty(item.dateCollection, item.dateSelected, 'key')]]"
+                      list="[[getDateFacetProperty(filterCollection, item.dateCollection, item.dateSelected, 'key', filterCollection.*)]]"
+                      text-function="[[transforms.config.formatDate]]">
+                    </terms-transformer>
                   </template>
                 </template>
               </section-and-title>
@@ -1107,7 +1114,7 @@ limitations under the License.
         var self = this;
         return {
           onClick: function() {
-            self.set(['histogramFields', index, 'shouldShowChart'], !self.histogramFields[index].shouldShowChart);
+            self.set(['histogramFields', index, 'showBarChart'], !self.histogramFields[index].showBarChart);
           }
         };
       },
@@ -1143,6 +1150,14 @@ limitations under the License.
       /********************************/
 
       /************ TERMS ************/
+      getDateFacetProperty: function(facetsCollection, dateCollection, dateSelected, keyProperty) {
+        if(!dateCollection || !dateSelected || !keyProperty) {
+          return undefined;
+        }
+        var key = dateCollection[dateSelected][keyProperty];
+        return facetsCollection[key];
+      },
+
       getFacetProperty: function(collection, key) {
         return collection[key];
       },
