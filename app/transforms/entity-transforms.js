@@ -212,7 +212,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     // By default, use the given non-knowledge-graph path.
     var returnObject = {
-      text: getSingleStringFromResult(result, path),
+      text: getSingleStringFromResult(result, '_source.' + path),
       // The highlight in the title/description object is the tagged text.
       highlight: result.highlight && result.highlight[path] && result.highlight[path].length ? result.highlight[path][0] : undefined
     };
@@ -229,7 +229,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
             return object.value;
           }).join(' ');
         }
-        returnObject.highlight = highlightMapping ? (getHighlightedText(returnObject.text, returnObject.text, result, type, highlightMapping[searchFieldsObject.key]) || returnObject.text) : undefined;
+        if(highlightMapping) {
+          var highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlightMapping[searchFieldsObject.key]);
+          returnObject.highlight = highlight || returnObject.highlight || returnObject.text;
+        }
       }
     }
 
@@ -265,8 +268,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var time = commonTransforms.getFormattedDate(_.get(result, 'timestamp_crawl'));
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
-    var title = getTitleOrDescription('title', searchFields, result, '_source.content_extraction.title.text', highlightMapping);
-    var description = getTitleOrDescription('description', searchFields, result, '_source.content_extraction.content_strict.text', highlightMapping);
+    var title = getTitleOrDescription('title', searchFields, result, 'content_extraction.title.text', highlightMapping);
+    var description = getTitleOrDescription('description', searchFields, result, 'content_extraction.content_strict.text', highlightMapping);
 
     var documentObject = {
       id: id,
