@@ -105,7 +105,7 @@ limitations under the License.
           if(serverConfig.searchConfig) {
             esConfig.searchEndpoint = serverConfig.searchConfig[esConfig.searchEndpoint];
           } else {
-            esConfig.searchEndpoint = esConfig.searchEndpoint + '/search/coarse';
+            esConfig.searchEndpoint = esConfig.searchEndpoint + '/search/coarse?project=' + domain;
           }
         }
 
