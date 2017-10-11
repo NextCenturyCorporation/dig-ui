@@ -649,7 +649,7 @@ limitations under the License.
             <template is="dom-if" if="[[documentsInList.length]]">
               <paper-material>
                 <paper-tabs id="searchTab" class="flex" no-bar no-ink selected="{{selectedSearchTab}}">
-                  <paper-tab class="flex-1">Document Results</paper-tab>
+                  <paper-tab class="flex-1">Webpage Results</paper-tab>
                   <paper-tab class="flex-1">Image Results</paper-tab>
                 </paper-tabs>
               </paper-material>
@@ -666,6 +666,8 @@ limitations under the License.
                 page="{{searchPage}}"
                 page-size="25"
                 loading="[[searchLoading]]"
+                pretty-name="Webpage Results"
+                pretty-name-singular="Webpage Result"
                 header="{{searchTitle}}"
                 cache-transform="[[transforms.entity.cache]]"
                 client="[[esClient]]"

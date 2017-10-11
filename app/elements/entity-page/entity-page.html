@@ -41,9 +41,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/terms-transformer/terms-transformer.html">
 <link rel="import" href="../../bower_components/user-settings-dialog/user-settings-dialog.html">
 <link rel="import" href="../../bower_components/zoomable-bar-chart/zoomable-bar-chart.html">
-<!--
 <link rel="import" href="../../elements/info-aggregations/info-aggregations.html">
--->
 <link rel="import" href="../../elements/info-data/info-data.html">
 <link rel="import" href="../../elements/section-and-map/section-and-map.html">
 <link rel="import" href="../../elements/section-and-title/section-and-title.html">
@@ -392,16 +390,22 @@ limitations under the License.
 
               <div class="page-info layout horizontal flex end-justified">
                 <template is="dom-if" if="[[searchLoading]]">
-                  Loading Results...
+                  Loading Webpage Results...
                 </template>
 
                 <template is="dom-if" if="[[!searchLoading]]">
                   <template is="dom-if" if="[[!searchTotal]]">
-                    No Results
+                    No Webpage Results
                   </template>
 
                   <template is="dom-if" if="[[searchTotal]]">
-                    [[searchTotal]] Results
+                    <template is="dom-if" if="[[!equals(searchTotal, 1)]]">
+                      [[searchTotal]] Webpage Results
+                    </template>
+
+                    <template is="dom-if" if="[[equals(searchTotal, 1)]]">
+                      [[searchTotal]] Webpage Result
+                    </template>
                   </template>
                 </template>
               </div>
@@ -501,7 +505,7 @@ limitations under the License.
                       transform-function="[[transforms.entity.extractions]]"
                       data="{{item.mapData}}"
                       header-data-name="[[item.title]]"
-                      header-counts-name="Results"
+                      header-counts-name="Webpages"
                       header-entity-name="[[pageName]]"
                       show-checkboxes
                       show-double-bar-chart="[[showDoubleBarChart(item)]]">
@@ -545,7 +549,7 @@ limitations under the License.
                       transform-function="[[transforms.entity.extractions]]"
                       data="{{item.aggregationData}}"
                       header-data-name="[[item.title]]"
-                      header-counts-name="Results"
+                      header-counts-name="Webpages"
                       header-entity-name="[[pageName]]"
                       show-checkboxes
                       show-double-bar-chart="[[showDoubleBarChart(item)]]">
@@ -560,7 +564,9 @@ limitations under the License.
                         text-function="[[getTextFunction(item.aggregationData)]]">
                       </terms-transformer>
 
-                      <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
+                      <template is="dom-if" if="[[showDoubleBarChart(item)]]">
+                        <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
+                      </template>
                     </template>
                   </section-and-title>
                 </template>
@@ -581,7 +587,7 @@ limitations under the License.
                   client="[[esClient]]"
                   filter-list="[[filterList]]"
                   header-data-name="[[esConfig.imageField.title]]"
-                  header-counts-name="Results"
+                  header-counts-name="Webpages"
                   header-entity-name="[[pageName]]"
                   index-name="[[esConfig.esIndex]]"
                   index-types="[[esConfig.esType]]"
@@ -694,7 +700,7 @@ limitations under the License.
                       interval="week"
                       data="[[item.histogramResults.dates]]"
                       default-label="Unidentified [[item.entity.titlePlural]]"
-                      source="Results"
+                      source="Webpages"
                       loading="[[item.histogramLoading]]"
                       display-filter-text>
                     </zoomable-bar-chart>
@@ -738,6 +744,8 @@ limitations under the License.
                 page="{{searchPage}}"
                 page-size="25"
                 loading="[[searchLoading]]"
+                pretty-name="Webpage Results"
+                pretty-name-singular="Webpage Result"
                 header="{{searchTitle}}"
                 cache-transform="[[transforms.entity.cache]]"
                 client="[[esClient]]"
@@ -1108,6 +1116,10 @@ limitations under the License.
             self.set(['histogramFields', index, 'showBarChart'], !self.histogramFields[index].showBarChart);
           }
         };
+      },
+
+      equals: function(one, two) {
+        return one === two;
       },
 
       findAggregationTitle: function(size, config) {

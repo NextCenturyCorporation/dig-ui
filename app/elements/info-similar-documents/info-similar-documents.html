@@ -22,7 +22,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/styled-dialog/styled-dialog-styles.html">
 <link rel="import" href="../../styles/info-styles.html">
 
-<dom-module id="info-search">
+<dom-module id="info-similar-webpages">
   <template>
     <style include="styled-dialog-styles"></style>
     <style include="iron-flex"></style>
@@ -31,11 +31,7 @@ limitations under the License.
     <style>
       :host {
         display: block;
-        margin-left: 10px;
-      }
-
-      .bold-font {
-        font-weight: bold;
+        margin-bottom: 10px;
       }
     </style>
 
@@ -45,15 +41,9 @@ limitations under the License.
     </div>
 
     <styled-dialog id="dialog" header="[[_header]]">
-      <div class="styled-dialog-text">Each search result must always contain at least one search term.</div>
-      <div class="styled-dialog-text">A search result may contain search terms in either its title or its content.</div>
-      <div class="styled-dialog-text">By default, search terms are marked as <span class="bold-font">optional</span>.</div>
-      <div class="styled-dialog-text">Any search term may be marked as <span class="bold-font">required</span>.</div>
-      <div class="styled-dialog-text">Each search result must always contain all <span class="bold-font">required</span> search terms.</div>
-      <div class="styled-dialog-text">Any search term may be marked as <span class="bold-font">excluded</span>.</div>
-      <div class="styled-dialog-text">Each search result can never contain any <span class="bold-font">excluded</span> search terms.</div>
-      <div class="styled-dialog-text">Adding more <span class="bold-font">optional</span> search terms generates <span class="bold-font">more</span> results.</div>
-      <div class="styled-dialog-text">Adding more <span class="bold-font">required</span> search terms generates <span class="bold-font">fewer</span> results.</div>
+      <div class="styled-dialog-text">Similar webpages are found by looking at the words and phrases used in the title and content of a webpage.</div>
+      <div class="styled-dialog-text">Uncommon words or phrases that are used in multiple webpages may indicate that the webpages have the same poster.</div>
+      <div class="styled-dialog-text">Webpages that are most similar are ordered first.</div>
     </styled-dialog>
   </template>
 
@@ -62,12 +52,12 @@ limitations under the License.
     'use strict';
 
     Polymer({
-      is: 'info-search',
+      is: 'info-similar-webpages',
 
       properties: {
         _header: {
           type: String,
-          value: 'How are search results found?'
+          value: 'How are similar webpages found?'
         }
       },
 
