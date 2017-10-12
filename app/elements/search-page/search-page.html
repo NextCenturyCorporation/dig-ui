@@ -1113,11 +1113,15 @@ limitations under the License.
       },
 
       handleImageFaceSearchResults: function(event) {
-        if(event.detail.error) {
+        if(event.detail.error || event.detail.response.error) {
+          while(this.imageFaceSearchList.length && this.imageFaceSearchList[0].face) {
+            var inputImage = this.imageFaceSearchList.shift();
+            this.handleImageResults('Face', inputImage, [], [], [], this.imageFaceSearchThreshold, (event.detail.error || event.detail.response.error));
+          }
         }
 
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-        var response = event.detail.response ? event.detail.response.AllSimilarFaces : [];
+        var response = (event.detail.response || {}).AllSimilarFaces || [];
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
         if(response && response.length) {
           var self = this;
@@ -1129,7 +1133,7 @@ limitations under the License.
             /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
             var inputImage = self.imageFaceSearchList.shift();
-            self.handleImageResults(inputImage.id, imageUrls, imageIds, imageDistances, self.imageFaceSearchThreshold);
+            self.handleImageResults('Face', inputImage, imageUrls, imageIds, imageDistances, self.imageFaceSearchThreshold);
           });
         }
 
@@ -1137,7 +1141,14 @@ limitations under the License.
       },
 
       handleImageSimilaritySearchResults: function(event) {
-        var response = event.detail.response ? event.detail.response.images : [];
+        if(event.detail.error || event.detail.response.error) {
+          while(this.imageSimilaritySearchList.length && this.imageSimilaritySearchList[0].similarity) {
+            var inputImage = this.imageSimilaritySearchList.shift();
+            this.handleImageResults('Similarity', inputImage, [], [], [], this.imageSimilaritySearchThreshold, (event.detail.error || event.detail.response.error));
+          }
+        }
+
+        var response = (event.detail.response || {}).images || [];
         if(response && response.length) {
           var self = this;
           response.forEach(function(imageResults) {
@@ -1148,16 +1159,16 @@ limitations under the License.
             /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
             var inputImage = self.imageSimilaritySearchList.shift();
-            self.handleImageResults(inputImage.id, imageUrls, imageIds, imageDistances, self.imageSimilaritySearchThreshold);
+            self.handleImageResults('Similarity', inputImage, imageUrls, imageIds, imageDistances, self.imageSimilaritySearchThreshold);
           });
         }
 
         this.runImageSimilaritySearch();
       },
 
-      handleImageResults: function(inputImageId, imageUrls, imageIds, imageDistances, imageThreshold) {
+      handleImageResults: function(searchType, inputImage, imageUrls, imageIds, imageDistances, imageThreshold, error) {
         var imageIndex = _.findIndex(this.imagesUploaded, function(object) {
-          return object.id === inputImageId;
+          return object.id === inputImage.id;
         });
 
         if(imageIndex < 0) {
@@ -1187,18 +1198,22 @@ limitations under the License.
           this.set('imagesProcessing', this.imagesProcessing.map(function(id) {
             return id;
           }).filter(function(id) {
-            return id !== inputImageId;
+            return id !== inputImage.id;
           }));
         }
 
         var allResults = !previousImageResults.length ? imageResults : _.uniqBy(previousImageResults.concat(imageResults).sort(function(a, b) {
           return a.rank - b.rank;
         }), 'id').map(function(result, index) {
-          result.name = 'Match #' + (index + 1) + ' (' + inputImageId + ')';
+          result.name = 'Match #' + (index + 1) + ' (' + inputImage.id + ')';
           return result;
         });
 
         this.set(['imagesUploaded', imageIndex, 'hits'], allResults);
+
+        if(error && this.logger) {
+          this.logger.log('ImageSearch' + searchType + '-Error', '{"type":"' + inputImage.type + '","name":"' + inputImage.id + '"}');
+        }
       },
 
       runBothImageSearches: function() {
@@ -1209,9 +1224,8 @@ limitations under the License.
         // Find all of the new images using their names as unique identifiers.
         var self = this;
         var images = this.imagesUploaded.filter(function(object) {
-          var search = _.isUndefined(object.searches);
-          // Face Search + Similarity Search = 2 Searches
-          object.searches = object.searches || 2;
+          var search = _.isUndefined(object.hits);
+          object.hits = null;
           return search;
         });
 
@@ -1242,7 +1256,7 @@ limitations under the License.
         }
 
         this.imageFaceSearchRunning = true;
-        this.sendImageSearchRequest('imageFaceSearch', this.imageFaceSearchList, this.imageFaceSearchThreshold);
+        this.sendImageSearchRequest('Face', 'imageFaceSearch', this.imageFaceSearchList, this.imageFaceSearchThreshold);
       },
 
       runImageSimilaritySearch: function() {
@@ -1252,15 +1266,18 @@ limitations under the License.
         }
 
         this.imageSimilaritySearchRunning = true;
-        this.sendImageSearchRequest('imageSimilaritySearch', this.imageSimilaritySearchList, this.imageSimilaritySearchThreshold);
+        this.sendImageSearchRequest('Similarity', 'imageSimilaritySearch', this.imageSimilaritySearchList, this.imageSimilaritySearchThreshold);
       },
 
-      sendImageSearchRequest: function(searchName, searchList, imageThreshold) {
+      sendImageSearchRequest: function(searchType, searchName, searchList, imageThreshold) {
         // Run in batches of 5.  All 5 must be either links or uploaded files.
         var dataType = searchList[0].type;
-        var dataList = searchList.filter(function(object) {
+        var objectList = searchList.filter(function(object) {
           return object.type === dataType;
-        }).slice(0, 5).map(function(object) {
+        }).slice(0, 5);
+        var sourceList = searchList.map(function(object) {
+          // Set the 'face' or 'similarity' property to 'true' for the objects in the search.
+          object[searchType.toLowerCase()] = true;
           if(dataType === 'DATA') {
             return object.source.substring(object.source.indexOf(';base64,') + 8);
           }
@@ -1272,22 +1289,25 @@ limitations under the License.
         var endpointConfig = (this.serverConfig.imageServiceConfig.endpoint || {});
         var endpoint = endpointConfig[dataType.toLowerCase()];
         var hostConfig = (this.serverConfig.imageServiceConfig.host || {});
-        var host = hostConfig[(searchName === 'imageFaceSearch' ? 'face' : 'similarity')];
+        var host = hostConfig[searchType.toLowerCase()];
 
-        // TODO Logging
+        if(this.logger) {
+          var logMessage = '["' + objectList.map(function(object) {
+            return object.id;
+          }).join('","') + '"]';
+          this.logger.log('ImageSearch' + searchType + '-Start', logMessage);
+        }
 
         if(auth && endpoint && host) {
           var requestElement = this.$$('#' + searchName);
           requestElement.body = {
-            data: dataList.join(',')
+            data: sourceList.join(',')
           };
           requestElement.body.options = '{"max_returned":1000,"near_dup":1,"near_dup_th":' + imageThreshold + '}';
           requestElement.url = host + endpoint;
           requestElement.headers = requestElement.headers || {};
           requestElement.headers.Authorization = auth;
           requestElement.generateRequest();
-        } else {
-          // TODO Error
         }
       },
       /********************************/
