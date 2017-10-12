@@ -104,7 +104,7 @@ limitations under the License.
           esConfig.searchEndpoint = clientConfig.configuration['sandpaper_' + serverConfig.databaseType + '_url'];
 
           if(serverConfig.searchConfig) {
-            esConfig.searchEndpoint = serverConfig.searchConfig[esConfig.searchEndpoint];
+            esConfig.searchEndpoint = (serverConfig.searchConfig[esConfig.searchEndpoint] || serverConfig.searchConfig[domain]) + '?project=' + domain;
           } else {
             esConfig.searchEndpoint = esConfig.searchEndpoint + '/search/coarse?project=' + domain;
           }

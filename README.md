@@ -50,7 +50,7 @@ LOG_INDEX | The elasticsearch log index name. | 'dig-logs'
 LOG_TYPE | The elasticsearch log index type. | 'log'
 OVERRIDE_CONFIG | The stringified config object.  Overrides the domain/project and the config from the CONFIG_ENDPOINT | undefined
 OVERRIDE_SEARCH_ENDPOINT | The stringified object containing the project names mapped to the endpoints for the search and facets REST services.  Overrides the endpoints from the project configs. | undefined
-SEARCH_CONFIG | The stringified object containing locations for the search REST service (from project configs) mapped to replacement locations. | undefined
+SEARCH_CONFIG | The stringified object containing project names and/or locations for the search REST service (from project configs) mapped to replacement locations. | undefined
 STATE_INDEX | The elasticsearch state index name. | 'dig-states'
 STATE_TYPE | The elasticsearch state index type. | 'state'
 TAG_ENTITY_ENDPOINT | The entity endpoint for the tag REST service. | undefined
