@@ -79,7 +79,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     if(config.type === 'image') {
       extraction.downloadSource = (esConfig ? '/' + esConfig.downloadImageUrl || '' : '') + '/' + encodeURIComponent(item.key);
-      extraction.source = (esConfig ? esConfig.imageUrlPrefix || '' : '') + item.key;
+      extraction.source = commonTransforms.getImageUrl(item.key, esConfig);
     }
 
     extraction.textAndCount = extraction.text + (extraction.count ? (' (' + extraction.count + ')') : '');
@@ -336,10 +336,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     documentObject.images = getExtractionsFromList(_.get(result, '_source.objects', []).map(function(object) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-      var source = object.obj_stored_url;
+      var id = object.img_sha1;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
       return {
-        key: source
+        key: id
       };
     }), esConfig.imageField || {});
 
@@ -560,7 +560,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      * @return {String}
      */
     externalImageLink: function(id) {
-      return commonTransforms.getLink(id, 'image');
+      return commonTransforms.getLink(id, esConfig.imageField.link, esConfig.imageField.type, esConfig.imageField.key);
     },
 
     /**

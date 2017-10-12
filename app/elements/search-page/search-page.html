@@ -45,7 +45,6 @@ limitations under the License.
 <link rel="import" href="../../elements/info-data/info-data.html">
 <link rel="import" href="../../elements/info-facets/info-facets.html">
 <link rel="import" href="../../elements/info-search/info-search.html">
-<link rel="import" href="../../elements/similar-image-search/similar-image-search.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
 <link rel="import" href="../../styles/page-styles.html">
 
@@ -79,6 +78,10 @@ limitations under the License.
         --paper-toolbar-content: {
           padding: 0 10px;
         };
+      }
+
+      paper-toolbar img {
+        min-width: 90px;
       }
 
       paper-toolbar modal-icon {
@@ -493,6 +496,30 @@ limitations under the License.
       </build-and-run-query>
     </template>
 
+    <iron-ajax
+      id="imageSimilaritySearch"
+      content-type="application/x-www-form-urlencoded"
+      handle-as="json"
+      loading="{{imageSimilaritySearchLoading}}"
+      method="POST"
+      params="{}"
+      with-credentials
+      on-error="handleImageSimilaritySearchResults"
+      on-response="handleImageSimilaritySearchResults">
+    </iron-ajax>
+
+    <iron-ajax
+      id="imageFaceSearch"
+      content-type="application/x-www-form-urlencoded"
+      handle-as="json"
+      loading="{{imageFaceSearchLoading}}"
+      method="POST"
+      params="{}"
+      with-credentials
+      on-error="handleImageFaceSearchResults"
+      on-response="handleImageFaceSearchResults">
+    </iron-ajax>
+
     <paper-header-panel class="flex" mode="waterfall">
       <paper-toolbar slot="header">
         <img slot="top" src="images/dig-logo.png" alt="">
@@ -502,24 +529,21 @@ limitations under the License.
           <search-fields-dialog
             date-config="[[datePropertiesToKeys]]"
             search-fields-config="[[searchFieldsDialogConfig]]"
-            search-parameters="{{searchParameters}}"
+            image-url-prefix="[[esConfig.imageUrlPrefix]]"
+            image-url-suffix="[[esConfig.imageUrlSuffix]]"
+            images="{{imagesUploaded}}"
+            images-processing="[[imagesProcessing]]"
+            large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+            small-image-style-class="[[getBlurStyleClass(blurImages)]]"
             network-expansion-parameters="{{networkExpansionParameters}}"
-            process-request="{{processRequest}}">
+            process-request="{{processRequest}}"
+            search-parameters="{{searchParameters}}">
           </search-fields-dialog>
         </div>
 
         <a slot="top" href="[[getUrlWithProject(domain)]]" style="color: #ffffff;">
           <paper-icon-button icon="fa:times" title="Reset Page"></paper-icon-button>
         </a>
-
-        <similar-image-search id="similarImageSearchDialog"
-          logger="[[logger]]"
-          blur="[[blurImages]]"
-          image-service-auth="[[serverConfig.imageServiceAuth]]"
-          image-service-host="[[serverConfig.imageServiceHost]]"
-          link-function="[[transforms.entity.externalImageLink]]">
-        </similar-image-search>
-        <!-- TODO: add logger, update transform when we're ready to link to image entity pages -->
 
         <user-settings-dialog
           slot="top"
@@ -563,11 +587,6 @@ limitations under the License.
               Bulk Search from Uploaded File or Text
             </paper-icon-item>
 
-            <paper-icon-item title="Search on an Image URL or Uploaded Image" on-tap="openSimilarImageSearchDialog">
-              <iron-icon slot="item-icon" icon="fa:picture-o" item-icon></iron-icon>
-              Similar Image Search
-            </paper-icon-item>
-
             <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
               <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
               Open a DIG Search Page in a New Tab
@@ -590,6 +609,7 @@ limitations under the License.
         <facet-panel slot="drawer"
           date-fields="[[dateFieldsToProperties]]"
           facets-query="[[facetsQuery]]"
+          image-style-class="[[getBlurStyleClass(blurImages)]]"
           network-expansion-parameters="[[networkExpansionParameters]]"
           process-request="{{processRequest}}"
           search-endpoint="[[esConfig.searchEndpoint]]"
@@ -784,6 +804,62 @@ limitations under the License.
           type: Array
         },
 
+        imagesProcessing: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        imagesUploaded: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        imageFaceSearchList: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        imageFaceSearchLoading: {
+          type: Boolean
+        },
+
+        imageFaceSearchRunning: {
+          type: Boolean,
+          value: false
+        },
+
+        imageFaceSearchThreshold: {
+          type: Number,
+          value: 0.1
+        },
+
+        imageSimilaritySearchList: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        imageSimilaritySearchLoading: {
+          type: Boolean
+        },
+
+        imageSimilaritySearchRunning: {
+          type: Boolean,
+          value: false
+        },
+
+        imageSimilaritySearchThreshold: {
+          type: Number,
+          value: 0.3
+        },
+
         logger: {
           type: Object
         },
@@ -896,6 +972,10 @@ limitations under the License.
           type: Boolean
         }
       },
+
+      observers: [
+        'runBothImageSearches(imagesUploaded)'
+      ],
 
       attached: function() {
         var self = this;
@@ -1031,6 +1111,185 @@ limitations under the License.
       getUrlWithProject: function(domain) {
         return './?project=' + domain;
       },
+
+      handleImageFaceSearchResults: function(event) {
+        if(event.detail.error) {
+        }
+
+        /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+        var response = event.detail.response ? event.detail.response.AllSimilarFaces : [];
+        /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+        if(response && response.length) {
+          var self = this;
+          response.forEach(function(imageResults) {
+            /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+            var imageUrls = imageResults.SimilarFaces.CachedImageURLs;
+            var imageIds = imageResults.SimilarFaces.ImageSha1s;
+            var imageDistances = imageResults.SimilarFaces.Distances;
+            /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+            var inputImage = self.imageFaceSearchList.shift();
+            self.handleImageResults(inputImage.id, imageUrls, imageIds, imageDistances, self.imageFaceSearchThreshold);
+          });
+        }
+
+        this.runImageFaceSearch();
+      },
+
+      handleImageSimilaritySearchResults: function(event) {
+        var response = event.detail.response ? event.detail.response.images : [];
+        if(response && response.length) {
+          var self = this;
+          response.forEach(function(imageResults) {
+            /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+            var imageUrls = imageResults.similar_images.cached_image_urls;
+            var imageIds = imageResults.similar_images.sha1;
+            var imageDistances = imageResults.similar_images.distance;
+            /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+            var inputImage = self.imageSimilaritySearchList.shift();
+            self.handleImageResults(inputImage.id, imageUrls, imageIds, imageDistances, self.imageSimilaritySearchThreshold);
+          });
+        }
+
+        this.runImageSimilaritySearch();
+      },
+
+      handleImageResults: function(inputImageId, imageUrls, imageIds, imageDistances, imageThreshold) {
+        var imageIndex = _.findIndex(this.imagesUploaded, function(object) {
+          return object.id === inputImageId;
+        });
+
+        if(imageIndex < 0) {
+          return;
+        }
+
+        var linkFunction = this.transforms && this.transforms.entity ? this.transforms.entity.externalImageLink : null;
+
+        // Remove images with distances over the threshold.
+        var sliceIndex = _.findIndex(imageDistances, function(distance) {
+          return _.toNumber(distance) > imageThreshold;
+        });
+
+        var previousImageResults = this.imagesUploaded[imageIndex].hits || [];
+        var imageResults = imageIds.map(function(id, index) {
+          return {
+            id: id,
+            link: (linkFunction ? linkFunction(id) : ''),
+            rank: imageDistances[index],
+            source: imageUrls[index]
+          };
+        }).slice(0, sliceIndex < 0 ? imageIds.length : sliceIndex);
+
+        // Mark one search as done.
+        this.imagesUploaded[imageIndex].searches = this.imagesUploaded[imageIndex].searches - 1;
+        if(!this.imagesUploaded[imageIndex].searches) {
+          this.set('imagesProcessing', this.imagesProcessing.map(function(id) {
+            return id;
+          }).filter(function(id) {
+            return id !== inputImageId;
+          }));
+        }
+
+        var allResults = !previousImageResults.length ? imageResults : _.uniqBy(previousImageResults.concat(imageResults).sort(function(a, b) {
+          return a.rank - b.rank;
+        }), 'id').map(function(result, index) {
+          result.name = 'Match #' + (index + 1) + ' (' + inputImageId + ')';
+          return result;
+        });
+
+        this.set(['imagesUploaded', imageIndex, 'hits'], allResults);
+      },
+
+      runBothImageSearches: function() {
+        if(!this.imagesUploaded.length) {
+          return;
+        }
+
+        // Find all of the new images using their names as unique identifiers.
+        var self = this;
+        var images = this.imagesUploaded.filter(function(object) {
+          var search = _.isUndefined(object.searches);
+          // Face Search + Similarity Search = 2 Searches
+          object.searches = object.searches || 2;
+          return search;
+        });
+
+        self.set('imagesProcessing', this.imagesProcessing.concat(images.map(function(object) {
+          return object.id;
+        })));
+
+        this.set('imageFaceSearchList', this.imageFaceSearchList.concat(images));
+
+        // Use the map function to create a new array.
+        this.set('imageSimilaritySearchList', this.imageSimilaritySearchList.concat(images.map(function(object) {
+          return object;
+        })));
+
+        // Run the face and similarity searches simultaneously.
+        if(!this.imageFaceSearchRunning) {
+          this.runImageFaceSearch();
+        }
+        if(!this.imageSimilaritySearchRunning) {
+          this.runImageSimilaritySearch();
+        }
+      },
+
+      runImageFaceSearch: function() {
+        if(!this.imageFaceSearchList.length) {
+          this.imageFaceSearchRunning = false;
+          return;
+        }
+
+        this.imageFaceSearchRunning = true;
+        this.sendImageSearchRequest('imageFaceSearch', this.imageFaceSearchList, this.imageFaceSearchThreshold);
+      },
+
+      runImageSimilaritySearch: function() {
+        if(!this.imageSimilaritySearchList.length) {
+          this.imageSimilaritySearchRunning = false;
+          return;
+        }
+
+        this.imageSimilaritySearchRunning = true;
+        this.sendImageSearchRequest('imageSimilaritySearch', this.imageSimilaritySearchList, this.imageSimilaritySearchThreshold);
+      },
+
+      sendImageSearchRequest: function(searchName, searchList, imageThreshold) {
+        // Run in batches of 5.  All 5 must be either links or uploaded files.
+        var dataType = searchList[0].type;
+        var dataList = searchList.filter(function(object) {
+          return object.type === dataType;
+        }).slice(0, 5).map(function(object) {
+          if(dataType === 'DATA') {
+            return object.source.substring(object.source.indexOf(';base64,') + 8);
+          }
+          return object.source;
+        });
+
+        var authConfig = (this.serverConfig.imageServiceConfig.auth || {});
+        var auth = authConfig.user && authConfig.password ? 'Basic ' + btoa(authConfig.user + ':' + authConfig.password) : '';
+        var endpointConfig = (this.serverConfig.imageServiceConfig.endpoint || {});
+        var endpoint = endpointConfig[dataType.toLowerCase()];
+        var hostConfig = (this.serverConfig.imageServiceConfig.host || {});
+        var host = hostConfig[(searchName === 'imageFaceSearch' ? 'face' : 'similarity')];
+
+        // TODO Logging
+
+        if(auth && endpoint && host) {
+          var requestElement = this.$$('#' + searchName);
+          requestElement.body = {
+            data: dataList.join(',')
+          };
+          requestElement.body.options = '{"max_returned":1000,"near_dup":1,"near_dup_th":' + imageThreshold + '}';
+          requestElement.url = host + endpoint;
+          requestElement.headers = requestElement.headers || {};
+          requestElement.headers.Authorization = auth;
+          requestElement.generateRequest();
+        } else {
+          // TODO Error
+        }
+      },
       /********************************/
 
       /************* MENU *************/
@@ -1055,11 +1314,6 @@ limitations under the License.
 
       openNewTab: function() {
         window.open('./?project=' + this.domain);
-      },
-
-      openSimilarImageSearchDialog: function() {
-        this.$$('#menuDropdown').close();
-        this.$$('#similarImageSearchDialog').open();
       },
 
       openStateHistoryDialog: function() {

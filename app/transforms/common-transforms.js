@@ -42,6 +42,16 @@ var commonTransforms = (function(_, moment, domain) {
   }
 
   /**
+   * Returns the source URL for the image with the given ID using the given config.
+   */
+  function getImageUrl(id, config) {
+    if(!config) {
+      return id;
+    }
+    return (config.imageUrlPrefix || '') + id + (config.imageUrlSuffix || '');
+  }
+
+  /**
    * Returns the link for the given ID.
    */
   function getLink(itemId, linkType, fieldType, fieldId) {
@@ -242,10 +252,17 @@ var commonTransforms = (function(_, moment, domain) {
   }
 
   /**
+   * Returns whether the given extraction has the required properties (an ID).
+   */
+  function isGoodExtraction(object) {
+    return object.id;
+  }
+
+  /**
    * Returns whether the given location data object has the required properties.
    */
   function isGoodLocation(location) {
-    return location.latitude && location.longitude && location.text;
+    return location.id && location.latitude && location.longitude && location.text;
   }
 
   /**
@@ -253,12 +270,9 @@ var commonTransforms = (function(_, moment, domain) {
    */
   function getExtractionFilterFunction(type) {
     if(type === 'location') {
-      // TODO Filter out bad locations once the data can support it.
-      //return isGoodLocation;
+      return isGoodLocation;
     }
-    return function() {
-      return true;
-    };
+    return isGoodExtraction;
   }
 
   /**
@@ -313,6 +327,13 @@ var commonTransforms = (function(_, moment, domain) {
      */
     getFormattedPhone: function(phone) {
       return getFormattedPhone(phone);
+    },
+
+    /**
+     * Returns the source URL for the image with the given ID using the given config.
+     */
+    getImageUrl: function(id, config) {
+      return getImageUrl(id, config);
     },
 
     /**

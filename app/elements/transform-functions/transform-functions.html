@@ -63,8 +63,8 @@ limitations under the License.
           key: 'image',
           color: 'grey',
           facets: true,
-          field: 'objects.obj_stored_url',
-          group: 'Image',
+          field: 'objects.img_sha1',
+          group: 'Images',
           icon: 'image:photo',
           link: 'entity',
           result: 'image',
@@ -86,7 +86,8 @@ limitations under the License.
           esIndex: (clientConfig.index && serverConfig.databaseType ? clientConfig.index[serverConfig.databaseType] : undefined),
           esType: clientConfig.root_name,
           imageField: this._createImageFieldConfig(),
-          imageUrlPrefix: clientConfig.image_prefix || serverConfig.imageUrlPrefix || ''
+          imageUrlPrefix: clientConfig.image_prefix || serverConfig.imageUrlPrefix || '',
+          imageUrlSuffix: clientConfig.image_suffix || serverConfig.imageUrlSuffix || ''
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 

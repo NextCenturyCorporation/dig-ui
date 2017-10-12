@@ -59,7 +59,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
             count: count,
             id: id,
             link: commonTransforms.getLink(bucket.key, linkType, fieldType, fieldId),
-            source: (fieldType === 'image' ? ((esConfig ? esConfig.imageUrlPrefix || '' : '') + bucket.key) : undefined),
+            source: (fieldType === 'image' ? commonTransforms.getImageUrl(bucket.key, esConfig) : undefined),
             text: commonTransforms.getFacetsDataText(bucket.key, fieldType)
           });
         }
@@ -288,7 +288,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      * @return {String}
      */
     imageSrc: function(id, esConfig) {
-      return (esConfig ? esConfig.imageUrlPrefix || '' : '') + id;
+      return commonTransforms.getImageUrl(id, esConfig);
     },
 
     /**
