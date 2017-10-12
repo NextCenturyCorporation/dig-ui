@@ -23,7 +23,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       start: {
         key: searchFieldsObject.key + '_start',
         field: searchFieldsObject.field,
-        title: searchFieldsObject.title + ' Start'
+        title: searchFieldsObject.title + ' Begin'
       },
       end: {
         key: searchFieldsObject.key + '_end',
@@ -199,8 +199,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         var filterCollectionObject = filterCollection[searchFieldsObject.key];
         if(searchFieldsObject.isDate) {
           if(_.isArray(filterCollectionObject) && filterCollectionObject.length === 2) {
-            terms['Start ' + searchFieldsObject.title] = [filterCollectionObject[0]];
-            terms['End ' + searchFieldsObject.title] = [filterCollectionObject[1]];
+            terms['Begin ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(filterCollectionObject[0])];
+            terms['End ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(filterCollectionObject[1])];
           }
         } else {
           // Use map to create a new array.
@@ -544,11 +544,11 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         if(searchFieldsObject.isDate) {
           var startKey = searchFieldsObject.dateProperties.start.key;
           if(searchParametersObject[startKey] && searchParametersObject[startKey].enabled) {
-            terms['Start ' + searchFieldsObject.title] = [searchParametersObject[startKey].text];
+            terms['Begin ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(searchParametersObject[startKey].text)];
           }
           var endKey = searchFieldsObject.dateProperties.end.key;
           if(searchParametersObject[endKey] && searchParametersObject[endKey].enabled) {
-            terms['End ' + searchFieldsObject.title] = [searchParametersObject[endKey].text];
+            terms['End ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(searchParametersObject[endKey].text)];
           }
         } else {
           terms[searchFieldsObject.title] = _.keys(searchParametersObject).reduce(function(list, term) {

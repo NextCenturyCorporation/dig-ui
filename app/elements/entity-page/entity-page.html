@@ -340,6 +340,7 @@ limitations under the License.
         build-state-data-function="[[transforms.config.filterState]]"
         client="[[esClient]]"
         function-config="[[searchFields]]"
+        header-type="Filter"
         state-index="[[serverConfig.stateIndexName]]"
         state-type="[[serverConfig.stateIndexType]]"
         state-id="[[parameters.state]]"
@@ -420,7 +421,8 @@ limitations under the License.
               <template is="dom-repeat" items="[[searchFields]]">
                 <selected-facets-display
                   facets="{{entityFilters}}"
-                  facet-key="[[item.key]]">
+                  facet-key="[[item.key]]"
+                  hide-remove-button="[[item.isDate]]">
                 </selected-facets-display>
               </template>
             </div>
@@ -520,7 +522,7 @@ limitations under the License.
                         category="[[item.title]]"
                         object="{{entityFilters}}"
                         object-property="[[item.key]]"
-                        list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
+                        list="[[getFacetsList(filterCollection, item.key, filterCollection.*)]]"
                         text-function="[[getTextFunction(item.mapData)]]">
                       </terms-transformer>
                     </template>
@@ -564,7 +566,7 @@ limitations under the License.
                         category="[[item.title]]"
                         object="{{entityFilters}}"
                         object-property="[[item.key]]"
-                        list="[[getFacetProperty(filterCollection, item.key, filterCollection.*)]]"
+                        list="[[getFacetsList(filterCollection, item.key, filterCollection.*)]]"
                         text-function="[[getTextFunction(item.aggregationData)]]">
                       </terms-transformer>
 
@@ -608,6 +610,15 @@ limitations under the License.
                   selected="{{filterCollection}}"
                   show-checkboxes>
                 </image-query-and-display>
+
+                <template is="dom-if" if="[[images.length]]">
+                  <terms-transformer
+                    category="[[esConfig.imageField.title]]"
+                    object="{{entityFilters}}"
+                    object-property="[[esConfig.imageField.key]]"
+                    list="[[getFacetsList(filterCollection, esConfig.imageField.key, filterCollection.*)]]">
+                  </terms-transformer>
+                </template>
               </section-and-title>
             </template>
           </div>
@@ -711,11 +722,10 @@ limitations under the License.
                     </zoomable-bar-chart>
 
                     <terms-transformer
-                      category="[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]] Range"
+                      category="[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]"
                       object="{{entityFilters}}"
                       object-property="[[getDateProperty(item.dateCollection, item.dateSelected, 'key')]]"
-                      list="[[getDateFacetProperty(filterCollection, item.dateCollection, item.dateSelected, 'key', filterCollection.*)]]"
-                      text-function="[[transforms.config.formatDate]]">
+                      list="[[getDateFacetsList(filterCollection, item.dateCollection, item.dateSelected, 'key', filterCollection.*)]]">
                     </terms-transformer>
                   </template>
                 </template>
@@ -991,7 +1001,7 @@ limitations under the License.
       },
 
       observers: [
-        'handleFilterChange(entityFilters.*)'
+        'handleRemoveFilter(entityFilters.*)'
       ],
 
       attached: function() {
@@ -1171,15 +1181,18 @@ limitations under the License.
       /********************************/
 
       /************ FILTER ************/
-      getDateFacetProperty: function(facetsCollection, dateCollection, dateSelected, keyProperty) {
+      getDateFacetsList: function(facetsCollection, dateCollection, dateSelected, keyProperty) {
         if(!dateCollection || !dateSelected || !keyProperty) {
           return undefined;
         }
         var key = dateCollection[dateSelected][keyProperty];
-        return facetsCollection[key];
+        if(facetsCollection[key].length === 2) {
+          return [this.transforms.config.formatDate(facetsCollection[key][0]) + ' to ' + this.transforms.config.formatDate(facetsCollection[key][1])];
+        }
+        return [];
       },
 
-      getFacetProperty: function(collection, key) {
+      getFacetsList: function(collection, key) {
         return collection[key];
       },
 
@@ -1199,15 +1212,13 @@ limitations under the License.
         };
       },
 
-      handleFilterChange: function() {
+      /**
+       * Handles removing a filter using the selected-facets-display.
+       */
+      handleRemoveFilter: function() {
         var self = this;
         _.keys(this.entityFilters).forEach(function(type) {
           _.keys(self.entityFilters[type]).forEach(function(term) {
-            if(self.entityFilters[type][term].enabled && self.filterCollection[type] && self.filterCollection[type].indexOf(term) < 0) {
-              self.set(['filterCollection', type], self.filterCollection[type].map(function(id) {
-                return id;
-              }).concat(self.entityFilters[type][term].key));
-            }
             if(!self.entityFilters[type][term].enabled && self.filterCollection[type] && self.filterCollection[type].indexOf(term) >= 0) {
               self.set(['filterCollection', type], self.filterCollection[type].map(function(id) {
                 return id;
