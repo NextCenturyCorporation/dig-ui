@@ -22,6 +22,7 @@
 
 var fs = require('fs');
 var path = require('path');
+var exec = require('child_process').exec;
 
 var clientConfig = {};
 var csvWriteStream = require('csv-write-stream');
@@ -34,6 +35,17 @@ var upload = multer({
 
 module.exports = function(app) {
   app.get('/serverConfig/?', function(req, res) {
+    // Whenever a page is loaded, initialize the DIG elasticsearch indices if needed.
+    exec('./scripts/create_dig_indices.sh ' + serverConfig.esHost.host, function(error, stdout, stderr) {
+      if(!error) {
+        console.log(stdout);
+        console.log('Validation of DIG elasticsearch indices SUCCESSFUL');
+      } else {
+        console.log('Validation of DIG elasticsearch indices FAILED');
+        console.log(error);
+      }
+    });
+
     res.status(200).send({
       appVersion: serverConfig.appVersion,
       username: req.headers.user ? req.headers.user : 'username',

@@ -32,20 +32,6 @@ var server = require('http').createServer(app);
 require('./config/express')(app);
 require('./routes')(app);
 
-// Run setup scripts
-var exec = require('child_process').exec;
-
-// Initialize elasticsearch indices
-exec('./scripts/create_dig_indices.sh ' + config.esHost.host, function(error, stdout, stderr) {
-  if(!error) {
-    console.log(stdout);
-    console.log('Creating DIG indices successful!');
-  } else {
-    console.log('Creating DIG indices failed!');
-    console.log(error);
-  }
-});
-
 // Start server
 server.listen(config.port, config.ip, function () {
   console.log('Express server listening on %d, in %s mode', config.port, app.get('env'));
