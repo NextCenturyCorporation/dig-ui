@@ -22,7 +22,7 @@
     "elastic-create": "DigElements/elastic-create#2.0.1",
     "elastic-error": "DigElements/elastic-error#2.0.0",
     "export-button": "DigElements/export-button#2.2.1",
-    "facet-panel": "DigElements/facet-panel#2.1.5",
+    "facet-panel": "DigElements/facet-panel#2.1.6",
     "filters-builder": "DigElements/filters-builder#2.0.1",
     "fontawesome-iconset": "https://github.com/vangware/fontawesome-iconset.git#09ac70f619bb44d73fefc5f9524ae29ab217ed15",
     "horizontal-bar": "DigElements/horizontal-bar#2.2.5",
@@ -56,7 +56,7 @@
     "query-transformer": "DigElements/query-transformer#2.1.0",
     "result-list": "DigElements/result-list#2.3.3",
     "search-fields-dialog": "DigElements/search-fields-dialog#2.3.5",
-    "selected-facets-display": "DigElements/selected-facets-display#2.0.5",
+    "selected-facets-display": "DigElements/selected-facets-display#2.0.6",
     "sparkline-list": "DigElements/sparkline-list#2.2.0",
     "state-manager": "DigElements/state-manager#2.2.1",
     "styled-dialog": "DigElements/styled-dialog#2.1.2",
@@ -71,7 +71,7 @@
     "web-component-tester": "^6.1.5"
   },
   "resolutions": {
-    "breadbox-item": "2.0.5",
+    "breadbox-item": "2.0.6",
     "button-action": "2.0.1",
     "button-link": "2.0.1",
     "build-and-run-query": "2.2.0",
