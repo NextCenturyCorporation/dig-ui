@@ -534,30 +534,37 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     /**
      * Returns the search terms object to show in the state history dialog.
      *
-     * @param {Object} searchParameters
+     * @param {Object} parameters
      * @param {Object} searchFields
      * @return {Object}
      */
-    searchTerms: function(searchParameters, searchFields) {
+    searchTerms: function(parameters, searchFields) {
       return searchFields.reduce(function(terms, searchFieldsObject) {
-        var searchParametersObject = searchParameters[searchFieldsObject.key];
-        if(searchFieldsObject.isDate) {
+        var parametersObject = parameters[searchFieldsObject.key];
+        if(!_.isObject(parametersObject) && !!parametersObject) {
+          terms[searchFieldsObject.title] = true;
+        }
+
+        if(_.isObject(parametersObject) && searchFieldsObject.isDate) {
           var startKey = searchFieldsObject.dateProperties.start.key;
-          if(searchParametersObject[startKey] && searchParametersObject[startKey].enabled) {
-            terms['Begin ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(searchParametersObject[startKey].text)];
+          if(parametersObject[startKey] && parametersObject[startKey].enabled) {
+            terms['Begin ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(parametersObject[startKey].text)];
           }
           var endKey = searchFieldsObject.dateProperties.end.key;
-          if(searchParametersObject[endKey] && searchParametersObject[endKey].enabled) {
-            terms['End ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(searchParametersObject[endKey].text)];
+          if(parametersObject[endKey] && parametersObject[endKey].enabled) {
+            terms['End ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(parametersObject[endKey].text)];
           }
-        } else {
-          terms[searchFieldsObject.title] = _.keys(searchParametersObject).reduce(function(list, term) {
-            if(searchParametersObject[term].enabled) {
-              list.push(searchParametersObject[term].text);
+        }
+
+        if(_.isObject(parametersObject) && !searchFieldsObject.isDate) {
+          terms[searchFieldsObject.title] = _.keys(parametersObject).reduce(function(list, term) {
+            if(parametersObject[term].enabled) {
+              list.push(parametersObject[term].text);
             }
             return list;
           }, []);
         }
+
         return terms;
       }, {});
     },
