@@ -527,12 +527,13 @@ limitations under the License.
         <div slot="top" class="flex">
           <search-fields-dialog
             date-config="[[datePropertiesToKeys]]"
-            search-fields-config="[[searchFieldsDialogConfig]]"
+            hide-images="[[!validateImageServiceConfig(serverConfig.imageServiceConfig)]]"
             image-url-prefix="[[esConfig.imageUrlPrefix]]"
             image-url-suffix="[[esConfig.imageUrlSuffix]]"
             images="{{imagesUploaded}}"
             images-processing="[[imagesProcessing]]"
             large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+            search-fields-config="[[searchFieldsDialogConfig]]"
             small-image-style-class="[[getBlurStyleClass(blurImages)]]"
             network-expansion-parameters="{{networkExpansionParameters}}"
             process-request="{{processRequest}}"
@@ -1308,6 +1309,10 @@ limitations under the License.
           requestElement.headers.Authorization = auth;
           requestElement.generateRequest();
         }
+      },
+
+      validateImageServiceConfig: function(config) {
+        return config && config.auth && config.auth.user && config.auth.password && config.endpoint && config.endpoint.data && config.endpoint.link && config.host && config.host.face && config.host.similarity;
       },
       /********************************/
 
