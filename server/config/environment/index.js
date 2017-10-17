@@ -41,6 +41,7 @@ module.exports = {
     defaultProject: process.env.DEFAULT_PROJECT,
     downloadImageUrl: process.env.DOWNLOAD_IMAGE_URL || 'downloadImage',
     esHost: JSON.parse(process.env.ES_HOST || '{"host":"http://localhost:9200"}'),
+    esHostString: process.env.ES_HOST_STRING || '',
     imageServiceConfig: JSON.parse(process.env.IMAGE_SERVICE_CONFIG || '{"auth":{},"endpoint":{},"host":{}}'),
     imageUrlPrefix: process.env.IMAGE_URL_PREFIX || '',
     imageUrlSuffix: process.env.IMAGE_URL_SUFFIX || '',

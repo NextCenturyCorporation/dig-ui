@@ -3,6 +3,8 @@
 # Move to script folder.
 cd "${0%/*}"
 
+echo "Looking for DIG indices..."
+
 logs=$1/dig-logs
 response=$(curl $logs --write-out %{http_code} --silent --output /dev/null)
 if [ $response = "200" ]
