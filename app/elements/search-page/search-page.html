@@ -448,7 +448,7 @@ limitations under the License.
       index-name="[[esConfig.esIndex]]"
       index-types="[[esConfig.esType]]"
       domain="[[domain]]"
-      sort-field="timestamp_crawl">
+      sort-field="timestamp">
     </info-data>
 
     <bulk-search
@@ -468,11 +468,11 @@ limitations under the License.
     </query-builder>
 
     <elastic-client-aggregation-builder
-      name="timestamp_crawl"
+      name="timestamp"
       type="date_histogram"
       count="0"
-      field="timestamp_crawl"
-      interval="day"
+      field="timestamp"
+      interval="week"
       ejs-aggregation="{{dateAggregation}}">
     </elastic-client-aggregation-builder>
 
@@ -485,9 +485,9 @@ limitations under the License.
         aggregations="[[buildArray(dateAggregation)]]"
         filters="[]"
         page-size="0"
-        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp", "tld", "url"]'
         source-exclude='["knowledge_graph.*.provenance"]'
-        transform-config='{"date":{"key":"timestamp_crawl"}}'
+        transform-config='{"date":{"key":"timestamp"}}'
         transform-function="[[transforms.entity.histograms]]"
         error="{{sparklineError}}"
         loading="{{sparklineLoading}}"
@@ -657,7 +657,7 @@ limitations under the License.
                   index-types="[[esConfig.esType]]"
                   search-fields="[[searchFields]]"
                   search-parameters="[[searchParameters]]"
-                  source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+                  source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp", "tld", "url"]'
                   transform-csv-function="[[transforms.export.createExportDataForCsv]]"
                   transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
                   transform-search-input-function="[[transforms.export.createBulkSearchData]]"
@@ -665,7 +665,7 @@ limitations under the License.
                 </export-button>
               </div>
 
-              <sparkline-list time-interval="day" hide-name data="[[sparklineResults.items]]"></sparkline-list>
+              <sparkline-list time-interval="week" hide-name data="[[sparklineResults.items]]"></sparkline-list>
             </div>
 
             <template is="dom-if" if="[[documentsInList.length]]">

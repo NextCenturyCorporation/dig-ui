@@ -201,7 +201,7 @@ limitations under the License.
       filters="[]"
       page-size="1"
       properties-ready="{{processRequest}}"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.document]]"
       error="{{documentError}}"
@@ -237,7 +237,7 @@ limitations under the License.
       page-size="25"
       sort-field="[[sortField]]"
       sort-order="desc"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp", "tld", "url"]'
       loading="{{revisionLoading}}"
       last-error="{{revisionError}}"
       results="{{revisionResults}}"
@@ -270,7 +270,7 @@ limitations under the License.
       filters="[[buildArray(notThisDocFilter)]]"
       page="{{moreLikeThisPage}}"
       page-size="25"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp", "tld", "url"]'
       loading="{{moreLikeThisLoading}}"
       last-error="{{moreLikeThisError}}"
       results="{{moreLikeThisResults}}"
@@ -320,7 +320,7 @@ limitations under the License.
       index-name="[[esConfig.esIndex]]"
       index-types="[[esConfig.esType]]"
       domain="[[domain]]"
-      sort-field="timestamp_crawl">
+      sort-field="timestamp">
     </info-data>
 
     <template is="dom-if" if="[[!document.id]]">

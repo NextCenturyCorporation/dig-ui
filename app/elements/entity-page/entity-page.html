@@ -306,7 +306,7 @@ limitations under the License.
       page-size="25"
       properties-ready="{{processRequest}}"
       sort-field="[[sortField]]"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.documents]]"
       error="{{searchError}}"
@@ -357,7 +357,7 @@ limitations under the License.
       index-name="[[esConfig.esIndex]]"
       index-types="[[esConfig.esType]]"
       domain="[[domain]]"
-      sort-field="timestamp_crawl">
+      sort-field="timestamp">
     </info-data>
 
     <template is="dom-if" if="[[!pageConfig]]">
@@ -660,7 +660,7 @@ limitations under the License.
                     filters="[[filterList]]"
                     page-size="0"
                     properties-ready="{{processRequest}}"
-                    source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+                    source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp", "tld", "url"]'
                     source-exclude='["knowledge_graph.*.provenance"]'
                     transform-config="[[createHistogramConfig(item.dateCollection, item.dateSelected, item.entity, pageConfig, pageId)]]"
                     transform-function="[[transforms.entity.histograms]]"

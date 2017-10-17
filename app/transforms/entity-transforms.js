@@ -265,7 +265,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
 
     // var rank = _.get(result, '_score');
-    var time = commonTransforms.getFormattedDate(_.get(result, 'timestamp_crawl'));
+    var time = commonTransforms.getFormattedDate(_.get(result, 'timestamp'));
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
     var title = getTitleOrDescription('title', searchFields, result, 'content_extraction.title.text', highlightMapping);
