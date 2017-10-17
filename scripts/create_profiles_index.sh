@@ -30,6 +30,24 @@ curl -XPUT $1/dig-profiles -d '
             "sendEmailAlert": {
               "type": "boolean"
             },
+            "documents": {
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "lastAutomatedRun": {
+                  "type": "date",
+                  "format" : "dateOptionalTime"
+                },
+                "lastViewedByUser": {
+                  "type": "date",
+                  "format" : "dateOptionalTime"
+                },
+                "notify": {
+                  "type": "boolean"
+                }
+              }
+            },
             "entities": {
               "properties": {
                 "id": {
