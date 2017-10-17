@@ -458,10 +458,12 @@ limitations under the License.
                 View This Page's Filter History
               </paper-icon-item>
 
-              <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
-                <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
-                View DIG Data Training Options
-              </paper-icon-item>
+              <template is="dom-if" if="[[serverConfig.tagsListEndpoint]]">
+                <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
+                  <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
+                  View DIG Data Training Options
+                </paper-icon-item>
+              </template>
 
               <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
                 <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
