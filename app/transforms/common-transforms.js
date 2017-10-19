@@ -48,7 +48,7 @@ var commonTransforms = (function(_, moment, domain) {
     if(!config) {
       return id;
     }
-    return (config.imageUrlPrefix || '') + id + (config.imageUrlSuffix || '');
+    return (config.imageUrlPrefix || '') + ('' + id).toUpperCase() + (config.imageUrlSuffix || '');
   }
 
   /**
