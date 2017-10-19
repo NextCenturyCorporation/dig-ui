@@ -138,7 +138,7 @@ limitations under the License.
 
       #searchResults {
         position: absolute;
-        top: 150px;
+        top: 170px;
         bottom: 0;
         left: 0;
         right: 0;
@@ -173,7 +173,7 @@ limitations under the License.
 
       #searchGallery {
         position: absolute;
-        top: 150px;
+        top: 170px;
         bottom: 0px;
         left: 0;
         right: 0;
@@ -183,7 +183,7 @@ limitations under the License.
       #searchTab {
         @apply --shadow-elevation-2dp;
         position: absolute;
-        top: 110px;
+        top: 130px;
         bottom: 0;
         left: 0;
         right: 0;
@@ -448,7 +448,7 @@ limitations under the License.
       index-name="[[esConfig.esIndex]]"
       index-types="[[esConfig.esType]]"
       domain="[[domain]]"
-      sort-field="timestamp">
+      sort-field="timestamp_crawl">
     </info-data>
 
     <bulk-search
@@ -468,10 +468,10 @@ limitations under the License.
     </query-builder>
 
     <elastic-client-aggregation-builder
-      name="timestamp"
+      name="timestamp_crawl"
       type="date_histogram"
       count="0"
-      field="timestamp"
+      field="timestamp_crawl"
       interval="week"
       ejs-aggregation="{{dateAggregation}}">
     </elastic-client-aggregation-builder>
@@ -485,10 +485,10 @@ limitations under the License.
         aggregations="[[buildArray(dateAggregation)]]"
         filters="[]"
         page-size="0"
-        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp", "tld", "url"]'
+        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
         source-exclude='["knowledge_graph.*.provenance"]'
-        transform-config='{"date":{"key":"timestamp"}}'
-        transform-function="[[transforms.entity.histograms]]"
+        transform-config='{"date":{"key":"timestamp_crawl"}}'
+        transform-function="[[transforms.entity.searchPageTimeline]]"
         error="{{sparklineError}}"
         loading="{{sparklineLoading}}"
         results="{{sparklineResults}}">
@@ -657,7 +657,7 @@ limitations under the License.
                   index-types="[[esConfig.esType]]"
                   search-fields="[[searchFields]]"
                   search-parameters="[[searchParameters]]"
-                  source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp", "tld", "url"]'
+                  source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
                   transform-csv-function="[[transforms.export.createExportDataForCsv]]"
                   transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
                   transform-search-input-function="[[transforms.export.createBulkSearchData]]"
@@ -665,7 +665,23 @@ limitations under the License.
                 </export-button>
               </div>
 
-              <sparkline-list time-interval="week" hide-name data="[[sparklineResults.items]]"></sparkline-list>
+              <template is="dom-if" if="[[sparklineLoading]]">
+                <loading-spinner show type="Timeline" style="margin: 30px 0 10px;"></loading-spinner>
+              </template>
+
+              <template is="dom-if" if="[[!sparklineLoading]]">
+                <sparkline-list time-interval="week" hide-name data="[[sparklineResults.points]]"></sparkline-list>
+
+                <div class="layout horizontal" style="min-height: 20px;">
+                  <template is="dom-if" if="[[sparklineResults.begin]]">
+                    <div>[[sparklineResults.begin]]</div>
+                  </template>
+                  <div class="flex"></div>
+                  <template is="dom-if" if="[[sparklineResults.end]]">
+                    <div>[[sparklineResults.end]]</div>
+                  </template>
+                </div>
+              </template>
             </div>
 
             <template is="dom-if" if="[[documentsInList.length]]">

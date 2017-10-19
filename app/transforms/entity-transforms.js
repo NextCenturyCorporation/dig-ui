@@ -427,10 +427,17 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     });
   }
 
-  function createItemHistograms(buckets, config) {
+  function createItemHistograms(buckets, config, showUnidentified) {
     if(buckets.length < 2) {
       return [];
     }
+
+    var unidentifiedHistogram = {
+      icon: config.entity ? config.entity.icon : undefined,
+      name: '(Unidentified)',
+      styleClass: config.entity ? commonTransforms.getStyleClass(config.entity.color) : undefined,
+      points: []
+    };
 
     var histograms = buckets.reduce(function(histograms, dateBucket) {
       var date = commonTransforms.getFormattedDate(dateBucket.key);
@@ -469,6 +476,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
             sum += dataItem.count;
           });
         }
+
+        if(sum < count) {
+          unidentifiedHistogram.points.push({
+            count: count - sum,
+            date: date
+          });
+        }
       }
 
       return histograms;
@@ -489,7 +503,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       });
     });
 
-    return histograms;
+    return showUnidentified && unidentifiedHistogram.points.length ? histograms.concat(unidentifiedHistogram) : histograms;
   }
 
   return {
@@ -612,6 +626,29 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return {
         dates: [],
         items: []
+      };
+    },
+
+    /**
+     * Returns the histogram data for the search page sparkline chart (by item, then by date) with unidentified data.
+     *
+     * @param {Object} data
+     * @param {Object} config
+     * @return {Object}
+     */
+    searchPageTimeline: function(data, config) {
+      if(data && data.aggregations && data.aggregations[config.date.key] && data.aggregations[config.date.key][config.date.key]) {
+        var buckets = data.aggregations[config.date.key][config.date.key].buckets;
+        if(buckets.length > 1) {
+          return {
+            begin: commonTransforms.getFormattedDate(buckets[0].key),
+            end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
+            points: createItemHistograms(buckets, config, true)
+          };
+        }
+      }
+      return {
+        points: []
       };
     },
 
