@@ -409,13 +409,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return [];
     }
 
-    var unidentifiedHistogram = {
-      icon: config.entity ? config.entity.icon : undefined,
-      name: '(Unidentified)',
-      styleClass: config.entity ? commonTransforms.getStyleClass(config.entity.color) : undefined,
-      points: []
-    };
-
     var histograms = buckets.reduce(function(histograms, dateBucket) {
       var date = commonTransforms.getFormattedDate(dateBucket.key);
 
@@ -453,13 +446,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
             sum += dataItem.count;
           });
         }
-
-        if(sum < count) {
-          unidentifiedHistogram.points.push({
-            count: count - sum,
-            date: date
-          });
-        }
       }
 
       return histograms;
@@ -480,7 +466,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       });
     });
 
-    return unidentifiedHistogram.points.length ? histograms.concat(unidentifiedHistogram) : histograms;
+    return histograms;
   }
 
   return {
