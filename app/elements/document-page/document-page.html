@@ -323,10 +323,16 @@ limitations under the License.
       sort-field="timestamp_crawl">
     </info-data>
 
-    <template is="dom-if" if="[[!document.id]]">
+    <template is="dom-if" if="[[documentLoading]]">
       <div class="layout horizontal center-justified flex">
-        <loading-spinner show type="Page"></loading-spinner>
+        <loading-spinner show type="Webpage"></loading-spinner>
       </div>
+    </template>
+
+    <template is="dom-if" if="[[!documentLoading]]">
+      <template is="dom-if" if="[[!document.id]]">
+        <div class="layout horizontal flex center-justified" style="padding: 20px;">Webpage Not Found</div>
+      </template>
     </template>
 
     <template is="dom-if" if="[[document.id]]">
