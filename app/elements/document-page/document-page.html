@@ -880,9 +880,12 @@ limitations under the License.
       },
 
       /************* PAGE *************/
-      buildMoreLikeThisValue: function(title, content) {
+      buildMoreLikeThisValue: function(title, description) {
+        if(!title || !description) {
+          return undefined;
+        }
         // Remove special characters.
-        return (title + ' ' + content).replace(/[^\w\s]/gi, '');
+        return (title + ' ' + description).replace(/[^\w\s]/gi, '');
       },
 
       createSectionTitleTransformConfig: function(searchFieldsObject, totalCount) {
