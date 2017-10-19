@@ -187,7 +187,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return {
       data: data,
       key: config.key,
-      name: config.titlePlural
+      name: config.titlePlural,
+      type: config.type
     };
   }
 
@@ -297,6 +298,28 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         }
         return ('' + a.text).toLowerCase() - ('' + b.text).toLowerCase();
       });
+
+      // Transform any list of multiple date extractions into a single date range extraction.
+      if(extractionObject.type === 'date' && extractionObject.data.length > 1) {
+        var begin = extractionObject.data[0];
+        var end = extractionObject.data[extractionObject.data.length - 1];
+        var clone = _.cloneDeep(begin);
+        clone.text = begin.text + ' to ' + end.text;
+        clone.provenances = extractionObject.data.reduce(function(provenances, extraction) {
+          return provenances.concat(extraction.provenances);
+        }, []);
+        clone.count = _.sum(extractionObject.data.map(function(extraction) {
+          return extraction.count;
+        }));
+        var confidences = extractionObject.data.map(function(extraction) {
+          return extraction.confidence;
+        }).filter(function(confidence) {
+          return !!confidence;
+        });
+        clone.confidence = (confidences.length ? (_.sum(confidences) / confidences.length) : 0);
+        extractionObject.data = [clone];
+      }
+
       return extractionObject;
     };
 
