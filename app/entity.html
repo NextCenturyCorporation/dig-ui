@@ -28,12 +28,10 @@ limitations under the License.
   <link rel="icon" href="favicon.ico"/>
 
   <!-- build:css styles/main.css -->
-  <!-- Must link leaflet css (https://github.com/leaflet-extras/leaflet-map/issues/46) -->
-  <link rel="stylesheet" href="bower_components/leaflet/dist/leaflet.css">
   <link rel="stylesheet" href="styles/main.css">
   <!-- endbuild-->
 
-  <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
+  <!-- build:js bower_components/webcomponentsjs/webcomponents-loader.js -->
   <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
   <!-- endbuild -->
 
@@ -43,8 +41,6 @@ limitations under the License.
 </head>
 
 <body unresolved class="fullbleed layout vertical">
-  <span id="browser-sync-binding"></span>
-
   <dom-bind id="app">
     <template is="dom-bind">
       <entity-page></entity-page>

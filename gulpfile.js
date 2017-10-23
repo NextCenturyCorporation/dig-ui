@@ -15,21 +15,17 @@
  */
 'use strict';
 
-// Include Gulp & tools we'll use
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')();
 var del = require('del');
-var runSequence = require('run-sequence');
-var browserSync = require('browser-sync');
-var reload = browserSync.reload;
+var livereload = require('gulp-livereload');
 var merge = require('merge-stream');
+var nodemon = require('gulp-nodemon');
 var path = require('path');
-var historyApiFallback = require('connect-history-api-fallback');
+var runSequence = require('run-sequence');
+
 var packageJson = require('./package.json');
 var ensureFiles = require('./tasks/ensure-files.js');
-var nodemon = require('gulp-nodemon');
-var url = require('url');
-var proxy = require('proxy-middleware');
 
 var localConfig = {};
 try {
@@ -116,16 +112,12 @@ var optimizeHtmlTask = function(src, dest) {
 gulp.task('jslint', function() {
   return gulp.src([
       'app/*.html',
-      'app/behaviors/*.js',
       'app/elements/**/*.html',
       'app/test/*.html',
       'app/transforms/*.js',
       'gulpfile.js'
     ])
-    .pipe(reload({
-      stream: true,
-      once: true
-    }))
+    .pipe(livereload())
 
     // Extract the scripts from the HTML files for JSHint using its own extract function.
     .pipe($.jshint.extract())
@@ -142,11 +134,7 @@ gulp.task('polylint', function() {
   return gulp.src([
       'app/elements/**/*.html'
     ])
-    .pipe(reload({
-      stream: true,
-      once: true
-    }))
-
+    .pipe(livereload())
     .pipe($.polylint())
     .pipe($.polylint.reporter($.polylint.reporter.stylishlike))
     .pipe($.polylint.reporter.fail({buffer: true, ignoreWarnings: false}));
@@ -156,12 +144,8 @@ gulp.task('polylint', function() {
 gulp.task('lint', ['jslint']);
 
 // Compile and automatically prefix stylesheets
-gulp.task('styles', function() {
+gulp.task('minify-styles', function() {
   return styleTask('styles', ['**/*.css']);
-});
-
-gulp.task('elements', function() {
-  return styleTask('elements', ['**/*.css']);
 });
 
 // Ensure that we are not missing required files for the project
@@ -192,10 +176,6 @@ gulp.task('copy', function() {
     dot: true
   }).pipe(gulp.dest(dist()));
 
-  var behaviors = gulp.src([
-    'app/behaviors/*'
-  ]).pipe(gulp.dest(dist('behaviors')));
-
   // Copy over only the bower_components we need
   // These are things which cannot be vulcanized
   var bower = gulp.src([
@@ -208,7 +188,7 @@ gulp.task('copy', function() {
     'app/bower_components/pdfmake/build/pdfmake.min.js.map'
   ]).pipe(gulp.dest(dist('elements')));
 
-  return merge(app, behaviors, bower, sourceMaps)
+  return merge(app, bower, sourceMaps)
     .pipe($.size({
       title: 'copy'
     }));
@@ -247,111 +227,43 @@ gulp.task('clean', function() {
   return del(['.tmp', dist()]);
 });
 
+gulp.task('elements', function() {
+  return gulp.src('app/elements/**/*')
+    .pipe(livereload());
+});
+
+gulp.task('images', function() {
+  return gulp.src('app/images/**/*')
+    .pipe(livereload());
+});
+
+gulp.task('pages', function() {
+  return gulp.src('app/**/*.html')
+    .pipe(livereload());
+});
+
+gulp.task('styles', function() {
+  return gulp.src('app/styles/**/*')
+    .pipe(livereload());
+});
+
+gulp.task('transforms', function() {
+  return gulp.src('app/transforms/**/*.js')
+    .pipe(livereload());
+});
+
 // Watch files for changes & reload
 gulp.task('serve', ['lint', 'styles', 'elements', 'nodemon'], function() {
-  var serverConfigProxyOptions = url.parse('http://localhost:9000/serverConfig');
-  serverConfigProxyOptions.route = '/serverConfig';
-
-  var clientConfigProxyOptions = url.parse('http://localhost:9000/clientConfig');
-  clientConfigProxyOptions.route = '/clientConfig';
-
-  var saveClientConfigProxyOptions = url.parse('http://localhost:9000/saveClientConfig');
-  saveClientConfigProxyOptions.route = '/saveClientConfig';
-
-  var exportProxyOptions = url.parse('http://localhost:9000/export');
-  exportProxyOptions.route = '/export';
-
-  var fileProxyOptions = url.parse('http://localhost:9000/file');
-  fileProxyOptions.route = '/file';
-
-  var uploadProxyOptions = url.parse('http://localhost:9000/upload');
-  uploadProxyOptions.route = '/upload';
-
-  browserSync({
-    port: 5009,
-    notify: false,
-    logPrefix: 'DIG',
-    snippetOptions: {
-      rule: {
-        match: '<span id="browser-sync-binding"></span>',
-        fn: function(snippet) {
-          return snippet;
-        }
-      }
-    },
-    // Run as an https by uncommenting 'https: true'
-    // Note: this uses an unsigned certificate which on first access
-    //       will present a certificate warning in the browser.
-    // https: true,
-    server: {
-      baseDir: ['.tmp', 'app'],
-      middleware: [
-        proxy(serverConfigProxyOptions),
-        proxy(clientConfigProxyOptions),
-        proxy(saveClientConfigProxyOptions),
-        proxy(exportProxyOptions),
-        proxy(fileProxyOptions),
-        proxy(uploadProxyOptions),
-        historyApiFallback()
-      ]
-    }
-  });
-
-  gulp.watch(['app/**/*.html'], reload);
-  gulp.watch(['app/styles/**/*.css'], ['styles', reload]);
-  gulp.watch(['app/elements/**/*.css'], ['elements', reload]);
-  gulp.watch(['app/images/**/*'], reload);
-  gulp.watch(['app/transforms/**/*.js'], reload);
+  livereload.listen();
+  gulp.watch(['app/**/*.html'], ['pages']);
+  gulp.watch(['app/elements/**/*.css'], ['elements']);
+  gulp.watch(['app/images/**/*'], ['images']);
+  gulp.watch(['app/styles/**/*.css'], ['styles', 'minify-styles']);
+  gulp.watch(['app/transforms/**/*.js'], ['transforms']);
 });
 
 // Build and serve the output from the dist build
-gulp.task('serve:dist', ['default', 'nodemon'], function() {
-  var serverConfigProxyOptions = url.parse('http://localhost:9000/serverConfig');
-  serverConfigProxyOptions.route = '/serverConfig';
-
-  var clientConfigProxyOptions = url.parse('http://localhost:9000/clientConfig');
-  clientConfigProxyOptions.route = '/clientConfig';
-
-  var saveClientConfigProxyOptions = url.parse('http://localhost:9000/saveClientConfig');
-  saveClientConfigProxyOptions.route = '/saveClientConfig';
-
-  var exportProxyOptions = url.parse('http://localhost:9000/export');
-  exportProxyOptions.route = '/export';
-
-  var fileProxyOptions = url.parse('http://localhost:9000/file');
-  fileProxyOptions.route = '/file';
-
-  var uploadProxyOptions = url.parse('http://localhost:9000/upload');
-  uploadProxyOptions.route = '/upload';
-
-  browserSync({
-    port: 5001,
-    notify: false,
-    logPrefix: 'PSK',
-    snippetOptions: {
-      rule: {
-        match: '<span id="browser-sync-binding"></span>',
-        fn: function(snippet) {
-          return snippet;
-        }
-      }
-    },
-    // Run as an https by uncommenting 'https: true'
-    // Note: this uses an unsigned certificate which on first access
-    //       will present a certificate warning in the browser.
-    // https: true,
-    server: dist(),
-    middleware: [
-      proxy(serverConfigProxyOptions),
-      proxy(clientConfigProxyOptions),
-      proxy(saveClientConfigProxyOptions),
-      proxy(exportProxyOptions),
-      proxy(fileProxyOptions),
-      proxy(uploadProxyOptions),
-      historyApiFallback()
-    ]
-  });
-});
+gulp.task('serve:dist', ['default', 'nodemon']);
 
 // start express app and watch files
 gulp.task('nodemon', function(cb) {

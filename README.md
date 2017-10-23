@@ -36,6 +36,9 @@ Copy **dig-ui/server/config/local.env.sample.js** to **dig-ui/server/config/loca
 
 Configuration Option | Description | Default
 ---------------------|-------------|--------
+AUTH | Whether to enable SSO authentication. | false
+AUTH_LOGIN_URL | The URL for the login page.  Adds the target DIG URL to the end of the login URL for redirects back.  Example:  'http://localhost:1234/redirect=' | ''
+AUTH_TOKEN_URL | The URL for the token validation page.  Adds the token string to the end of the token URL for validation.  Example:  'http://localhost:1234/token=' | ''
 CONFIG_ENDPOINT | The location for the config REST service. | 'http://localhost:1234'
 CONFIG_PASSWORD | The password for the config REST service. | ''
 CONFIG_USERNAME | The username for the config REST service. | ''

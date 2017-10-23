@@ -20,21 +20,75 @@
 
 'use strict';
 
+var csvWriteStream = require('csv-write-stream');
+var exec = require('child_process').exec;
 var fs = require('fs');
 var path = require('path');
-var exec = require('child_process').exec;
-
-var clientConfig = {};
-var csvWriteStream = require('csv-write-stream');
-var serverConfig = require('./config/environment');
+var request = require('request');
 var multer = require('multer');
 var storage = multer.memoryStorage();
 var upload = multer({
   storage: storage
 });
 
+var clientConfig = {};
+var serverConfig = require('./config/environment');
+
 module.exports = function(app) {
-  app.get('/serverConfig/?', function(req, res) {
+  app.use(function(req, res, next) {
+    // If auth is false, continue to the next step.
+    if(!serverConfig.auth) {
+      next();
+      return;
+    }
+
+    // If the user is unauthorized (and is not already redirected to the login page), redirect to the login page.
+    if(!req.query.access_token && !req.session.token && !req.session.login) {
+      req.session.login = true;
+      res.redirect('/login' + req.originalUrl);
+      return;
+    }
+
+    // If the user is redirected to the login page, continue to the login page.
+    if(req.session.login) {
+      next();
+      return;
+    }
+
+    // For all other requests, validate the user's authorization before continuing to the request.
+    var token = (req.query.access_token ? decodeURIComponent(req.query.access_token) : req.session.token);
+    request(serverConfig.authTokenUrl + encodeURIComponent(token), function(error, response, body) {
+      // Clone the URL without the query token.
+      var url = req.originalUrl.split(/[?&]access_token=/)[0];
+      // If the token is invalid, redirect to the login page.
+      var data = JSON.parse(body);
+      if(data.error) {
+        res.redirect('/login' + url);
+        return;
+      }
+      // If the token is in the URL, save the token and redirect to the URL without the query token.
+      if(req.query.access_token) {
+        req.session.token = token;
+        res.redirect(url);
+      }
+      else {
+        // Continue to the next step.
+        next();
+      }
+    });
+  });
+
+  app.get('/login/*', function(req, res) {
+    var redirectBackTo = req.protocol + '://' + req.get('host') + req.originalUrl.substring(('/login').length);
+    req.session.login = false;
+    res.redirect(serverConfig.authLoginUrl + encodeURIComponent(redirectBackTo));
+  });
+
+  app.get('/file/:file', function(req, res) {
+    res.download(req.params.file);
+  });
+
+  app.get('/config/?', function(req, res) {
     // Whenever a page is loaded, initialize the DIG elasticsearch indices if needed.
     if(serverConfig.esHostString) {
       exec('./scripts/create_dig_indices.sh ' + serverConfig.esHostString, function(error, stdout, stderr) {
@@ -76,10 +130,6 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/file/:file', function(req, res) {
-    res.download(req.params.file);
-  });
-
   app.post('/export', function(req, res) {
     if(req.body && req.body.length > 1) {
       var filename = req.body[0] + '.csv';
@@ -112,7 +162,19 @@ module.exports = function(app) {
       res.status(200).send({mimeType: req.files[0].mimetype, base64: req.files[0].buffer.toString('base64')});
   });
 
-  app.route('/*').get(function(req, res) {
-    res.sendFile(path.resolve(app.get('appPath') + '/index.html'));
+  app.get('/document.html', function(req, res) {
+    res.sendFile(path.resolve(app.get('appPath') + '/document.html'));
+  });
+
+  app.get('/entity.html', function(req, res) {
+    res.sendFile(path.resolve(app.get('appPath') + '/entity.html'));
+  });
+
+  app.get('/search.html', function(req, res) {
+    res.sendFile(path.resolve(app.get('appPath') + '/search.html'));
+  });
+
+  app.get('/*', function(req, res) {
+    res.redirect('/search.html');
   });
 };

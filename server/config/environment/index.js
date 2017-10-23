@@ -27,13 +27,16 @@ module.exports = {
     root: path.normalize(__dirname + '/../../..'),
 
     // Server port
-    port: process.env.PORT || (process.env.NODE_ENV === 'production' ? 8080 : 9000),
+    port: process.env.PORT || (process.env.NODE_ENV === 'production' ? 8080 : 5009),
 
     // Server IP
     ip: process.env.IP || (process.env.NODE_ENV === 'production' ? undefined : '0.0.0.0'),
 
     appVersion: pjson.version,
 
+    auth: process.env.AUTH || false,
+    authLoginUrl: process.env.AUTH_LOGIN_URL,
+    authTokenUrl: process.env.AUTH_TOKEN_URL,
     configEndpoint: process.env.CONFIG_ENDPOINT || 'http://localhost:1234',
     configPassword: process.env.CONFIG_PASSWORD || '',
     configUsername: process.env.CONFIG_USERNAME || '',
@@ -52,6 +55,7 @@ module.exports = {
     profileIndexName: process.env.STATE_INDEX_NAME || 'dig-profiles',
     profileIndexType: process.env.STATE_INDEX_TYPE || 'profile',
     searchConfig: process.env.SEARCH_CONFIG ? JSON.parse(process.env.SEARCH_CONFIG) : undefined,
+    secret: process.env.SECRET || 'dig memex',
     stateIndexName: process.env.STATE_INDEX_NAME || 'dig-states',
     stateIndexType: process.env.STATE_INDEX_TYPE || 'state',
     tagsEntityEndpoint: process.env.TAGS_ENTITY_ENDPOINT,
