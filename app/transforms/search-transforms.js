@@ -117,6 +117,10 @@ var searchTransforms = (function(_) {
       template.filters.push(andFilter);
     }
 
+    if(notFilter.clauses.length) {
+      template.filters.push(notFilter);
+    }
+
     var unionNetworkExpansion = {
       clauses: [],
       operator: 'union'
