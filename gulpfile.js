@@ -238,7 +238,7 @@ gulp.task('images', function() {
 });
 
 gulp.task('pages', function() {
-  return gulp.src('app/**/*.html')
+  return gulp.src('app/*.html')
     .pipe(livereload());
 });
 
@@ -248,18 +248,18 @@ gulp.task('styles', function() {
 });
 
 gulp.task('transforms', function() {
-  return gulp.src('app/transforms/**/*.js')
+  return gulp.src('app/transforms/**/*')
     .pipe(livereload());
 });
 
 // Watch files for changes & reload
 gulp.task('serve', ['lint', 'styles', 'elements', 'nodemon'], function() {
   livereload.listen();
-  gulp.watch(['app/**/*.html'], ['pages']);
-  gulp.watch(['app/elements/**/*.css'], ['elements']);
+  gulp.watch(['app/*.html'], ['pages']);
+  gulp.watch(['app/elements/**/*'], ['elements']);
   gulp.watch(['app/images/**/*'], ['images']);
-  gulp.watch(['app/styles/**/*.css'], ['styles', 'minify-styles']);
-  gulp.watch(['app/transforms/**/*.js'], ['transforms']);
+  gulp.watch(['app/styles/**/*'], ['styles', 'minify-styles']);
+  gulp.watch(['app/transforms/**/*'], ['transforms']);
 });
 
 // Build and serve the output from the dist build
