@@ -36,6 +36,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/profile-manager/profile-manager.html">
 <link rel="import" href="../../bower_components/result-list/result-list.html">
+<link rel="import" href="../../bower_components/save-case-dialog/save-case-dialog.html">
 <link rel="import" href="../../bower_components/selected-facets-display/selected-facets-display.html">
 <link rel="import" href="../../bower_components/state-manager/state-manager.html">
 <link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
@@ -169,6 +170,13 @@ limitations under the License.
     <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
+      data-out="{{searchFieldsCollection}}"
+      combine-function="[[transforms.config.searchFieldsCollection]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
       data-out="{{aggregationFields}}"
       combine-function="[[transforms.config.aggregationFields]]">
     </json-combine>
@@ -276,13 +284,13 @@ limitations under the License.
     </log-creator>
 
     <profile-manager
-      build-search-state-function="[[transforms.config.searchState]]"
+      build-state-data-function="[[transforms.config.searchState]]"
       client="[[esClient]]"
+      function-config="[[searchFields]]"
       index-name="[[serverConfig.profileIndexName]]"
       index-type="[[serverConfig.profileIndexType]]"
       query-builder-config="[[searchFields]]"
       query-builder-date-fields="[[dateFieldsToProperties]]"
-      search-parameters="[[searchParameters]]"
       username="[[serverConfig.username]]"
       blur-images="{{blurImages}}"
       cases="{{cases}}"
@@ -350,6 +358,16 @@ limitations under the License.
         has-history="{{hasHistory}}">
       </state-manager>
     </template>
+
+    <save-case-dialog
+      id="saveDialog"
+      cases="[[cases]]"
+      entity-id="[[parameters.id]]"
+      entity-name="[[pageName]]"
+      entity-type="[[parameters.type]]"
+      profile-manager="[[profileManager]]"
+      user-id="[[userId]]">
+    </save-case-dialog>
 
     <info-data
       id="dataInfoDialog"
@@ -429,33 +447,44 @@ limitations under the License.
           </div>
 
           <user-settings-dialog
-            build-search-state-function="[[transforms.config.searchState]]"
-            build-search-terms-function="[[transforms.config.searchTerms]]"
-            reset-search-dates-function="[[createResetDatesFunction(searchFields)]]"
-            cases="[[cases]]"
+            build-popup-data-function="[[transforms.config.searchTerms]]"
+            build-state-data-function="[[transforms.config.searchState]]"
+            document-icon="av:web"
+            document-link-function="[[transforms.config.documentLinkFunction]]"
+            document-type-plural="Webpages"
+            document-type-singular="Webpage"
+            entity-config="[[searchFieldsCollection]]"
+            function-config="[[searchFields]]"
+            reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
             user-id="[[userId]]"
             user-loading="[[userLoading]]"
             username="[[serverConfig.username]]"
             blur-images="{{blurImages}}"
+            cases="{{cases}}"
             email-address="{{emailAddress}}"
             notifications="{{notifications}}"
             notification-date="{{notificationDate}}"
             notification-interval="{{notificationInterval}}"
-            search-parameters="{{searchParameters}}">
+            process-request="{{processRequest}}">
           </user-settings-dialog>
 
           <paper-icon-button icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
           <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="40">
             <div slot="dropdown-content">
-              <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
-                <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
-                View DIG Database Information
+              <paper-icon-item title="Save This [[pageConfig.title]] to Case..." on-tap="openSaveDialog">
+                <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
+                Save This [[pageConfig.title]] to Case...
               </paper-icon-item>
 
               <paper-icon-item disabled="[[!hasHistory]]" title="View This Page's Filter History" on-tap="openStateHistoryDialog">
                 <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
                 View This Page's Filter History
+              </paper-icon-item>
+
+              <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
+                <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
+                View DIG Database Information
               </paper-icon-item>
 
               <template is="dom-if" if="[[serverConfig.tagsListEndpoint]]">
@@ -736,7 +765,7 @@ limitations under the License.
 
             <section-container>
               <section-title
-                icon="icons:assignment"
+                icon="av:web"
                 style-class="entity-grey"
                 section-title="[[searchTitle]]">
 
@@ -1250,6 +1279,11 @@ limitations under the License.
 
       openNewTab: function() {
         window.open('./?project=' + this.domain);
+      },
+
+      openSaveDialog: function() {
+        this.$$('#menuDropdown').close();
+        this.$$('#saveDialog').open();
       },
 
       openStateHistoryDialog: function() {

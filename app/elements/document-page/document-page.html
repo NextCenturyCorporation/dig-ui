@@ -136,6 +136,13 @@ limitations under the License.
     <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
+      data-out="{{searchFieldsCollection}}"
+      combine-function="[[transforms.config.searchFieldsCollection]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
       data-out="{{dateFieldsToProperties}}"
       combine-function="[[transforms.config.dateFieldsToProperties]]">
     </json-combine>
@@ -285,13 +292,13 @@ limitations under the License.
     </json-combine>
 
     <profile-manager
-      build-search-state-function="[[transforms.config.searchState]]"
+      build-state-data-function="[[transforms.config.searchState]]"
       client="[[esClient]]"
+      function-config="[[searchFields]]"
       index-name="[[serverConfig.profileIndexName]]"
       index-type="[[serverConfig.profileIndexType]]"
       query-builder-config="[[searchFields]]"
       query-builder-date-fields="[[dateFieldsToProperties]]"
-      search-parameters="[[searchParameters]]"
       username="[[serverConfig.username]]"
       blur-images="{{blurImages}}"
       cases="{{cases}}"
@@ -313,6 +320,16 @@ limitations under the License.
       project="[[domain]]"
       tag-manager="{{tagManager}}">
     </tag-manager>
+
+    <save-case-dialog
+      id="saveDialog"
+      cases="[[cases]]"
+      document-id="[[parameters.id]]"
+      document-name="[[document.title]]"
+      document-type="Webpage"
+      profile-manager="[[profileManager]]"
+      user-id="[[userId]]">
+    </save-case-dialog>
 
     <info-data
       id="dataInfoDialog"
@@ -340,7 +357,7 @@ limitations under the License.
         <div slot="header" class="page-head layout horizontal">
           <div class="layout vertical flex">
             <div class="page-data layout horizontal center">
-              <iron-icon class="grey" icon="icons:assignment"></iron-icon>
+              <iron-icon class="grey" icon="av:web"></iron-icon>
               <div class="page-name">
                 [[document.title]]
               </div>
@@ -360,25 +377,36 @@ limitations under the License.
           </tag-entity-buttons>
 
           <user-settings-dialog
-            build-search-state-function="[[transforms.config.searchState]]"
-            build-search-terms-function="[[transforms.config.searchTerms]]"
-            reset-search-dates-function="[[createResetDatesFunction(searchFields)]]"
-            cases="[[cases]]"
+            build-popup-data-function="[[transforms.config.searchTerms]]"
+            build-state-data-function="[[transforms.config.searchState]]"
+            document-icon="av:web"
+            document-link-function="[[returnFunctionOutput(transforms.config.documentLinkFunction)]]"
+            document-type-plural="Webpages"
+            document-type-singular="Webpage"
+            entity-config="[[searchFieldsCollection]]"
+            function-config="[[searchFields]]"
+            reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
             user-id="[[userId]]"
             user-loading="[[userLoading]]"
             username="[[serverConfig.username]]"
             blur-images="{{blurImages}}"
+            cases="{{cases}}"
             email-address="{{emailAddress}}"
             notifications="{{notifications}}"
             notification-date="{{notificationDate}}"
             notification-interval="{{notificationInterval}}"
-            search-parameters="{{searchParameters}}">
+            process-request="{{processRequest}}">
           </user-settings-dialog>
 
           <paper-icon-button icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
           <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="40">
             <div slot="dropdown-content">
+              <paper-icon-item title="Save This Webpage to Case..." on-tap="openSaveDialog">
+                <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
+                Save This Webpage to Case...
+              </paper-icon-item>
+
               <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
                 <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
                 View DIG Database Information
@@ -452,7 +480,7 @@ limitations under the License.
 
             <section-container>
               <section-title
-                icon="icons:assignment"
+                icon="av:web"
                 style-class="entity-grey"
                 section-title="[[revisionTitle]]">
 
@@ -536,7 +564,7 @@ limitations under the License.
 
             <section-container>
               <section-title
-                icon="icons:assignment"
+                icon="av:web"
                 style-class="entity-grey"
                 section-title="[[moreLikeThisTitle]]">
 
@@ -911,6 +939,10 @@ limitations under the License.
         var totalCountString = config.totalCount !== undefined && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
         return sizeString + totalCountString + (config.sayOther ? ' Other ' : ' ') + (size === 1 ? config.name : config.namePlural);
       },
+
+      returnFunctionOutput: function(func) {
+        return func();
+      },
       /********************************/
 
       /************* MENU *************/
@@ -930,6 +962,11 @@ limitations under the License.
 
       openNewTab: function() {
         window.open('./?project=' + this.domain);
+      },
+
+      openSaveDialog: function() {
+        this.$$('#menuDropdown').close();
+        this.$$('#saveDialog').open();
       },
 
       openTagsDialog: function() {

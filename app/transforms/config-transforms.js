@@ -120,6 +120,15 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
+     * Returns the link function for the documents.
+     *
+     * @return {Function}
+     */
+    documentLinkFunction: function() {
+      return commonTransforms.getLinkFunction('ad');
+    },
+
+    /**
      * Initializes an Object with filter subproperties for the facets on the entity page
      *
      * @param {Object} searchFields
@@ -432,6 +441,10 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       return searchFields.reduce(function(object, searchFieldsObject) {
         object[searchFieldsObject.key] = {
           field: searchFieldsObject.queryField,
+          icon: searchFieldsObject.icon,
+          link: commonTransforms.getLinkFunction(searchFieldsObject.link, searchFieldsObject.type, searchFieldsObject.key),
+          name: searchFieldsObject.title,
+          styleClass: commonTransforms.getStyleClass(searchFieldsObject.color),
           type: searchFieldsObject.type
         };
         return object;

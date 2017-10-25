@@ -38,6 +38,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/query-builder/query-builder.html">
 <link rel="import" href="../../bower_components/query-transformer/query-transformer.html">
 <link rel="import" href="../../bower_components/result-list/result-list.html">
+<link rel="import" href="../../bower_components/save-case-dialog/save-case-dialog.html">
 <link rel="import" href="../../bower_components/search-fields-dialog/search-fields-dialog.html">
 <link rel="import" href="../../bower_components/state-manager/state-manager.html">
 <link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
@@ -395,10 +396,12 @@ limitations under the License.
     </log-creator>
 
     <profile-manager
-      build-search-state-function="[[transforms.config.searchState]]"
+      build-state-data-function="[[transforms.config.searchState]]"
       client="[[esClient]]"
+      function-config="[[searchFields]]"
       index-name="[[serverConfig.profileIndexName]]"
       index-type="[[serverConfig.profileIndexType]]"
+      network-expansion-parameters="[[networkExpansionParameters]]"
       query-builder-config="[[searchFieldsCollection]]"
       query-builder-date-fields="[[dateFieldsToProperties]]"
       search-parameters="[[searchParameters]]"
@@ -441,6 +444,17 @@ limitations under the License.
         has-history="{{hasHistory}}">
       </state-manager>
     </template>
+
+    <save-case-dialog
+      id="saveDialog"
+      build-popup-data-function="[[transforms.config.searchTerms]]"
+      cases="[[cases]]"
+      function-config="[[searchFields]]"
+      network-expansion-parameters="[[networkExpansionParameters]]"
+      profile-manager="[[profileManager]]"
+      search-parameters="[[searchParameters]]"
+      user-id="[[userId]]">
+    </save-case-dialog>
 
     <info-data
       id="dataInfoDialog"
@@ -547,19 +561,27 @@ limitations under the License.
 
         <user-settings-dialog
           slot="top"
-          show-search
-          build-search-state-function="[[transforms.config.searchState]]"
-          build-search-terms-function="[[transforms.config.searchTerms]]"
-          reset-search-dates-function="[[createResetDatesFunction(searchFields)]]"
-          cases="[[cases]]"
+          enable-search
+          build-popup-data-function="[[transforms.config.searchTerms]]"
+          build-state-data-function="[[transforms.config.searchState]]"
+          document-icon="av:web"
+          document-link-function="[[transforms.config.documentLinkFunction]]"
+          document-type-plural="Webpages"
+          document-type-singular="Webpage"
+          entity-config="[[searchFieldsCollection]]"
+          function-config="[[searchFields]]"
+          reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
           user-id="[[userId]]"
           user-loading="[[userLoading]]"
           username="[[serverConfig.username]]"
           blur-images="{{blurImages}}"
+          cases="{{cases}}"
           email-address="{{emailAddress}}"
+          network-expansion-parameters="{{networkExpansionParameters}}"
           notifications="{{notifications}}"
           notification-date="{{notificationDate}}"
           notification-interval="{{notificationInterval}}"
+          process-request="{{processRequest}}"
           search-parameters="{{searchParameters}}">
         </user-settings-dialog>
 
@@ -567,14 +589,19 @@ limitations under the License.
 
         <iron-dropdown id="menuDropdown" slot="top" horizontal-align="right" vertical-align="top" vertical-offset="60">
           <div slot="dropdown-content">
-            <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
-              <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
-              View DIG Database Information
+            <paper-icon-item disabled="[[searchParametersDisabled(searchParameters, searchParameters.*)]]" title="Save Search to Case..." on-tap="openSaveDialog">
+              <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
+              Save Search to Case...
             </paper-icon-item>
 
             <paper-icon-item disabled="[[!hasHistory]]" title="View Your Search History" on-tap="openStateHistoryDialog">
               <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
               View Your Search History
+            </paper-icon-item>
+
+            <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
+              <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
+              View DIG Database Information
             </paper-icon-item>
 
             <template is="dom-if" if="[[serverConfig.tagsListEndpoint]]">
@@ -1339,6 +1366,20 @@ limitations under the License.
         window.open('mailto:support@memex.software');
       },
 
+      /**
+       * Returns whether all the terms in the given search parameters object are disabled.
+       *
+       * @param {Object} searchParameters
+       * @return {Boolean}
+       */
+      searchParametersDisabled: function(searchParameters) {
+        return _.keys(searchParameters).every(function(type) {
+          return _.keys(searchParameters[type]).every(function(term) {
+            return !searchParameters[type][term].enabled;
+          });
+        });
+      },
+
       openBulkSearchDialog: function() {
         this.$$('#menuDropdown').close();
         this.$$('#bulkSearchDialog').open();
@@ -1356,6 +1397,11 @@ limitations under the License.
 
       openNewTab: function() {
         window.open('./?project=' + this.domain);
+      },
+
+      openSaveDialog: function() {
+        this.$$('#menuDropdown').close();
+        this.$$('#saveDialog').open();
       },
 
       openStateHistoryDialog: function() {

@@ -21,7 +21,7 @@ curl -XPUT $1/dig-profiles -d '
           "type": "string",
           "index": "not_analyzed"
         },
-        "cases": {
+        "caseList": {
           "properties": {
             "name": {
               "type": "string",
@@ -30,10 +30,11 @@ curl -XPUT $1/dig-profiles -d '
             "sendEmailAlert": {
               "type": "boolean"
             },
-            "documents": {
+            "documentList": {
               "properties": {
                 "id": {
-                  "type": "string"
+                  "type": "string",
+                  "index": "not_analyzed"
                 },
                 "lastAutomatedRun": {
                   "type": "date",
@@ -43,15 +44,20 @@ curl -XPUT $1/dig-profiles -d '
                   "type": "date",
                   "format" : "dateOptionalTime"
                 },
+                "name": {
+                  "type": "string",
+                  "index": "not_analyzed"
+                },
                 "notify": {
                   "type": "boolean"
                 }
               }
             },
-            "entities": {
+            "entityList": {
               "properties": {
                 "id": {
-                  "type": "string"
+                  "type": "string",
+                  "index": "not_analyzed"
                 },
                 "lastAutomatedRun": {
                   "type": "date",
@@ -61,15 +67,24 @@ curl -XPUT $1/dig-profiles -d '
                   "type": "date",
                   "format" : "dateOptionalTime"
                 },
+                "name": {
+                  "type": "string",
+                  "index": "not_analyzed"
+                },
                 "notify": {
                   "type": "boolean"
+                },
+                "type": {
+                  "type": "string",
+                  "index": "not_analyzed"
                 }
               }
             },
-            "searches": {
+            "searchList": {
               "properties": {
                 "esState": {
-                  "type": "string"
+                  "type": "string",
+                  "index": "not_analyzed"
                 },
                 "lastAutomatedRun": {
                   "type": "date",
@@ -83,7 +98,8 @@ curl -XPUT $1/dig-profiles -d '
                   "type": "boolean"
                 },
                 "uiState": {
-                  "type": "string"
+                  "type": "string",
+                  "index": "not_analyzed"
                 }
               }
             }

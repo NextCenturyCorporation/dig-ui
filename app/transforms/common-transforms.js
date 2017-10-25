@@ -65,6 +65,15 @@ var commonTransforms = (function(_, moment, domain) {
   }
 
   /**
+   * Returns the link function for the field with the given settings.
+   */
+  function getLinkFunction(linkType, fieldType, fieldId) {
+    return function(id) {
+      return getLink(id, linkType, fieldType, fieldId);
+    };
+  }
+
+  /**
    * Returns the location data from the given location key formatted as city:state:country:longitude:latitude.
    */
   function getLocationDataFromKey(rawKey) {
@@ -341,6 +350,13 @@ var commonTransforms = (function(_, moment, domain) {
      */
     getLink: function(itemId, linkType, fieldType, fieldId) {
       return getLink(itemId, linkType, fieldType, fieldId);
+    },
+
+    /**
+     * Returns the link function for the field with the given settings.
+     */
+    getLinkFunction: function(linkType, fieldType, fieldId) {
+      return getLinkFunction(linkType, fieldType, fieldId);
     },
 
     /**

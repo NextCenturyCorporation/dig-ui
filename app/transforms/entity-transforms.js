@@ -285,11 +285,12 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       esData: esDataEndpoint,
       title: title.text || 'No Title',
       description: description.text || 'No Description',
-      highlightedText: title.highlight,
       headerExtractions: [],
       detailExtractions: [],
       details: []
     };
+
+    documentObject.highlightedText = title.highlight || documentObject.title;
 
     var finalizeExtractionFunction = function(extractionObject) {
       extractionObject.data = extractionObject.data.sort(function(a, b) {
@@ -353,7 +354,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     documentObject.details.push({
       name: 'Description',
-      highlightedText: description.highlight,
+      highlightedText: description.highlight || documentObject.description,
       text: documentObject.description
     });
 
