@@ -134,7 +134,7 @@ var commonTransforms = (function(_, moment, domain) {
     var keySplit = key ? key.split('-') : [];
 
     if(keySplit.length < 2) {
-      return undefined;
+      return keySplit.length ? keySplit[0] : undefined;
     }
 
     var text = keySplit[0];
