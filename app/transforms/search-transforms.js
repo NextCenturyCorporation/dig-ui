@@ -48,14 +48,37 @@ var searchTransforms = (function(_) {
         operator: 'union'
       };
 
+      var createDateVariable = true;
+
       _.keys(searchParameters[type]).forEach(function(term) {
         if(searchParameters[type][term].enabled) {
+          // If the term is a date...
           if(dateConfig[term]) {
             andFilter.clauses.push({
               constraint: searchParameters[type][term].date,
               operator: term.includes('start') ? '>=' : '<=',
               variable: '?' + type + '1'
             });
+
+            // Only create one date variable per date type.
+            if(createDateVariable) {
+              createDateVariable = false;
+
+              template.clauses.push({
+                isOptional: false,
+                predicate: type,
+                variable: '?' + type + '1'
+              });
+
+              // If network expansion is enabled for any type...
+              if(networkExpansionParameters) {
+                template.clauses[0].clauses.push({
+                  isOptional: false,
+                  predicate: type,
+                  variable: '?' + type + '1'
+                });
+              }
+            }
           } else if(searchParameters[type][term].search === 'excluded') {
             notFilter.clauses.push({
               constraint: searchParameters[type][term].key,
@@ -113,14 +136,6 @@ var searchTransforms = (function(_) {
       }
     });
 
-    if(andFilter.clauses.length) {
-      template.filters.push(andFilter);
-    }
-
-    if(notFilter.clauses.length) {
-      template.filters.push(notFilter);
-    }
-
     var unionNetworkExpansion = {
       clauses: [],
       operator: 'union'
@@ -148,6 +163,14 @@ var searchTransforms = (function(_) {
 
     if(unionNetworkExpansion.clauses.length > 1) {
       template.clauses.push(unionNetworkExpansion);
+    }
+
+    if(andFilter.clauses.length) {
+      template.filters.push(andFilter);
+    }
+
+    if(notFilter.clauses.length) {
+      template.filters.push(notFilter);
     }
 
     return template;
