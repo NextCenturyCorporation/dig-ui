@@ -77,7 +77,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     aggregationFields: function(searchFields) {
       return searchFields.filter(function(searchFieldsObject) {
-        return !searchFieldsObject.isDate && !searchFieldsObject.isImage && !searchFieldsObject.isText;
+        return !searchFieldsObject.isDate && !searchFieldsObject.isImage && !searchFieldsObject.isHidden;
       }).map(function(searchFieldsObject) {
         return _.cloneDeep(searchFieldsObject);
       });
@@ -260,10 +260,10 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     histogramFields: function(searchFields) {
       var entityFields = searchFields.filter(function(searchFieldsObject) {
-        return !searchFieldsObject.isDate && !searchFieldsObject.isText;
+        return !searchFieldsObject.isDate && !searchFieldsObject.isHidden;
       });
       var dateFields = searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.isDate && !searchFieldsObject.isText;
+        return searchFieldsObject.isDate && !searchFieldsObject.isHidden;
       });
       if(dateFields.length && entityFields.length) {
         return entityFields.map(function(entityFieldsObject) {
@@ -414,8 +414,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         searchFieldsObject.isDate = (searchFieldsObject.type === 'date');
         searchFieldsObject.isEntity = (searchFieldsObject.link === 'entity');
         searchFieldsObject.isImage = (searchFieldsObject.type === 'image');
+        searchFieldsObject.isHidden = !(searchFieldsObject.result === 'header' || searchFieldsObject.result === 'detail');
         searchFieldsObject.isLocation = (searchFieldsObject.type === 'location');
-        searchFieldsObject.isText = (searchFieldsObject.result === 'title' || searchFieldsObject.result === 'description');
         searchFieldsObject.isUrl = (searchFieldsObject.type === 'tld' || searchFieldsObject.type === 'url');
 
         // The facet aggregation transform function.
@@ -590,7 +590,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     sortField: function(searchFields) {
       var index = _.findIndex(searchFields, function(searchFieldsObject) {
-        return searchFieldsObject.isDate && !searchFieldsObject.isText;
+        return searchFieldsObject.isDate && !searchFieldsObject.isHidden;
       });
       return index >= 0 ? searchFields[index].field : '';
     }
