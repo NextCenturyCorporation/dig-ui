@@ -370,7 +370,9 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           // The plural pretty name to show.
           titlePlural: fields[id].screen_label_plural || 'Extractions',
           // Either date, email, hyphenated, image, location, phone, string, or username.
-          type: fields[id].type
+          type: fields[id].type,
+          // The width (number) to set for the extractions, if any.
+          width: fields[id].width
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 

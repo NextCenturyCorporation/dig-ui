@@ -45,7 +45,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       provenances: [],
       styleClass: commonTransforms.getStyleClass(config.color),
       text: commonTransforms.getExtractionDataText(item.key, item.value, config.type, (index || 0)),
-      type: config.key
+      type: config.key,
+      width: config.width
     };
 
     if(item.provenance && item.provenance.length) {
