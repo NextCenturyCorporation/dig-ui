@@ -160,7 +160,7 @@ gulp.task('ensureFiles', function(cb) {
 });
 
 // Optimize images
-gulp.task('images', function() {
+gulp.task('optimize-images', function() {
   return imageOptimizeTask('app/images/**/*.*', dist('images'));
 });
 
@@ -284,9 +284,8 @@ gulp.task('nodemon', function(cb) {
 // Build production files, the default task
 gulp.task('default', ['clean'], function(cb) {
   runSequence(
-    ['ensureFiles', 'copy', 'styles'],
-    'elements',
-    ['lint', 'images', 'fonts', 'html'],
+    ['ensureFiles', 'copy', 'minify-styles'],
+    ['lint', 'optimize-images', 'fonts', 'html'],
     'vulcanize',
     'version',
     cb);
