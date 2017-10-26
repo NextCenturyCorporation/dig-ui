@@ -291,9 +291,6 @@ var searchTransforms = (function(_) {
       if(response && response.length) {
         if(response[0].query && response[0].query.SPARQL && response[0].query.SPARQL.where && response[0].query.SPARQL.where.clauses && response[0].query.SPARQL.where.clauses.length) {
           var clauses = response[0].query.SPARQL.where.clauses;
-          if(config && config.isNetworkExpansion && response[0].query.SPARQL.where.clauses[0].clauses && response[0].query.SPARQL.where.clauses[0].clauses.length) {
-            clauses = response[0].query.SPARQL.where.clauses[0].clauses;
-          }
           clauses.forEach(function(clause) {
             if(clause.predicate && clause.constraint && clause._id) {
               fields[clause.predicate] = fields[clause.predicate] || {};
