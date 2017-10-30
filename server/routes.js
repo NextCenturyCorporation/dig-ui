@@ -170,6 +170,10 @@ module.exports = function(app) {
     res.sendFile(path.resolve(app.get('appPath') + '/entity.html'));
   });
 
+  app.get('/help.html', function(req, res) {
+    res.sendFile(path.resolve(app.get('appPath') + '/help.html'));
+  });
+
   app.get('/search.html', function(req, res) {
     res.sendFile(path.resolve(app.get('appPath') + '/search.html'));
   });
