@@ -501,7 +501,7 @@ limitations under the License.
         page-size="0"
         source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
         source-exclude='["knowledge_graph.*.provenance"]'
-        transform-config='{"date":{"key":"timestamp_crawl"}}'
+        transform-config='{"date":{"key":"timestamp_crawl"},"entity":{"color":"black"}}'
         transform-function="[[transforms.entity.searchPageTimeline]]"
         error="{{sparklineError}}"
         loading="{{sparklineLoading}}"
