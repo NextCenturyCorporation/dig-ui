@@ -252,8 +252,8 @@ limitations under the License.
      <!-- Logger for Filter Terms -->
     <dig-logger
       es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
+      es-index="[[serverConfig.logIndexName]]"
+      es-type="[[serverConfig.logIndexType]]"
       type="Entity-Filter"
       data="[[logMessage]]"
       username="[[serverConfig.username]]">
@@ -262,8 +262,8 @@ limitations under the License.
      <!-- Logger for Pagination -->
     <dig-logger
       es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
+      es-index="[[serverConfig.logIndexName]]"
+      es-type="[[serverConfig.logIndexType]]"
       type="Entity-ResultPage"
       data="[[searchPage]]"
       username="[[serverConfig.username]]">
@@ -272,8 +272,8 @@ limitations under the License.
     <!-- Logger for Page View -->
     <dig-logger log-page-view
       es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
+      es-index="[[serverConfig.logIndexName]]"
+      es-type="[[serverConfig.logIndexType]]"
       username="[[serverConfig.username]]"
       logger="{{logger}}">
     </dig-logger>

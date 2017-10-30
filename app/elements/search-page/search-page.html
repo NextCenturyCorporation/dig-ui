@@ -363,8 +363,8 @@ limitations under the License.
     <!-- Logger for Search Terms -->
     <dig-logger
       es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
+      es-index="[[serverConfig.logIndexName]]"
+      es-type="[[serverConfig.logIndexType]]"
       type="Search-SubmitSearch"
       data="[[logMessage]]"
       username="[[serverConfig.username]]">
@@ -373,8 +373,8 @@ limitations under the License.
     <!-- Logger for Pagination -->
     <dig-logger
       es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
+      es-index="[[serverConfig.logIndexName]]"
+      es-type="[[serverConfig.logIndexType]]"
       type="Search-ResultPage"
       data="[[searchPage]]"
       username="[[serverConfig.username]]">
@@ -383,8 +383,8 @@ limitations under the License.
     <!-- Logger for Page View -->
     <dig-logger log-page-view
       es-client="[[esClient]]"
-      es-index="[[serverConfig.logIndex]]"
-      es-type="[[serverConfig.logType]]"
+      es-index="[[serverConfig.logIndexName]]"
+      es-type="[[serverConfig.logIndexType]]"
       type="Search-Open"
       username="[[serverConfig.username]]"
       logger="{{logger}}">
