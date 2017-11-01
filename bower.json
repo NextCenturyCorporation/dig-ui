@@ -13,7 +13,7 @@
     "bulk-search": "DigElements/bulk-search#2.1.1",
     "button-action": "DigElements/button-action#2.0.1",
     "clipboard": "^1.5.15",
-    "detail-subsection": "DigElements/detail-subsection#2.0.2",
+    "detail-subsection": "DigElements/detail-subsection#2.0.3",
     "dig-logger": "DigElements/dig-logger#2.0.1",
     "elastic-client": "DigElements/elastic-client#2.0.0",
     "elastic-client-aggregation-builder": "DigElements/elastic-client-aggregation-builder#2.0.1",
@@ -54,7 +54,7 @@
     "profile-manager": "DigElements/profile-manager#2.2.2",
     "query-builder": "DigElements/query-builder#2.0.1",
     "query-transformer": "DigElements/query-transformer#2.1.0",
-    "result-list": "DigElements/result-list#2.4.3",
+    "result-list": "DigElements/result-list#2.4.4",
     "save-case-dialog": "DigElements/save-case-dialog#2.0.3",
     "search-fields-dialog": "DigElements/search-fields-dialog#2.3.6",
     "selected-facets-display": "DigElements/selected-facets-display#2.0.6",
@@ -74,13 +74,11 @@
   "resolutions": {
     "breadbox-item": "2.0.6",
     "button-action": "2.0.1",
-    "button-link": "2.0.1",
     "build-and-run-query": "2.2.0",
     "elastic-client-search": "2.1.0",
     "horizontal-bar": "2.2.5",
     "image-gallery": "2.1.3",
     "lodash": "~4.17.2",
-    "styled-dialog": "2.1.2",
-    "terms-display": "2.1.3"
+    "styled-dialog": "2.1.2"
   }
 }
