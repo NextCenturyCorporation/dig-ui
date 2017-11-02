@@ -238,6 +238,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       }
     }
 
+    // Change newlines to breaks and remove extras.
+    returnObject.text = returnObject.text.replace(/[\n\r][\s]*/g, '<br/>');
+    returnObject.highlight = returnObject.highlight.replace(/[\n\r][\s]*/g, '<br/>');
+
     return returnObject;
   }
 
