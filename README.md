@@ -52,7 +52,7 @@ CONFIG_USERNAME | The username for the MyDIG config REST service. | ''
 DATABASE_TYPE | The database type:  either 'full' or 'sample'.  Used when reading the domain/project config. | 'sample'
 DEFAULT_PROJECT | The default project. | undefined
 DOWNLOAD_IMAGE_URL | The download endpoint to get the image data for the image URLs for the PDF export. | 'downloadImage'
-ES_HOST | The stringified object containing the location of the elasticsearch instance. | '{"host": "http://localhost:9200"}'
+ES_HOST | The stringified object containing the location of the elasticsearch instance.  Supports all configuration options for the elasticsearch.js v12 client. | '{"apiVersion":"2.4","host": "http://localhost:9200"}'
 ES_HOST_STRING | The string location of the elasticsearch instance with username and password authorization (if needed).  Used for the curl commands run by the node/express server.  Formatted 'http(s)://(username:password@)host:port'. | ''
 IMAGE_SERVICE_CONFIG | The stringified object containing the username and password authorization, hostnames, and endpoints for the similar image REST service.  Syntax:  { auth: { user: username, password: password }, host: { face: hostname, similarity: hostname }, endpoint: { data: endpoint, link: endpoint } } | '{"auth": {}, "endpoint": {}, "host": {}}'
 IMAGE_URL_PREFIX | The prefix added to the start of the image URLs (if not specified in the project config). | ''
