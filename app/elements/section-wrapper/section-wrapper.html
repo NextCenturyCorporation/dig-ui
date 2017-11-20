@@ -20,7 +20,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/json-combine/json-combine.html">
 <link rel="import" href="../clipboard.html">
 
-<dom-module id="section-and-title">
+<dom-module id="section-wrapper">
   <template>
     <style include="iron-flex iron-flex-alignment"></style>
 
@@ -33,10 +33,10 @@ limitations under the License.
         background-color: #fff;
         display: block;
         margin: 0 0 20px;
-        padding: var(--section-and-title-padding, 20px);
+        padding: var(--section-wrapper-padding, 20px);
       }
 
-      .title-container {
+      .section-title {
         margin-bottom: 10px;
       }
 
@@ -172,7 +172,7 @@ limitations under the License.
 
     <paper-material>
       <template is="dom-if" if="[[!hideSectionTitle]]">
-        <div class="title-container layout horizontal start center">
+        <div class="section-title layout horizontal start center">
           <iron-icon class$="section-title-icon [[styleClass]]" icon="[[icon]]"></iron-icon>
 
           <json-combine
@@ -209,7 +209,7 @@ limitations under the License.
     'use strict';
 
     Polymer({
-      is: 'section-and-title',
+      is: 'section-wrapper',
 
       properties: {
         /**
@@ -269,6 +269,20 @@ limitations under the License.
          * @default ''
          */
         icon: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * (Optional|Output)
+         *
+         * The section title.
+         *
+         * @type {String}
+         * @default ''
+         */
+        sectionTitle: {
+          notify: true,
           type: String,
           value: ''
         },
@@ -340,20 +354,6 @@ limitations under the License.
          */
         transformFunction: {
           type: Object
-        },
-
-        /**
-         * (Optional|Output)
-         *
-         * The section title.
-         *
-         * @type {String}
-         * @default ''
-         */
-        sectionTitle: {
-          notify: true,
-          type: String,
-          value: ''
         }
       },
 

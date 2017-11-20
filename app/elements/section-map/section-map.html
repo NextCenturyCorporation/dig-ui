@@ -15,9 +15,9 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../section-and-title/section-and-title.html">
+<link rel="import" href="../section-wrapper/section-wrapper.html">
 
-<dom-module id="section-and-map">
+<dom-module id="section-map">
   <template>
     <style>
       :host {
@@ -32,7 +32,7 @@ limitations under the License.
       }
     </style>
 
-    <section-and-title
+    <section-wrapper
       show-copy="[[showCopy]]"
       copy-type="Locations"
       error="[[error]]"
@@ -55,7 +55,7 @@ limitations under the License.
       </template>
 
       <slot></slot>
-    </section-and-title>
+    </section-wrapper>
   </template>
 
   <script>
@@ -63,7 +63,7 @@ limitations under the License.
     'use strict';
 
     Polymer({
-      is: 'section-and-map',
+      is: 'section-map',
 
       properties: {
         /**

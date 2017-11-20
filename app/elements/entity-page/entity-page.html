@@ -45,8 +45,8 @@ limitations under the License.
 <link rel="import" href="../../bower_components/zoomable-bar-chart/zoomable-bar-chart.html">
 <link rel="import" href="../../elements/info-aggregations/info-aggregations.html">
 <link rel="import" href="../../elements/info-data/info-data.html">
-<link rel="import" href="../../elements/section-and-map/section-and-map.html">
-<link rel="import" href="../../elements/section-and-title/section-and-title.html">
+<link rel="import" href="../../elements/section-map/section-map.html">
+<link rel="import" href="../../elements/section-wrapper/section-wrapper.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
 <link rel="import" href="../../styles/entity-page-styles.html">
 <link rel="import" href="../../styles/icon-styles.html">
@@ -517,7 +517,7 @@ limitations under the License.
             <template is="dom-repeat" items="[[aggregationFields]]">
               <template is="dom-if" if="[[item.result]]">
                 <template is="dom-if" if="[[item.isLocation]]">
-                  <section-and-map
+                  <section-map
                     show-copy
                     icon="[[item.icon]]"
                     style-class="[[item.styleClass]]"
@@ -557,11 +557,11 @@ limitations under the License.
                         text-function="[[getTextFunction(item.mapData)]]">
                       </terms-transformer>
                     </template>
-                  </section-and-map>
+                  </section-map>
                 </template>
 
                 <template is="dom-if" if="[[!item.isLocation]]">
-                  <section-and-title
+                  <section-wrapper
                     show-copy
                     copy-type="[[item.titlePlural]]"
                     icon="[[item.icon]]"
@@ -605,13 +605,13 @@ limitations under the License.
                         <info-aggregations entity="[[pageName]]" type="[[item.title]]"></info-aggregations>
                       </template>
                     </template>
-                  </section-and-title>
+                  </section-wrapper>
                 </template>
               </template>
             </template>
 
             <template is="dom-if" if="[[esConfig.imageField]]">
-              <section-and-title
+              <section-wrapper
                 icon="[[esConfig.imageField.icon]]"
                 style-class="[[esConfig.imageField.styleClass]]"
                 transform-config="[[createSectionTitleTransformConfig(pageConfig, esConfig.imageField, images.length)]]"
@@ -650,7 +650,7 @@ limitations under the License.
                     list="[[getFacetsList(filterCollection, esConfig.imageField.key, filterCollection.*)]]">
                   </terms-transformer>
                 </template>
-              </section-and-title>
+              </section-wrapper>
             </template>
           </div>
 
@@ -700,7 +700,7 @@ limitations under the License.
                 </template>
               </template>
 
-              <section-and-title
+              <section-wrapper
                 error="[[item.histogramError]]"
                 icon="[[item.entity.icon]]"
                 style-class="[[item.entity.styleClass]]"
@@ -760,10 +760,10 @@ limitations under the License.
                     </terms-transformer>
                   </template>
                 </template>
-              </section-and-title>
+              </section-wrapper>
             </template>
 
-            <section-and-title
+            <section-wrapper
               icon="av:web"
               style-class="entity-grey"
               section-title="[[searchTitle]]">
@@ -802,7 +802,7 @@ limitations under the License.
                 large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
                 tag-manager="[[tagManager]]">
               </result-list>
-            </section-and-title>
+            </section-wrapper>
           </div>
         </div>
       </paper-header-panel>

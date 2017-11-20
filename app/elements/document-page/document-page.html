@@ -43,9 +43,8 @@ limitations under the License.
 <link rel="import" href="../../elements/info-data/info-data.html">
 <link rel="import" href="../../elements/info-revisions/info-revisions.html">
 <link rel="import" href="../../elements/info-similar-documents/info-similar-documents.html">
-<link rel="import" href="../../elements/section-and-map/section-and-map.html">
-<link rel="import" href="../../elements/section-and-title/section-and-title.html">
-<link rel="import" href="../../elements/section-title/section-title.html">
+<link rel="import" href="../../elements/section-map/section-map.html">
+<link rel="import" href="../../elements/section-wrapper/section-wrapper.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
 <link rel="import" href="../../styles/entity-page-styles.html">
 <link rel="import" href="../../styles/icon-styles.html">
@@ -69,7 +68,7 @@ limitations under the License.
       }
 
       .details-section {
-        --section-and-title-padding: 0;
+        --section-wrapper-padding: 0;
       }
     </style>
 
@@ -442,7 +441,7 @@ limitations under the License.
             <template is="dom-repeat" items="[[documentInfo]]">
               <template is="dom-if" if="[[!item.config.isImage)]]">
                 <template is="dom-if" if="[[item.config.isLocation]]">
-                  <section-and-map
+                  <section-map
                     show-copy
                     icon="[[item.config.icon]]"
                     style-class="[[item.config.styleClass]]"
@@ -456,11 +455,11 @@ limitations under the License.
                       icon-style-class-property="styleClass"
                       extractions="[[item.data]]">
                     </detail-subsection>
-                  </section-and-map>
+                  </section-map>
                 </template>
 
                 <template is="dom-if" if="[[!item.config.isLocation)]]">
-                  <section-and-title
+                  <section-wrapper
                     show-copy
                     icon="[[item.config.icon]]"
                     style-class="[[item.config.styleClass]]"
@@ -473,12 +472,12 @@ limitations under the License.
                       icon-style-class-property="styleClass"
                       extractions="[[item.data]]">
                     </detail-subsection>
-                  </section-and-title>
+                  </section-wrapper>
                 </template>
               </template>
             </template>
 
-            <section-and-title
+            <section-wrapper
               icon="av:web"
               style-class="entity-grey"
               section-title="[[revisionTitle]]">
@@ -523,11 +522,11 @@ limitations under the License.
                 large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
                 tag-manager="[[tagManager]]">
               </result-list>
-            </section-and-title>
+            </section-wrapper>
           </div>
 
           <div class="page-column">
-            <section-and-title class="details-section" hide-section-title>
+            <section-wrapper class="details-section" hide-section-title>
               <build-and-run-query
                 fields='"doc_id"'
                 values="[[document.id]]"
@@ -559,9 +558,9 @@ limitations under the License.
                 large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
                 tag-manager="[[tagManager]]">
               </single-result>
-            </section-and-title>
+            </section-wrapper>
 
-            <section-and-title
+            <section-wrapper
               icon="av:web"
               style-class="entity-grey"
               section-title="[[moreLikeThisTitle]]">
@@ -604,7 +603,7 @@ limitations under the License.
                 large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
                 tag-manager="[[tagManager]]">
               </result-list>
-            </section-and-title>
+            </section-wrapper>
           </div>
         </div>
       </paper-header-panel>
