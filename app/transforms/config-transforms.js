@@ -416,7 +416,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         searchFieldsObject.isDate = (searchFieldsObject.type === 'date');
         searchFieldsObject.isEntity = (searchFieldsObject.link === 'entity');
         searchFieldsObject.isImage = (searchFieldsObject.type === 'image');
-        searchFieldsObject.isHidden = !(searchFieldsObject.result === 'header' || searchFieldsObject.result === 'detail');
+        searchFieldsObject.isHidden = !(searchFieldsObject.link === 'entity' || searchFieldsObject.result === 'header' || searchFieldsObject.result === 'detail');
         searchFieldsObject.isLocation = (searchFieldsObject.type === 'location');
         searchFieldsObject.isUrl = (searchFieldsObject.type === 'tld' || searchFieldsObject.type === 'url');
 
