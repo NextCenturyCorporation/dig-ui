@@ -239,13 +239,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
 
     // Change newlines to breaks and remove repeat newlines.
-    returnObject.text = returnObject.text.replace(/[\n\r][\s]*/g, '<br/>');
-    returnObject.highlight = returnObject.highlight.replace(/[\n\r][\s]*/g, '<br/>');
+    returnObject.text = (returnObject.text || '').replace(/[\n\r][\s]*/g, '<br/>');
+    returnObject.highlight = (returnObject.highlight || '').replace(/[\n\r][\s]*/g, '<br/>');
 
     if(type === 'title') {
       // Remove breaks from titles.
-      returnObject.text = returnObject.text.replace(/<br\/>/g, '');
-      returnObject.highlight = returnObject.highlight.replace(/<br\/>/g, '');
+      returnObject.text = (returnObject.text || '').replace(/<br\/>/g, '');
+      returnObject.highlight = (returnObject.highlight || '').replace(/<br\/>/g, '');
     }
 
     return returnObject;
