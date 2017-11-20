@@ -47,8 +47,6 @@ limitations under the License.
 <link rel="import" href="../../elements/info-data/info-data.html">
 <link rel="import" href="../../elements/section-and-map/section-and-map.html">
 <link rel="import" href="../../elements/section-and-title/section-and-title.html">
-<link rel="import" href="../../elements/section-container/section-container.html">
-<link rel="import" href="../../elements/section-title/section-title.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
 <link rel="import" href="../../styles/entity-page-styles.html">
 <link rel="import" href="../../styles/icon-styles.html">
@@ -765,19 +763,18 @@ limitations under the License.
               </section-and-title>
             </template>
 
-            <section-container>
-              <section-title
-                icon="av:web"
-                style-class="entity-grey"
-                section-title="[[searchTitle]]">
+            <section-and-title
+              icon="av:web"
+              style-class="entity-grey"
+              section-title="[[searchTitle]]">
 
-                <export-button
-                  data="[[documentsShown]]"
-                  search-fields="[[searchFields]]"
-                  transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                  transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
-                </export-button>
-              </section-title>
+              <export-button
+                slot="title"
+                data="[[documentsShown]]"
+                search-fields="[[searchFields]]"
+                transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
+              </export-button>
 
               <template is="dom-if" if="[[searchError]]">
                 <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
@@ -805,7 +802,7 @@ limitations under the License.
                 large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
                 tag-manager="[[tagManager]]">
               </result-list>
-            </section-container>
+            </section-and-title>
           </div>
         </div>
       </paper-header-panel>
