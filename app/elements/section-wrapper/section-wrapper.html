@@ -15,10 +15,8 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
-<link rel="import" href="../../bower_components/json-combine/json-combine.html">
-<link rel="import" href="../clipboard.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 
 <dom-module id="section-wrapper">
   <template>
@@ -30,27 +28,48 @@ limitations under the License.
       }
 
       paper-material {
-        background-color: #fff;
         display: block;
-        margin: 0 0 20px;
-        padding: var(--section-wrapper-padding, 20px);
+        margin-bottom: 5px;
+      }
+
+      paper-spinner {
+        height: 20px;
+        width: 20px;
+      }
+
+      .opened,
+      .toggle:hover {
+        background-color: #fff;
+      }
+
+      .section-container {
+        padding: var(--section-container-padding, 0 10px 10px);
       }
 
       .section-title {
-        margin-bottom: 10px;
+        padding: 10px;
       }
 
-      .section-title-icon {
+      .toggle .section-title {
+        cursor: pointer;
+      }
+
+      .status-icon {
+        margin: 0 5px;
+      }
+
+      .header-icon,
+      .status-icon {
         /* Same height as section-title */
-        --iron-icon-height: 30px;
-        --iron-icon-width: 30px;
-        min-width: 30px;
+        --iron-icon-height: 20px;
+        --iron-icon-width: 20px;
+        min-width: 20px;
       }
 
-      .section-title-text {
-        font-size: 20px;
+      .header-text {
+        font-size: 18px;
         font-weight: 500;
-        line-height: 30px;
+        line-height: 20px;
         margin-left: 10px;
         margin-right: 10px;
         /* Needed to fix flexbox layout issues in newer browsers. */
@@ -63,144 +82,127 @@ limitations under the License.
         -webkit-box-orient: vertical;
       }
 
-      .copy-button {
-        color: var(--secondary-text-color);
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 500;
-        line-height: 30px;
-        text-decoration: underline;
-      }
-
-      .copy-button:hover {
-        color: var(--primary-text-color);
-      }
-
-      .copy-button iron-icon {
-        --iron-icon-height: 20px;
-        --iron-icon-width: 20px;
-      }
-
-      .copy-button span {
-        margin-left: 5px;
-      }
-
-      .section-title-icon.amber {
+      iron-icon.amber {
         color: var(--paper-amber-600);
       }
 
-      .section-title-icon.black {
+      iron-icon.black {
         color: #111;
       }
 
-      .section-title-icon.blue {
+      iron-icon.blue {
         color: var(--paper-blue-600);
       }
 
-      .section-title-icon.blue-grey {
+      iron-icon.blue-grey {
         color: var(--paper-blue-grey-600);
       }
 
-      .section-title-icon.brown {
+      iron-icon.brown {
         color: var(--paper-brown-600);
       }
 
-      .section-title-icon.cyan {
+      iron-icon.cyan {
         color: var(--paper-cyan-600);
       }
 
-      .section-title-icon.deep-orange {
+      iron-icon.deep-orange {
         color: var(--paper-deep-orange-600);
       }
 
-      .section-title-icon.deep-purple {
+      iron-icon.deep-purple {
         color: var(--paper-deep-purple-600);
       }
 
-      .section-title-icon.green {
+      iron-icon.green {
         color: var(--paper-green-600);
       }
 
-      .section-title-icon.grey {
+      iron-icon.grey {
         color: var(--paper-grey-600);
       }
 
-      .section-title-icon.indigo {
+      iron-icon.indigo {
         color: var(--paper-indigo-600);
       }
 
-      .section-title-icon.light-blue {
+      iron-icon.light-blue {
         color: var(--paper-light-blue-600);
       }
 
-      .section-title-icon.light-green {
+      iron-icon.light-green {
         color: var(--paper-light-green-600);
       }
 
-      .section-title-icon.lime {
+      iron-icon.lime {
         color: var(--paper-lime-600);
       }
 
-      .section-title-icon.orange {
+      iron-icon.orange {
         color: var(--paper-orange-600);
       }
 
-      .section-title-icon.pink {
+      iron-icon.pink {
         color: var(--paper-pink-600);
       }
 
-      .section-title-icon.purple {
+      iron-icon.purple {
         color: var(--paper-purple-600);
       }
 
-      .section-title-icon.red {
+      iron-icon.red {
         color: var(--paper-red-600);
       }
 
-      .section-title-icon.teal {
+      iron-icon.teal {
         color: var(--paper-teal-600);
       }
 
-      .section-title-icon.white {
+      iron-icon.white {
         color: #fff;
       }
 
-      .section-title-icon.yellow {
+      iron-icon.yellow {
         color: var(--paper-yellow-600);
       }
     </style>
 
-    <paper-material>
+    <paper-material class$="[[_getSectionStyleClass(noData, noToggle, opened)]]">
       <template is="dom-if" if="[[!hideSectionTitle]]">
-        <div class="section-title layout horizontal start center">
-          <iron-icon class$="section-title-icon [[styleClass]]" icon="[[icon]]"></iron-icon>
+        <div class="section-title layout horizontal start center" on-tap="toggle">
+          <iron-icon class$="header-icon [[styleClass]]" icon="[[icon]]"></iron-icon>
 
-          <json-combine
-            data-in1="[[data.length]]"
-            data-in2="[[transformConfig]]"
-            data-out="{{sectionTitle}}"
-            combine-function="[[transformFunction]]">
-          </json-combine>
-
-          <div class="section-title-text flex">[[sectionTitle]]</div>
-
-          <template is="dom-if" if="[[_showClipboardElement(showCopy, data)]]">
-            <div class="layout horizontal center copy-button" id="clipboard" title$="Copy [[copyType]] to Clipboard" data-clipboard-text$="[[_getClipboardText(data, textFunction)]]">
-              <iron-icon icon="content-copy"></iron-icon>
-              <span>Copy</span>
-            </div>
-          </template>
+          <div class="header-text flex">[[sectionTitle]]</div>
 
           <slot name="title"></slot>
+
+          <template is="dom-if" if="[[loading]]">
+            <paper-spinner class="status-icon" active$="[[loading]]"></paper-spinner>
+          </template>
+
+          <template is="dom-if" if="[[!hideLoadIcon]]">
+            <template is="dom-if" if="[[!loading]]">
+              <template is="dom-if" if="[[!noData]]">
+                <iron-icon class="status-icon" icon="check-circle" title$="[[sectionTitle]]"></iron-icon>
+              </template>
+              <template is="dom-if" if="[[noData]]">
+                <template is="dom-if" if="[[error]]">
+                  <iron-icon class="status-icon" icon="error" title$="[[sectionTitle]]"></iron-icon>
+                </template>
+                <template is="dom-if" if="[[!error]]">
+                  <iron-icon class="status-icon" icon="block" title$="[[sectionTitle]]"></iron-icon>
+                </template>
+              </template>
+            </template>
+          </template>
         </div>
       </template>
 
-      <template is="dom-if" if="[[error]]">
-        <elastic-error error="[[error]]" message="{{_errorMessage}}"></elastic-error>
-        <div>[[_errorMessage]]</div>
+      <template is="dom-if" if="[[opened]]">
+        <div class="section-container">
+          <slot></slot>
+        </div>
       </template>
-
-      <slot></slot>
     </paper-material>
   </template>
 
@@ -215,36 +217,25 @@ limitations under the License.
         /**
          * (Optional)
          *
-         * The type of data to copy.
-         *
-         * @type {String}
-         * @default 'Data'
-         */
-        copyType: {
-          type: String,
-          value: 'Data'
-        },
-
-        /**
-         * (Optional)
-         *
-         * The section data to copy.
-         *
-         * @type {Array}
-         */
-        data: {
-          type: Array
-        },
-
-        /**
-         * (Optional)
-         *
          * The section error.
          *
          * @type {Object}
          */
         error: {
           type: Object,
+        },
+
+        /**
+         * (Optional)
+         *
+         * Whether to hide the loading success or failure icons.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        hideLoadIcon: {
+          type: Boolean,
+          value: false
         },
 
         /**
@@ -274,6 +265,70 @@ limitations under the License.
         },
 
         /**
+         * (Optional)
+         *
+         * Whether the data is loading.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        loading: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * (Optional)
+         *
+         * The section data name for the loading spinner.
+         *
+         * @type {String}
+         * @default 'Data'
+         */
+        name: {
+          type: String,
+          value: 'Data'
+        },
+
+        /**
+         * (Required)
+         *
+         * Disables toggle behavior and displays a No Data icon.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        noData: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * (Optional)
+         *
+         * Disables toggle behavior.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        noToggle: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Whether the section wrapper is opened.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        opened: {
+          notify: true,
+          type: Boolean,
+          value: false
+        },
+
+        /**
          * (Optional|Output)
          *
          * The section title.
@@ -290,19 +345,6 @@ limitations under the License.
         /**
          * (Optional)
          *
-         * Whether to show the Copy button.
-         *
-         * @type {Boolean}
-         * @default false
-         */
-        showCopy: {
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * (Optional)
-         *
          * The section style class.
          *
          * @type {String}
@@ -311,78 +353,29 @@ limitations under the License.
         styleClass: {
           type: String,
           value: ''
-        },
-
-        /**
-         * (Optional)
-         *
-         * The function to get the clipboard text from an item in the data.
-         *
-         * @type {Object}
-         * @default function(item) { return item.id; }
-         */
-        textFunction: {
-          type: Object,
-          value: function() {
-            return function(item) {
-              return item.id;
-            };
-          }
-        },
-
-        /**
-         * (Optional)
-         *
-         * The config passed with the count to the transformFunction.
-         *
-         * @type {Object}
-         * @default {}
-         */
-        transformConfig: {
-          type: Object,
-          value: function() {
-            return {};
-          }
-        },
-
-        /**
-         * (Optional)
-         *
-         * The function to transform the count into the title.
-         *
-         * @type {Object}
-         */
-        transformFunction: {
-          type: Object
         }
       },
 
-      attached: function() {
-        this.clipboard = new Clipboard('#clipboard');
+      /**
+       * Toggles opened.
+       */
+      toggle: function() {
+        if(!this.noData && !this.noToggle) {
+          this.set('opened', !this.opened);
+        }
       },
 
       /**
-       * Returns the string clipboard text for the given array and function.
+       * Returns the style class for the section.
        *
-       * @param {Array} data
-       * @param {Function} textFunction
+       * @param {Boolean} noData
+       * @param {Boolean} noToggle
+       * @param {Boolean} opened
        * @return {String}
        * @private
        */
-      _getClipboardText: function(data, textFunction) {
-        return (data || []).map(textFunction).join(',');
-      },
-
-      /**
-       * Returns whether to show the clipboard element.
-       *
-       * @param {Boolean} showCopy
-       * @param {Array} data
-       * @return {Boolean}
-       * @private
-       */
-      _showClipboardElement: function(showCopy, data) {
-        return !!(showCopy && data && data.length);
+      _getSectionStyleClass: function(noData, noToggle, opened) {
+        return (!noData && !noToggle ? 'toggle ' : '') + (opened ? 'opened' : '');
       }
     });
   })();

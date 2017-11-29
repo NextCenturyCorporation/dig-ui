@@ -534,41 +534,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
-     * Returns the extractions for the given document to show in the document page.
-     *
-     * @param {Object} document
-     * @param {Object} searchFields
-     * @return {Object}
-     */
-    documentInfo: function(document, searchFields) {
-      if(!document || !document.headerExtractions || !document.detailExtractions) {
-        return undefined;
-      }
-
-      var resultFields = searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.result === 'header' || searchFieldsObject.result === 'detail';
-      });
-
-      return resultFields.reduce(function(info, searchFieldsObject) {
-        var headerIndex = _.findIndex(document.headerExtractions, function(extraction) {
-          return extraction.key === searchFieldsObject.key;
-        });
-        var detailIndex = _.findIndex(document.detailExtractions, function(extraction) {
-          return extraction.key === searchFieldsObject.key;
-        });
-
-        var extraction = (headerIndex >= 0 ? document.headerExtractions[headerIndex] : (detailIndex >= 0 ? document.detailExtractions[detailIndex] : {}));
-
-        info.push({
-          config: searchFieldsObject,
-          data: extraction.data
-        });
-
-        return info;
-      }, []);
-    },
-
-    /**
      * Returns the list of document objects for the given query results to show in a result-list.
      *
      * @param {Object} data
@@ -639,6 +604,41 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         dates: [],
         items: []
       };
+    },
+
+    /**
+     * Returns the data for the given document to show in maps in the document page.
+     *
+     * @param {Object} document
+     * @param {Object} searchFields
+     * @return {Array}
+     */
+    maps: function(document, searchFields) {
+      if(!document || !document.headerExtractions || !document.detailExtractions) {
+        return undefined;
+      }
+
+      var locationFields = searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.isLocation && !searchFieldsObject.isHidden;
+      });
+
+      return locationFields.reduce(function(info, searchFieldsObject) {
+        var headerIndex = _.findIndex(document.headerExtractions, function(extraction) {
+          return extraction.key === searchFieldsObject.key;
+        });
+        var detailIndex = _.findIndex(document.detailExtractions, function(extraction) {
+          return extraction.key === searchFieldsObject.key;
+        });
+
+        var extraction = (headerIndex >= 0 ? document.headerExtractions[headerIndex] : (detailIndex >= 0 ? document.detailExtractions[detailIndex] : {}));
+
+        info.push({
+          config: searchFieldsObject,
+          data: extraction.data
+        });
+
+        return info;
+      }, []);
     },
 
     /**

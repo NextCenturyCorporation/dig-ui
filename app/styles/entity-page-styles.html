@@ -18,81 +18,87 @@ limitations under the License.
   <template>
     <style>
       .page-head {
+        @apply --layout-horizontal;
+        @apply --layout-flex;
+        @apply --layout-center;
+        @apply --shadow-elevation-2dp;
+        background-color: var(--navbar-color);
+        color: #fff;
         min-height: 30px;
-        padding: 15px;
+        padding: 10px;
         transition: height 0.2s;
       }
 
-      .page-head .page-data {
-        padding: 5px;
+      .page-head .page-name,
+      .page-head .page-name > div,
+      .page-head .page-icon,
+      .page-head .page-image,
+      .page-head img {
+        margin-right: 10px;
       }
 
-      .page-head .page-data .page-name {
-        font-size: 24px;
+      .page-head .page-name {
+        @apply --layout-horizontal;
+        @apply --layout-flex;
+        @apply --layout-center;
+        font-size: 20px;
         font-weight: 500;
         line-height: 30px;
-        margin-right: 10px;
         transition: all 0.2s;
         word-break: break-word;
       }
 
-      .page-head .page-data iron-icon {
+      .page-head page-icon {
         /* Same height as page-head */
         --iron-icon-height: 30px;
         --iron-icon-width: 30px;
-        margin-right: 10px;
         min-width: 30px;
       }
 
-      .page-head .page-data a {
+      .page-head a {
         /* Same height as page-head */
         height: 30px;
       }
 
-      .page-head .page-data iron-image {
+      .page-head .page-image {
         /* Same height as page-head */
         --iron-image-height: 30px;
         --iron-image-width: auto;
-        margin-right: 10px;
         min-width: 30px;
-      }
-
-      .page-head .page-data .page-info {
-        color: var(--secondary-text-color);
-        font-size: 16px;
-        font-weight: 500;
-        line-height: 20px;
-        margin-right: 10px;
-        transition: font-size 0.2s;
-      }
-
-      .page-head selected-facets-display {
-        @apply --layout-horizontal;
-        @apply --layout-wrap;
-        --selected-facet-item-style-mixin: {
-          margin-top: 10px;
-        };
       }
 
       .page-body {
         @apply --layout-horizontal;
-        margin: 0 10px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: 55px;
       }
 
-      .page-body > * {
+      .page-body .page-column {
         @apply --layout-vertical;
         @apply --layout-flex;
         display: block;
+        overflow-y: scroll;
+      }
+
+      .page-body .results-section {
+        --section-container-padding: 0;
+      }
+
+      .page-body .results-error {
         margin: 0 10px;
       }
 
       .page-body result-list {
-        icon-label {
-         --extraction-text: {
-            max-width: 115px;
-            white-space: nowrap;
-          }
-        }
+        --result-list-max-height: none;
+      }
+
+      .page-body selected-facets-display {
+        --selected-facet-item-style-mixin: {
+          margin-bottom: 0;
+        };
       }
 
       .small-blur {
@@ -108,6 +114,13 @@ limitations under the License.
       .no-blur {
         -webkit-filter: none;
         filter: none;
+      }
+
+      leaflet-wrapper {
+        margin-bottom: 10px;
+        min-height: 400px;
+        min-width: 200px;
+        position: relative;
       }
 
       /* Material Design Adaptive Breakpoints */
@@ -139,36 +152,60 @@ limitations under the License.
       @media all and (min-width: 0) and (max-width: 480px) and (orientation: landscape) {
         .page-body {
           @apply --layout-vertical;
+          overflow-y: auto;
+        }
+        .page-body .page-column {
+          overflow-y: visible;
         }
       }
       /* desktop-x-small */
       @media all and (min-width: 0) and (max-width: 480px) and (max-aspect-ratio: 4/3) {
         .page-body {
           @apply --layout-vertical;
+          overflow-y: auto;
+        }
+        .page-body .page-column {
+          overflow-y: visible;
         }
       }
       /* desktop-small-landscape */
       @media all and (min-width: 481px) and (max-width: 840px) and (orientation: landscape) {
         .page-body {
           @apply --layout-vertical;
+          overflow-y: auto;
+        }
+        .page-body .page-column {
+          overflow-y: visible;
         }
       }
       /* desktop-small */
       @media all and (min-width: 481px) and (max-width: 840px) and (max-aspect-ratio: 4/3) {
         .page-body {
           @apply --layout-vertical;
+          overflow-y: auto;
+        }
+        .page-body .page-column {
+          overflow-y: visible;
         }
       }
       /* desktop-medium-landscape */
-      @media all and (min-width: 841px) and (max-width: 1280px) and (orientation: landscape) {
+      @media all and (min-width: 841px) and (max-width: 1080px) and (orientation: landscape) {
         .page-body {
           @apply --layout-vertical;
+          overflow-y: auto;
+        }
+        .page-body .page-column {
+          overflow-y: visible;
         }
       }
       /* desktop-medium */
-      @media all and (min-width: 841px) and (max-width: 1280px) and (max-aspect-ratio: 4/3) {
+      @media all and (min-width: 841px) and (max-width: 1080px) and (max-aspect-ratio: 4/3) {
         .page-body {
           @apply --layout-vertical;
+          overflow-y: auto;
+        }
+        .page-body .page-column {
+          overflow-y: visible;
         }
       }
       /* desktop-large */

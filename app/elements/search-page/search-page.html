@@ -65,60 +65,50 @@ limitations under the License.
         margin-right: 230px;
       }
 
-      paper-drawer-panel {
+      #pageDrawer {
         --paper-drawer-panel-left-drawer-container: {
           background-color: var(--primary-background-color);
           border-right: 1px solid rgba(0,0,0,var(--dark-divider-opacity));
         };
       }
 
-      paper-toolbar {
+      #pageNavbar {
         background-color: var(--navbar-color);
         color: var(--text-primary-color);
-        --paper-toolbar-height: 60px;
+        --paper-toolbar-height: 50px;
         --paper-toolbar-content: {
           padding: 0 10px;
         };
       }
 
-      paper-toolbar img {
-        min-width: 90px;
-      }
-
-      paper-toolbar modal-icon {
-        --paper-icon-button: {
-          margin: 20px 0 0;
-        };
-      }
-
-      paper-toolbar paper-icon-button {
-        --paper-icon-button: {
-          padding: 5px;
-        };
+      #reloadButton {
+        height: 30px;
+        width: 30px;
+        padding: 0;
       }
 
       /* Spacer to match drawer width */
-      paper-toolbar .drawer-spacer {
+      #pageNavbar .drawer-spacer {
         width: 220px;
       }
 
-      facet-panel {
+      #pageFacets {
         --facet-panel-selected-facet-icon-hover-color: #fff;
       }
 
-      #searchPanel {
+      #pageSearch {
         --paper-header-panel-container: {
           background-color: #ffffff;
         };
       }
 
-      #searchTitle {
-        @apply --shadow-elevation-2dp;
-        padding: 20px 30px;
+      #searchHeader,
+      #searchTimeline {
+        padding: 10px;
       }
 
-      #searchTitle .search-results-title {
-        font-size: 24px;
+      #searchHeader .search-results-title {
+        font-size: 20px;
         font-weight: 500;
         /* Match the height of the export button. */
         line-height: 30px;
@@ -132,80 +122,42 @@ limitations under the License.
         -webkit-box-orient: vertical;
       }
 
-      #searchTitle sparkline-list {
+      #searchHeader sparkline-list {
         height: 25px;
         margin-top: 15px;
       }
 
-      #searchResults {
-        position: absolute;
-        top: 170px;
-        bottom: 0;
-        left: 0;
-        right: 0;
-
-        --result-list-scroll-threshold: {
-          @apply --shadow-elevation-2dp;
-          height: auto;
-          max-height: none;
-          position: absolute;
-          bottom: 70px;
-          top: 0;
-          left: 0;
-          right: 0;
-        };
-
-        --result-list-loading-spinner: {
-          position: absolute;
-          bottom: 20px;
-          left: 0;
-          right: 0;
-          padding: 25px 0 5px;
-        };
-
-        --result-list-show-more-button: {
-          position: absolute;
-          bottom: 20px;
-          left: 0;
-          right: 0;
-          padding: 20px 0 0;
-        };
+      #searchResultList {
+        --result-list-max-height: none;
       }
 
-      #searchGallery {
-        position: absolute;
-        top: 170px;
-        bottom: 0px;
-        left: 0;
-        right: 0;
-        overflow-y: scroll;
-      }
-
-      #searchTab {
-        @apply --shadow-elevation-2dp;
-        position: absolute;
-        top: 130px;
-        bottom: 0;
-        left: 0;
-        right: 0;
+      #searchTabs paper-tabs {
         height: 40px;
       }
 
-      #searchTab paper-tab {
+      #searchTabs paper-tab {
         color: var(--secondary-text-color);
         font-size: 16px;
         font-weight: 500;
         padding: 0 15px;
       }
 
-      #searchTab paper-tab:hover {
+      #searchTabs paper-tab:hover {
         background-color: rgba(0,0,0,0.05);
         color: var(--primary-text-color);
       }
 
-      #searchTab paper-tab.iron-selected {
+      #searchTabs paper-tab.iron-selected {
         background-color: rgba(0,0,0,0.1);
         color: var(--primary-text-color);
+      }
+
+      #searchTimeline .timeline-text {
+        line-height: 20px;
+      }
+
+      #searchTimeline .timeline-header {
+        margin-bottom: 5px;
       }
     </style>
 
@@ -535,8 +487,11 @@ limitations under the License.
     </iron-ajax>
 
     <paper-header-panel class="flex" mode="waterfall">
-      <paper-toolbar slot="header">
-        <img slot="top" src="/images/dig-logo.png" alt="">
+      <paper-toolbar slot="header" id="pageNavbar">
+        <a id="logoLink" slot="top" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
+          <img id="logo" src="/images/dig-logo.png" alt="">
+        </a>
+
         <div slot="top" class="drawer-spacer"></div>
 
         <div slot="top" class="flex">
@@ -557,7 +512,7 @@ limitations under the License.
         </div>
 
         <a slot="top" href="[[getUrlWithProject(domain)]]" style="color: #ffffff;">
-          <paper-icon-button icon="fa:times" title="Reset Page"></paper-icon-button>
+          <paper-icon-button id="reloadButton" icon="fa:times" title="Reset Page"></paper-icon-button>
         </a>
 
         <user-settings-dialog
@@ -586,9 +541,9 @@ limitations under the License.
           search-parameters="{{searchParameters}}">
         </user-settings-dialog>
 
-        <paper-icon-button icon="fa:bars" slot="top" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+        <paper-icon-button id="menuButton" icon="fa:bars" slot="top" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
-        <iron-dropdown id="menuDropdown" slot="top" horizontal-align="right" vertical-align="top" vertical-offset="60">
+        <iron-dropdown id="menuDropdown" slot="top" horizontal-align="right" vertical-align="top" vertical-offset="50">
           <div slot="dropdown-content">
             <paper-icon-item disabled="[[searchParametersDisabled(searchParameters, searchParameters.*)]]" title="Save Search to Case..." on-tap="openSaveDialog">
               <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
@@ -635,8 +590,8 @@ limitations under the License.
         </iron-dropdown>
       </paper-toolbar>
 
-      <paper-drawer-panel drawer-width="320px">
-        <facet-panel slot="drawer"
+      <paper-drawer-panel drawer-width="320px" id="pageDrawer">
+        <facet-panel slot="drawer" id="pageFacets"
           date-fields="[[dateFieldsToProperties]]"
           facets-query="[[facetsQuery]]"
           image-style-class="[[getBlurStyleClass(blurImages)]]"
@@ -650,71 +605,79 @@ limitations under the License.
           <info-facets></info-facets>
         </facet-panel>
 
-        <paper-header-panel slot="main" id="searchPanel">
+        <paper-header-panel slot="main" id="pageSearch">
           <template is="dom-if" if="[[clientConfigLoading]]">
-            <loading-spinner class="layout horizontal" style="margin: 10px 20px;" show type="Configuration"></loading-spinner>
+            <loading-spinner slot="header" class="layout horizontal" style="margin: 10px;" show type="Configuration"></loading-spinner>
           </template>
 
           <template is="dom-if" if="[[esConfig]]">
-            <div id="searchTitle" class="layout vertical">
-              <div class="layout horizontal">
-                <div class="layout vertical flex">
-                  <template is="dom-if" if="[[!searchError]]">
-                    <div class="layout horizontal">
-                      <div class="search-results-title">[[searchTitle]]</div>
+            <paper-material slot="header" id="searchHeader" class="layout horizontal">
+              <div class="layout vertical flex">
+                <template is="dom-if" if="[[!searchError]]">
+                  <div class="layout horizontal">
+                    <div class="search-results-title">[[searchTitle]]</div>
 
-                      <template is="dom-if" if="[[searchTotal]]">
-                        <info-search search-parameters="[[searchParameters]]"></info-search>
+                    <template is="dom-if" if="[[searchTotal]]">
+                      <info-search search-parameters="[[searchParameters]]"></info-search>
+                    </template>
+                  </div>
+                </template>
+
+                <template is="dom-if" if="[[searchError]]">
+                  <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
+                  <div class="search-results-title flex">
+                    [[searchErrorMessage]]
+                  </div>
+                </template>
+              </div>
+
+              <export-button
+                client="[[esClient]]"
+                data="[[documentsInList]]"
+                filter-list="[]"
+                index-name="[[esConfig.esIndex]]"
+                index-types="[[esConfig.esType]]"
+                search-fields="[[searchFields]]"
+                search-parameters="[[searchParameters]]"
+                source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+                transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
+                transform-search-input-function="[[transforms.export.createBulkSearchData]]"
+                transform-search-results-function="[[transforms.entity.documents]]">
+              </export-button>
+            </paper-material>
+
+            <template is="dom-if" if="[[documentsInList.length]]">
+              <paper-material slot="header" id="searchTimeline" class="layout vertical">
+                <template is="dom-if" if="[[sparklineLoading]]">
+                  <loading-spinner show type="Timeline"></loading-spinner>
+                </template>
+
+                <template is="dom-if" if="[[!sparklineLoading]]">
+                  <template is="dom-if" if="[[!sparklineResults.points.length]]">
+                    <div class="timeline-text">No Timeline of Search Results</div>
+                  </template>
+
+                  <template is="dom-if" if="[[sparklineResults.points.length]]">
+                    <div class="timeline-text timeline-header">Timeline of Search Results</div>
+
+                    <sparkline-list time-interval="week" hide-name data="[[sparklineResults.points]]"></sparkline-list>
+
+                    <div class="layout horizontal timeline-text">
+                      <template is="dom-if" if="[[sparklineResults.begin]]">
+                        <div>[[sparklineResults.begin]]</div>
+                      </template>
+                      <div class="flex"></div>
+                      <template is="dom-if" if="[[sparklineResults.end]]">
+                        <div>[[sparklineResults.end]]</div>
                       </template>
                     </div>
                   </template>
+                </template>
+              </paper-material>
 
-                  <template is="dom-if" if="[[searchError]]">
-                    <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
-                    <div class="search-results-title flex">
-                      [[searchErrorMessage]]
-                    </div>
-                  </template>
-                </div>
-
-                <export-button
-                  client="[[esClient]]"
-                  data="[[documentsInList]]"
-                  filter-list="[]"
-                  index-name="[[esConfig.esIndex]]"
-                  index-types="[[esConfig.esType]]"
-                  search-fields="[[searchFields]]"
-                  search-parameters="[[searchParameters]]"
-                  source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
-                  transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                  transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
-                  transform-search-input-function="[[transforms.export.createBulkSearchData]]"
-                  transform-search-results-function="[[transforms.entity.documents]]">
-                </export-button>
-              </div>
-
-              <template is="dom-if" if="[[sparklineLoading]]">
-                <loading-spinner show type="Timeline" style="margin: 30px 0 10px;"></loading-spinner>
-              </template>
-
-              <template is="dom-if" if="[[!sparklineLoading]]">
-                <sparkline-list time-interval="week" hide-name data="[[sparklineResults.points]]"></sparkline-list>
-
-                <div class="layout horizontal" style="min-height: 20px;">
-                  <template is="dom-if" if="[[sparklineResults.begin]]">
-                    <div>[[sparklineResults.begin]]</div>
-                  </template>
-                  <div class="flex"></div>
-                  <template is="dom-if" if="[[sparklineResults.end]]">
-                    <div>[[sparklineResults.end]]</div>
-                  </template>
-                </div>
-              </template>
-            </div>
-
-            <template is="dom-if" if="[[documentsInList.length]]">
-              <paper-material>
-                <paper-tabs id="searchTab" class="flex" no-bar no-ink selected="{{selectedSearchTab}}">
+              <paper-material slot="header" id="searchTabs" class="layout horizontal">
+                <paper-tabs class="flex" no-bar no-ink selected="{{selectedSearchTab}}">
                   <paper-tab class="flex-1">Webpage Results</paper-tab>
                   <paper-tab class="flex-1">Image Results</paper-tab>
                 </paper-tabs>
@@ -723,7 +686,7 @@ limitations under the License.
 
             <template is="dom-if" if="[[equals(0, selectedSearchTab)]]">
               <result-list
-                id="searchResults"
+                id="searchResultList"
                 new-tab
                 text-property="title"
                 query-results="[[documents]]"
@@ -749,7 +712,7 @@ limitations under the License.
 
             <template is="dom-if" if="[[equals(1, selectedSearchTab)]]">
               <image-gallery
-                id="searchGallery"
+                id="searchImageGallery"
                 images="[[imagesFromDocuments]]"
                 small-image-style-class="[[getBlurStyleClass(blurImages)]]"
                 large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]">

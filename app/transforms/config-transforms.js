@@ -70,17 +70,40 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
 
   return {
     /**
-     * Returns the fields for which to show aggregations in entity pages.
+     * Returns the fields for which to show aggregations and timelines in the entity pages.
      *
      * @param {Object} searchFields
      * @return {Array}
      */
     aggregationFields: function(searchFields) {
-      return searchFields.filter(function(searchFieldsObject) {
-        return !searchFieldsObject.isDate && !searchFieldsObject.isImage && !searchFieldsObject.isHidden;
-      }).map(function(searchFieldsObject) {
-        return _.cloneDeep(searchFieldsObject);
+      var entityFields = searchFields.filter(function(searchFieldsObject) {
+        return !searchFieldsObject.isDate && !searchFieldsObject.isHidden;
       });
+      var dateFields = searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.isDate && !searchFieldsObject.isHidden;
+      });
+      if(dateFields.length && entityFields.length) {
+        return entityFields.map(function(entityFieldsObject) {
+          var object = {
+            dateCollection: dateFields.reduce(function(dates, dateFieldsObject) {
+              dates[dateFieldsObject.key] = _.cloneDeep(dateFieldsObject);
+              return dates;
+            }, {}),
+            dateList: dateFields.reduce(function(dateChoices, dateFieldsObject) {
+              dateChoices.push({
+                key: dateFieldsObject.key,
+                title: dateFieldsObject.title
+              });
+              return dateChoices;
+            }, []),
+            dateSelected: dateFields[0].key,
+            entity: _.cloneDeep(entityFieldsObject),
+            showDateMenu: dateFields.length > 1
+          };
+          return object;
+        });
+      }
+      return [];
     },
 
     /**
@@ -250,43 +273,6 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     formatName: function(id, type) {
       return commonTransforms.getExtractionDataText(id, id, type);
-    },
-
-    /**
-     * Returns the fields for which to show histograms (timelines) in the entity pages.
-     *
-     * @param {Object} searchFields
-     * @return {Array}
-     */
-    histogramFields: function(searchFields) {
-      var entityFields = searchFields.filter(function(searchFieldsObject) {
-        return !searchFieldsObject.isDate && !searchFieldsObject.isHidden;
-      });
-      var dateFields = searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.isDate && !searchFieldsObject.isHidden;
-      });
-      if(dateFields.length && entityFields.length) {
-        return entityFields.map(function(entityFieldsObject) {
-          var object = {
-            dateCollection: dateFields.reduce(function(dates, dateFieldsObject) {
-              dates[dateFieldsObject.key] = _.cloneDeep(dateFieldsObject);
-              return dates;
-            }, {}),
-            dateList: dateFields.reduce(function(dateChoices, dateFieldsObject) {
-              dateChoices.push({
-                key: dateFieldsObject.key,
-                title: dateFieldsObject.title
-              });
-              return dateChoices;
-            }, []),
-            dateSelected: dateFields[0].key,
-            entity: _.cloneDeep(entityFieldsObject),
-            showDateMenu: dateFields.length > 1
-          };
-          return object;
-        });
-      }
-      return [];
     },
 
     /**

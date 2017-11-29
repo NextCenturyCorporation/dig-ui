@@ -1,0 +1,125 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/button-action/button-action.html">
+<link rel="import" href="../clipboard.html">
+
+<dom-module id="copy-button">
+  <template>
+    <style include="iron-flex iron-flex-alignment"></style>
+
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+      <button-action id="clipboard" icon="content-copy" text="Copy Data" title$="Copy [[name]] to Clipboard" data-clipboard-text$="[[_getClipboardText(data, textFunction)]]">
+      </button-action>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'copy-button',
+
+      /* globals Clipboard */
+      properties: {
+        clipboard: {
+          type: Object
+        },
+
+        /**
+         * (Optional)
+         *
+         * The section data to copy.
+         *
+         * @type {Array}
+         */
+        data: {
+          type: Array
+        },
+
+        /**
+         * (Optional)
+         *
+         * Whether to hide the copy button.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        hide: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * (Optional)
+         *
+         * The type of data to copy.
+         *
+         * @type {String}
+         * @default 'Data'
+         */
+        name: {
+          type: String,
+          value: 'Data'
+        },
+
+        /**
+         * (Optional)
+         *
+         * The function to get the clipboard text from an item in the data.
+         *
+         * @type {Object}
+         * @default function(item) { return item.id; }
+         */
+        textFunction: {
+          type: Object,
+          value: function() {
+            return function(item) {
+              return item.id;
+            };
+          }
+        }
+      },
+
+      attached: function() {
+        this.clipboard = new Clipboard(this.$.clipboard);
+      },
+
+      detached: function() {
+        this.clipboard.destroy();
+      },
+
+      /**
+       * Returns the string clipboard text for the given array and function.
+       *
+       * @param {Array} data
+       * @param {Function} textFunction
+       * @return {String}
+       * @private
+       */
+      _getClipboardText: function(data, textFunction) {
+        return (data || []).map(textFunction).join(',');
+      }
+    });
+  })();
+  </script>
+</dom-module>
