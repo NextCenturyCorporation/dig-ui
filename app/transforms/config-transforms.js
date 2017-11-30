@@ -83,8 +83,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         return searchFieldsObject.isDate && !searchFieldsObject.isHidden;
       });
       if(dateFields.length && entityFields.length) {
-        return entityFields.map(function(entityFieldsObject) {
-          var object = {
+        return entityFields.map(function(entityFieldsObject, index) {
+          return {
             dateCollection: dateFields.reduce(function(dates, dateFieldsObject) {
               dates[dateFieldsObject.key] = _.cloneDeep(dateFieldsObject);
               return dates;
@@ -98,9 +98,10 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
             }, []),
             dateSelected: dateFields[0].key,
             entity: _.cloneDeep(entityFieldsObject),
+            loadData: !index,
+            showData: !index,
             showDateMenu: dateFields.length > 1
           };
-          return object;
         });
       }
       return [];
@@ -432,7 +433,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           icon: searchFieldsObject.icon,
           link: commonTransforms.getLinkFunction(searchFieldsObject.link, searchFieldsObject.type, searchFieldsObject.key),
           name: searchFieldsObject.title,
-          styleClass: commonTransforms.getStyleClass(searchFieldsObject.color),
+          styleClass: searchFieldsObject.styleClass,
           type: searchFieldsObject.type
         };
         return object;

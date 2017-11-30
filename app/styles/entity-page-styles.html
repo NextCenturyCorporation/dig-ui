@@ -80,11 +80,15 @@ limitations under the License.
         @apply --layout-vertical;
         @apply --layout-flex;
         display: block;
+      }
+
+      .page-body .page-single-column {
         overflow-y: scroll;
       }
 
+      .page-body .details-section,
       .page-body .results-section {
-        --section-container-padding: 0;
+        --section-content-padding: 0;
       }
 
       .page-body .results-error {
@@ -118,7 +122,7 @@ limitations under the License.
 
       leaflet-wrapper {
         margin-bottom: 10px;
-        min-height: 400px;
+        min-height: 300px;
         min-width: 200px;
         position: relative;
       }

@@ -65,10 +65,6 @@ limitations under the License.
       .page-head tag-entity-buttons {
         padding: 0 10px;
       }
-
-      .details-section {
-        --section-container-padding: 0;
-      }
     </style>
 
     <iron-ajax
@@ -432,7 +428,7 @@ limitations under the License.
       </div>
 
       <div class="page-body">
-        <div class="page-column">
+        <div class="page-column page-single-column">
           <template is="dom-repeat" items="[[maps]]">
             <json-combine
               data-in1="[[item.data.length]]"
@@ -442,14 +438,10 @@ limitations under the License.
             </json-combine>
 
             <section-wrapper
-              class="details-section"
               icon="[[item.config.icon]]"
               section-title="[[item.sectionTitle]]"
               style-class="[[item.config.styleClass]]"
-              opened
-              no-toggle
-              no-data="[[!item.data.length]]"
-              hide-load-icon>
+              class="details-section">
 
               <template is="dom-if" if="[[item.config.isLocation]]">
                 <template is="dom-if" if="[[item.data.length]]">
@@ -465,11 +457,8 @@ limitations under the License.
           </template>
 
           <section-wrapper
-            class="details-section"
-            opened
-            no-toggle
             hide-section-title
-            hide-load-icon>
+            class="details-section">
 
             <build-and-run-query
               fields='"doc_id"'
@@ -506,14 +495,10 @@ limitations under the License.
           </section-wrapper>
 
           <section-wrapper
-            class="results-section"
             icon="av:web"
             section-title="[[revisionTitle]]"
             style-class="grey"
-            opened
-            no-toggle
-            no-data="[[!revisionTotal]]"
-            hide-load-icon>
+            class="results-section">
 
             <template is="dom-if" if="[[revisionDocumentsShown]]">
               <export-button
@@ -558,16 +543,12 @@ limitations under the License.
           </section-wrapper>
         </div>
 
-        <div class="page-column">
+        <div class="page-column page-single-column">
           <section-wrapper
-            class="results-section"
             icon="av:web"
             section-title="[[moreLikeThisTitle]]"
             style-class="grey"
-            opened
-            no-toggle
-            no-data="[[!moreLikeThisTotal]]"
-            hide-load-icon>
+            class="results-section">
 
             <template is="dom-if" if="[[moreLikeThisDocumentsShown]]">
               <export-button

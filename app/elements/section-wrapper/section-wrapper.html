@@ -28,8 +28,14 @@ limitations under the License.
       }
 
       paper-material {
+        background-color: #fff;
         display: block;
-        margin-bottom: 5px;
+        height: var(--section-wrapper-height, auto);
+        margin: var(--section-wrapper-margin, 0 0 5px);
+      }
+
+      paper-material.tappable:hover {
+        background-color: rgba(0,0,0,0.1);
       }
 
       paper-spinner {
@@ -37,20 +43,15 @@ limitations under the License.
         width: 20px;
       }
 
-      .opened,
-      .toggle:hover {
-        background-color: #fff;
-      }
-
-      .section-container {
-        padding: var(--section-container-padding, 0 10px 10px);
+      .section-content {
+        padding: var(--section-content-padding, 0 10px 10px);
       }
 
       .section-title {
         padding: 10px;
       }
 
-      .toggle .section-title {
+      .tappable .section-title {
         cursor: pointer;
       }
 
@@ -167,12 +168,12 @@ limitations under the License.
       }
     </style>
 
-    <paper-material class$="[[_getSectionStyleClass(noData, noToggle, opened)]]">
+    <paper-material class$="[[_isTappable(error, loading, noData, tappable)]]">
       <template is="dom-if" if="[[!hideSectionTitle]]">
-        <div class="section-title layout horizontal start center" on-tap="toggle">
+        <div class="section-title layout horizontal start center" on-tap="_updateTapped">
           <iron-icon class$="header-icon [[styleClass]]" icon="[[icon]]"></iron-icon>
 
-          <div class="header-text flex">[[sectionTitle]]</div>
+          <div class="header-text flex" title$="[[sectionTitle]]">[[sectionTitle]]</div>
 
           <slot name="title"></slot>
 
@@ -180,7 +181,7 @@ limitations under the License.
             <paper-spinner class="status-icon" active$="[[loading]]"></paper-spinner>
           </template>
 
-          <template is="dom-if" if="[[!hideLoadIcon]]">
+          <template is="dom-if" if="[[showLoadIcon]]">
             <template is="dom-if" if="[[!loading]]">
               <template is="dom-if" if="[[!noData]]">
                 <iron-icon class="status-icon" icon="check-circle" title$="[[sectionTitle]]"></iron-icon>
@@ -198,8 +199,8 @@ limitations under the License.
         </div>
       </template>
 
-      <template is="dom-if" if="[[opened]]">
-        <div class="section-container">
+      <template is="dom-if" if="[[!hideSectionContent]]">
+        <div class="section-content">
           <slot></slot>
         </div>
       </template>
@@ -228,12 +229,12 @@ limitations under the License.
         /**
          * (Optional)
          *
-         * Whether to hide the loading success or failure icons.
+         * Whether to hide the section content.
          *
          * @type {Boolean}
          * @default false
          */
-        hideLoadIcon: {
+        hideSectionContent: {
           type: Boolean,
           value: false
         },
@@ -291,39 +292,14 @@ limitations under the License.
         },
 
         /**
-         * (Required)
+         * (Optional)
          *
-         * Disables toggle behavior and displays a No Data icon.
+         * Whether the section has no data.
          *
          * @type {Boolean}
          * @default false
          */
         noData: {
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * (Optional)
-         *
-         * Disables toggle behavior.
-         *
-         * @type {Boolean}
-         * @default false
-         */
-        noToggle: {
-          type: Boolean,
-          value: false
-        },
-
-        /**
-         * Whether the section wrapper is opened.
-         *
-         * @type {Boolean}
-         * @default false
-         */
-        opened: {
-          notify: true,
           type: Boolean,
           value: false
         },
@@ -345,6 +321,19 @@ limitations under the License.
         /**
          * (Optional)
          *
+         * Whether to show the loading success or failure icons.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        showLoadIcon: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * (Optional)
+         *
          * The section style class.
          *
          * @type {String}
@@ -353,29 +342,58 @@ limitations under the License.
         styleClass: {
           type: String,
           value: ''
+        },
+
+        /**
+         * (Optional)
+         *
+         * Enables tap behavior.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        tappable: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * (Output)
+         *
+         * Whether the section title was clicked or tapped.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        tapped: {
+          notify: true,
+          type: Boolean,
+          value: false
         }
       },
 
       /**
-       * Toggles opened.
-       */
-      toggle: function() {
-        if(!this.noData && !this.noToggle) {
-          this.set('opened', !this.opened);
-        }
-      },
-
-      /**
-       * Returns the style class for the section.
+       * Returns the tappable style class if needed.
        *
+       * @param {Object} error
+       * @param {Boolean} loading
        * @param {Boolean} noData
-       * @param {Boolean} noToggle
-       * @param {Boolean} opened
+       * @param {Boolean} tappable
        * @return {String}
        * @private
        */
-      _getSectionStyleClass: function(noData, noToggle, opened) {
-        return (!noData && !noToggle ? 'toggle ' : '') + (opened ? 'opened' : '');
+      _isTappable: function(error, loading, noData, tappable) {
+        return (!error && !loading && !noData && tappable ? 'tappable' : '');
+      },
+
+      /**
+       * Sets tapped to true then false.
+       *
+       * @private
+       */
+      _updateTapped: function() {
+        this.set('tapped', true);
+        this.set('tapped', false);
       }
     });
   })();
