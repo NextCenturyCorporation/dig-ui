@@ -39,6 +39,8 @@ module.exports = function(app) {
   app.set('view engine', 'html');
   app.use(compression());
   app.use(session({
+    resave: false,
+    saveUninitialized: false,
     secret: config.secret
   }));
   app.use(bodyParser.urlencoded({ extended: false }));
