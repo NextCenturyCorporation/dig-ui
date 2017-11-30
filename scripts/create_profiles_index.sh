@@ -30,29 +30,6 @@ curl -XPUT $1/dig-profiles -d '
             "sendEmailAlert": {
               "type": "boolean"
             },
-            "documentList": {
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "index": "not_analyzed"
-                },
-                "lastAutomatedRun": {
-                  "type": "date",
-                  "format" : "dateOptionalTime"
-                },
-                "lastViewedByUser": {
-                  "type": "date",
-                  "format" : "dateOptionalTime"
-                },
-                "name": {
-                  "type": "string",
-                  "index": "not_analyzed"
-                },
-                "notify": {
-                  "type": "boolean"
-                }
-              }
-            },
             "entityList": {
               "properties": {
                 "id": {
@@ -77,6 +54,29 @@ curl -XPUT $1/dig-profiles -d '
                 "type": {
                   "type": "string",
                   "index": "not_analyzed"
+                }
+              }
+            },
+            "resultList": {
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "index": "not_analyzed"
+                },
+                "lastAutomatedRun": {
+                  "type": "date",
+                  "format" : "dateOptionalTime"
+                },
+                "lastViewedByUser": {
+                  "type": "date",
+                  "format" : "dateOptionalTime"
+                },
+                "name": {
+                  "type": "string",
+                  "index": "not_analyzed"
+                },
+                "notify": {
+                  "type": "boolean"
                 }
               }
             },

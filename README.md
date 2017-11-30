@@ -106,7 +106,7 @@ This will build & vulcanize the application, build a docker image named **digmem
 
 ## MyDIG and Domain/Project Configuration
 
-[MyDIG](https://github.com/usc-isi-i2/mydig-webservice/) provides REST services for retreiving DIG domain/project configuration and setting tags on documents and extractions.  The MyDIG REST endpoints can be set in the server configuration using the CONFIG_* and TAG_* properties.
+[MyDIG](https://github.com/usc-isi-i2/mydig-webservice/) provides REST services for retreiving DIG domain/project configuration and setting tags on webpage results and extractions.  The MyDIG REST endpoints can be set in the server configuration using the CONFIG_* and TAG_* properties.
 
 If you want to run the DIG UI without MyDIG, you can set a domain/project configuration with the OVERRIDE_CONFIG option in the server configuration.  You can find the domain/project configuration syntax [here](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md).
 
@@ -115,7 +115,7 @@ If you want to run the DIG UI without MyDIG, you can set a domain/project config
 The DIG UI runs search queries using [Sandpaper](https://github.com/usc-isi-i2/dig-sandpaper) (also called Pinpoint).  The Sandpaper REST endpoint can be set in the server configuration using the domain/project configuration or the OVERRIDE_SEARCH_ENDPOINT or SEARCH_CONFIG options in the server configuration.
 
 All other elasticsearch queries and aggregations are sent directly to the elasticsearch instance defined in the search configuration by ES_HOST.  This includes:
-- All queries/aggregations from the document/entity pages
+- All queries/aggregations from the entity/result pages
 - All queries to the log/profile/state indices
 
 If you want to run the DIG UI without using Sandpaper, *coming soon...*

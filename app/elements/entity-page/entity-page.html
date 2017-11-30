@@ -335,10 +335,10 @@ limitations under the License.
       sort-field="[[sortField]]"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       transform-config="[[searchFields]]"
-      transform-function="[[transforms.entity.documents]]"
+      transform-function="[[transforms.entity.results]]"
       error="{{searchError}}"
       loading="{{searchLoading}}"
-      results="{{documents}}"
+      results="{{searchResults}}"
       total="{{searchTotal}}">
     </build-and-run-query>
 
@@ -435,13 +435,13 @@ limitations under the License.
         <user-settings-dialog
           build-popup-data-function="[[transforms.config.searchTerms]]"
           build-state-data-function="[[transforms.config.searchState]]"
-          document-icon="av:web"
-          document-link-function="[[transforms.config.documentLinkFunction]]"
-          document-type-plural="Webpages"
-          document-type-singular="Webpage"
           entity-config="[[searchFieldsCollection]]"
           function-config="[[searchFields]]"
           reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
+          result-icon="av:web"
+          result-link-function="[[transforms.config.resultLinkFunction]]"
+          result-type-plural="Webpages"
+          result-type-singular="Webpage"
           user-id="[[userId]]"
           user-loading="[[userLoading]]"
           username="[[serverConfig.username]]"
@@ -752,10 +752,10 @@ limitations under the License.
             style-class="grey"
             class="results-section">
 
-            <template is="dom-if" if="[[documentsShown]]">
+            <template is="dom-if" if="[[searchResultsShown]]">
               <export-button
                 slot="title"
-                data="[[documentsShown]]"
+                data="[[searchResultsShown]]"
                 search-fields="[[searchFields]]"
                 transform-csv-function="[[transforms.export.createExportDataForCsv]]"
                 transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
@@ -769,9 +769,9 @@ limitations under the License.
 
             <result-list
               text-property="title"
-              query-results="[[documents]]"
+              query-results="[[searchResults]]"
               total-results="{{searchTotal}}"
-              shown-results="{{documentsShown}}"
+              shown-results="{{searchResultsShown}}"
               page="{{searchPage}}"
               page-size="10"
               loading="[[searchLoading]]"
@@ -842,14 +842,6 @@ limitations under the License.
 
         dateFieldsToProperties: {
           type: Object
-        },
-
-        documents: {
-          type: Array
-        },
-
-        documentsShown: {
-          type: Array
         },
 
         domain: {
@@ -964,6 +956,14 @@ limitations under the License.
 
         searchPage: {
           type: Number
+        },
+
+        searchResults: {
+          type: Array
+        },
+
+        searchResultsShown: {
+          type: Array
         },
 
         searchTitle: {

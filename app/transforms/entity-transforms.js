@@ -193,14 +193,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     };
   }
 
-  function getDocumentTags(result, path) {
+  function getResultTags(result, path) {
     var tags = _.get(result, path, {});
     return _.keys(tags).reduce(function(object, tag) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var userClassification = '' + tags[tag].human_annotation;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
       object[tag] = {
-        type: 'ad',
+        type: 'result',
         user: (userClassification === '1' ? 'positive' : (userClassification === '0' ? 'negative' : undefined))
       };
       return object;
@@ -252,11 +252,11 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   /**
-   * Creates and returns the transformed document object.
+   * Creates and returns the transformed result object.
    *
    * @param {Object} result The elasticsearch result object.
    * @param {Array} searchFields The list of search fields config objects.
-   * @param {Boolean} documentPage Whether to create an object for the document page (rather than the entity page).
+   * @param {Boolean} resultPage Whether to create an object for the result page (rather than the entity page).
    * @param {Object} highlightMapping The highlight mapping returned by the search.  An object that maps search fields to objects that map search terms to unique IDs.  For example:
    * {
    *   email: {
@@ -269,7 +269,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
    * }
    * @return {Object}
    */
-  function getDocumentObject(result, searchFields, documentPage, highlightMapping) {
+  function getResultObject(result, searchFields, resultPage, highlightMapping) {
     var id = _.get(result, '_source.doc_id');
 
     if(!id) {
@@ -283,16 +283,16 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var title = getTitleOrDescription('title', searchFields, result, 'content_extraction.title.text', highlightMapping);
     var description = getTitleOrDescription('description', searchFields, result, 'content_extraction.content_strict.text', highlightMapping);
 
-    var documentObject = {
+    var resultObject = {
       id: id,
       url: _.get(result, '_source.url'),
       // rank: rank ? rank.toFixed(2) : rank,
       time: time,
-      type: 'ad',
+      type: 'result',
       icon: '',
-      link: commonTransforms.getLink(id, 'ad'),
+      link: commonTransforms.getLink(id, 'result'),
       styleClass: '',
-      tags: getDocumentTags(result, '_source.knowledge_graph._tags'),
+      tags: getResultTags(result, '_source.knowledge_graph._tags'),
       esData: esDataEndpoint,
       title: title.text || 'No Title',
       description: description.text || 'No Description',
@@ -301,7 +301,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       details: []
     };
 
-    documentObject.highlightedText = title.highlight || documentObject.title;
+    resultObject.highlightedText = title.highlight || resultObject.title;
 
     var finalizeExtractionFunction = function(extractionObject) {
       extractionObject.data = extractionObject.data.sort(function(a, b) {
@@ -335,41 +335,41 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return extractionObject;
     };
 
-    documentObject.headerExtractions = searchFields.filter(function(object) {
+    resultObject.headerExtractions = searchFields.filter(function(object) {
       return object.result === 'header';
     }).map(function(object) {
       return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
     });
 
-    documentObject.detailExtractions = searchFields.filter(function(object) {
+    resultObject.detailExtractions = searchFields.filter(function(object) {
       return object.result === 'detail';
     }).map(function(object) {
       return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
     });
 
     if(esDataEndpoint) {
-      documentObject.details.push({
-        name: 'Raw ES Document',
+      resultObject.details.push({
+        name: 'Raw ES Result',
         link: esDataEndpoint,
         text: 'Open'
       });
     }
 
-    if(documentObject.url) {
-      documentObject.details.push({
+    if(resultObject.url) {
+      resultObject.details.push({
         name: 'Url',
-        link: documentObject.url,
-        text: documentObject.url
+        link: resultObject.url,
+        text: resultObject.url
       });
     }
 
-    documentObject.details.push({
+    resultObject.details.push({
       name: 'Description',
-      highlightedText: description.highlight || documentObject.description,
-      text: documentObject.description
+      highlightedText: description.highlight || resultObject.description,
+      text: resultObject.description
     });
 
-    documentObject.images = getExtractionsFromList(_.get(result, '_source.objects', []).map(function(object) {
+    resultObject.images = getExtractionsFromList(_.get(result, '_source.objects', []).map(function(object) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var id = object.img_sha1;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
@@ -378,7 +378,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       };
     }), esConfig.imageField || {});
 
-    return documentObject;
+    return resultObject;
   }
 
   function createDateHistogram(buckets, config) {
@@ -520,31 +520,31 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
   return {
     /**
-     * Returns the document object for the given query results to show in the document page.
+     * Returns the result object for the given query results to show in the result page.
      *
      * @param {Object} data
      * @param {Object} searchFields
      * @return {Object}
      */
-    document: function(data, searchFields) {
+    result: function(data, searchFields) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
-        return getDocumentObject(data.hits.hits[0], searchFields, true);
+        return getResultObject(data.hits.hits[0], searchFields, true);
       }
       return {};
     },
 
     /**
-     * Returns the list of document objects for the given query results to show in a result-list.
+     * Returns the list of result objects for the given query results to show in a result-list.
      *
      * @param {Object} data
      * @param {Object} searchFields
      * @return {Array}
      */
-    documents: function(data, searchFields) {
+    results: function(data, searchFields) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
         var returnData = data.hits.hits.map(function(result) {
           // Data returned by the searchResults function from the searchTransforms will have a "fields" property.
-          return getDocumentObject(result, searchFields, false, data.fields);
+          return getResultObject(result, searchFields, false, data.fields);
         }).filter(function(object) {
           return !_.isUndefined(object);
         });
@@ -607,14 +607,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
-     * Returns the data for the given document to show in maps in the document page.
+     * Returns the data for the given result to show in maps in the result page.
      *
-     * @param {Object} document
+     * @param {Object} result
      * @param {Object} searchFields
      * @return {Array}
      */
-    maps: function(document, searchFields) {
-      if(!document || !document.headerExtractions || !document.detailExtractions) {
+    maps: function(result, searchFields) {
+      if(!result || !result.headerExtractions || !result.detailExtractions) {
         return undefined;
       }
 
@@ -623,14 +623,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       });
 
       return locationFields.reduce(function(info, searchFieldsObject) {
-        var headerIndex = _.findIndex(document.headerExtractions, function(extraction) {
+        var headerIndex = _.findIndex(result.headerExtractions, function(extraction) {
           return extraction.key === searchFieldsObject.key;
         });
-        var detailIndex = _.findIndex(document.detailExtractions, function(extraction) {
+        var detailIndex = _.findIndex(result.detailExtractions, function(extraction) {
           return extraction.key === searchFieldsObject.key;
         });
 
-        var extraction = (headerIndex >= 0 ? document.headerExtractions[headerIndex] : (detailIndex >= 0 ? document.detailExtractions[detailIndex] : {}));
+        var extraction = (headerIndex >= 0 ? result.headerExtractions[headerIndex] : (detailIndex >= 0 ? result.detailExtractions[detailIndex] : {}));
 
         info.push({
           config: searchFieldsObject,

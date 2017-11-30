@@ -60,12 +60,12 @@ limitations under the License.
       </div>
 
       <div class="layout horizontal">
-        <div class="styled-dialog-name styled-dialog-right-space">Total [[documentType]] Count</div>
+        <div class="styled-dialog-name styled-dialog-right-space">Total [[resultType]] Count</div>
         <div class="styled-dialog-text">[[_count]]</div>
       </div>
 
       <div class="layout horizontal">
-        <div class="styled-dialog-name styled-dialog-right-space">Latest [[documentType]]</div>
+        <div class="styled-dialog-name styled-dialog-right-space">Latest [[resultType]]</div>
         <div class="styled-dialog-text">[[_timestamp]]</div>
       </div>
     </styled-dialog>
@@ -84,11 +84,6 @@ limitations under the License.
           type: Object
         },
 
-        documentType: {
-          type: String,
-          value: 'Ad'
-        },
-
         domain: {
           type: String,
           value: 'None'
@@ -100,6 +95,11 @@ limitations under the License.
 
         indexTypes: {
           type: Array
+        },
+
+        resultType: {
+          type: String,
+          value: 'Webpage'
         },
 
         sortField: {

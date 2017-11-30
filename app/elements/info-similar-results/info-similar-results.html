@@ -22,7 +22,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/styled-dialog/styled-dialog-styles.html">
 <link rel="import" href="../../styles/info-styles.html">
 
-<dom-module id="info-similar-documents">
+<dom-module id="info-similar-results">
   <template>
     <style include="styled-dialog-styles"></style>
     <style include="iron-flex"></style>
@@ -41,7 +41,7 @@ limitations under the License.
     </div>
 
     <styled-dialog id="dialog" header="[[_header]]">
-      <div class="styled-dialog-text">Similar webpages are found by looking at the words and phrases used in the title and content of a webpage.</div>
+      <div class="styled-dialog-text">Similar webpage results are found by looking at the words and phrases used in the title and content of a webpage.</div>
       <div class="styled-dialog-text">Uncommon words or phrases that are used in multiple webpages may indicate that the webpages have the same poster.</div>
       <div class="styled-dialog-text">Webpages that are most similar are ordered first.</div>
     </styled-dialog>
@@ -52,12 +52,12 @@ limitations under the License.
     'use strict';
 
     Polymer({
-      is: 'info-similar-documents',
+      is: 'info-similar-results',
 
       properties: {
         _header: {
           type: String,
-          value: 'How are similar webpages found?'
+          value: 'How are similar webpage results found?'
         }
       },
 

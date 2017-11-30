@@ -42,14 +42,14 @@ limitations under the License.
 <link rel="import" href="../../elements/copy-button/copy-button.html">
 <link rel="import" href="../../elements/info-data/info-data.html">
 <link rel="import" href="../../elements/info-revisions/info-revisions.html">
-<link rel="import" href="../../elements/info-similar-documents/info-similar-documents.html">
+<link rel="import" href="../../elements/info-similar-results/info-similar-results.html">
 <link rel="import" href="../../elements/section-wrapper/section-wrapper.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
 <link rel="import" href="../../styles/entity-page-styles.html">
 <link rel="import" href="../../styles/icon-styles.html">
 <link rel="import" href="../../styles/page-styles.html">
 
-<dom-module id="document-page">
+<dom-module id="result-page">
   <template>
     <style include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning"></style>
     <style include="page-styles"></style>
@@ -141,7 +141,7 @@ limitations under the License.
     </json-combine>
 
     <json-combine
-      data-in1="[[document]]"
+      data-in1="[[result]]"
       data-in2="[[searchFields]]"
       data-out="{{maps}}"
       combine-function="[[transforms.entity.maps]]">
@@ -164,17 +164,17 @@ limitations under the License.
       es-client="[[esClient]]"
       es-index="[[serverConfig.logIndexName]]"
       es-type="[[serverConfig.logIndexType]]"
-      type="Document-RevisionPage"
+      type="Result-RevisionPage"
       data="[[revisionPageNumber]]"
       username="[[serverConfig.username]]">
     </dig-logger>
 
-    <!-- Logger for Similar Documents Pagination -->
+    <!-- Logger for Similar Results Pagination -->
     <dig-logger
       es-client="[[esClient]]"
       es-index="[[serverConfig.logIndexName]]"
       es-type="[[serverConfig.logIndexType]]"
-      type="Document-SimilarDocPage"
+      type="Result-SimilarDocPage"
       data="[[moreLikeThisPageNumber]]"
       username="[[serverConfig.username]]">
     </dig-logger>
@@ -184,13 +184,13 @@ limitations under the License.
       es-client="[[esClient]]"
       es-index="[[serverConfig.logIndexName]]"
       es-type="[[serverConfig.logIndexType]]"
-      type="Document-Open"
+      type="Result-Open"
       data="[[parameters.state]]"
       username="[[serverConfig.username]]"
       logger="{{logger}}">
     </dig-logger>
 
-    <!-- Document Query -->
+    <!-- Result Query -->
 
     <build-and-run-query
       fields='"doc_id"'
@@ -204,17 +204,17 @@ limitations under the License.
       properties-ready="{{processRequest}}"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       transform-config="[[searchFields]]"
-      transform-function="[[transforms.entity.document]]"
-      error="{{documentError}}"
-      loading="{{documentLoading}}"
-      results="{{document}}">
+      transform-function="[[transforms.entity.result]]"
+      error="{{resultError}}"
+      loading="{{resultLoading}}"
+      results="{{result}}">
     </build-and-run-query>
 
     <elastic-client-filter-builder
       not
       type="term"
       field="doc_id"
-      values="[[document.id]]"
+      values="[[result.id]]"
       ejs-filter="{{notThisDocFilter}}">
     </elastic-client-filter-builder>
 
@@ -223,7 +223,7 @@ limitations under the License.
     <elastic-client-query-builder
       type="term"
       fields='"url.raw"'
-      values="[[document.url]]"
+      values="[[result.url]]"
       ejs-query="{{revisionQuery}}">
     </elastic-client-query-builder>
 
@@ -241,15 +241,15 @@ limitations under the License.
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       loading="{{revisionLoading}}"
       last-error="{{revisionError}}"
-      results="{{revisionResults}}"
+      results="{{revisionQueryResults}}"
       result-count="{{revisionTotal}}">
     </elastic-client-search>
 
     <json-combine
-      data-in1="[[revisionResults]]"
+      data-in1="[[revisionQueryResults]]"
       data-in2="[[searchFields]]"
-      data-out="{{revisionDocuments}}"
-      combine-function="[[transforms.entity.documents]]">
+      data-out="{{revisionResults}}"
+      combine-function="[[transforms.entity.results]]">
     </json-combine>
 
     <!-- More Like This Query -->
@@ -258,7 +258,7 @@ limitations under the License.
       type="mlt"
       mlt-config='{"minTermFreq":1,"minDocFreq":1,"maxQueryTerms":100,"minimumShouldMatch":"75%"}'
       fields='["content_extraction.content_strict.text", "content_extraction.title.text", "knowledge_graph"]'
-      values="[[buildMoreLikeThisValue(document.title, document.description)]]"
+      values="[[buildMoreLikeThisValue(result.title, result.description)]]"
       ejs-query="{{moreLikeThisQuery}}">
     </elastic-client-query-builder>
 
@@ -274,15 +274,15 @@ limitations under the License.
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
       loading="{{moreLikeThisLoading}}"
       last-error="{{moreLikeThisError}}"
-      results="{{moreLikeThisResults}}"
+      results="{{moreLikeThisQueryResults}}"
       result-count="{{moreLikeThisTotal}}">
     </elastic-client-search>
 
     <json-combine
-      data-in1="[[moreLikeThisResults]]"
+      data-in1="[[moreLikeThisQueryResults]]"
       data-in2="[[searchFields]]"
-      data-out="{{moreLikeThisDocuments}}"
-      combine-function="[[transforms.entity.documents]]">
+      data-out="{{moreLikeThisResults}}"
+      combine-function="[[transforms.entity.results]]">
     </json-combine>
 
     <profile-manager
@@ -318,10 +318,10 @@ limitations under the License.
     <save-case-dialog
       id="saveDialog"
       cases="[[cases]]"
-      document-id="[[parameters.id]]"
-      document-name="[[document.title]]"
-      document-type="Webpage"
       profile-manager="[[profileManager]]"
+      result-id="[[parameters.id]]"
+      result-name="[[result.title]]"
+      result-type="Webpage"
       user-id="[[userId]]">
     </save-case-dialog>
 
@@ -334,19 +334,19 @@ limitations under the License.
       sort-field="timestamp_crawl">
     </info-data>
 
-    <template is="dom-if" if="[[documentLoading]]">
+    <template is="dom-if" if="[[resultLoading]]">
       <div class="layout horizontal center-justified flex">
         <loading-spinner show type="Webpage"></loading-spinner>
       </div>
     </template>
 
-    <template is="dom-if" if="[[!documentLoading]]">
-      <template is="dom-if" if="[[!document.id]]">
+    <template is="dom-if" if="[[!resultLoading]]">
+      <template is="dom-if" if="[[!result.id]]">
         <div class="layout horizontal flex center-justified" style="padding: 20px;">Webpage Not Found</div>
       </template>
     </template>
 
-    <template is="dom-if" if="[[document.id]]">
+    <template is="dom-if" if="[[result.id]]">
       <div class="page-head">
         <a id="logoLink" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
           <img id="logo" src="/images/dig-logo.png" alt="">
@@ -355,27 +355,27 @@ limitations under the License.
         <iron-icon class="page-icon" icon="av:web"></iron-icon>
 
         <div class="page-name">
-          [[document.title]]
+          [[result.title]]
         </div>
 
         <tag-entity-buttons
           class="layout horizontal center-justified"
-          entity-id="[[document.id]]"
-          entity-type="[[document.type]]"
+          entity-id="[[result.id]]"
+          entity-type="[[result.type]]"
           tag-manager="[[tagManager]]"
-          tags="[[document.tags]]">
+          tags="[[result.tags]]">
         </tag-entity-buttons>
 
         <user-settings-dialog
           build-popup-data-function="[[transforms.config.searchTerms]]"
           build-state-data-function="[[transforms.config.searchState]]"
-          document-icon="av:web"
-          document-link-function="[[returnFunctionOutput(transforms.config.documentLinkFunction)]]"
-          document-type-plural="Webpages"
-          document-type-singular="Webpage"
           entity-config="[[searchFieldsCollection]]"
           function-config="[[searchFields]]"
           reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
+          result-icon="av:web"
+          result-link-function="[[returnFunctionOutput(transforms.config.resultLinkFunction)]]"
+          result-type-plural="Webpages"
+          result-type-singular="Webpage"
           user-id="[[userId]]"
           user-loading="[[userLoading]]"
           username="[[serverConfig.username]]"
@@ -462,7 +462,7 @@ limitations under the License.
 
             <build-and-run-query
               fields='"doc_id"'
-              values="[[document.id]]"
+              values="[[result.id]]"
               client="[[esClient]]"
               index-name="[[esConfig.esIndex]]"
               index-types="[[esConfig.esType]]"
@@ -480,14 +480,14 @@ limitations under the License.
               hide-header
               open
               cached-page="[[cachedPage]]"
-              icon="[[document.icon]]"
-              result-id="[[document.id]]"
-              style-class="[[document.styleClass]]"
-              tags="[[document.tags]]"
-              type="[[document.type]]"
-              detail-extractions="[[concatList(document.headerExtractions, document.detailExtractions)]]"
-              details="[[document.details]]"
-              images="[[document.images]]"
+              icon="[[result.icon]]"
+              result-id="[[result.id]]"
+              style-class="[[result.styleClass]]"
+              tags="[[result.tags]]"
+              type="[[result.type]]"
+              detail-extractions="[[concatList(result.headerExtractions, result.detailExtractions)]]"
+              details="[[result.details]]"
+              images="[[result.images]]"
               small-image-style-class="[[getBlurStyleClass(blurImages)]]"
               large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
               tag-manager="[[tagManager]]">
@@ -500,10 +500,10 @@ limitations under the License.
             style-class="grey"
             class="results-section">
 
-            <template is="dom-if" if="[[revisionDocumentsShown]]">
+            <template is="dom-if" if="[[revisionResultsShown]]">
               <export-button
                 slot="title"
-                data="[[revisionDocumentsShown]]"
+                data="[[revisionResultsShown]]"
                 search-fields="[[searchFields]]"
                 transform-csv-function="[[transforms.export.createExportDataForCsv]]"
                 transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
@@ -521,9 +521,9 @@ limitations under the License.
 
             <result-list
               text-property="title"
-              query-results="[[revisionDocuments]]"
+              query-results="[[revisionResults]]"
               total-results="{{revisionTotal}}"
-              shown-results="{{revisionDocumentsShown}}"
+              shown-results="{{revisionResultsShown}}"
               page="{{revisionPage}}"
               page-size="10"
               loading="[[revisionLoading]]"
@@ -550,10 +550,10 @@ limitations under the License.
             style-class="grey"
             class="results-section">
 
-            <template is="dom-if" if="[[moreLikeThisDocumentsShown]]">
+            <template is="dom-if" if="[[moreLikeThisResultsShown]]">
               <export-button
                 slot="title"
-                data="[[moreLikeThisDocumentsShown]]"
+                data="[[moreLikeThisResultsShown]]"
                 search-fields="[[searchFields]]"
                 transform-csv-function="[[transforms.export.createExportDataForCsv]]"
                 transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
@@ -566,14 +566,14 @@ limitations under the License.
             </template>
 
             <template is="dom-if" if="[[moreLikeThisTotal]]">
-              <info-similar-documents></info-similar-documents>
+              <info-similar-results></info-similar-results>
             </template>
 
             <result-list
               text-property="title"
-              query-results="[[moreLikeThisDocuments]]"
+              query-results="[[moreLikeThisResults]]"
               total-results="{{moreLikeThisTotal}}"
-              shown-results="{{moreLikeThisDocumentsShown}}"
+              shown-results="{{moreLikeThisResultsShown}}"
               page="{{moreLikeThisPage}}"
               page-size="10"
               loading="[[moreLikeThisLoading]]"
@@ -602,7 +602,7 @@ limitations under the License.
 
     Polymer({
       /* globals DigBehaviors */
-      is: 'document-page',
+      is: 'result-page',
 
       behaviors: [
         DigBehaviors.ArrayBehavior
@@ -654,18 +654,6 @@ limitations under the License.
           type: Object
         },
 
-        document: {
-          type: Object
-        },
-
-        documentError: {
-          type: Object
-        },
-
-        documentLoading: {
-          type: Boolean
-        },
-
         domain: {
           computed: 'findDomain(parameters, serverConfig)',
           type: String
@@ -695,14 +683,6 @@ limitations under the License.
           type: Array
         },
 
-        moreLikeThisDocuments: {
-          type: Array
-        },
-
-        moreLikeThisDocumentsShown: {
-          type: Array
-        },
-
         moreLikeThisError: {
           type: Object
         },
@@ -723,8 +703,16 @@ limitations under the License.
           type: Number
         },
 
-        moreLikeThisResults: {
+        moreLikeThisQueryResults: {
           type: Object
+        },
+
+        moreLikeThisResults: {
+          type: Array
+        },
+
+        moreLikeThisResultsShown: {
+          type: Array
         },
 
         moreLikeThisTitle: {
@@ -756,12 +744,16 @@ limitations under the License.
           type: Boolean
         },
 
-        revisionDocuments: {
-          type: Array
+        result: {
+          type: Object
         },
 
-        revisionDocumentsShown: {
-          type: Array
+        resultError: {
+          type: Object
+        },
+
+        resultLoading: {
+          type: Boolean
         },
 
         revisionError: {
@@ -784,8 +776,16 @@ limitations under the License.
           type: Number
         },
 
-        revisionResults: {
+        revisionQueryResults: {
           type: Object
+        },
+
+        revisionResults: {
+          type: Array
+        },
+
+        revisionResultsShown: {
+          type: Array
         },
 
         revisionTitle: {

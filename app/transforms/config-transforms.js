@@ -144,15 +144,6 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
-     * Returns the link function for the documents.
-     *
-     * @return {Function}
-     */
-    documentLinkFunction: function() {
-      return commonTransforms.getLinkFunction('ad');
-    },
-
-    /**
      * Initializes an Object with filter subproperties for the facets on the entity page
      *
      * @param {Object} searchFields
@@ -312,6 +303,15 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         return searchFieldsObject.key === key;
       });
       return index >= 0 ? searchFields[index] : {};
+    },
+
+    /**
+     * Returns the link function for the results.
+     *
+     * @return {Function}
+     */
+    resultLinkFunction: function() {
+      return commonTransforms.getLinkFunction('result');
     },
 
     /**

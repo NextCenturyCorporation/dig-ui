@@ -162,8 +162,9 @@ module.exports = function(app) {
       res.status(200).send({mimeType: req.files[0].mimetype, base64: req.files[0].buffer.toString('base64')});
   });
 
+  // Deprecated
   app.get('/document.html', function(req, res) {
-    res.sendFile(path.resolve(app.get('appPath') + '/document.html'));
+    res.sendFile(path.resolve(app.get('appPath') + '/result.html'));
   });
 
   app.get('/entity.html', function(req, res) {
@@ -172,6 +173,10 @@ module.exports = function(app) {
 
   app.get('/help.html', function(req, res) {
     res.sendFile(path.resolve(app.get('appPath') + '/help.html'));
+  });
+
+  app.get('/result.html', function(req, res) {
+    res.sendFile(path.resolve(app.get('appPath') + '/result.html'));
   });
 
   app.get('/search.html', function(req, res) {
