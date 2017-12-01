@@ -188,7 +188,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return {
       data: data,
       key: config.key,
-      name: config.titlePlural,
+      name: data.length === 1 ? config.title : config.titlePlural,
       type: config.type
     };
   }
