@@ -276,7 +276,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return undefined;
     }
 
-    // var rank = _.get(result, '_score');
     var crawlTimestamp = commonTransforms.getFormattedDate(_.get(result, '_source.@timestamp'));
     if(crawlTimestamp === 'None') {
       crawlTimestamp = commonTransforms.getFormattedDate(_.get(result, '_source.timestamp'));
@@ -289,7 +288,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var resultObject = {
       id: id,
       url: _.get(result, '_source.url'),
-      // rank: rank ? rank.toFixed(2) : rank,
       crawlTimestamp: (crawlTimestamp === 'None' ? 'Unknown' : crawlTimestamp),
       type: 'result',
       icon: '',
@@ -366,7 +364,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       });
     }
 
-    if(resultObject.crawlTimestamp) {
+    if(resultObject.crawlTimestamp && resultObject.crawlTimestamp !== 'Unknown') {
       resultObject.details.push({
         name: 'Date Crawled',
         text: resultObject.crawlTimestamp
