@@ -237,24 +237,24 @@ limitations under the License.
     </json-combine>
 
     <json-combine
-      data-in1="[[parameters.id]]"
+      data-in1="[[searchFields]]"
       data-in2="[[parameters.type]]"
+      data-out="{{pageConfig}}"
+      combine-function="[[transforms.config.pageConfig]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[parameters.id]]"
+      data-in2="[[pageConfig.type]]"
       data-out="{{pageId}}"
       combine-function="[[transforms.config.formatId]]">
     </json-combine>
 
     <json-combine
       data-in1="[[pageId]]"
-      data-in2="[[parameters.type]]"
+      data-in2="[[pageConfig.type]]"
       data-out="{{pageName}}"
       combine-function="[[transforms.config.formatName]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="[[parameters.type]]"
-      data-out="{{pageConfig}}"
-      combine-function="[[transforms.config.pageConfig]]">
     </json-combine>
 
     <json-combine
