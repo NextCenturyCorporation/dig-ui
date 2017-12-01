@@ -19,8 +19,8 @@ limitations under the License.
     <style>
       .page-head {
         @apply --layout-horizontal;
-        @apply --layout-flex;
         @apply --layout-center;
+        @apply --layout-flex;
         @apply --shadow-elevation-2dp;
         background-color: var(--navbar-color);
         color: #fff;
@@ -29,42 +29,44 @@ limitations under the License.
         transition: height 0.2s;
       }
 
-      .page-head .page-name,
-      .page-head .page-name > div,
+      .page-head .page-data {
+        @apply --layout-horizontal;
+        @apply --layout-center;
+        @apply --layout-flex;
+        transition: all 0.2s;
+      }
+
       .page-head .page-icon,
-      .page-head .page-image,
-      .page-head img {
+      .page-head .page-link,
+      .page-head .page-name,
+      .page-head #logoLink {
         margin-right: 10px;
       }
 
-      .page-head .page-name {
-        @apply --layout-horizontal;
-        @apply --layout-flex;
-        @apply --layout-center;
-        font-size: 20px;
-        font-weight: 500;
-        line-height: 30px;
-        transition: all 0.2s;
-        word-break: break-word;
-      }
-
-      .page-head page-icon {
+      .page-head .page-icon {
         /* Same height as page-head */
         --iron-icon-height: 30px;
         --iron-icon-width: 30px;
         min-width: 30px;
       }
 
-      .page-head a {
+      .page-head .page-link {
         /* Same height as page-head */
         height: 30px;
       }
 
-      .page-head .page-image {
+      .page-head .page-link iron-image {
         /* Same height as page-head */
         --iron-image-height: 30px;
         --iron-image-width: auto;
         min-width: 30px;
+      }
+
+      .page-head .page-name {
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 30px;
+        word-break: break-word;
       }
 
       .page-body {

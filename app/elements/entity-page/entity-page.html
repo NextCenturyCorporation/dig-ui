@@ -65,10 +65,6 @@ limitations under the License.
         @apply --layout-fullbleed;
       }
 
-      .date-menu {
-        margin-bottom: 10px;
-      }
-
       .date-menu > div {
         color: var(--secondary-text-color);
         line-height: 24px;
@@ -103,7 +99,9 @@ limitations under the License.
       }
 
       aggregation-query-and-display,
-      image-query-and-display {
+      image-query-and-display,
+      sparkline-list,
+      status-text {
         margin-bottom: 10px;
       }
 
@@ -127,8 +125,20 @@ limitations under the License.
         --selected-facet-icon-hover-color: #fff;
       }
 
+      status-text {
+        margin-right: 5px;
+      }
+
       .hide {
         display: none;
+      }
+
+      .large-margins {
+        margin: 20px 0;
+      }
+
+      .small-margins {
+        margin: 10px 0;
       }
     </style>
 
@@ -397,25 +407,19 @@ limitations under the License.
       sort-field="timestamp_crawl">
     </info-data>
 
-    <template is="dom-if" if="[[!pageConfig]]">
-      <div class="layout horizontal center-justified flex">
-        <loading-spinner show type="Page"></loading-spinner>
-      </div>
-    </template>
+    <div class="page-head">
+      <a id="logoLink" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
+        <img id="logo" src="/images/dig-logo.png" alt="">
+      </a>
 
-    <template is="dom-if" if="[[pageConfig]]">
-      <div class="page-head">
-        <a id="logoLink" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
-          <img id="logo" src="/images/dig-logo.png" alt="">
-        </a>
+      <div class="page-data">
+        <template is="dom-if" if="[[pageConfig]]">
+          <iron-icon class$="page-icon [[pageConfig.styleClass]]" icon="[[pageConfig.icon]]"></iron-icon>
 
-        <iron-icon class$="page-icon [[pageConfig.styleClass]]" icon="[[pageConfig.icon]]"></iron-icon>
-
-        <div class="page-name">
-          <div>[[pageConfig.title]]:</div>
+          <div class="page-name">[[pageConfig.title]]:</div>
 
           <template is="dom-if" if="[[!pageConfig.isImage]]">
-            <div>[[pageName]]</div>
+            <div class="page-name">[[pageName]]</div>
           </template>
 
           <template is="dom-if" if="[[pageConfig.isImage]]">
@@ -426,78 +430,86 @@ limitations under the License.
               combine-function="[[transforms.config.imageSrc]]">
             </json-combine>
 
-            <a href="[[imageSrc]]" target="_blank" title="Open Image">
-              <iron-image class$="page-image small-blur [[getNoBlurStyleClass(blurImages)]]" src="[[imageSrc]]"></iron-image>
+            <a class="page-link" href="[[imageSrc]]" target="_blank" title="Open Image">
+              <iron-image class$="small-blur [[getNoBlurStyleClass(blurImages)]]" src="[[imageSrc]]"></iron-image>
             </a>
           </template>
-        </div>
-
-        <user-settings-dialog
-          build-popup-data-function="[[transforms.config.searchTerms]]"
-          build-state-data-function="[[transforms.config.searchState]]"
-          entity-config="[[searchFieldsCollection]]"
-          function-config="[[searchFields]]"
-          reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
-          result-icon="av:web"
-          result-link-function="[[transforms.config.resultLinkFunction]]"
-          result-type-plural="Webpages"
-          result-type-singular="Webpage"
-          user-id="[[userId]]"
-          user-loading="[[userLoading]]"
-          username="[[serverConfig.username]]"
-          blur-images="{{blurImages}}"
-          cases="{{cases}}"
-          email-address="{{emailAddress}}"
-          notifications="{{notifications}}"
-          notification-date="{{notificationDate}}"
-          notification-interval="{{notificationInterval}}"
-          process-request="{{processRequest}}">
-        </user-settings-dialog>
-
-        <paper-icon-button id="menuButton" icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
-
-        <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="50">
-          <div slot="dropdown-content">
-            <paper-icon-item title="Save This [[pageConfig.title]] to Case..." on-tap="openSaveDialog">
-              <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
-              Save This [[pageConfig.title]] to Case...
-            </paper-icon-item>
-
-            <paper-icon-item disabled="[[!hasHistory]]" title="View This Page's Filter History" on-tap="openStateHistoryDialog">
-              <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
-              View This Page's Filter History
-            </paper-icon-item>
-
-            <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
-              <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
-              View DIG Database Information
-            </paper-icon-item>
-
-            <template is="dom-if" if="[[serverConfig.tagsListEndpoint]]">
-              <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
-                <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
-                View DIG Data Training Options
-              </paper-icon-item>
-            </template>
-
-            <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-              <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
-              Open a DIG Search Page in a New Tab
-            </paper-icon-item>
-
-            <paper-icon-item title="Open DIG Help Page" on-tap="openHelpPage">
-              <iron-icon slot="item-icon" icon="fa:question-circle" item-icon></iron-icon>
-              Open the DIG Help Page
-            </paper-icon-item>
-
-            <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="emailSupport">
-              <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
-              Contact DIG / Memex Support
-            </paper-icon-item>
-          </div>
-        </iron-dropdown>
+        </template>
       </div>
 
+      <user-settings-dialog
+        build-popup-data-function="[[transforms.config.searchTerms]]"
+        build-state-data-function="[[transforms.config.searchState]]"
+        entity-config="[[searchFieldsCollection]]"
+        function-config="[[searchFields]]"
+        reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
+        result-icon="av:web"
+        result-link-function="[[transforms.config.resultLinkFunction]]"
+        result-type-plural="Webpages"
+        result-type-singular="Webpage"
+        user-id="[[userId]]"
+        user-loading="[[userLoading]]"
+        username="[[serverConfig.username]]"
+        blur-images="{{blurImages}}"
+        cases="{{cases}}"
+        email-address="{{emailAddress}}"
+        notifications="{{notifications}}"
+        notification-date="{{notificationDate}}"
+        notification-interval="{{notificationInterval}}"
+        process-request="{{processRequest}}">
+      </user-settings-dialog>
+
+      <paper-icon-button id="menuButton" icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+
+      <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="50">
+        <div slot="dropdown-content">
+          <paper-icon-item disabled="[[!pageConfig]]" title="Save This [[pageConfig.title]] to Case..." on-tap="openSaveDialog">
+            <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
+            Save This [[pageConfig.title]] to Case...
+          </paper-icon-item>
+
+          <paper-icon-item disabled="[[!hasHistory]]" disabled="[[!pageConfig]]" title="View This Page's Filter History" on-tap="openStateHistoryDialog">
+            <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
+            View This Page's Filter History
+          </paper-icon-item>
+
+          <template is="dom-if" if="[[serverConfig.tagsListEndpoint]]">
+            <paper-icon-item disabled="[[!pageConfig]]" title="View DIG Data Training Options" on-tap="openTagsDialog">
+              <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
+              View DIG Data Training Options
+            </paper-icon-item>
+          </template>
+
+          <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
+            <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
+            View DIG Database Information
+          </paper-icon-item>
+
+          <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+            <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
+            Open a DIG Search Page in a New Tab
+          </paper-icon-item>
+
+          <paper-icon-item title="Open DIG Help Page" on-tap="openHelpPage">
+            <iron-icon slot="item-icon" icon="fa:question-circle" item-icon></iron-icon>
+            Open the DIG Help Page
+          </paper-icon-item>
+
+          <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="emailSupport">
+            <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
+            Contact DIG / Memex Support
+          </paper-icon-item>
+        </div>
+      </iron-dropdown>
+    </div>
+
+    <template is="dom-if" if="[[!pageConfig]]">
+      <div class="layout horizontal center-justified flex">
+        <loading-spinner show type="Page"></loading-spinner>
+      </div>
+    </template>
+
+    <template is="dom-if" if="[[pageConfig]]">
       <div class="page-body">
         <div class="page-column">
           <dual-column>
@@ -642,7 +654,7 @@ limitations under the License.
                     text-function="[[getTextFunction(item.aggregatedDataResults)]]">
                   </terms-transformer>
 
-                  <div class="layout horizontal center" style="margin: 20px 0;">
+                  <div class="layout horizontal center large-margins">
                     <copy-button class="flex" data="[[item.aggregatedDataResults]]" name="[[item.entity.titlePlural]]" text-function="[[createCopyTextFunction(item.entity.isLocation)]]"></copy-button>
 
                     <template is="dom-if" if="[[showDoubleBarChart(item.entity)]]">
@@ -651,13 +663,21 @@ limitations under the License.
                   </div>
                 </template>
 
-                <template is="dom-if" if="[[item.timelineDataLoading]]">
-                  <div>Loading Timelines...</div>
+                <elastic-error error="[[item.timelineDataError]]" message="{{item.timelineDataErrorMessage}}"></elastic-error>
+
+                <template is="dom-if" if="[[!item.timelineDataResults.items.length]]">
+                  <status-text
+                    count="[[item.timelineDataResults.items.length]]"
+                    error="[[item.timelineDataErrorMessage]]"
+                    label="Timelines"
+                    loading="[[item.timelineDataLoading]]"
+                    empty="[[createNoTimelineText(item.dateCollection, item.dateSelected, item.entity)]]">
+                  </status-text>
                 </template>
 
                 <template is="dom-if" if="[[!item.timelineDataLoading]]">
                   <template is="dom-if" if="[[item.showDateMenu]]">
-                    <div class="layout horizontal center date-menu">
+                    <div class="layout horizontal center date-menu small-margins">
                       <div>Date Field</div>
 
                       <paper-dropdown-menu label="Date" no-label-float>
@@ -670,21 +690,10 @@ limitations under the License.
                     </div>
                   </template>
 
-                  <template is="dom-if" if="[[item.timelineDataError]]">
-                    <elastic-error error="[[item.timelineDataError]]" message="{{item.timelineDataErrorMessage}}"></elastic-error>
-                    <div>Timeline [[item.timelineDataErrorMessage]]</div>
-                  </template>
-
-                  <template is="dom-if" if="[[!item.timelineDataError]]">
-                    <template is="dom-if" if="[[!item.timelineDataResults.items.length]]">
-                      <div>No Timelines of [[item.entity.title]] vs. [[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]</div>
-                    </template>
-                  </template>
-
                   <template is="dom-if" if="[[item.timelineDataResults.items.length]]">
                     <sparkline-list hide-sparkline-chart="[[!item.loadData]]" data="[[item.timelineDataResults.items]]"></sparkline-list>
 
-                    <div class="layout horizontal center" style="margin: 10px 0;">
+                    <div class="layout horizontal center small-margins">
                       <button-action icon="timeline" text="[[getBarChartButtonText(item.showBarChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
                     </div>
 
@@ -846,6 +855,7 @@ limitations under the License.
 
         domain: {
           computed: 'findDomain(parameters, serverConfig)',
+          notify: true,
           type: String
         },
 
@@ -1119,6 +1129,10 @@ limitations under the License.
           page: pageConfig,
           id: id
         };
+      },
+
+      createNoTimelineText: function(dateCollection, dateSelected, entity) {
+        return 'No Timelines of ' + entity.title + ' vs. ' + this.getDateProperty(dateCollection, dateSelected, 'title');
       },
 
       createSectionTitle: function(size, config) {
