@@ -336,6 +336,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           key: id,
           // Material design color.
           color: fields[id].color || 'grey',
+          // The extraction field.
+          extractionField: fields[id].field || 'knowledge_graph.' + id,
           // Whether to show in the facets.
           facets: fields[id].show_in_facets || false,
           // The aggregation field.
@@ -350,8 +352,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           icon: fields[id].icon || 'icons:text-format',
           // Either entity, text, or undefined.
           link: fields[id].show_as_link !== 'no' ? fields[id].show_as_link : undefined,
-          // The queryField field.
-          queryField: 'knowledge_graph.' + id + '.value',
+          // The query field.
+          queryField: fields[id].field || 'knowledge_graph.' + id + '.value',
           // Either header, detail, title, description, or undefined.
           result: fields[id].show_in_result !== 'no' ? fields[id].show_in_result : undefined,
           // Whether to show in the search fields.  Must be shown in the search fields if shown in the facets.

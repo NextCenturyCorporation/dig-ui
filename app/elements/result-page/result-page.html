@@ -202,7 +202,7 @@ limitations under the License.
       filters="[]"
       page-size="1"
       properties-ready="{{processRequest}}"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.result]]"
       error="{{resultError}}"
@@ -238,7 +238,7 @@ limitations under the License.
       page-size="10"
       sort-field="[[sortField]]"
       sort-order="desc"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
       loading="{{revisionLoading}}"
       last-error="{{revisionError}}"
       results="{{revisionQueryResults}}"
@@ -271,7 +271,7 @@ limitations under the License.
       filters="[[buildArray(notThisDocFilter)]]"
       page="{{moreLikeThisPage}}"
       page-size="10"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
       loading="{{moreLikeThisLoading}}"
       last-error="{{moreLikeThisError}}"
       results="{{moreLikeThisQueryResults}}"
@@ -331,7 +331,7 @@ limitations under the License.
       index-name="[[esConfig.esIndex]]"
       index-types="[[esConfig.esType]]"
       domain="[[domain]]"
-      sort-field="timestamp_crawl">
+      sort-field="@timestamp">
     </info-data>
 
     <div class="page-head">

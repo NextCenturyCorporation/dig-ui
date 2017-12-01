@@ -97,7 +97,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
   function getExtractionsFromResult(result, path, config) {
     var data = _.get(result, path, []);
-    return getExtractionsFromList(data, config);
+    return getExtractionsFromList((_.isArray(data) ? data : [data]), config);
   }
 
   function getHighlightPathList(itemId, itemText, result, type, highlightMapping) {
@@ -177,7 +177,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function getHighlightedExtractionObjectFromResult(result, config, highlightMapping) {
-    var data = getExtractionsFromResult(result, '_source.knowledge_graph.' + config.key, config);
+    var data = getExtractionsFromResult(result, '_source.' + config.extractionField, config);
     if(highlightMapping) {
       data = data.map(function(item) {
         // The highlight in the extraction object is a boolean (YES or NO).
@@ -221,7 +221,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     // Use the extraction data from the field in the searchFieldsObject if possible.  This overwrites the default.
     if(searchFieldsObject) {
-      var extraction = _.get(result, '_source.knowledge_graph.' + searchFieldsObject.key);
+      var extraction = _.get(result, '_source.' + searchFieldsObject.extractionField);
       if(_.isObject(extraction) || _.isArray(extraction)) {
         if(_.isObject(extraction)) {
           returnObject.text = extraction.value;
@@ -277,7 +277,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
 
     // var rank = _.get(result, '_score');
-    var time = commonTransforms.getFormattedDate(_.get(result, 'timestamp'));
+    var crawlTimestamp = commonTransforms.getFormattedDate(_.get(result, '_source.@timestamp'));
+    if(crawlTimestamp === 'None') {
+      crawlTimestamp = commonTransforms.getFormattedDate(_.get(result, '_source.timestamp'));
+    }
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
     var title = getTitleOrDescription('title', searchFields, result, 'content_extraction.title.text', highlightMapping);
@@ -287,7 +290,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       id: id,
       url: _.get(result, '_source.url'),
       // rank: rank ? rank.toFixed(2) : rank,
-      time: time,
+      crawlTimestamp: (crawlTimestamp === 'None' ? 'Unknown' : crawlTimestamp),
       type: 'result',
       icon: '',
       link: commonTransforms.getLink(id, 'result'),
@@ -360,6 +363,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         name: 'Url',
         link: resultObject.url,
         text: resultObject.url
+      });
+    }
+
+    if(resultObject.crawlTimestamp) {
+      resultObject.details.push({
+        name: 'Date Crawled',
+        text: resultObject.crawlTimestamp
       });
     }
 

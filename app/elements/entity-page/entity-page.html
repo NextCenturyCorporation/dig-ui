@@ -343,7 +343,7 @@ limitations under the License.
       page-size="10"
       properties-ready="{{processRequest}}"
       sort-field="[[sortField]]"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.results]]"
       error="{{searchError}}"
@@ -404,7 +404,7 @@ limitations under the License.
       index-name="[[esConfig.esIndex]]"
       index-types="[[esConfig.esType]]"
       domain="[[domain]]"
-      sort-field="timestamp_crawl">
+      sort-field="@timestamp">
     </info-data>
 
     <div class="page-head">
@@ -565,7 +565,7 @@ limitations under the License.
                         filters="[[filterList]]"
                         page-size="0"
                         properties-ready="{{processRequest}}"
-                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "timestamp_crawl", "tld", "url"]'
+                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
                         transform-config="[[createTimelineConfig(item.dateCollection, item.dateSelected, item.entity, pageConfig, pageId)]]"
                         transform-function="[[transforms.entity.histograms]]"
                         error="{{item.timelineDataError}}"
