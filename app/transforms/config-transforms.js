@@ -21,13 +21,17 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
   function createDateProperties(searchFieldsObject) {
     return {
       start: {
-        key: searchFieldsObject.key + '_start',
         field: searchFieldsObject.field,
+        icon: searchFieldsObject.icon,
+        key: searchFieldsObject.key + '_start',
+        styleClass: searchFieldsObject.styleClass,
         title: searchFieldsObject.title + ' Begin'
       },
       end: {
-        key: searchFieldsObject.key + '_end',
+        icon: searchFieldsObject.icon,
         field: searchFieldsObject.field,
+        key: searchFieldsObject.key + '_end',
+        styleClass: searchFieldsObject.styleClass,
         title: searchFieldsObject.title + ' End'
       }
     };
@@ -478,8 +482,10 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           }
 
           dialogConfig[index].data.push({
-            key: searchFieldsObject.key,
             field: searchFieldsObject.field,
+            icon: searchFieldsObject.icon,
+            key: searchFieldsObject.key,
+            styleClass: searchFieldsObject.styleClass,
             title: searchFieldsObject.title,
             enableNetworkExpansion: (searchFieldsObject.isEntity)
           });
