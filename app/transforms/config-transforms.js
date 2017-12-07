@@ -87,6 +87,10 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         return searchFieldsObject.isDate && !searchFieldsObject.isHidden;
       });
       if(dateFields.length && entityFields.length) {
+        // TODO Add config option.
+        var showFieldAtIndex = Math.max(0, _.findIndex(entityFields, function(entityFieldsObject) {
+          return entityFieldsObject.key === 'tld' || entityFieldsObject.key === 'website';
+        }));
         return entityFields.map(function(entityFieldsObject, index) {
           return {
             dateCollection: dateFields.reduce(function(dates, dateFieldsObject) {
@@ -102,8 +106,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
             }, []),
             dateSelected: dateFields[0].key,
             entity: _.cloneDeep(entityFieldsObject),
-            loadData: !index,
-            showData: !index,
+            loadData: index === showFieldAtIndex,
+            showData: index === showFieldAtIndex,
             showDateMenu: dateFields.length > 1
           };
         });
