@@ -70,6 +70,7 @@ limitations under the License.
         --section-wrapper-margin: 0;
       }
 
+      .bottom-margin,
       aggregation-query-and-display,
       image-query-and-display,
       sparkline-list,
@@ -103,14 +104,6 @@ limitations under the License.
 
       .hide {
         display: none;
-      }
-
-      .large-margins {
-        margin: 20px 0;
-      }
-
-      .small-margins {
-        margin: 10px 0;
       }
     </style>
 
@@ -631,6 +624,28 @@ limitations under the License.
                   <info-aggregations slot="title" entity="[[isEntity(item.entity)]]" page="[[pageName]]" type="[[item.entity.title]]"></info-aggregations>
                 </template>
 
+                <div class="layout horizontal center date-menu bottom-margin">
+                  <template is="dom-if" if="[[!item.timelineDataResults.items.length]]">
+                    <div class="flex">No Timelines of [[item.entity.title]] vs. [[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]</div>
+                  </template>
+
+                  <template is="dom-if" if="[[item.timelineDataResults.items.length]]">
+                    <div class="flex">[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]] from [[item.timelineDataResults.begin]] to [[item.timelineDataResults.end]]</div>
+                  </template>
+
+                  <template is="dom-if" if="[[item.showDateMenu]]">
+                    <div>Date Field</div>
+
+                    <paper-dropdown-menu label="Date" no-label-float>
+                      <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{item.dateSelected}}">
+                        <template is="dom-repeat" items="[[item.dateList]]" as="dateFieldsObject">
+                          <paper-item id$="[[dateFieldsObject.key]]" value="[[dateFieldsObject.key]]">[[dateFieldsObject.title]]</paper-item>
+                        </template>
+                      </paper-listbox>
+                    </paper-dropdown-menu>
+                  </template>
+                </div>
+
                 <elastic-error error="[[item.timelineDataError]]" message="{{item.timelineDataErrorMessage}}"></elastic-error>
 
                 <template is="dom-if" if="[[!item.timelineDataResults.items.length]]">
@@ -639,29 +654,15 @@ limitations under the License.
                     error="[[item.timelineDataErrorMessage]]"
                     label="Timelines"
                     loading="[[item.timelineDataLoading]]"
-                    empty="[[createNoTimelineText(item.dateCollection, item.dateSelected, item.entity)]]">
+                    empty="">
                   </status-text>
                 </template>
 
                 <template is="dom-if" if="[[!item.timelineDataLoading]]">
-                  <template is="dom-if" if="[[item.showDateMenu]]">
-                    <div class="layout horizontal center date-menu small-margins">
-                      <div>Date Field</div>
-
-                      <paper-dropdown-menu label="Date" no-label-float>
-                        <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{item.dateSelected}}">
-                          <template is="dom-repeat" items="[[item.dateList]]" as="dateFieldsObject">
-                            <paper-item id$="[[dateFieldsObject.key]]" value="[[dateFieldsObject.key]]">[[dateFieldsObject.title]]</paper-item>
-                          </template>
-                        </paper-listbox>
-                      </paper-dropdown-menu>
-                    </div>
-                  </template>
-
                   <template is="dom-if" if="[[item.timelineDataResults.items.length]]">
                     <sparkline-list hide-sparkline-chart="[[!item.loadData]]" data="[[item.timelineDataResults.items]]"></sparkline-list>
 
-                    <div class="layout horizontal center small-margins">
+                    <div class="layout horizontal center bottom-margin">
                       <button-action icon="timeline" text="[[getBarChartButtonText(item.showBarChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
                     </div>
 
@@ -1112,10 +1113,6 @@ limitations under the License.
           page: pageConfig,
           id: id
         };
-      },
-
-      createNoTimelineText: function(dateCollection, dateSelected, entity) {
-        return 'No Timelines of ' + entity.title + ' vs. ' + this.getDateProperty(dateCollection, dateSelected, 'title');
       },
 
       createSectionTitle: function(size, config) {

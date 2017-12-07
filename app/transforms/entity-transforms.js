@@ -649,10 +649,15 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      */
     histograms: function(data, config) {
       if(data && data.aggregations && data.aggregations[config.date.key] && data.aggregations[config.date.key][config.date.key]) {
-        return {
-          dates: createDateHistogram(data.aggregations[config.date.key][config.date.key].buckets, config),
-          items: createItemHistograms(data.aggregations[config.date.key][config.date.key].buckets, config)
-        };
+        var buckets = data.aggregations[config.date.key][config.date.key].buckets;
+        if(buckets.length > 1) {
+          return {
+            begin: commonTransforms.getFormattedDate(buckets[0].key),
+            end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
+            dates: createDateHistogram(buckets, config),
+            items: createItemHistograms(buckets, config)
+          };
+        }
       }
       return {
         dates: [],
