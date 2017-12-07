@@ -20,7 +20,7 @@
     "elastic-client-search": "DigElements/elastic-client-search#2.2.0",
     "elastic-create": "DigElements/elastic-create#2.1.0",
     "elastic-error": "DigElements/elastic-error#2.0.0",
-    "export-button": "DigElements/export-button#2.3.0",
+    "export-button": "DigElements/export-button#2.3.1",
     "facet-panel": "DigElements/facet-panel#2.2.4",
     "filters-builder": "DigElements/filters-builder#2.0.1",
     "fontawesome-iconset": "https://github.com/vangware/fontawesome-iconset.git#09ac70f619bb44d73fefc5f9524ae29ab217ed15",
