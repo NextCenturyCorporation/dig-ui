@@ -323,13 +323,6 @@ limitations under the License.
     </query-builder>
 
     <template is="dom-if" if="[[serverConfig.sendSearchesDirectlyToES]]">
-      <query-builder
-        config="[[searchFieldsCollection]]"
-        data="[[searchParameters]]"
-        date-fields="[[dateFieldsToProperties]]"
-        query="{{esQuery}}">
-      </query-builder>
-
       <build-and-run-query
         query="[[esQuery]]"
         client="[[esClient]]"
@@ -622,23 +615,38 @@ limitations under the License.
       </paper-toolbar>
 
       <paper-drawer-panel drawer-width="320px" id="pageDrawer">
-        <facet-panel slot="drawer" id="pageFacets"
-          client="[[esClient]]"
-          date-fields="[[dateFieldsToProperties]]"
-          facets-query="[[facetsQuery]]"
-          image-style-class="[[getBlurStyleClass(blurImages)]]"
-          index-name="[[esConfig.esIndex]]"
-          index-types="[[esConfig.esType]]"
-          network-expansion-parameters="[[networkExpansionParameters]]"
-          process-request="{{processRequest}}"
-          query-builder-config="[[searchFieldsCollection]]"
-          search-endpoint="[[esConfig.searchEndpoint]]"
-          search-keys="[[searchKeys]]"
-          search-fields="[[searchFields]]"
-          search-parameters="{{searchParameters}}">
+        <template is="dom-if" if="[[!serverConfig.sendSearchesDirectlyToES]]">
+          <facet-panel slot="drawer" id="pageFacets"
+            date-fields="[[dateFieldsToProperties]]"
+            facets-query="[[facetsQuery]]"
+            image-style-class="[[getBlurStyleClass(blurImages)]]"
+            network-expansion-parameters="[[networkExpansionParameters]]"
+            process-request="{{processRequest}}"
+            search-endpoint="[[esConfig.searchEndpoint]]"
+            search-keys="[[searchKeys]]"
+            search-fields="[[searchFields]]"
+            search-parameters="{{searchParameters}}">
 
-          <info-facets></info-facets>
-        </facet-panel>
+            <info-facets></info-facets>
+          </facet-panel>
+        </template>
+
+        <template is="dom-if" if="[[serverConfig.sendSearchesDirectlyToES]]">
+          <facet-panel slot="drawer" id="pageFacets"
+            client="[[esClient]]"
+            date-fields="[[dateFieldsToProperties]]"
+            image-style-class="[[getBlurStyleClass(blurImages)]]"
+            index-name="[[esConfig.esIndex]]"
+            index-types="[[esConfig.esType]]"
+            process-request="{{processRequest}}"
+            query-builder-config="[[searchFieldsCollection]]"
+            search-keys="[[searchKeys]]"
+            search-fields="[[searchFields]]"
+            search-parameters="{{searchParameters}}">
+
+            <info-facets></info-facets>
+          </facet-panel>
+        </template>
 
         <paper-header-panel slot="main" id="pageSearch">
           <template is="dom-if" if="[[clientConfigLoading]]">
