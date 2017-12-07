@@ -93,6 +93,36 @@ limitations under the License.
         }
       }
 
+      .date-menu > div {
+        color: var(--secondary-text-color);
+        line-height: 24px;
+        margin-bottom: 2px;
+        margin-right: 10px;
+      }
+
+      .date-menu paper-dropdown-menu {
+        margin-right: 5px;
+        --paper-input-container: {
+          padding: 0 !important;
+          width: 125px;
+        };
+      }
+
+      .date-menu paper-listbox {
+        --paper-listbox: {
+          padding: 0;
+        };
+      }
+
+      .date-menu paper-item {
+        --paper-item-min-height: 30px;
+        --paper-item: {
+          cursor: pointer;
+          padding: 0 10px;
+          white-space: nowrap;
+        };
+      }
+
       .note {
         font-style: italic;
         color: var(--secondary-text-color);

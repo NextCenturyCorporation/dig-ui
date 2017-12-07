@@ -65,34 +65,6 @@ limitations under the License.
         @apply --layout-fullbleed;
       }
 
-      .date-menu > div {
-        color: var(--secondary-text-color);
-        line-height: 24px;
-        margin-bottom: 2px;
-        margin-right: 10px;
-      }
-
-      .date-menu paper-dropdown-menu {
-        --paper-input-container: {
-          padding: 0 !important;
-        };
-      }
-
-      .date-menu paper-listbox {
-        --paper-listbox: {
-          padding: 0;
-        };
-      }
-
-      .date-menu paper-item {
-        --paper-item-min-height: 30px;
-        --paper-item: {
-          cursor: pointer;
-          padding: 0 10px;
-          white-space: nowrap;
-        };
-      }
-
       section-wrapper[slot="top"] {
         --section-wrapper-height: 100%;
         --section-wrapper-margin: 0;
@@ -225,6 +197,13 @@ limitations under the License.
     <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
+      data-out="{{dateMenu}}"
+      combine-function="[[transforms.config.dateMenu]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
       data-out="{{filterCollection}}"
       combine-function="[[transforms.config.filterCollection]]">
     </json-combine>
@@ -255,13 +234,6 @@ limitations under the License.
       data-in2="[[pageConfig.type]]"
       data-out="{{pageName}}"
       combine-function="[[transforms.config.formatName]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{sortField}}"
-      combine-function="[[transforms.config.sortField]]">
     </json-combine>
 
     <json-combine
@@ -342,8 +314,8 @@ limitations under the License.
       page="{{searchPage}}"
       page-size="10"
       properties-ready="{{processRequest}}"
-      sort-field="[[sortField]]"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+      sort-field="[[dateMenu.selected]]"
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.results]]"
       error="{{searchError}}"
@@ -565,7 +537,7 @@ limitations under the License.
                         filters="[[filterList]]"
                         page-size="0"
                         properties-ready="{{processRequest}}"
-                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
                         transform-config="[[createTimelineConfig(item.dateCollection, item.dateSelected, item.entity, pageConfig, pageId)]]"
                         transform-function="[[transforms.entity.histograms]]"
                         error="{{item.timelineDataError}}"
@@ -682,8 +654,8 @@ limitations under the License.
 
                       <paper-dropdown-menu label="Date" no-label-float>
                         <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{item.dateSelected}}">
-                          <template is="dom-repeat" items="[[item.dateList]]" as="dateListItem">
-                            <paper-item id$="[[dateListItem.key]]" value="[[dateListItem.key]]">[[dateListItem.title]]</paper-item>
+                          <template is="dom-repeat" items="[[item.dateList]]" as="dateFieldsObject">
+                            <paper-item id$="[[dateFieldsObject.key]]" value="[[dateFieldsObject.key]]">[[dateFieldsObject.title]]</paper-item>
                           </template>
                         </paper-listbox>
                       </paper-dropdown-menu>
@@ -761,15 +733,27 @@ limitations under the License.
             style-class="grey"
             class="results-section">
 
-            <template is="dom-if" if="[[searchResultsShown]]">
-              <export-button
-                slot="title"
-                data="[[searchResultsShown]]"
-                search-fields="[[searchFields]]"
-                transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
-              </export-button>
+            <template is="dom-if" if="[[dateMenu.show]]">
+              <div slot="title" class="layout horizontal center date-menu">
+                <div>Sort By</div>
+
+                <paper-dropdown-menu label="Date" no-label-float>
+                  <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{dateMenu.selected}}">
+                    <template is="dom-repeat" items="[[dateMenu.fields]]" as="dateFieldsObject">
+                      <paper-item id$="[[dateFieldsObject.field]]" value="[[dateFieldsObject.field]]">[[dateFieldsObject.title]]</paper-item>
+                    </template>
+                  </paper-listbox>
+                </paper-dropdown-menu>
+              </div>
             </template>
+
+            <export-button
+              slot="title"
+              data="[[searchResultsShown]]"
+              search-fields="[[searchFields]]"
+              transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+              transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
+            </export-button>
 
             <template is="dom-if" if="[[searchError]]">
               <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
@@ -793,7 +777,7 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[getBlurStyleClass(blurImages)]]"
@@ -853,6 +837,10 @@ limitations under the License.
         },
 
         dateFieldsToProperties: {
+          type: Object
+        },
+
+        dateMenu: {
           type: Object
         },
 
@@ -989,10 +977,6 @@ limitations under the License.
 
         serverConfig: {
           type: Object
-        },
-
-        sortField: {
-          type: String
         },
 
         stateHistory: {

@@ -141,17 +141,17 @@ limitations under the License.
     </json-combine>
 
     <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{dateMenu}}"
+      combine-function="[[transforms.config.dateMenu]]">
+    </json-combine>
+
+    <json-combine
       data-in1="[[result]]"
       data-in2="[[searchFields]]"
       data-out="{{maps}}"
       combine-function="[[transforms.entity.maps]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
-      data-out="{{sortField}}"
-      combine-function="[[transforms.config.sortField]]">
     </json-combine>
 
     <elastic-client
@@ -202,7 +202,7 @@ limitations under the License.
       filters="[]"
       page-size="1"
       properties-ready="{{processRequest}}"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.result]]"
       error="{{resultError}}"
@@ -236,9 +236,9 @@ limitations under the License.
       filters="[[buildArray(notThisDocFilter)]]"
       page="{{revisionPage}}"
       page-size="10"
-      sort-field="[[sortField]]"
+      sort-field="[[dateMenu.selected]]"
       sort-order="desc"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
       loading="{{revisionLoading}}"
       last-error="{{revisionError}}"
       results="{{revisionQueryResults}}"
@@ -271,7 +271,7 @@ limitations under the License.
       filters="[[buildArray(notThisDocFilter)]]"
       page="{{moreLikeThisPage}}"
       page-size="10"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
       loading="{{moreLikeThisLoading}}"
       last-error="{{moreLikeThisError}}"
       results="{{moreLikeThisQueryResults}}"
@@ -474,7 +474,7 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[getBlurStyleClass(blurImages)]]"
@@ -489,15 +489,27 @@ limitations under the License.
             style-class="grey"
             class="results-section">
 
-            <template is="dom-if" if="[[revisionResultsShown]]">
-              <export-button
-                slot="title"
-                data="[[revisionResultsShown]]"
-                search-fields="[[searchFields]]"
-                transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
-              </export-button>
+            <template is="dom-if" if="[[dateMenu.show]]">
+              <div slot="title" class="layout horizontal center date-menu">
+                <div>Sort By</div>
+
+                <paper-dropdown-menu label="Date" no-label-float>
+                  <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{dateMenu.selected}}">
+                    <template is="dom-repeat" items="[[dateMenu.fields]]" as="dateFieldsObject">
+                      <paper-item id$="[[dateFieldsObject.field]]" value="[[dateFieldsObject.field]]">[[dateFieldsObject.title]]</paper-item>
+                    </template>
+                  </paper-listbox>
+                </paper-dropdown-menu>
+              </div>
             </template>
+
+            <export-button
+              slot="title"
+              data="[[revisionResultsShown]]"
+              search-fields="[[searchFields]]"
+              transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+              transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
+            </export-button>
 
             <template is="dom-if" if="[[revisionError]]">
               <elastic-error error="[[revisionError]]" message="{{revisionErrorMessage}}"></elastic-error>
@@ -525,7 +537,7 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[getBlurStyleClass(blurImages)]]"
@@ -542,15 +554,13 @@ limitations under the License.
             style-class="grey"
             class="results-section">
 
-            <template is="dom-if" if="[[moreLikeThisResultsShown]]">
-              <export-button
-                slot="title"
-                data="[[moreLikeThisResultsShown]]"
-                search-fields="[[searchFields]]"
-                transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
-              </export-button>
-            </template>
+            <export-button
+              slot="title"
+              data="[[moreLikeThisResultsShown]]"
+              search-fields="[[searchFields]]"
+              transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+              transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
+            </export-button>
 
             <template is="dom-if" if="[[moreLikeThisError]]">
               <elastic-error error="[[moreLikeThisError]]" message="{{moreLikeThisErrorMessage}}"></elastic-error>
@@ -578,7 +588,7 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[getBlurStyleClass(blurImages)]]"
@@ -635,6 +645,10 @@ limitations under the License.
 
         dateFieldsToProperties: {
           type: Object
+        },
+
+        dateMenu: {
+          type: String
         },
 
         domain: {
@@ -786,10 +800,6 @@ limitations under the License.
 
         serverConfig: {
           type: Object
-        },
-
-        sortField: {
-          type: String
         },
 
         tagManager: {

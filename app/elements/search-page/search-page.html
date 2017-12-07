@@ -153,12 +153,13 @@ limitations under the License.
         color: var(--primary-text-color);
       }
 
-      #searchTimeline .timeline-text {
-        line-height: 20px;
+      #searchTimeline .date-menu {
+        margin-bottom: 10px;
       }
 
-      #searchTimeline .timeline-header {
-        margin-bottom: 5px;
+      #searchTimeline .timeline-text {
+        color: var(--secondary-text-color);
+        line-height: 24px;
       }
     </style>
 
@@ -226,6 +227,13 @@ limitations under the License.
       data-in2="{}"
       data-out="{{dateFieldsToProperties}}"
       combine-function="[[transforms.config.dateFieldsToProperties]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{dateMenu}}"
+      combine-function="[[transforms.config.dateMenu]]">
     </json-combine>
 
     <json-combine
@@ -333,8 +341,7 @@ limitations under the License.
         page="{{searchPage}}"
         page-size="10"
         properties-ready="[[processRequest]]"
-        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
-        source-exclude='["knowledge_graph.*.provenance"]'
+        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
         transform-config="[[searchFields]]"
         transform-function="[[transforms.entity.results]]"
         error="{{searchError}}"
@@ -459,10 +466,10 @@ limitations under the License.
     </bulk-search>
 
     <elastic-client-aggregation-builder
-      name="@timestamp"
+      name="[[dateMenu.selected]]"
       type="date_histogram"
       count="0"
-      field="@timestamp"
+      field="[[dateMenu.selected]]"
       interval="week"
       ejs-aggregation="{{dateAggregation}}">
     </elastic-client-aggregation-builder>
@@ -476,9 +483,7 @@ limitations under the License.
         aggregations="[[buildArray(dateAggregation)]]"
         filters="[]"
         page-size="0"
-        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
-        source-exclude='["knowledge_graph.*.provenance"]'
-        transform-config='{"date":{"key":"@timestamp"},"entity":{"color":"black"}}'
+        transform-config="[[dateMenu.selected]]"
         transform-function="[[transforms.entity.searchPageTimeline]]"
         error="{{sparklineError}}"
         loading="{{sparklineLoading}}"
@@ -654,7 +659,7 @@ limitations under the License.
           </template>
 
           <template is="dom-if" if="[[esConfig]]">
-            <paper-material slot="header" id="searchHeader" class="layout horizontal">
+            <paper-material slot="header" id="searchHeader" class="layout horizontal center">
               <div class="layout vertical flex">
                 <template is="dom-if" if="[[!searchError]]">
                   <div class="layout horizontal">
@@ -682,7 +687,7 @@ limitations under the License.
                 index-types="[[esConfig.esType]]"
                 search-fields="[[searchFields]]"
                 search-parameters="[[searchParameters]]"
-                source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+                source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
                 transform-csv-function="[[transforms.export.createExportDataForCsv]]"
                 transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
                 transform-search-input-function="[[transforms.export.createBulkSearchData]]"
@@ -692,18 +697,34 @@ limitations under the License.
 
             <template is="dom-if" if="[[searchResultsShown.length]]">
               <paper-material slot="header" id="searchTimeline" class="layout vertical">
+                <div class="layout horizontal center date-menu">
+                  <template is="dom-if" if="[[sparklineResults.points.length]]">
+                    <div class="layout flex">Timeline of Search Results</div>
+                  </template>
+
+                  <template is="dom-if" if="[[!sparklineResults.points.length]]">
+                    <div class="layout flex">Timeline of Search Results Not Available</div>
+                  </template>
+
+                  <template is="dom-if" if="[[dateMenu.show]]">
+                    <div>Date Field</div>
+
+                    <paper-dropdown-menu label="Date" no-label-float>
+                      <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{dateMenu.selected}}">
+                        <template is="dom-repeat" items="[[dateMenu.fields]]" as="dateFieldsObject">
+                          <paper-item id$="[[dateFieldsObject.field]]" value="[[dateFieldsObject.field]]">[[dateFieldsObject.title]]</paper-item>
+                        </template>
+                      </paper-listbox>
+                    </paper-dropdown-menu>
+                  </template>
+                </div>
+
                 <template is="dom-if" if="[[sparklineLoading]]">
                   <loading-spinner show type="Timeline"></loading-spinner>
                 </template>
 
                 <template is="dom-if" if="[[!sparklineLoading]]">
-                  <template is="dom-if" if="[[!sparklineResults.points.length]]">
-                    <div class="timeline-text">No Timeline of Search Results</div>
-                  </template>
-
                   <template is="dom-if" if="[[sparklineResults.points.length]]">
-                    <div class="timeline-text timeline-header">Timeline of Search Results</div>
-
                     <sparkline-list time-interval="week" hide-name data="[[sparklineResults.points]]"></sparkline-list>
 
                     <div class="layout horizontal timeline-text">
@@ -747,7 +768,7 @@ limitations under the License.
                 id-field="_id"
                 search-fields="[[searchFields]]"
                 source-include-cached-page='["raw_content"]'
-                source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+                source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
                 transform-cached-page="[[transforms.entity.cache]]"
                 transform-nested-data="[[transforms.entity.nestedResults]]"
                 small-image-style-class="[[getBlurStyleClass(blurImages)]]"
@@ -813,6 +834,10 @@ limitations under the License.
         },
 
         dateFieldsToProperties: {
+          type: Object
+        },
+
+        dateMenu: {
           type: Object
         },
 

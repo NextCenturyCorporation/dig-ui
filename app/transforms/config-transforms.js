@@ -78,6 +78,16 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     };
   }
 
+  function createDateMenuConfig(searchFields) {
+    var fields = searchFields.filter(function(searchFieldsObject) {
+      return searchFieldsObject.isDate && !searchFieldsObject.isHidden;
+    });
+    return {
+      fields: fields,
+      show: fields.length > 1
+    };
+  }
+
   return {
     /**
      * Returns the fields for which to show aggregations and timelines in the entity pages.
@@ -89,36 +99,40 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       var entityFields = searchFields.filter(function(searchFieldsObject) {
         return !searchFieldsObject.isDate && !searchFieldsObject.isHidden;
       });
-      var dateFields = searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.isDate && !searchFieldsObject.isHidden;
-      });
-      if(dateFields.length && entityFields.length) {
+      var dateMenu = createDateMenuConfig(searchFields);
+      if(dateMenu.fields.length && entityFields.length) {
         // TODO Add config option.
         var showFieldAtIndex = Math.max(0, _.findIndex(entityFields, function(entityFieldsObject) {
           return entityFieldsObject.isUrl;
         }));
         return entityFields.map(function(entityFieldsObject, index) {
           return {
-            dateCollection: dateFields.reduce(function(dates, dateFieldsObject) {
+            dateCollection: dateMenu.fields.reduce(function(dates, dateFieldsObject) {
               dates[dateFieldsObject.key] = _.cloneDeep(dateFieldsObject);
               return dates;
             }, {}),
-            dateList: dateFields.reduce(function(dateChoices, dateFieldsObject) {
-              dateChoices.push({
-                key: dateFieldsObject.key,
-                title: dateFieldsObject.title
-              });
-              return dateChoices;
-            }, []),
-            dateSelected: dateFields[0].key,
+            dateList: dateMenu.fields,
+            dateSelected: dateMenu.fields.length ? dateMenu.fields[0].key : undefined,
             entity: _.cloneDeep(entityFieldsObject),
             loadData: index === showFieldAtIndex,
             showData: index === showFieldAtIndex,
-            showDateMenu: dateFields.length > 1
+            showDateMenu: dateMenu.show
           };
         });
       }
       return [];
+    },
+
+    /**
+     * Returns the fields for any date menu on the pages.
+     *
+     * @param {Object} searchFields
+     * @return {Array}
+     */
+    dateMenu: function(searchFields) {
+      var menu = createDateMenuConfig(searchFields);
+      menu.selected = menu.fields.length ? menu.fields[0].field : undefined;
+      return menu;
     },
 
     /**
@@ -587,19 +601,6 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
 
         return terms;
       }, {});
-    },
-
-    /**
-     * Returns the date sort field.
-     *
-     * @param {Object} searchFields
-     * @return {String}
-     */
-    sortField: function(searchFields) {
-      var index = _.findIndex(searchFields, function(searchFieldsObject) {
-        return searchFieldsObject.isDate && !searchFieldsObject.isHidden;
-      });
-      return index >= 0 ? searchFields[index].field : '';
     }
   };
 });

@@ -29,7 +29,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       icon: config.icon,
       link: commonTransforms.getLink(item.key, config.link, config.type, config.key),
       provenances: [],
-      styleClass: commonTransforms.getStyleClass(config.color),
+      styleClass: config.styleClass,
       text: commonTransforms.getExtractionDataText(item.key, item.value, config.type, (index || 0)),
       type: config.key,
       width: config.width
@@ -445,7 +445,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
           dateObject.data.push({
             count: count - sum,
             icon: config.entity ? config.entity.icon : undefined,
-            styleClass: config.entity ? commonTransforms.getStyleClass(config.entity.color) : undefined,
+            styleClass: config.entity ? config.entity.styleClass : undefined,
             text: text,
             textAndCount: text + ' (' + (count) + ')'
           });
@@ -479,7 +479,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var unidentifiedHistogram = {
       icon: config.entity ? config.entity.icon : undefined,
       name: '(Unidentified)',
-      styleClass: config.entity ? commonTransforms.getStyleClass(config.entity.color) : undefined,
+      styleClass: config.entity ? config.entity.styleClass : undefined,
       points: []
     };
 
@@ -699,17 +699,19 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      * Returns the histogram data for the search page sparkline chart (by item, then by date) with unidentified data.
      *
      * @param {Object} data
-     * @param {Object} config
+     * @param {Object} property
      * @return {Object}
      */
-    searchPageTimeline: function(data, config) {
-      if(data && data.aggregations && data.aggregations[config.date.key] && data.aggregations[config.date.key][config.date.key]) {
-        var buckets = data.aggregations[config.date.key][config.date.key].buckets;
+    searchPageTimeline: function(data, property) {
+      if(data && data.aggregations && data.aggregations[property] && data.aggregations[property][property]) {
+        var buckets = data.aggregations[property][property].buckets;
         if(buckets.length > 1) {
           return {
             begin: commonTransforms.getFormattedDate(buckets[0].key),
             end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
-            points: createItemHistograms(buckets, config, true)
+            points: createItemHistograms(buckets, {
+              styleClass: commonTransforms.getStyleClass('black')
+            }, true)
           };
         }
       }
