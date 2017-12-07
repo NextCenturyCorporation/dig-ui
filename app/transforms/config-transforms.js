@@ -38,6 +38,11 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function findAggregationsInResponse(response, property, isNetworkExpansion) {
+    // If no search endpoint is defined, the response was sent directly from ES.
+    if(!esConfig.searchEndpoint) {
+      return (response && response.aggregations && response.aggregations[property] && response.aggregations[property][property] ? response.aggregations[property][property].buckets : []) || [];
+    }
+
     if(isNetworkExpansion) {
       if(response && response.length && response[0].result && response[0].result.length > 1 && response[0].result[1].aggregations && response[0].result[1].aggregations['?' + property]) {
         return response[0].result[1].aggregations['?' + property].buckets || [];
@@ -47,6 +52,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         return response[0].result.aggregations['?' + property].buckets || [];
       }
     }
+
     return [];
   }
 
@@ -358,7 +364,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           link: fields[id].show_as_link !== 'no' ? fields[id].show_as_link : undefined,
           // The query field.
           queryField: fields[id].field || 'knowledge_graph.' + id + '.value',
-          // Either header, detail, title, description, or undefined.
+          // Either header, detail, nested, title, description, or undefined.
           result: fields[id].show_in_result !== 'no' ? fields[id].show_in_result : undefined,
           // Whether to show in the search fields.  Must be shown in the search fields if shown in the facets.
           search: fields[id].show_in_search || fields[id].show_in_facets || false,

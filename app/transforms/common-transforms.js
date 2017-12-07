@@ -177,6 +177,9 @@ var commonTransforms = (function(_, moment, domain) {
    * Returns the ID for the facets data with the given key and type.
    */
   function getFacetsDataId(key, type) {
+    if(type === 'id') {
+      return key.substring(0, key.indexOf('-'));
+    }
     if(type === 'email') {
       return decodeURIComponent(key);
     }
@@ -204,6 +207,9 @@ var commonTransforms = (function(_, moment, domain) {
    * Returns the text for the facets data with the given key and type.
    */
   function getFacetsDataText(key, type) {
+    if(type === 'id') {
+      return key.substring(0, key.indexOf('-'));
+    }
     if(type === 'date') {
       return getFormattedDate(key);
     }
@@ -229,6 +235,9 @@ var commonTransforms = (function(_, moment, domain) {
    * Returns the ID for the extraction data with the given key, value, and type.
    */
   function getExtractionDataId(key, value, type) {
+    if(type === 'id') {
+      return value;
+    }
     if(type === 'email') {
       return decodeURIComponent(key || value);
     }
@@ -239,6 +248,9 @@ var commonTransforms = (function(_, moment, domain) {
    * Returns the text for the extraction data with the given key, value, type, and index.
    */
   function getExtractionDataText(key, value, type, index) {
+    if(type === 'id') {
+      return value;
+    }
     if(type === 'date') {
       return getFormattedDate(value || key);
     }

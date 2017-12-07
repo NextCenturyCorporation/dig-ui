@@ -787,12 +787,15 @@ limitations under the License.
               pretty-name="Webpage Results"
               pretty-name-singular="Webpage Result"
               header="{{searchTitle}}"
-              cache-transform="[[transforms.entity.cache]]"
               client="[[esClient]]"
+              id-field="_id"
               index-name="[[esConfig.esIndex]]"
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
-              source-include='["raw_content"]'
+              source-include-cached-page='["raw_content"]'
+              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+              transform-cached-page="[[transforms.entity.cache]]"
+              transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[getBlurStyleClass(blurImages)]]"
               large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
               tag-manager="[[tagManager]]">

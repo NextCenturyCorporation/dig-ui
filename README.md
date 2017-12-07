@@ -64,6 +64,7 @@ OVERRIDE_SEARCH_ENDPOINT | The stringified object containing the project names m
 PROFILE_INDEX_NAME | The elasticsearch profile index name. | 'dig-profiles'
 PROFILE_INDEX_TYPE | The elasticsearch profile index type. | 'profile'
 SEARCH_CONFIG | The stringified object containing project names and/or locations for the Sandpaper search REST service (from project configs) mapped to replacement locations. | undefined
+SEND_SEARCHES_DIRECTLY_TO_ES | Whether to ignore any Sandpaper settings and send searches directly to elasticsearch. | false
 STATE_INDEX | The elasticsearch state index name. | 'dig-states'
 STATE_TYPE | The elasticsearch state index type. | 'state'
 TAG_ENTITY_ENDPOINT | The entity endpoint for the MyDIG tag REST service. | undefined
@@ -112,13 +113,13 @@ If you want to run the DIG UI without MyDIG, you can set a domain/project config
 
 ## Sandpaper (Pinpoint)
 
-The DIG UI runs search queries using [Sandpaper](https://github.com/usc-isi-i2/dig-sandpaper) (also called Pinpoint).  The Sandpaper REST endpoint can be set in the server configuration using the domain/project configuration or the OVERRIDE_SEARCH_ENDPOINT or SEARCH_CONFIG options in the server configuration.
+The DIG UI runs search queries using [Sandpaper](https://github.com/usc-isi-i2/dig-sandpaper) (soon to be renamed Pinpoint).  The Sandpaper REST endpoint can be set in the server configuration using the domain/project configuration or the OVERRIDE_SEARCH_ENDPOINT or SEARCH_CONFIG options in the server configuration.
 
 All other elasticsearch queries and aggregations are sent directly to the elasticsearch instance defined in the search configuration by ES_HOST.  This includes:
 - All queries/aggregations from the entity/result pages
 - All queries to the log/profile/state indices
 
-If you want to run the DIG UI without using Sandpaper, *coming soon...*
+If you want to run the DIG UI without using Sandpaper, you can set the SEND_SEARCHES_DIRECTLY_TO_ES option in the server configuration.
 
 ## License
 

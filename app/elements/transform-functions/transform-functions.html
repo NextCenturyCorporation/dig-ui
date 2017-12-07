@@ -91,22 +91,24 @@ limitations under the License.
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-        if(serverConfig.overrideSearchEndpoint) {
-          if(_.isString(serverConfig.overrideSearchEndpoint)) {
-            esConfig.searchEndpoint = serverConfig.overrideSearchEndpoint;
+        if(!serverConfig.sendSearchesDirectlyToES) {
+          if(serverConfig.overrideSearchEndpoint) {
+            if(_.isString(serverConfig.overrideSearchEndpoint)) {
+              esConfig.searchEndpoint = serverConfig.overrideSearchEndpoint;
+            }
+            if(_.isObject(serverConfig.overrideSearchEndpoint) && serverConfig.overrideSearchEndpoint[domain]) {
+              esConfig.searchEndpoint = serverConfig.overrideSearchEndpoint[domain];
+            }
           }
-          if(_.isObject(serverConfig.overrideSearchEndpoint) && serverConfig.overrideSearchEndpoint[domain]) {
-            esConfig.searchEndpoint = serverConfig.overrideSearchEndpoint[domain];
-          }
-        }
 
-        if(!esConfig.searchEndpoint && clientConfig.configuration && serverConfig.databaseType) {
-          esConfig.searchEndpoint = clientConfig.configuration['sandpaper_' + serverConfig.databaseType + '_url'];
+          if(!esConfig.searchEndpoint && clientConfig.configuration && serverConfig.databaseType) {
+            esConfig.searchEndpoint = clientConfig.configuration['sandpaper_' + serverConfig.databaseType + '_url'];
 
-          if(serverConfig.searchConfig) {
-            esConfig.searchEndpoint = (serverConfig.searchConfig[esConfig.searchEndpoint] || serverConfig.searchConfig[domain]) + '?project=' + domain;
-          } else {
-            esConfig.searchEndpoint = esConfig.searchEndpoint + '/search/coarse?project=' + domain;
+            if(serverConfig.searchConfig) {
+              esConfig.searchEndpoint = (serverConfig.searchConfig[esConfig.searchEndpoint] || serverConfig.searchConfig[domain]) + '?project=' + domain;
+            } else {
+              esConfig.searchEndpoint = esConfig.searchEndpoint + '/search/coarse?project=' + domain;
+            }
           }
         }
 

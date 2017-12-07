@@ -18,20 +18,6 @@
 /* jshint camelcase:false */
 
 var entityTransforms = (function(_, commonTransforms, esConfig) {
-  function getSingleStringFromResult(result, path) {
-    var parentPath = path.substring(0, path.lastIndexOf('.'));
-    var property = path.substring(path.lastIndexOf('.') + 1, path.length);
-    var data = _.get(result, parentPath, []);
-
-    if(data && _.isArray(data)) {
-      return data.length ? data.map(function(item) {
-        return item[property];
-      }).join('\n') : undefined;
-    }
-
-    return data ? data[property] : undefined;
-  }
-
   function getExtraction(item, config, index, confidence) {
     /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
     var count = item.doc_count;
@@ -207,16 +193,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }, {});
   }
 
-  function getTitleOrDescription(type, searchFields, result, path, highlightMapping) {
+  function getTitleOrDescription(type, searchFields, result, highlightMapping) {
     var searchFieldsObject = _.find(searchFields, function(object) {
       return object.result === type;
     });
 
-    // By default, use the given non-knowledge-graph path.
     var returnObject = {
-      text: getSingleStringFromResult(result, '_source.' + path),
-      // The highlight in the title/description object is the tagged text.
-      highlight: result.highlight && result.highlight[path] && result.highlight[path].length ? result.highlight[path][0] : undefined
+      text: '',
+      highlight: ''
     };
 
     // Use the extraction data from the field in the searchFieldsObject if possible.  This overwrites the default.
@@ -256,7 +240,9 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
    *
    * @param {Object} result The elasticsearch result object.
    * @param {Array} searchFields The list of search fields config objects.
-   * @param {Boolean} resultPage Whether to create an object for the result page (rather than the entity page).
+   * @param {String} icon
+   * @param {String} name
+   * @param {String} styleClass
    * @param {Object} highlightMapping The highlight mapping returned by the search.  An object that maps search fields to objects that map search terms to unique IDs.  For example:
    * {
    *   email: {
@@ -269,7 +255,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
    * }
    * @return {Object}
    */
-  function getResultObject(result, searchFields, resultPage, highlightMapping) {
+  function createResultObject(result, searchFields, icon, name, styleClass, highlightMapping) {
     var id = _.get(result, '_source.doc_id');
 
     if(!id) {
@@ -282,23 +268,25 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
-    var title = getTitleOrDescription('title', searchFields, result, 'content_extraction.title.text', highlightMapping);
-    var description = getTitleOrDescription('description', searchFields, result, 'content_extraction.content_strict.text', highlightMapping);
+    var title = getTitleOrDescription('title', searchFields, result, highlightMapping);
+    var description = getTitleOrDescription('description', searchFields, result, highlightMapping);
 
     var resultObject = {
       id: id,
       url: _.get(result, '_source.url'),
       crawlTimestamp: (crawlTimestamp === 'None' ? 'Unknown' : crawlTimestamp),
       type: 'result',
-      icon: '',
+      icon: icon,
       link: commonTransforms.getLink(id, 'result'),
-      styleClass: '',
+      name: name,
+      styleClass: styleClass,
       tags: getResultTags(result, '_source.knowledge_graph._tags'),
       esData: esDataEndpoint,
-      title: title.text || 'No Title',
-      description: description.text || 'No Description',
+      title: title.text,
+      description: description.text || 'None',
       headerExtractions: [],
       detailExtractions: [],
+      nestedExtractions: [],
       details: []
     };
 
@@ -348,9 +336,15 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
     });
 
+    resultObject.nestedExtractions = searchFields.filter(function(object) {
+      return object.result === 'nested';
+    }).map(function(object) {
+      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
+    });
+
     if(esDataEndpoint) {
       resultObject.details.push({
-        name: 'Raw ES Result',
+        name: 'Raw ES Document',
         link: esDataEndpoint,
         text: 'Open'
       });
@@ -372,21 +366,34 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
 
     resultObject.details.push({
-      name: 'Description',
+      name: 'Content',
       highlightedText: description.highlight || resultObject.description,
       text: resultObject.description
     });
 
-    resultObject.images = getExtractionsFromList(_.get(result, '_source.objects', []).map(function(object) {
+    // The images should be undefined by default.
+    var images = _.get(result, '_source.objects');
+    resultObject.images = images ? getExtractionsFromList(images.map(function(object) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var id = object.img_sha1;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
       return {
         key: id
       };
-    }), esConfig.imageField || {});
+    }), esConfig.imageField || {}) : undefined;
 
     return resultObject;
+  }
+
+  function getWebpageResultObject(result, searchFields, highlightMapping) {
+    return createResultObject(result, searchFields, 'av:web-asset', 'Webpage', 'grey', highlightMapping);
+  }
+
+  function getQueryResultObject(result, searchFields, extractionId) {
+    var searchFieldsObject = _.find(searchFields, function(object) {
+      return object.key === extractionId;
+    });
+    return createResultObject(result, searchFields, searchFieldsObject.icon, searchFieldsObject.title, searchFieldsObject.styleClass);
   }
 
   function createDateHistogram(buckets, config) {
@@ -536,7 +543,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      */
     result: function(data, searchFields) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
-        return getResultObject(data.hits.hits[0], searchFields, true);
+        return getWebpageResultObject(data.hits.hits[0], searchFields);
       }
       return {};
     },
@@ -552,13 +559,35 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
         var returnData = data.hits.hits.map(function(result) {
           // Data returned by the searchResults function from the searchTransforms will have a "fields" property.
-          return getResultObject(result, searchFields, false, data.fields);
+          return getWebpageResultObject(result, searchFields, data.fields);
         }).filter(function(object) {
           return !_.isUndefined(object);
         });
         return returnData;
       }
       return [];
+    },
+
+    /**
+     * Returns the collection of result IDs mapped to result objects for the given query results to show as nested data in a result-list.
+     *
+     * @param {Object} data
+     * @param {Object} config
+     * @return {Object}
+     */
+    nestedResults: function(data, config) {
+      if(data && data.hits && data.hits.hits && data.hits.hits.length) {
+        var returnData = data.hits.hits.map(function(result) {
+          return getQueryResultObject(result, config.searchFields, config.extractionId);
+        }).filter(function(object) {
+          return !_.isUndefined(object);
+        });
+        return returnData.reduce(function(collection, result) {
+          collection[result.id] = result;
+          return collection;
+        }, {});
+      }
+      return {};
     },
 
     /**

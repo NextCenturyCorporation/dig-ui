@@ -122,6 +122,7 @@ module.exports = function(app) {
       profileIndexName: serverConfig.profileIndexName,
       profileIndexType: serverConfig.profileIndexType,
       searchConfig: serverConfig.searchConfig,
+      sendSearchesDirectlyToES: serverConfig.sendSearchesDirectlyToES,
       stateIndexName: serverConfig.stateIndexName,
       stateIndexType: serverConfig.stateIndexType,
       tagsEntityEndpoint: serverConfig.tagsEntityEndpoint,

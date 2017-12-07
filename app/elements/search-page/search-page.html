@@ -28,6 +28,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/loading-spinner/loading-spinner.html">
 <link rel="import" href="../../bower_components/lodash-import/lodash.html">
 <link rel="import" href="../../bower_components/log-creator/log-creator.html">
+<link rel="import" href="../../bower_components/nested-list/nested-list.html">
 <link rel="import" href="../../bower_components/paper-drawer-panel/paper-drawer-panel.html">
 <link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
@@ -283,34 +284,71 @@ limitations under the License.
       combine-function="[[transforms.search.createFacetsQuery]]">
     </json-combine>
 
-    <query-transformer
-      error="{{searchError}}"
-      loading="{{searchLoading}}"
-      page="{{searchPage}}"
-      page-size="10"
-      process-request="[[processRequest]]"
-      result-config="[[createSearchResultConfig(networkExpansionParameters, networkExpansionParameters.*)]]"
-      result-function="[[transforms.search.searchResults]]"
-      results="{{searchQueryResults}}"
-      search-parameters="[[searchParameters]]"
-      search-config="[[networkExpansionParameters]]"
-      search-function="[[searchQuery]]"
-      total-count-function="[[createTotalCountFunction()]]"
-      total="{{searchTotal}}"
-      url="[[esConfig.searchEndpoint]]">
-    </query-transformer>
+    <template is="dom-if" if="[[!serverConfig.sendSearchesDirectlyToES]]">
+      <query-transformer
+        error="{{searchError}}"
+        loading="{{searchLoading}}"
+        page="{{searchPage}}"
+        page-size="10"
+        process-request="[[processRequest]]"
+        result-config="[[createSearchResultConfig(networkExpansionParameters, networkExpansionParameters.*)]]"
+        result-function="[[transforms.search.searchResults]]"
+        results="{{searchQueryTransformerResults}}"
+        search-parameters="[[searchParameters]]"
+        search-config="[[networkExpansionParameters]]"
+        search-function="[[searchQuery]]"
+        total-count-function="[[createTotalCountFunction()]]"
+        total="{{searchTotal}}"
+        url="[[esConfig.searchEndpoint]]">
+      </query-transformer>
 
-    <json-combine
-      data-in1="[[searchQueryResults]]"
-      data-in2="[[searchFields]]"
-      data-out="{{searchResults}}"
-      combine-function="[[transforms.entity.results]]">
-    </json-combine>
+      <json-combine
+        data-in1="[[searchQueryTransformerResults]]"
+        data-in2="[[searchFields]]"
+        data-out="{{searchResults}}"
+        combine-function="[[transforms.entity.results]]">
+      </json-combine>
+    </template>
 
     <elastic-client
       config="[[serverConfig.esHost]]"
       client="{{esClient}}">
     </elastic-client>
+
+    <query-builder
+      config="[[searchFieldsCollection]]"
+      data="[[searchParameters]]"
+      date-fields="[[dateFieldsToProperties]]"
+      query="{{esQuery}}">
+    </query-builder>
+
+    <template is="dom-if" if="[[serverConfig.sendSearchesDirectlyToES]]">
+      <query-builder
+        config="[[searchFieldsCollection]]"
+        data="[[searchParameters]]"
+        date-fields="[[dateFieldsToProperties]]"
+        query="{{esQuery}}">
+      </query-builder>
+
+      <build-and-run-query
+        query="[[esQuery]]"
+        client="[[esClient]]"
+        index-name="[[esConfig.esIndex]]"
+        index-types="[[esConfig.esType]]"
+        aggregations="[]"
+        filters="[]"
+        page="{{searchPage}}"
+        page-size="10"
+        properties-ready="[[processRequest]]"
+        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+        source-exclude='["knowledge_graph.*.provenance"]'
+        transform-config="[[searchFields]]"
+        transform-function="[[transforms.entity.results]]"
+        error="{{searchError}}"
+        loading="{{searchLoading}}"
+        results="{{searchResults}}">
+      </build-and-run-query>
+    </template>
 
     <!-- Logger for Search Terms -->
     <dig-logger
@@ -426,13 +464,6 @@ limitations under the License.
       process-request="{{processRequest}}"
       build-search-state="[[buildSearchState]]">
     </bulk-search>
-
-    <query-builder
-      config="[[searchFieldsCollection]]"
-      data="[[searchParameters]]"
-      date-fields="[[dateFieldsToProperties]]"
-      query="{{esQuery}}">
-    </query-builder>
 
     <elastic-client-aggregation-builder
       name="@timestamp"
@@ -592,11 +623,15 @@ limitations under the License.
 
       <paper-drawer-panel drawer-width="320px" id="pageDrawer">
         <facet-panel slot="drawer" id="pageFacets"
+          client="[[esClient]]"
           date-fields="[[dateFieldsToProperties]]"
           facets-query="[[facetsQuery]]"
           image-style-class="[[getBlurStyleClass(blurImages)]]"
+          index-name="[[esConfig.esIndex]]"
+          index-types="[[esConfig.esType]]"
           network-expansion-parameters="[[networkExpansionParameters]]"
           process-request="{{processRequest}}"
+          query-builder-config="[[searchFieldsCollection]]"
           search-endpoint="[[esConfig.searchEndpoint]]"
           search-keys="[[searchKeys]]"
           search-fields="[[searchFields]]"
@@ -698,12 +733,15 @@ limitations under the License.
                 pretty-name="Webpage Results"
                 pretty-name-singular="Webpage Result"
                 header="{{searchTitle}}"
-                cache-transform="[[transforms.entity.cache]]"
                 client="[[esClient]]"
                 index-name="[[esConfig.esIndex]]"
                 index-types="[[esConfig.esType]]"
+                id-field="_id"
                 search-fields="[[searchFields]]"
-                source-include='["raw_content"]'
+                source-include-cached-page='["raw_content"]'
+                source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+                transform-cached-page="[[transforms.entity.cache]]"
+                transform-nested-data="[[transforms.entity.nestedResults]]"
                 small-image-style-class="[[getBlurStyleClass(blurImages)]]"
                 large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
                 tag-manager="[[tagManager]]">
@@ -931,7 +969,7 @@ limitations under the License.
           type: Object
         },
 
-        searchQueryResults: {
+        searchQueryTransformerResults: {
           type: Object
         },
 
@@ -1111,7 +1149,7 @@ limitations under the License.
       findImagesFromResults: function(searchResults) {
         var images = [];
         searchResults.forEach(function(result) {
-          result.images.forEach(function(image) {
+          (result.images || []).forEach(function(image) {
             images.push(image);
           });
         });

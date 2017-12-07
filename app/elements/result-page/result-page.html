@@ -462,38 +462,25 @@ limitations under the License.
             hide-section-title
             class="details-section">
 
-            <build-and-run-query
-              fields='"doc_id"'
-              values="[[result.id]]"
+            <result-list
+              hide-headers
+              opened
+              query-results="[[transformResultToArray(result)]]"
+              page="1"
+              page-size="1"
               client="[[esClient]]"
+              id-field="_id"
               index-name="[[esConfig.esIndex]]"
               index-types="[[esConfig.esType]]"
-              aggregations="[]"
-              filters="[]"
-              source-include='["raw_content"]'
-              transform-config="[[searchFields]]"
-              transform-function="[[transforms.entity.cache]]"
-              error="{{cachedPageError}}"
-              loading="{{cachedPageLoading}}"
-              results="{{cachedPage}}">
-            </build-and-run-query>
-
-            <single-result
-              hide-header
-              open
-              cached-page="[[cachedPage]]"
-              icon="[[result.icon]]"
-              result-id="[[result.id]]"
-              style-class="[[result.styleClass]]"
-              tags="[[result.tags]]"
-              type="[[result.type]]"
-              detail-extractions="[[concatList(result.headerExtractions, result.detailExtractions)]]"
-              details="[[result.details]]"
-              images="[[result.images]]"
+              search-fields="[[searchFields]]"
+              source-include-cached-page='["raw_content"]'
+              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+              transform-cached-page="[[transforms.entity.cache]]"
+              transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[getBlurStyleClass(blurImages)]]"
               large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
               tag-manager="[[tagManager]]">
-            </single-result>
+            </result-list>
           </section-wrapper>
 
           <section-wrapper
@@ -532,12 +519,15 @@ limitations under the License.
               pretty-name="Webpage Revisions"
               pretty-name-singular="Webpage Revision"
               header="{{revisionTitle}}"
-              cache-transform="[[transforms.entity.cache]]"
               client="[[esClient]]"
+              id-field="_id"
               index-name="[[esConfig.esIndex]]"
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
-              source-include='["raw_content"]'
+              source-include-cached-page='["raw_content"]'
+              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+              transform-cached-page="[[transforms.entity.cache]]"
+              transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[getBlurStyleClass(blurImages)]]"
               large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
               tag-manager="[[tagManager]]">
@@ -582,12 +572,15 @@ limitations under the License.
               pretty-name="Similar Webpage Results"
               pretty-name-singular="Similar Webpage Result"
               header="{{moreLikeThisTitle}}"
-              cache-transform="[[transforms.entity.cache]]"
               client="[[esClient]]"
+              id-field="_id"
               index-name="[[esConfig.esIndex]]"
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
-              source-include='["raw_content"]'
+              source-include-cached-page='["raw_content"]'
+              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "@timestamp", "timestamp", "tld", "url"]'
+              transform-cached-page="[[transforms.entity.cache]]"
+              transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[getBlurStyleClass(blurImages)]]"
               large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
               tag-manager="[[tagManager]]">
@@ -612,18 +605,6 @@ limitations under the License.
 
       properties: {
         blurImages: {
-          type: Boolean
-        },
-
-        cachedPage: {
-          type: String
-        },
-
-        cachedPageError: {
-          type: Object
-        },
-
-        cachedPageLoading: {
           type: Boolean
         },
 
@@ -835,13 +816,6 @@ limitations under the License.
         return undefined;
       },
 
-      concatList: function(a, b) {
-        if(a && b) {
-          return a.concat(b);
-        }
-        return undefined;
-      },
-
       createAuthHeader: function(serverConfig) {
         if(serverConfig.configUsername && serverConfig.configPassword) {
           return {
@@ -922,6 +896,12 @@ limitations under the License.
 
       returnFunctionOutput: function(func) {
         return func();
+      },
+
+      transformResultToArray: function(result) {
+        result.detailExtractions = result.headerExtractions.concat(result.detailExtractions);
+        result.headerExtractions = [];
+        return [result];
       },
       /********************************/
 
