@@ -583,7 +583,7 @@ limitations under the License.
                     limit="0"
                     loading="{{item.aggregatedDataLoading}}"
                     show-checkboxes
-                    show-double-bar-chart="[[showDoubleBarChart(item.entity)]]">
+                    show-double-bar-chart="[[isEntity(item.entity)]]">
                   </aggregation-query-and-display>
                 </template>
 
@@ -626,13 +626,9 @@ limitations under the License.
                     text-function="[[getTextFunction(item.aggregatedDataResults)]]">
                   </terms-transformer>
 
-                  <div class="layout horizontal center large-margins">
-                    <copy-button class="flex" data="[[item.aggregatedDataResults]]" name="[[item.entity.titlePlural]]" text-function="[[createCopyTextFunction(item.entity.isLocation)]]"></copy-button>
+                  <copy-button slot="title" data="[[item.aggregatedDataResults]]" name="[[item.entity.titlePlural]]" text-function="[[createCopyTextFunction(item.entity.isLocation)]]"></copy-button>
 
-                    <template is="dom-if" if="[[showDoubleBarChart(item.entity)]]">
-                      <info-aggregations entity="[[pageName]]" type="[[item.entity.title]]"></info-aggregations>
-                    </template>
-                  </div>
+                  <info-aggregations slot="title" entity="[[isEntity(item.entity)]]" page="[[pageName]]" type="[[item.entity.title]]"></info-aggregations>
                 </template>
 
                 <elastic-error error="[[item.timelineDataError]]" message="{{item.timelineDataErrorMessage}}"></elastic-error>
@@ -1188,13 +1184,13 @@ limitations under the License.
         return (blur ? '' : 'no-blur');
       },
 
+      isEntity: function(searchFieldsConfig) {
+        return searchFieldsConfig.link === 'entity';
+      },
+
       isMapVisible: function(loading, data, opened) {
         // Ensure the map section is opened prior to rendering.
         return !loading && !!(data && data.length) && opened;
-      },
-
-      showDoubleBarChart: function(searchFieldsConfig) {
-        return searchFieldsConfig.link === 'entity';
       },
 
       showSectionAndRunQueries: function(event) {

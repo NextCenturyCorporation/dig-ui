@@ -33,22 +33,32 @@ limitations under the License.
         display: block;
         margin-left: 5px;
       }
+
+      iron-icon {
+        padding: 0;
+      }
     </style>
 
-    <div class="link" on-tap="open">
+    <div class="link" title="What do these visualizations represent?" on-tap="open">
       <iron-icon icon="icons:help"></iron-icon>
-      <span>[[_header]]</span>
     </div>
 
     <styled-dialog id="dialog" header="[[_header]]">
-      <div>
-        <div class="styled-dialog-text">Each row in the bar chart:</div>
-        <ul class="styled-dialog-list styled-dialog-text">
-          <li>Lists a [[type]] that was extracted from webpages that also contain [[entity]] as well as the number of webpages containing both extractions.</li>
-          <li>Shows a second "webpages not co-occurring" bar with the number of webpages containing the [[type]] but not [[entity]].</li>
-          <li>Has a link that can be clicked to open the DIG page for that [[type]].</li>
-        </ul>
-      </div>
+      <div class="styled-dialog-text">The bar chart shows:</div>
+      <ul class="styled-dialog-list styled-dialog-text">
+        <li>Each [[type]] contained within webpages that also contain ("co-occur with") [[page]].</li>
+        <li>The count of webpages for each [[type]] that co-occur with [[page]].</li>
+        <template is="dom-if" if="[[entity]]">
+          <li>A second set of rows for "webpages not co-occurring" listing the count of webpages that contain each [[type]] but not [[page]].</li>
+          <li>A link that can be clicked to open the DIG page for each [[type]].</li>
+        </template>
+      </ul>
+
+      <div class="styled-dialog-text">The sparklines show:</div>
+      <ul class="styled-dialog-list styled-dialog-text">
+        <li>Each [[type]] contained within webpages that also contain ("co-occur with") [[page]] and have time extractions.</li>
+        <li>The chart of the count of webpages over time for each [[type]] that co-occur with [[page]].</li>
+      </ul>
     </styled-dialog>
   </template>
 
@@ -61,6 +71,11 @@ limitations under the License.
 
       properties: {
         entity: {
+          type: Boolean,
+          value: false
+        },
+
+        page: {
           type: String
         },
 
@@ -70,7 +85,7 @@ limitations under the License.
 
         _header: {
           type: String,
-          value: 'What does this bar chart represent?'
+          value: 'What do these visualizations represent?'
         }
       },
 
