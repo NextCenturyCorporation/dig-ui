@@ -95,7 +95,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       if(dateFields.length && entityFields.length) {
         // TODO Add config option.
         var showFieldAtIndex = Math.max(0, _.findIndex(entityFields, function(entityFieldsObject) {
-          return entityFieldsObject.key === 'tld' || entityFieldsObject.key === 'website';
+          return entityFieldsObject.isUrl;
         }));
         return entityFields.map(function(entityFieldsObject, index) {
           return {

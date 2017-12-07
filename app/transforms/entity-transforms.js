@@ -173,6 +173,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
     return {
       data: data,
+      isDate: config.isDate,
+      isUrl: config.isUrl,
       key: config.key,
       name: data.length === 1 ? config.title : config.titlePlural,
       type: config.type
@@ -292,7 +294,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     resultObject.highlightedText = title.highlight || resultObject.title;
 
-    var finalizeExtractionFunction = function(extractionObject) {
+    var finalizeExtractionFunction = function(extractionObject, index) {
       extractionObject.data = extractionObject.data.sort(function(a, b) {
         if(extractionObject.type === 'date') {
           return new Date(a.id) - new Date(b.id);
@@ -321,13 +323,28 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         extractionObject.data = [clone];
       }
 
+      extractionObject.index = index;
       return extractionObject;
     };
 
     resultObject.headerExtractions = searchFields.filter(function(object) {
       return object.result === 'header';
-    }).map(function(object) {
-      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
+    }).map(function(object, index) {
+      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping), index);
+    }).sort(function(a, b) {
+      if(a.isUrl && !b.isUrl) {
+        return -1;
+      }
+      if(b.isUrl && !a.isUrl) {
+        return 1;
+      }
+      if(a.isDate && !b.isDate) {
+        return -1;
+      }
+      if(b.isDate && !a.isDate) {
+        return 1;
+      }
+      return a.index - b.index;
     });
 
     resultObject.detailExtractions = searchFields.filter(function(object) {
