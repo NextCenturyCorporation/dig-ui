@@ -22,6 +22,7 @@
 
 var express = require('express');
 var session = require('express-session');
+var MemoryStore = require('memorystore')(session);
 var favicon = require('serve-favicon');
 var morgan = require('morgan');
 var compression = require('compression');
@@ -41,7 +42,10 @@ module.exports = function(app) {
   app.use(session({
     resave: false,
     saveUninitialized: false,
-    secret: config.secret
+    secret: config.secret,
+    store: new MemoryStore({
+      checkPeriod: 86400000
+    })
   }));
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.urlencoded({
