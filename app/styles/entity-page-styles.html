@@ -73,7 +73,7 @@ limitations under the License.
         @apply --layout-horizontal;
         position: absolute;
         bottom: 0;
-        left: 0;
+        left: 5px;
         right: 0;
         top: 55px;
       }
@@ -82,10 +82,11 @@ limitations under the License.
         @apply --layout-vertical;
         @apply --layout-flex;
         display: block;
+        padding-right: 5px;
       }
 
       .page-body .page-single-column {
-        overflow-y: scroll;
+        overflow-y: auto;
       }
 
       .page-body .details-section,
