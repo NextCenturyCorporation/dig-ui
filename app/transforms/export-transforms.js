@@ -58,35 +58,31 @@ var exportTransforms = (function(_) {
         }
       });
 
-      header.push('Description');
-      header.push('Images');
+      header.push('Content');
+      header.push('Image URLs');
       exportData.push(header);
 
       searchData.forEach(function(result) {
         var imageLinks = (result.images || []).map(function(image) {
           return image.source;
-        }).join('; ');
+        }).join(', ');
+
         var exportDataBody = [
             result.url,
             linkPrefix + result.link,
             result.title,
         ];
-        result.headerExtractions.forEach(function(elementArray) {
-          var data = '';
-          elementArray.data.forEach(function(element) {
-            data += element.text + '; ';
-          });
 
-          exportDataBody.push(data);
+        result.headerExtractions.forEach(function(elementArray) {
+          exportDataBody.push(elementArray.data.reduce(function(terms, element, index) {
+            return terms + (index ? ', ' : '') + element.text;
+          }, ''));
         });
 
         result.detailExtractions.forEach(function(elementArray) {
-          var data = '';
-          elementArray.data.forEach(function(element) {
-            data += element.text + '; ';
-          });
-
-          exportDataBody.push(data);
+          exportDataBody.push(elementArray.data.reduce(function(terms, element, index) {
+            return terms + (index ? ', ' : '') + element.text;
+          }, ''));
         });
 
         exportDataBody.push(result.description.replace(/\s/g, ' '));
@@ -101,6 +97,7 @@ var exportTransforms = (function(_) {
       var linkPrefix = window.location.hostname + ':' + window.location.port;
       var exportData = [];
       var nextId = 1;
+
       searchData.forEach(function(result) {
         var item = {
           images: (result.images || []).map(function(image) {
@@ -124,12 +121,9 @@ var exportTransforms = (function(_) {
         };
 
         result.headerExtractions.forEach(function(elementArray) {
-          var data = '';
-          elementArray.data.forEach(function(element) {
-            data += element.text + ', ';
-          });
-
-          data = data.substring(0, data.length - 2);
+          var data = elementArray.data.reduce(function(terms, element, index) {
+            return terms + (index ? ', ' : '') + element.text;
+          }, '');
 
           if(data !== '') {
             item.paragraphs.push({
@@ -140,12 +134,9 @@ var exportTransforms = (function(_) {
         });
 
         result.detailExtractions.forEach(function(elementArray) {
-          var data = '';
-          elementArray.data.forEach(function(element) {
-            data += element.text + ', ';
-          });
-
-          data = data.substring(0, data.length - 2);
+          var data = elementArray.data.reduce(function(terms, element, index) {
+            return terms + (index ? ', ' : '') + element.text;
+          }, '');
 
           if(data !== '') {
             item.paragraphs.push({
@@ -156,12 +147,13 @@ var exportTransforms = (function(_) {
         });
 
         item.paragraphs.push({
-          label: 'Description:  ',
+          label: 'Content:  ',
           value: result.description.replace(/\n/g, ' ')
         });
 
         exportData.push(item);
       });
+
       return exportData;
     }
   };
