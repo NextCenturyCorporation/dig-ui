@@ -1307,7 +1307,7 @@ limitations under the License.
         var self = this;
         var images = this.imagesUploaded.filter(function(object) {
           var search = _.isUndefined(object.hits);
-          object.hits = null;
+          object.hits = object.hits || null;
           return search;
         });
 
