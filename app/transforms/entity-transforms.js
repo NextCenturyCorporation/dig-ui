@@ -307,7 +307,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         var begin = extractionObject.data[0];
         var end = extractionObject.data[extractionObject.data.length - 1];
         var clone = _.cloneDeep(begin);
-        clone.text = begin.text + ' to ' + end.text;
+        clone.text = begin.text + ' and ' + end.text;
         clone.provenances = extractionObject.data.reduce(function(provenances, extraction) {
           return provenances.concat(extraction.provenances);
         }, []);
@@ -403,7 +403,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function getWebpageResultObject(result, searchFields, highlightMapping) {
-    return createResultObject(result, searchFields, 'av:web-asset', 'Webpage', 'grey', highlightMapping);
+    return createResultObject(result, searchFields, 'av:web-asset', 'Webpage', '', highlightMapping);
   }
 
   function getQueryResultObject(result, searchFields, extractionId) {
@@ -448,13 +448,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
             styleClass: config.entity ? config.entity.styleClass : undefined,
             text: text,
             textAndCount: text + ' (' + (count) + ')'
-          });
-        }
-
-        if(config.entity && config.page && config.entity.key === config.page.key) {
-          // Filter out the items that do not match the ID for the entity page (do this following the creation of the unidentified object).
-          dateObject.data = dateObject.data.filter(function(entityObject) {
-            return entityObject.id === config.id;
           });
         }
 
@@ -504,6 +497,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
             if(histogramIndex < 0) {
               histograms.push({
                 icon: dataItem.icon,
+                id: dataItem.id,
                 link: dataItem.link,
                 name: dataItem.text,
                 styleClass: dataItem.styleClass,
@@ -531,7 +525,17 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
       return histograms;
     }, []).sort(function(a, b) {
-      // Sort alphabetically.
+      // Sort the page item to the top.
+      if(config.entity && config.page && config.entity.key === config.page.key) {
+        if(a.id === config.id) {
+          return -1;
+        }
+        if(b.id === config.id) {
+          return 1;
+        }
+      }
+
+      // Sort the other items alphabetically.
       if(a.name.localeCompare) {
         return a.name.localeCompare(b.name, undefined, {
           numeric: true

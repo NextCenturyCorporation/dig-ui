@@ -77,6 +77,10 @@ curl -XPUT $1/dig-profiles -d '
                 },
                 "notify": {
                   "type": "boolean"
+                },
+                "type": {
+                  "type": "string",
+                  "index": "not_analyzed"
                 }
               }
             },

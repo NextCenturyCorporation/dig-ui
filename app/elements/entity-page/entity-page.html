@@ -410,7 +410,7 @@ limitations under the License.
         entity-config="[[searchFieldsCollection]]"
         function-config="[[searchFields]]"
         reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
-        result-icon="av:web"
+        result-icon="av:web-asset"
         result-link-function="[[transforms.config.resultLinkFunction]]"
         result-type-plural="Webpages"
         result-type-singular="Webpage"
@@ -627,12 +627,14 @@ limitations under the License.
                 </template>
 
                 <div class="layout horizontal center date-menu bottom-margin">
-                  <template is="dom-if" if="[[!item.timelineDataResults.items.length]]">
-                    <div class="flex">No Timelines of [[item.entity.title]] vs. [[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]</div>
-                  </template>
+                  <template is="dom-if" if="[[!item.timelineDataLoading]]">
+                    <template is="dom-if" if="[[!item.timelineDataResults.items.length]]">
+                      <div class="flex">No Timelines of [[item.entity.title]] vs. [[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]</div>
+                    </template>
 
-                  <template is="dom-if" if="[[item.timelineDataResults.items.length]]">
-                    <div class="flex">[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]] from [[item.timelineDataResults.begin]] to [[item.timelineDataResults.end]]</div>
+                    <template is="dom-if" if="[[item.timelineDataResults.items.length]]">
+                      <div class="flex">[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]] from [[item.timelineDataResults.begin]] to [[item.timelineDataResults.end]]</div>
+                    </template>
                   </template>
 
                   <template is="dom-if" if="[[item.showDateMenu]]">
@@ -714,7 +716,6 @@ limitations under the License.
           <section-wrapper
             icon="fa:filter"
             section-title="[[createFilterSectionTitle(filterList)]]"
-            style-class="grey"
             hide-section-content="[[!filterList.length]]">
 
             <template is="dom-repeat" items="[[searchFields]]">
@@ -727,9 +728,8 @@ limitations under the License.
           </section-wrapper>
 
           <section-wrapper
-            icon="av:web"
+            icon="av:web-asset"
             section-title="[[searchTitle]]"
-            style-class="grey"
             class="results-section">
 
             <template is="dom-if" if="[[dateMenu.show]]">

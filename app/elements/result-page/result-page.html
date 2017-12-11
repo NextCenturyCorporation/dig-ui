@@ -341,7 +341,7 @@ limitations under the License.
 
       <div class="page-data">
         <template is="dom-if" if="[[result.id]]">
-          <iron-icon class="page-icon" icon="av:web"></iron-icon>
+          <iron-icon class$="page-icon [[result.styleClass]]" icon="[[result.icon]]"></iron-icon>
 
           <div class="page-name">[[result.title]]</div>
         </template>
@@ -361,7 +361,8 @@ limitations under the License.
         entity-config="[[searchFieldsCollection]]"
         function-config="[[searchFields]]"
         reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
-        result-icon="av:web"
+        result-icon="av:web-asset"
+        result-link-function="[[transforms.config.resultLinkFunction]]"
         result-link-function="[[returnFunctionOutput(transforms.config.resultLinkFunction)]]"
         result-type-plural="Webpages"
         result-type-singular="Webpage"
@@ -484,9 +485,8 @@ limitations under the License.
           </section-wrapper>
 
           <section-wrapper
-            icon="av:web"
+            icon="av:web-asset"
             section-title="[[revisionTitle]]"
-            style-class="grey"
             class="results-section">
 
             <template is="dom-if" if="[[dateMenu.show]]">
@@ -549,9 +549,8 @@ limitations under the License.
 
         <div class="page-column page-single-column">
           <section-wrapper
-            icon="av:web"
+            icon="av:web-asset"
             section-title="[[moreLikeThisTitle]]"
-            style-class="grey"
             class="results-section">
 
             <export-button
