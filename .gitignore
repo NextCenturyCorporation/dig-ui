@@ -3,6 +3,7 @@ dist
 node_modules
 /app/help.html
 /app/help/*
+/app/images/help/*
 /server/client-config-*.json
 /server/config/local.env.js
 *.swp
