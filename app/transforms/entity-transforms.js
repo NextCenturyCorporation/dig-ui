@@ -86,8 +86,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return getExtractionsFromList((_.isArray(data) ? data : [data]), config);
   }
 
-  function getHighlightPathList(itemId, itemText, result, type, highlightMapping) {
-    // The highlightMapping property maps search terms to unique IDs.
+  function getHighlightPathList(itemId, itemText, result, type, highlights) {
+    // The highlights property maps search terms to unique IDs.
     // The result.matched_queries property lists highlights in the format <id>:<path>:<text>
 
     /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
@@ -108,12 +108,12 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     var highlightPaths = {};
 
-    if(matchedQueries && matchedQueries.length && highlightMapping) {
+    if(matchedQueries && matchedQueries.length && highlights) {
       wordsOrPhrases.forEach(function(wordOrPhrase) {
         // If a highlight mapping exists for the word or phrase, check the matched queries.
-        if(highlightMapping[wordOrPhrase]) {
+        if(highlights[wordOrPhrase]) {
           return matchedQueries.filter(function(path) {
-            return _.startsWith(path, highlightMapping[wordOrPhrase]);
+            return _.startsWith(path, highlights[wordOrPhrase]);
           }).map(function(path) {
             // Return the path in the matched queries.
             return path.split(':')[1];
@@ -145,9 +145,9 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return output.indexOf('<em>') >= 0 && output.indexOf('</em>') >= 0 ? !!(output.replace(/<\/?em\>/g, '')) : false;
   }
 
-  function getHighlightedText(itemId, itemText, result, type, highlightMapping) {
+  function getHighlightedText(itemId, itemText, result, type, highlights) {
     // Get the paths from the highlight mapping to explore in the result highlights specifically for the given item.
-    var pathList = getHighlightPathList(('' + itemId).toLowerCase(), ('' + itemText).toLowerCase(), result, type, highlightMapping);
+    var pathList = getHighlightPathList(('' + itemId).toLowerCase(), ('' + itemText).toLowerCase(), result, type, highlights);
     var textList = [];
     if(result.highlight && pathList.length) {
       // Find the highlighted text in the result highlights using a highlights path.  Use the first because they are all the same.
@@ -162,12 +162,12 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return textList.length ? textList[0] : undefined;
   }
 
-  function getHighlightedExtractionObjectFromResult(result, config, highlightMapping) {
+  function getHighlightedExtractionObjectFromResult(result, config, highlights) {
     var data = getExtractionsFromResult(result, '_source.' + config.extractionField, config);
-    if(highlightMapping) {
+    if(highlights) {
       data = data.map(function(item) {
         // The highlight in the extraction object is a boolean (YES or NO).
-        item.highlight = !!(getHighlightedText(item.id, item.text, result, config.type, highlightMapping[config.key]));
+        item.highlight = !!(getHighlightedText(item.id, item.text, result, config.type, highlights[config.key]));
         return item;
       });
     }
@@ -195,7 +195,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }, {});
   }
 
-  function getTitleOrDescription(type, searchFields, result, highlightMapping) {
+  function getTitleOrDescription(type, searchFields, result, highlights) {
     var searchFieldsObject = _.find(searchFields, function(object) {
       return object.result === type;
     });
@@ -217,8 +217,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
             return object.value;
           }).join(' ');
         }
-        if(highlightMapping) {
-          var highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlightMapping[searchFieldsObject.key]);
+        if(highlights) {
+          var highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlights[searchFieldsObject.key]);
           returnObject.highlight = highlight || returnObject.highlight || returnObject.text;
         }
       }
@@ -245,7 +245,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
    * @param {String} icon
    * @param {String} name
    * @param {String} styleClass
-   * @param {Object} highlightMapping The highlight mapping returned by the search.  An object that maps search fields to objects that map search terms to unique IDs.  For example:
+   * @param {Object} highlights The fields mapped to the highlights returned by the search.  An object that maps search fields to objects that map search terms to unique IDs.  For example:
    * {
    *   email: {
    *     abc@gmail.com: 123
@@ -257,7 +257,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
    * }
    * @return {Object}
    */
-  function createResultObject(result, searchFields, icon, name, styleClass, highlightMapping) {
+  function createResultObject(result, searchFields, icon, name, styleClass, highlights) {
     var id = _.get(result, '_source.doc_id');
 
     if(!id) {
@@ -270,8 +270,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
-    var title = getTitleOrDescription('title', searchFields, result, highlightMapping);
-    var description = getTitleOrDescription('description', searchFields, result, highlightMapping);
+    var title = getTitleOrDescription('title', searchFields, result, highlights);
+    var description = getTitleOrDescription('description', searchFields, result, highlights);
 
     var resultObject = {
       id: id,
@@ -330,7 +330,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     resultObject.headerExtractions = searchFields.filter(function(object) {
       return object.result === 'header';
     }).map(function(object, index) {
-      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping), index);
+      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlights), index);
     }).sort(function(a, b) {
       if(a.isUrl && !b.isUrl) {
         return -1;
@@ -350,13 +350,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     resultObject.detailExtractions = searchFields.filter(function(object) {
       return object.result === 'detail';
     }).map(function(object) {
-      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
+      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlights));
     });
 
     resultObject.nestedExtractions = searchFields.filter(function(object) {
       return object.result === 'nested';
     }).map(function(object) {
-      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlightMapping));
+      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlights));
     });
 
     if(esDataEndpoint) {
@@ -402,8 +402,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return resultObject;
   }
 
-  function getWebpageResultObject(result, searchFields, highlightMapping) {
-    return createResultObject(result, searchFields, 'av:web-asset', 'Webpage', '', highlightMapping);
+  function getWebpageResultObject(result, searchFields, highlights) {
+    return createResultObject(result, searchFields, 'av:web-asset', 'Webpage', '', highlights);
   }
 
   function getQueryResultObject(result, searchFields, extractionId) {
@@ -579,8 +579,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     results: function(data, searchFields) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
         var returnData = data.hits.hits.map(function(result) {
-          // Data returned by the searchResults function from the searchTransforms will have a "fields" property.
-          return getWebpageResultObject(result, searchFields, data.fields);
+          // Data returned by the searchResults function from the searchTransforms will have a "highlights" property.
+          return getWebpageResultObject(result, searchFields, data.highlights);
         }).filter(function(object) {
           return !_.isUndefined(object);
         });
