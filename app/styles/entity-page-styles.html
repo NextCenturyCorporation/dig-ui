@@ -14,8 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
 <dom-module id="entity-page-styles">
   <template>
+    <style include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning"></style>
+
     <style>
       .page-head {
         @apply --layout-horizontal;
@@ -73,7 +77,7 @@ limitations under the License.
         @apply --layout-horizontal;
         position: absolute;
         bottom: 0;
-        left: 5px;
+        left: 0;
         right: 0;
         top: 55px;
       }
@@ -82,7 +86,7 @@ limitations under the License.
         @apply --layout-vertical;
         @apply --layout-flex;
         display: block;
-        padding-right: 5px;
+        padding-left: 5px;
       }
 
       .page-body .page-single-column {
@@ -100,12 +104,6 @@ limitations under the License.
 
       .page-body result-list {
         --result-list-max-height: none;
-      }
-
-      .page-body selected-facets-display {
-        --selected-facet-item-style-mixin: {
-          margin-bottom: 0;
-        };
       }
 
       .small-blur {
