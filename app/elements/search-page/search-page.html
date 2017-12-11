@@ -1097,20 +1097,24 @@ limitations under the License.
           searchFields.forEach(function(searchFieldsObject) {
             if(searchFieldsObject.isDate) {
               searchParameters[searchFieldsObject.key] = {};
-              searchParameters[searchFieldsObject.key][searchFieldsObject.dateProperties.start.key] = startDateString ? {
-                key: searchFieldsObject.dateProperties.start.key,
-                category: searchFieldsObject.dateProperties.start.title,
-                date: new Date(startDateString),
-                enabled: true,
-                text: startDateString
-              } : undefined;
-              searchParameters[searchFieldsObject.key][searchFieldsObject.dateProperties.end.key] = endDateString ? {
-                key: searchFieldsObject.dateProperties.end.key,
-                category: searchFieldsObject.dateProperties.end.title,
-                date: new Date(endDateString),
-                enabled: true,
-                text: endDateString
-              } : undefined;
+              if(startDateString) {
+                searchParameters[searchFieldsObject.key][searchFieldsObject.dateProperties.start.key] = {
+                  key: searchFieldsObject.dateProperties.start.key,
+                  category: searchFieldsObject.dateProperties.start.title,
+                  date: new Date(startDateString),
+                  enabled: true,
+                  text: startDateString
+                };
+              }
+              if(endDateString) {
+                searchParameters[searchFieldsObject.key][searchFieldsObject.dateProperties.end.key] = {
+                  key: searchFieldsObject.dateProperties.end.key,
+                  category: searchFieldsObject.dateProperties.end.title,
+                  date: new Date(endDateString),
+                  enabled: true,
+                  text: endDateString
+                };
+              }
             }
           });
           return searchParameters;
