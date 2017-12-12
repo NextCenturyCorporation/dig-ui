@@ -179,8 +179,12 @@ gulp.task('copy', function() {
   // Copy over only the bower_components we need
   // These are things which cannot be vulcanized
   var bower = gulp.src([
-    'app/bower_components/{webcomponentsjs,platinum-sw,sw-toolbox,promise-polyfill,leaflet,leaflet-map,lodash,array-behavior}/**/*'
+    'app/bower_components/{webcomponentsjs,platinum-sw,sw-toolbox,promise-polyfill,leaflet,leaflet-map,lodash}/**/*'
   ]).pipe(gulp.dest(dist('bower_components')));
+
+  var arrayBehavior = gulp.src([
+    'app/bower_components/array-behavior/array-behavior.*'
+  ]).pipe(gulp.dest(dist('bower_components/array-behavior')));
 
   var sourceMaps = gulp.src([
     'app/bower_components/web-animations-js/web-animations-next-lite.min.js.map',
@@ -188,7 +192,7 @@ gulp.task('copy', function() {
     'app/bower_components/pdfmake/build/pdfmake.min.js.map'
   ]).pipe(gulp.dest(dist('elements')));
 
-  return merge(app, bower, sourceMaps)
+  return merge(app, bower, arrayBehavior, sourceMaps)
     .pipe($.size({
       title: 'copy'
     }));
