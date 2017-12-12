@@ -513,7 +513,7 @@ limitations under the License.
 
                   <template is="dom-if" if="[[item.entityAggregation]]">
                     <elastic-client-aggregation-builder
-                      name="[[getDateProperty(item.dateCollection, item.dateSelected, 'key')]]"
+                      name="[[getDateProperty(item.dateCollection, item.dateSelected, 'key', '_timeline')]]"
                       type="date_histogram"
                       count="0"
                       field="[[getDateProperty(item.dateCollection, item.dateSelected, 'field')]]"
@@ -1154,8 +1154,8 @@ limitations under the License.
           return undefined;
         }
         return {
-          date: dateCollection[dateSelected],
           entity: entityConfig,
+          name: dateCollection[dateSelected].key + '_timeline',
           page: pageConfig,
           id: id
         };
@@ -1178,11 +1178,11 @@ limitations under the License.
         return (shown ? 'Hide' : 'Show') + ' Detailed Timeline';
       },
 
-      getDateProperty: function(collection, selected, property) {
+      getDateProperty: function(collection, selected, property, suffix) {
         if(!collection || !selected || !property) {
           return undefined;
         }
-        return collection[selected][property];
+        return collection[selected][property] + (suffix || '');
       },
 
       getNoBlurStyleClass: function(blur) {

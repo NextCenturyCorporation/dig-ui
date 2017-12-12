@@ -413,7 +413,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return createResultObject(result, searchFields, searchFieldsObject.icon, searchFieldsObject.title, searchFieldsObject.styleClass);
   }
 
-  function createDateHistogram(buckets, config) {
+  function createDateHistogram(buckets, entityConfig) {
     if(buckets.length < 2) {
       return [];
     }
@@ -425,10 +425,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
       if(count) {
         var data = [];
-        if(config.entity && dateBucket[config.entity.key] && dateBucket[config.entity.key].buckets) {
-          data = dateBucket[config.entity.key].buckets.map(function(entityBucket, index) {
-            return getExtraction(entityBucket, config.entity, index);
-          }).filter(commonTransforms.getExtractionFilterFunction(config.entity.type));
+        if(entityConfig && dateBucket[entityConfig.key] && dateBucket[entityConfig.key].buckets) {
+          data = dateBucket[entityConfig.key].buckets.map(function(entityBucket, index) {
+            return getExtraction(entityBucket, entityConfig, index);
+          }).filter(commonTransforms.getExtractionFilterFunction(entityConfig.type));
         }
 
         var dateObject = {
@@ -444,8 +444,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
           var text = '(Unidentified)';
           dateObject.data.push({
             count: count - sum,
-            icon: config.entity ? config.entity.icon : undefined,
-            styleClass: config.entity ? config.entity.styleClass : undefined,
+            icon: entityConfig ? entityConfig.icon : undefined,
+            styleClass: entityConfig ? entityConfig.styleClass : undefined,
             text: text,
             textAndCount: text + ' (' + (count) + ')'
           });
@@ -464,15 +464,15 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     });
   }
 
-  function createItemHistograms(buckets, config, showUnidentified) {
+  function createItemHistograms(buckets, showUnidentified, entityConfig, pageConfig, pageId) {
     if(buckets.length < 2) {
       return [];
     }
 
     var unidentifiedHistogram = {
-      icon: config.entity ? config.entity.icon : undefined,
+      icon: entityConfig ? entityConfig.icon : undefined,
       name: '(Unidentified)',
-      styleClass: config.entity ? config.entity.styleClass : undefined,
+      styleClass: entityConfig ? entityConfig.styleClass : undefined,
       points: []
     };
 
@@ -486,10 +486,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       if(count && date) {
         var sum = 0;
 
-        if(config.entity && dateBucket[config.entity.key] && dateBucket[config.entity.key].buckets) {
-          dateBucket[config.entity.key].buckets.map(function(entityBucket, index) {
-            return getExtraction(entityBucket, config.entity, index);
-          }).filter(commonTransforms.getExtractionFilterFunction(config.entity.type)).forEach(function(dataItem) {
+        if(entityConfig && dateBucket[entityConfig.key] && dateBucket[entityConfig.key].buckets) {
+          dateBucket[entityConfig.key].buckets.map(function(entityBucket, index) {
+            return getExtraction(entityBucket, entityConfig, index);
+          }).filter(commonTransforms.getExtractionFilterFunction(entityConfig.type)).forEach(function(dataItem) {
             var histogramIndex = _.findIndex(histograms, function(histogramItem) {
               return histogramItem.name === dataItem.text;
             });
@@ -526,11 +526,11 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return histograms;
     }, []).sort(function(a, b) {
       // Sort the page item to the top.
-      if(config.entity && config.page && config.entity.key === config.page.key) {
-        if(a.id === config.id) {
+      if(entityConfig && pageConfig && entityConfig.key === pageConfig.key) {
+        if(a.id === pageId) {
           return -1;
         }
-        if(b.id === config.id) {
+        if(b.id === pageId) {
           return 1;
         }
       }
@@ -652,14 +652,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Object}
      */
     histograms: function(data, config) {
-      if(data && data.aggregations && data.aggregations[config.date.key] && data.aggregations[config.date.key][config.date.key]) {
-        var buckets = data.aggregations[config.date.key][config.date.key].buckets;
+      if(data && data.aggregations && data.aggregations[config.name] && data.aggregations[config.name][config.name]) {
+        var buckets = data.aggregations[config.name][config.name].buckets;
         if(buckets.length > 1) {
           return {
             begin: commonTransforms.getFormattedDate(buckets[0].key),
             end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
-            dates: createDateHistogram(buckets, config),
-            items: createItemHistograms(buckets, config)
+            dates: createDateHistogram(buckets, config.entity),
+            items: createItemHistograms(buckets, false, config.entity, config.page, config.id)
           };
         }
       }
@@ -718,9 +718,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
           return {
             begin: commonTransforms.getFormattedDate(buckets[0].key),
             end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
-            points: createItemHistograms(buckets, {
-              styleClass: commonTransforms.getStyleClass('black')
-            }, true)
+            points: createItemHistograms(buckets, true)
           };
         }
       }
