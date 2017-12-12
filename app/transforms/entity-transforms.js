@@ -245,6 +245,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
    * @param {String} icon
    * @param {String} name
    * @param {String} styleClass
+   * @param {String} type
    * @param {Object} highlights The fields mapped to the highlights returned by the search.  An object that maps search fields to objects that map search terms to unique IDs.  For example:
    * {
    *   email: {
