@@ -322,7 +322,7 @@ limitations under the License.
       profile-manager="[[profileManager]]"
       result-id="[[parameters.id]]"
       result-name="[[result.title]]"
-      result-type="Webpage"
+      result-type="webpage"
       user-id="[[userId]]">
     </save-case-dialog>
 
@@ -361,12 +361,9 @@ limitations under the License.
         build-state-data-function="[[transforms.config.searchState]]"
         data-config="[[searchFieldsCollection]]"
         function-config="[[searchFields]]"
+        profile-manager="[[profileManager]]"
         reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
-        result-icon="av:web-asset"
-        result-link-function="[[transforms.config.resultLinkFunction]]"
-        result-link-function="[[returnFunctionOutput(transforms.config.resultLinkFunction)]]"
-        result-type-plural="Webpages"
-        result-type-singular="Webpage"
+        result-link-function="[[transforms.config.resultLink]]"
         user-id="[[userId]]"
         user-loading="[[userLoading]]"
         username="[[serverConfig.username]]"
@@ -383,9 +380,9 @@ limitations under the License.
 
       <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="50">
         <div slot="dropdown-content">
-          <paper-icon-item disabled="[[!result.id]]" title="Save This Webpage to Case..." on-tap="openSaveDialog">
+          <paper-icon-item disabled="[[!result.id]]" title$="Save This Result to Case..." on-tap="openSaveDialog">
             <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
-            Save This Webpage to Case...
+            Save This Result to Case...
           </paper-icon-item>
 
           <template is="dom-if" if="[[serverConfig.tagsListEndpoint]]">
@@ -420,13 +417,13 @@ limitations under the License.
 
     <template is="dom-if" if="[[resultLoading]]">
       <div class="layout horizontal center-justified flex">
-        <loading-spinner show type="Webpage"></loading-spinner>
+        <loading-spinner show type="Result"></loading-spinner>
       </div>
     </template>
 
     <template is="dom-if" if="[[!resultLoading]]">
       <template is="dom-if" if="[[!result.id]]">
-        <div class="layout horizontal flex center-justified" style="padding: 10px;">Webpage Not Found</div>
+        <div class="layout horizontal flex center-justified" style="padding: 10px;">Result Not Found</div>
       </template>
     </template>
 
@@ -529,8 +526,8 @@ limitations under the License.
               page="{{revisionPage}}"
               page-size="10"
               loading="[[revisionLoading]]"
-              pretty-name="Webpage Revisions"
-              pretty-name-singular="Webpage Revision"
+              pretty-name="[[result.name]] Revisions"
+              pretty-name-singular="[[result.name]] Revision"
               header="{{revisionTitle}}"
               client="[[esClient]]"
               id-field="_id"
@@ -579,8 +576,8 @@ limitations under the License.
               page="{{moreLikeThisPage}}"
               page-size="10"
               loading="[[moreLikeThisLoading]]"
-              pretty-name="Similar Webpage Results"
-              pretty-name-singular="Similar Webpage Result"
+              pretty-name="Similar [[result.name]] Results"
+              pretty-name-singular="Similar [[result.name]] Result"
               header="{{moreLikeThisTitle}}"
               client="[[esClient]]"
               id-field="_id"
@@ -906,10 +903,6 @@ limitations under the License.
       createSectionTitle: function(size, searchFieldsObject) {
         var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         return sizeString + ' ' + (size === 1 ? searchFieldsObject.title : searchFieldsObject.titlePlural);
-      },
-
-      returnFunctionOutput: function(func) {
-        return func();
       },
 
       transformResultToArray: function(result) {

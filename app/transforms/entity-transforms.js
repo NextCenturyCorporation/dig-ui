@@ -257,7 +257,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
    * }
    * @return {Object}
    */
-  function createResultObject(result, searchFields, icon, name, styleClass, highlights) {
+  function createResultObject(result, searchFields, icon, name, styleClass, type, highlights) {
     var id = _.get(result, '_source.doc_id');
 
     if(!id) {
@@ -277,7 +277,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       id: id,
       url: _.get(result, '_source.url'),
       crawlTimestamp: (crawlTimestamp === 'None' ? 'Unknown' : crawlTimestamp),
-      type: 'result',
+      type: type,
       icon: icon,
       link: commonTransforms.getLink(id, 'result'),
       name: name,
@@ -403,14 +403,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function getWebpageResultObject(result, searchFields, highlights) {
-    return createResultObject(result, searchFields, 'av:web-asset', 'Webpage', '', highlights);
+    return createResultObject(result, searchFields, esConfig.webpageField.icon, esConfig.webpageField.title, esConfig.webpageField.styleClass, 'webpage', highlights);
   }
 
   function getQueryResultObject(result, searchFields, extractionId) {
     var searchFieldsObject = _.find(searchFields, function(object) {
       return object.key === extractionId;
     });
-    return createResultObject(result, searchFields, searchFieldsObject.icon, searchFieldsObject.title, searchFieldsObject.styleClass);
+    return createResultObject(result, searchFields, searchFieldsObject.icon, searchFieldsObject.title, searchFieldsObject.styleClass, searchFieldsObject.key);
   }
 
   function createDateHistogram(buckets, entityConfig) {

@@ -334,12 +334,13 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
-     * Returns the link function for the results.
+     * Returns the link for the result with the given ID.
      *
-     * @return {Function}
+     * @param {String} id
+     * @return {String}
      */
-    resultLinkFunction: function() {
-      return commonTransforms.getLinkFunction('result');
+    resultLink: function(id) {
+      return commonTransforms.getLink(id, 'result');
     },
 
     /**
@@ -427,6 +428,9 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
 
       // Add the image field to show in the facets.
       searchFields.push(esConfig.imageField);
+
+      // Add the webpage field for the user settings dialog config.
+      searchFields.push(esConfig.webpageField);
 
       // Add additional properties after the image field is added.
       searchFields.forEach(function(searchFieldsObject) {

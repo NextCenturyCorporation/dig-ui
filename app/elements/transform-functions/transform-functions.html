@@ -75,6 +75,22 @@ limitations under the License.
         };
       },
 
+      _createWebpageFieldConfig: function() {
+        return {
+          key: 'webpage',
+          color: '',
+          facets: false,
+          field: '_id',
+          group: 'Webpage',
+          icon: 'av:web-asset',
+          result: 'nested',
+          search: false,
+          title: 'Webpage',
+          titlePlural: 'Webpages',
+          type: 'kg_id'
+        };
+      },
+
       _initializeEsConfig: function(domain, clientConfig, serverConfig) {
         if(!domain || !clientConfig || !serverConfig) {
           return undefined;
@@ -87,7 +103,8 @@ limitations under the License.
           esType: clientConfig.root_name,
           imageField: this._createImageFieldConfig(),
           imageUrlPrefix: clientConfig.image_prefix || serverConfig.imageUrlPrefix || '',
-          imageUrlSuffix: clientConfig.image_suffix || serverConfig.imageUrlSuffix || ''
+          imageUrlSuffix: clientConfig.image_suffix || serverConfig.imageUrlSuffix || '',
+          webpageField: this._createWebpageFieldConfig()
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
