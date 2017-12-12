@@ -256,7 +256,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           }
         } else {
           // Use map to create a new array.
-          terms[searchFieldsObject.title] = filterCollectionObject.map(function(term) {
+          terms[searchFieldsObject.title] = (filterCollectionObject || []).map(function(term) {
             return term;
           });
         }
