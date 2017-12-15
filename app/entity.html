@@ -22,7 +22,7 @@ limitations under the License.
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-  <title>DIG Entity</title>
+  <title>DIG</title>
   <meta name="description" content="DIG">
 
   <link rel="icon" href="favicon.ico"/>
@@ -42,8 +42,20 @@ limitations under the License.
 
 <body unresolved class="fullbleed layout vertical">
   <dom-bind id="app">
+    <script>
+      (function(document) {
+        var demo = document.querySelector('dom-bind');
+
+        demo.onPageNameChange = function(event) {
+          if(event.detail.value) {
+            document.title = 'DIG - ' + event.detail.value;
+          }
+        };
+      })(document);
+    </script>
+
     <template is="dom-bind">
-      <entity-page></entity-page>
+      <entity-page on-page-name-changed="onPageNameChange"></entity-page>
     </template>
   </dom-bind>
 </body>

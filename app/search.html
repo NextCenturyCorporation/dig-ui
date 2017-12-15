@@ -42,8 +42,20 @@ limitations under the License.
 
 <body unresolved>
   <dom-bind id="app">
+    <script>
+      (function(document) {
+        var demo = document.querySelector('dom-bind');
+
+        demo.onDomainChange = function(event) {
+          if(event.detail.value) {
+            document.title = 'DIG Search - ' + event.detail.value;
+          }
+        };
+      })(document);
+    </script>
+
     <template is="dom-bind">
-      <search-page></search-page>
+      <search-page on-domain-changed="onDomainChange"></search-page>
     </template>
   </dom-bind>
 </body>
