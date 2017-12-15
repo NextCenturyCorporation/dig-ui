@@ -32,6 +32,10 @@ curl -XPUT $1/dig-profiles -d '
             },
             "entityList": {
               "properties": {
+                "field": {
+                  "type": "string",
+                  "index": "not_analyzed"
+                },
                 "id": {
                   "type": "string",
                   "index": "not_analyzed"
