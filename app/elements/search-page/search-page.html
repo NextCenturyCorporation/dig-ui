@@ -469,7 +469,7 @@ limitations under the License.
     </bulk-search>
 
     <elastic-client-aggregation-builder
-      name="[[dateMenu.selected]]"
+      name="[[createSparklineAggregationName(dateFieldsToProperties, dateMenu.selected)]]"
       type="date_histogram"
       count="0"
       field="[[dateMenu.selected]]"
@@ -486,7 +486,7 @@ limitations under the License.
         aggregations="[[buildArray(dateAggregation)]]"
         filters="[]"
         page-size="0"
-        transform-config="[[dateMenu.selected]]"
+        transform-config="[[createSparklineAggregationConfig(dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
         transform-function="[[transforms.entity.searchPageTimeline]]"
         error="{{sparklineError}}"
         loading="{{sparklineLoading}}"
@@ -703,8 +703,10 @@ limitations under the License.
                     <div class="layout flex">Timeline of Search Results</div>
                   </template>
 
-                  <template is="dom-if" if="[[!sparklineResults.points.length]]">
-                    <div class="layout flex">Timeline of Search Results Not Available</div>
+                  <template is="dom-if" if="[[!sparklineLoading]]">
+                    <template is="dom-if" if="[[!sparklineResults.points.length]]">
+                      <div class="layout flex">Timeline of Search Results Not Available</div>
+                    </template>
                   </template>
 
                   <template is="dom-if" if="[[dateMenu.show]]">
@@ -1166,6 +1168,32 @@ limitations under the License.
             return key;
           }))
         };
+      },
+
+      createSparklineAggregationConfig: function(dateFieldsToProperties, dateSelected, searchParameters) {
+        var config = {
+          name: this.createSparklineAggregationName(dateFieldsToProperties, dateSelected)
+        };
+
+        if(searchParameters) {
+          _.keys(dateFieldsToProperties).forEach(function(dateId) {
+            if(dateId === dateSelected) {
+              var dateObject = dateFieldsToProperties[dateId];
+              var searchObject = searchParameters[dateObject.key];
+              config.begin = searchObject[dateObject.start] ? searchObject[dateObject.start].date : undefined;
+              config.end = searchObject[dateObject.end] ? searchObject[dateObject.end].date : undefined;
+            }
+          });
+        }
+
+        return config;
+      },
+
+      createSparklineAggregationName: function(dateFieldsToProperties, dateSelected) {
+        var dateId = _.find(_.keys(dateFieldsToProperties), function(dateId) {
+          return dateId === dateSelected;
+        });
+        return dateId ? dateFieldsToProperties[dateId].key + '_timeline' : undefined;
       },
 
       createTotalCountFunction: function() {

@@ -130,6 +130,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Array}
      */
     dateMenu: function(searchFields) {
+      // TODO Combine with dateFieldsToProperties?
       var menu = createDateMenuConfig(searchFields);
       menu.selected = menu.fields.length ? menu.fields[0].field : undefined;
       return menu;
@@ -142,10 +143,12 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Object}
      */
     dateFieldsToProperties: function(searchFields) {
+      // TODO Combine with dateMenu?
       var dateFieldsToProperties = {};
       searchFields.forEach(function(searchFieldsObject) {
         if(searchFieldsObject.isDate) {
           dateFieldsToProperties[searchFieldsObject.field] = {
+            key: searchFieldsObject.key,
             start: searchFieldsObject.dateProperties.start.key,
             end: searchFieldsObject.dateProperties.end.key
           };
@@ -463,7 +466,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     searchFieldsCollection: function(searchFields) {
       return searchFields.reduce(function(object, searchFieldsObject) {
         object[searchFieldsObject.key] = {
-          field: searchFieldsObject.queryField,
+          field: searchFieldsObject.isDate ? searchFieldsObject.field : searchFieldsObject.queryField,
           icon: searchFieldsObject.icon,
           link: commonTransforms.getLinkFunction(searchFieldsObject.link, searchFieldsObject.type, searchFieldsObject.key),
           name: searchFieldsObject.title,

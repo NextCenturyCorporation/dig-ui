@@ -465,7 +465,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     });
   }
 
-  function createItemHistograms(buckets, showUnidentified, entityConfig, pageConfig, pageId) {
+  function createItemHistograms(buckets, showUnidentified, timeBegin, timeEnd, entityConfig, pageConfig, pageId) {
     if(buckets.length < 2) {
       return [];
     }
@@ -545,14 +545,21 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
     });
 
+    if(showUnidentified && unidentifiedHistogram.points.length) {
+      histograms.push(unidentifiedHistogram);
+    }
+
     histograms.forEach(function(histogramItem) {
-      histogramItem.points.sort(function(a, b) {
+      histogramItem.points = histogramItem.points.filter(function(item) {
+        var time = new Date(item.date).getTime();
+        return (timeBegin ? time >= timeBegin : true) && (timeEnd ? time <= timeEnd : true);
+      }).sort(function(a, b) {
         // Sort oldest first.
         return new Date(a.date).getTime() - new Date(b.date).getTime();
       });
     });
 
-    return showUnidentified && unidentifiedHistogram.points.length ? histograms.concat(unidentifiedHistogram) : histograms;
+    return histograms;
   }
 
   return {
@@ -660,7 +667,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
             begin: commonTransforms.getFormattedDate(buckets[0].key),
             end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
             dates: createDateHistogram(buckets, config.entity),
-            items: createItemHistograms(buckets, false, config.entity, config.page, config.id)
+            items: createItemHistograms(buckets, false, null, null, config.entity, config.page, config.id)
           };
         }
       }
@@ -709,17 +716,17 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      * Returns the histogram data for the search page sparkline chart (by item, then by date) with unidentified data.
      *
      * @param {Object} data
-     * @param {Object} property
+     * @param {Object} config
      * @return {Object}
      */
-    searchPageTimeline: function(data, property) {
-      if(data && data.aggregations && data.aggregations[property] && data.aggregations[property][property]) {
-        var buckets = data.aggregations[property][property].buckets;
+    searchPageTimeline: function(data, config) {
+      if(data && data.aggregations && data.aggregations[config.name] && data.aggregations[config.name][config.name]) {
+        var buckets = data.aggregations[config.name][config.name].buckets;
         if(buckets.length > 1) {
           return {
-            begin: commonTransforms.getFormattedDate(buckets[0].key),
-            end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
-            points: createItemHistograms(buckets, true)
+            begin: commonTransforms.getFormattedDate(config.begin || buckets[0].key),
+            end: commonTransforms.getFormattedDate(config.end || buckets[buckets.length - 1].key),
+            points: createItemHistograms(buckets, true, (config.begin ? new Date(config.begin).getTime() : null), (config.end ? new Date(config.end).getTime() : null))
           };
         }
       }
