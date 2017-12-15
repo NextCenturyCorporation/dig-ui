@@ -36,6 +36,15 @@ var serverConfig = require('./config/environment');
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
+    var userAgent = req.headers['user-agent'];
+    if(userAgent.indexOf('Edge') >= 0 || userAgent.indexOf('MSIE') >= 0 || userAgent.indexOf('Trident') >= 0) {
+      res.sendFile(path.resolve(app.get('appPath') + '/unsupported.html'));
+    } else {
+      next();
+    }
+  });
+
+  app.use(function(req, res, next) {
     // If auth is false, continue to the next step.
     if(!serverConfig.auth) {
       next();
