@@ -520,7 +520,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
             key: searchFieldsObject.key,
             styleClass: searchFieldsObject.styleClass,
             title: searchFieldsObject.title,
-            enableNetworkExpansion: (searchFieldsObject.isEntity)
+            enableNetworkExpansion: esConfig.enableNetworkExpansion && (searchFieldsObject.isEntity)
           });
         }
       });
