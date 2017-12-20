@@ -361,8 +361,9 @@ limitations under the License.
       id="saveDialog"
       cases="[[cases]]"
       entity-field="[[pageConfig.field]]"
-      entity-id="[[parameters.id]]"
+      entity-id="[[pageId]]"
       entity-name="[[pageName]]"
+      entity-pretty-type="[[pageConfig.title]]"
       entity-type="[[parameters.type]]"
       profile-manager="[[profileManager]]"
       user-id="[[userId]]">
@@ -408,6 +409,7 @@ limitations under the License.
       </div>
 
       <user-settings-dialog
+        enable-email-address
         build-popup-data-function="[[transforms.config.searchTerms]]"
         build-state-data-function="[[transforms.config.searchState]]"
         data-config="[[searchFieldsCollection]]"

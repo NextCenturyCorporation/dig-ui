@@ -36,6 +36,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/profile-manager/profile-manager.html">
 <link rel="import" href="../../bower_components/result-list/result-list.html">
+<link rel="import" href="../../bower_components/save-case-dialog/save-case-dialog.html">
 <link rel="import" href="../../bower_components/single-result/single-result.html">
 <link rel="import" href="../../bower_components/tag-entity-buttons/tag-entity-buttons.html">
 <link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
@@ -320,9 +321,10 @@ limitations under the License.
       id="saveDialog"
       cases="[[cases]]"
       profile-manager="[[profileManager]]"
-      result-id="[[parameters.id]]"
+      result-id="[[result.id]]"
       result-name="[[result.title]]"
-      result-type="webpage"
+      result-pretty-type="[[result.name]]"
+      result-type="[[result.type]]"
       user-id="[[userId]]">
     </save-case-dialog>
 
@@ -357,6 +359,7 @@ limitations under the License.
       </tag-entity-buttons>
 
       <user-settings-dialog
+        enable-email-address
         build-popup-data-function="[[transforms.config.searchTerms]]"
         build-state-data-function="[[transforms.config.searchState]]"
         data-config="[[searchFieldsCollection]]"
