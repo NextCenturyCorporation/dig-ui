@@ -1290,7 +1290,7 @@ limitations under the License.
           return;
         }
 
-        var linkFunction = this.transforms && this.transforms.entity ? this.transforms.entity.externalImageLink : null;
+        var linkFunction = this.transforms && this.transforms.entity ? this.transforms.entity.imagePageLink : null;
 
         // Remove images with distances over the threshold.
         var sliceIndex = _.findIndex(imageDistances, function(distance) {
@@ -1317,9 +1317,9 @@ limitations under the License.
           }));
         }
 
-        var allResults = !previousImageResults.length ? imageResults : _.uniqBy(previousImageResults.concat(imageResults).sort(function(a, b) {
+        var allResults = (!previousImageResults.length ? imageResults : _.uniqBy(previousImageResults.concat(imageResults).sort(function(a, b) {
           return a.rank - b.rank;
-        }), 'id').map(function(result, index) {
+        }), 'id')).map(function(result, index) {
           result.name = 'Match #' + (index + 1) + ' (' + inputImage.id + ')';
           return result;
         });

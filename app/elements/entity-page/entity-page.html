@@ -17,6 +17,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/aggregation-query-and-display/aggregation-query-and-display.html">
 <link rel="import" href="../../bower_components/array-behavior/array-behavior.html">
+<link rel="import" href="../../bower_components/auto-paginated-image-gallery/auto-paginated-image-gallery.html">
 <link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
@@ -104,6 +105,15 @@ limitations under the License.
 
       status-text {
         margin-right: 5px;
+      }
+
+      auto-paginated-image-gallery {
+        --auto-paginated-image-gallery-hovering-color: yellow;
+        --auto-paginated-image-gallery-selected-color: var(--primary-background-color);
+        --auto-paginated-image-gallery-max-height: none;
+        --auto-paginated-image-gallery-show-more-button: {
+          margin-top: 10px;
+        };
       }
 
       .hide {
@@ -377,6 +387,30 @@ limitations under the License.
       domain="[[domain]]"
       sort-field="@timestamp">
     </info-data>
+
+    <iron-ajax
+      id="imageSimilaritySearch"
+      content-type="application/x-www-form-urlencoded"
+      handle-as="json"
+      loading="{{imageSimilaritySearchLoading}}"
+      method="POST"
+      params="{}"
+      with-credentials
+      on-error="handleImageSimilaritySearchResults"
+      on-response="handleImageSimilaritySearchResults">
+    </iron-ajax>
+
+    <iron-ajax
+      id="imageFaceSearch"
+      content-type="application/x-www-form-urlencoded"
+      handle-as="json"
+      loading="{{imageFaceSearchLoading}}"
+      method="POST"
+      params="{}"
+      with-credentials
+      on-error="handleImageFaceSearchResults"
+      on-response="handleImageFaceSearchResults">
+    </iron-ajax>
 
     <div class="page-head">
       <a id="logoLink" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
@@ -712,6 +746,40 @@ limitations under the License.
                 tappable>
               </section-wrapper>
             </template>
+
+            <template is="dom-if" if="[[pageConfig.isImage]]">
+              <section-wrapper slot="top"
+                class$="[[getShowStyleClass(showImageMatches)]]"
+                icon="[[esConfig.imageField.icon]]"
+                loading="[[imageSearchLoading]]"
+                no-data="[[!imageSearchMatches.length]]"
+                section-title="[[createSimilarImageMatchesTitle(imageSearchLoading, imageSearchMatches.length)]]"
+                style-class="[[esConfig.imageField.styleClass]]"
+                show-load-icon>
+
+                <auto-paginated-image-gallery
+                  class="results-gallery"
+                  large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                  new-tab
+                  page-size="100"
+                  show-labels
+                  small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                  images="[[imageSearchMatches]]">
+                </auto-paginated-image-gallery>
+              </section-wrapper>
+
+              <section-wrapper slot="bottom"
+                icon="[[esConfig.imageField.icon]]"
+                loading="[[imageSearchLoading]]"
+                no-data="[[!imageSearchMatches.length]]"
+                section-title="[[createSimilarImageMatchesTitle(imageSearchLoading, imageSearchMatches.length)]]"
+                style-class="[[esConfig.imageField.styleClass]]"
+                on-tapped-changed="showSimilarImageMatchesSection"
+                hide-section-content
+                show-load-icon
+                tappable>
+              </section-wrapper>
+            </template>
           </dual-column>
         </div>
 
@@ -898,6 +966,38 @@ limitations under the License.
           type: Boolean
         },
 
+        imageFaceSearchLoading: {
+          type: Boolean,
+          value: false
+        },
+
+        imageFaceSearchThreshold: {
+          type: Number,
+          value: 0.1
+        },
+
+        imageSearchLoading: {
+          type: Boolean,
+          value: false
+        },
+
+        imageSearchMatches: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        },
+
+        imageSimilaritySearchLoading: {
+          type: Boolean,
+          value: false
+        },
+
+        imageSimilaritySearchThreshold: {
+          type: Number,
+          value: 0.3
+        },
+
         logger: {
           type: Object
         },
@@ -982,6 +1082,11 @@ limitations under the License.
           type: Object
         },
 
+        showImageMatches: {
+          type: Boolean,
+          value: false
+        },
+
         stateHistory: {
           type: Array
         },
@@ -1004,6 +1109,7 @@ limitations under the License.
       },
 
       observers: [
+        'findImageMatches(esConfig, pageConfig, pageId, transforms)',
         'handleRemoveFilter(entityFilters.*)'
       ],
 
@@ -1125,6 +1231,13 @@ limitations under the License.
         };
       },
 
+      createSimilarImageMatchesTitle: function(loading, size) {
+        if(loading) {
+          return 'Loading Similar Image Matches...';
+        }
+        return (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' Similar Image Match' + (size === 1 ? '' : 'es');
+      },
+
       createSectionTitle: function(size, config) {
         if(config.loading) {
           return 'Loading' + (config.sayOther ? ' Other ' : ' ') + config.namePlural + '...';
@@ -1176,6 +1289,40 @@ limitations under the License.
         return one === two;
       },
 
+      findImageMatches: function(esConfig, pageConfig, pageId, transforms) {
+        if(esConfig && pageConfig && pageConfig.isImage && pageId && transforms && transforms.config && transforms.config.imageSrc) {
+          var imageLink = transforms.config.imageSrc(pageId, esConfig);
+          this.imageSearchLoading = true;
+          this.findImageMatchesOfType('Face', 'imageFaceSearch', imageLink, this.imageFaceSearchThreshold);
+          this.findImageMatchesOfType('Similarity', 'imageSimilaritySearch', imageLink, this.imageSimilaritySearchThreshold);
+        }
+      },
+
+      findImageMatchesOfType: function(searchType, searchName, imageLink, imageThreshold) {
+        var authConfig = (this.serverConfig.imageServiceConfig.auth || {});
+        var auth = authConfig.user && authConfig.password ? 'Basic ' + btoa(authConfig.user + ':' + authConfig.password) : '';
+        var endpointConfig = (this.serverConfig.imageServiceConfig.endpoint || {});
+        var endpoint = endpointConfig.link;
+        var hostConfig = (this.serverConfig.imageServiceConfig.host || {});
+        var host = hostConfig[searchType.toLowerCase()];
+
+        if(this.logger) {
+          this.logger.log('ImageSearch' + searchType + '-Start', '["' + this.pageId + '"]');
+        }
+
+        if(auth && endpoint && host) {
+          var requestElement = this.$$('#' + searchName);
+          requestElement.body = {
+            data: imageLink
+          };
+          requestElement.body.options = '{"max_returned":1000,"near_dup":1,"near_dup_th":' + imageThreshold + '}';
+          requestElement.url = host + endpoint;
+          requestElement.headers = requestElement.headers || {};
+          requestElement.headers.Authorization = auth;
+          requestElement.generateRequest();
+        }
+      },
+
       getBarChartButtonText: function(shown) {
         return (shown ? 'Hide' : 'Show') + ' Detailed Timeline';
       },
@@ -1191,6 +1338,76 @@ limitations under the License.
         return (blur ? '' : 'no-blur');
       },
 
+      handleImageFaceSearchResults: function(event) {
+        if(event.detail.error || event.detail.response.error) {
+          this.handleImageResults('Face', [], [], [], this.imageFaceSearchThreshold, (event.detail.error || event.detail.response.error));
+        }
+
+        /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+        var response = (event.detail.response || {}).AllSimilarFaces || [];
+        /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+        if(response && response.length) {
+          /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+          var imageUrls = response[0].SimilarFaces.CachedImageURLs;
+          var imageIds = response[0].SimilarFaces.ImageSha1s;
+          var imageDistances = response[0].SimilarFaces.Distances;
+          /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+          this.handleImageResults('Face', imageUrls, imageIds, imageDistances, this.imageFaceSearchThreshold);
+        }
+      },
+
+      handleImageSimilaritySearchResults: function(event) {
+        if(event.detail.error || event.detail.response.error) {
+          this.handleImageResults('Similarity', [], [], [], this.imageSimilaritySearchThreshold, (event.detail.error || event.detail.response.error));
+        }
+
+        var response = (event.detail.response || {}).images || [];
+        if(response && response.length) {
+          /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+          var imageUrls = response[0].similar_images.cached_image_urls;
+          var imageIds = response[0].similar_images.sha1;
+          var imageDistances = response[0].similar_images.distance;
+          /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+          this.handleImageResults('Similarity', imageUrls, imageIds, imageDistances, this.imageSimilaritySearchThreshold);
+        }
+      },
+
+      handleImageResults: function(searchType, imageUrls, imageIds, imageDistances, imageThreshold, error) {
+        var linkFunction = this.transforms && this.transforms.entity ? this.transforms.entity.imagePageLink : null;
+        var pageId = this.pageId;
+
+        // Remove images with distances over the threshold.
+        var sliceIndex = _.findIndex(imageDistances, function(distance) {
+          return _.toNumber(distance) > imageThreshold;
+        });
+
+        var imageResults = imageIds.map(function(id, index) {
+          return {
+            id: id,
+            link: (linkFunction ? linkFunction(id) : ''),
+            rank: imageDistances[index],
+            source: imageUrls[index]
+          };
+        }).slice(0, sliceIndex < 0 ? imageIds.length : sliceIndex);
+
+        this.imageSearchMatches = (!this.imageSearchMatches.length ? imageResults : _.uniqBy(this.imageSearchMatches.concat(imageResults).filter(function(result) {
+          return result.id !== pageId;
+        }).sort(function(a, b) {
+          return a.rank - b.rank;
+        }), 'id')).map(function(result, index) {
+          result.name = 'Match #' + (index + 1);
+          return result;
+        });
+
+        this.imageSearchLoading = this.imageFaceSearchLoading || this.imageSimilaritySearchLoading;
+
+        if(error && this.logger) {
+          this.logger.log('ImageSearch' + searchType + '-Error', '{"type":"' + searchType + '","name":"' + this.pageId + '"}');
+        }
+      },
+
       isEntity: function(searchFieldsConfig) {
         return searchFieldsConfig.link === 'entity';
       },
@@ -1198,6 +1415,17 @@ limitations under the License.
       isMapVisible: function(loading, data, opened) {
         // Ensure the map section is opened prior to rendering.
         return !loading && !!(data && data.length) && opened;
+      },
+
+      showSimilarImageMatchesSection: function(event) {
+        if(event.detail.value) {
+          var self = this;
+          this.aggregationFields.forEach(function(aggregationField, index) {
+            self.set(['aggregationFields', index, 'loadData'], false);
+            self.set(['aggregationFields', index, 'showData'], false);
+          });
+          this.showImageMatches = true;
+        }
       },
 
       showSectionAndRunQueries: function(event) {

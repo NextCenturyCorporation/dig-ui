@@ -620,16 +620,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
-     * Returns the link for the image with the given ID.
-     *
-     * @param {String} id
-     * @return {String}
-     */
-    externalImageLink: function(id) {
-      return commonTransforms.getLink(id, esConfig.imageField.link, esConfig.imageField.type, esConfig.imageField.key);
-    },
-
-    /**
      * Returns the list of extraction objects for the given query results to show in an aggregation-display.
      *
      * @param {Object} data
@@ -675,6 +665,16 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         dates: [],
         items: []
       };
+    },
+
+    /**
+     * Returns the link for the image entity page with the given ID.
+     *
+     * @param {String} id
+     * @return {String}
+     */
+    imagePageLink: function(id) {
+      return commonTransforms.getLink(id, esConfig.imageField.link, esConfig.imageField.type, esConfig.imageField.key);
     },
 
     /**
