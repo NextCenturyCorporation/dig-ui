@@ -549,7 +549,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       histograms.push(unidentifiedHistogram);
     }
 
-    histograms.forEach(function(histogramItem) {
+    return histograms.map(function(histogramItem) {
       histogramItem.points = histogramItem.points.filter(function(item) {
         var time = new Date(item.date).getTime();
         return (timeBegin ? time >= timeBegin : true) && (timeEnd ? time <= timeEnd : true);
@@ -557,9 +557,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         // Sort oldest first.
         return new Date(a.date).getTime() - new Date(b.date).getTime();
       });
+      return histogramItem;
+    }).filter(function(histogramItem) {
+      return histogramItem.points.length;
     });
-
-    return histograms;
   }
 
   return {

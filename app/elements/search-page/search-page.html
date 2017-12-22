@@ -64,8 +64,7 @@ limitations under the License.
       }
 
       search-fields-dialog {
-        /* Center with the screen.  Left:  320px facets drawer.  Right:  10px navbar padding + 40px per navbar icon. */
-        margin-right: 230px;
+        margin: 0 auto;
       }
 
       #pageDrawer {
@@ -88,11 +87,6 @@ limitations under the License.
         height: 30px;
         width: 30px;
         padding: 0;
-      }
-
-      /* Spacer to match drawer width */
-      #pageNavbar .drawer-spacer {
-        width: 220px;
       }
 
       #pageFacets {
@@ -125,9 +119,9 @@ limitations under the License.
         -webkit-box-orient: vertical;
       }
 
-      #searchHeader sparkline-list {
+      sparkline-list {
         height: 25px;
-        margin-top: 15px;
+        margin-top: 10px;
       }
 
       #searchResultList {
@@ -153,10 +147,6 @@ limitations under the License.
       #searchTabs paper-tab.iron-selected {
         background-color: rgba(0,0,0,0.1);
         color: var(--primary-text-color);
-      }
-
-      #searchTimeline .date-menu {
-        margin-bottom: 10px;
       }
 
       #searchTimeline .timeline-text {
@@ -523,8 +513,6 @@ limitations under the License.
         <a id="logoLink" slot="top" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
           <img id="logo" src="/images/dig-logo.png" alt="">
         </a>
-
-        <div slot="top" class="drawer-spacer"></div>
 
         <div slot="top" class="flex">
           <search-fields-dialog
