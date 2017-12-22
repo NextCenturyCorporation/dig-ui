@@ -196,8 +196,22 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function getTitleOrDescription(type, searchFields, result, highlights) {
-    var searchFieldsObject = _.find(searchFields, function(object) {
+    var getTitleOrDescriptionText = function(data) {
+      if(_.isArray(data)) {
+        return data.map(function(object) {
+          return object.value;
+        }).join(' ');
+      }
+      if(_.isObject(data)) {
+        return data.value;
+      }
+      return '';
+    };
+
+    var searchFieldsObject = _.find(searchFields.filter(function(object) {
       return object.result === type;
+    }), function(object) {
+      return getTitleOrDescriptionText(_.get(result, '_source.' + object.extractionField));
     });
 
     var returnObject = {
@@ -209,14 +223,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     if(searchFieldsObject) {
       var extraction = _.get(result, '_source.' + searchFieldsObject.extractionField);
       if(_.isObject(extraction) || _.isArray(extraction)) {
-        if(_.isObject(extraction)) {
-          returnObject.text = extraction.value;
-        }
-        if(_.isArray(extraction)) {
-          returnObject.text = extraction.map(function(object) {
-            return object.value;
-          }).join(' ');
-        }
+        returnObject.text = getTitleOrDescriptionText(extraction);
         if(highlights) {
           var highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlights[searchFieldsObject.key]);
           returnObject.highlight = highlight || returnObject.highlight || returnObject.text;
