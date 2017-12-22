@@ -17,7 +17,7 @@
 /* exported commonTransforms */
 /* jshint camelcase:false */
 
-var commonTransforms = (function(_, moment, domain) {
+var commonTransforms = (function(_, moment, domain, pathPrefix) {
   /**
    * Returns the formatted string for the given date number/string in UTC format.
    */
@@ -56,10 +56,10 @@ var commonTransforms = (function(_, moment, domain) {
    */
   function getLink(itemId, linkType, fieldType, fieldId) {
     if(linkType === 'result') {
-      return '/result.html?domain=' + domain + '&id=' + itemId;
+      return pathPrefix + '/result.html?domain=' + domain + '&id=' + itemId;
     }
     if(itemId && linkType === 'entity') {
-      return '/entity.html?domain=' + domain + '&id=' + encodeURIComponent(itemId) + '&type=' + fieldId;
+      return pathPrefix + '/entity.html?domain=' + domain + '&id=' + encodeURIComponent(itemId) + '&type=' + fieldId;
     }
     return undefined;
   }

@@ -124,7 +124,7 @@ limitations under the License.
     <iron-ajax
       auto
       handle-as="json"
-      url="/config"
+      url="/dig-ui/config"
       last-response="{{serverConfig}}">
     </iron-ajax>
 
@@ -414,7 +414,7 @@ limitations under the License.
 
     <div class="page-head">
       <a id="logoLink" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
-        <img id="logo" src="/images/dig-logo.png" alt="">
+        <img id="logo" src="[[findDigUrl(serverConfig.pathPrefix, '/images/dig-logo.png')]]" alt="">
       </a>
 
       <div class="page-data">
@@ -820,6 +820,7 @@ limitations under the License.
             <export-button
               slot="title"
               data="[[searchResultsShown]]"
+              export-endpoint="[[findDigUrl(serverConfig.pathPrefix, '/export')]]"
               search-fields="[[searchFields]]"
               transform-csv-function="[[transforms.export.createExportDataForCsv]]"
               transform-pdf-function="[[transforms.export.createExportDataForPdf]]">
@@ -1177,6 +1178,10 @@ limitations under the License.
 
       exists: function(object) {
         return typeof object !== 'undefined';
+      },
+
+      findDigUrl: function(prefix, link) {
+        return prefix + link;
       },
 
       findDomain: function(parameters, serverConfig) {

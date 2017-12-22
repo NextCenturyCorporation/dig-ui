@@ -30,19 +30,20 @@ var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var errorHandler = require('errorhandler');
 var path = require('path');
-var config = require('./environment');
+var serverConfig = require('./environment');
+var serverPath = serverConfig.pathPrefix ? '/' + serverConfig.pathPrefix : '';
 
 module.exports = function(app) {
   var env = app.get('env');
 
-  app.set('views', config.root + '/server/views');
+  app.set('views', serverConfig.root + '/server/views');
   app.engine('html', require('ejs').renderFile);
   app.set('view engine', 'html');
   app.use(compression());
   app.use(session({
     resave: false,
     saveUninitialized: false,
-    secret: config.secret,
+    secret: serverConfig.secret,
     store: new MemoryStore({
       checkPeriod: 86400000
     })
@@ -59,28 +60,28 @@ module.exports = function(app) {
   
   if ('production' === env) {
     // Add paths to static files.  Do NOT add paths to search/entity pages because they must be loaded through the router with proper auth.
-    app.use('/bower_components', express.static(path.join(config.root, 'dist/bower_components')));
-    app.use('/elements', express.static(path.join(config.root, 'dist/elements')));
-    app.use('/images', express.static(path.join(config.root, 'dist/images')));
-    app.use('/styles', express.static(path.join(config.root, 'dist/styles')));
-    app.use('/transforms', express.static(path.join(config.root, 'dist/transforms')));
-    app.use(favicon(path.join(config.root, 'dist/favicon.ico')));
+    app.use(serverPath + '/bower_components', express.static(path.join(serverConfig.root, 'dist/bower_components')));
+    app.use(serverPath + '/elements', express.static(path.join(serverConfig.root, 'dist/elements')));
+    app.use(serverPath + '/images', express.static(path.join(serverConfig.root, 'dist/images')));
+    app.use(serverPath + '/styles', express.static(path.join(serverConfig.root, 'dist/styles')));
+    app.use(serverPath + '/transforms', express.static(path.join(serverConfig.root, 'dist/transforms')));
+    app.use(favicon(path.join(serverConfig.root, 'dist/favicon.ico')));
     // Set appPath for use by the router.
-    app.set('appPath', path.join(config.root, 'dist'));
+    app.set('appPath', path.join(serverConfig.root, 'dist'));
     app.use(morgan('dev'));
     app.use(errorHandler()); // Error handler - has to be last
   }
 
   if ('development' === env || 'test' === env) {
     // Add paths to static files.  Do NOT add paths to search/entity pages because they must be loaded through the router with proper auth.
-    app.use('/bower_components', express.static(path.join(config.root, 'app/bower_components')));
-    app.use('/elements', express.static(path.join(config.root, 'app/elements')));
-    app.use('/images', express.static(path.join(config.root, 'app/images')));
-    app.use('/styles', express.static(path.join(config.root, 'app/styles')));
-    app.use('/transforms', express.static(path.join(config.root, 'app/transforms')));
-    app.use(favicon(path.join(config.root, 'app/favicon.ico')));
+    app.use(serverPath + '/bower_components', express.static(path.join(serverConfig.root, 'app/bower_components')));
+    app.use(serverPath + '/elements', express.static(path.join(serverConfig.root, 'app/elements')));
+    app.use(serverPath + '/images', express.static(path.join(serverConfig.root, 'app/images')));
+    app.use(serverPath + '/styles', express.static(path.join(serverConfig.root, 'app/styles')));
+    app.use(serverPath + '/transforms', express.static(path.join(serverConfig.root, 'app/transforms')));
+    app.use(favicon(path.join(serverConfig.root, 'app/favicon.ico')));
     // Set appPath for use by the router.
-    app.set('appPath', path.join(config.root, 'app'));
+    app.set('appPath', path.join(serverConfig.root, 'app'));
     app.use(morgan('dev'));
     app.use(errorHandler()); // Error handler - has to be last
   }

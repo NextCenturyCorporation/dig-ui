@@ -51,7 +51,7 @@ limitations under the License.
         },
 
         transforms: {
-          computed: '_initializeTransforms(domain, esConfig)',
+          computed: '_initializeTransforms(domain, esConfig, serverConfig)',
           notify: true,
           readOnly: true,
           type: Object
@@ -98,7 +98,7 @@ limitations under the License.
 
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var esConfig = {
-          downloadImageUrl: serverConfig.downloadImageUrl || '',
+          downloadImageUrl: serverConfig.pathPrefix + (serverConfig.downloadImageUrl || ''),
           enableNetworkExpansion: !serverConfig.sendSearchesDirectlyToES,
           esIndex: (clientConfig.index && serverConfig.databaseType ? clientConfig.index[serverConfig.databaseType] : undefined),
           esType: clientConfig.root_name,
@@ -128,6 +128,10 @@ limitations under the License.
               esConfig.searchEndpoint = esConfig.searchEndpoint + '/search/coarse?project=' + domain;
             }
           }
+
+          if(esConfig.searchEndpoint.indexOf('/') === 0 && serverConfig.pathPrefix) {
+            esConfig.searchEndpoint = serverConfig.pathPrefix + esConfig.searchEndpoint;
+          }
         }
 
         if(serverConfig.esHost && serverConfig.esHost.host && esConfig.esIndex && esConfig.esType) {
@@ -140,12 +144,12 @@ limitations under the License.
         return esConfig;
       },
 
-      _initializeTransforms: function(domain, esConfig) {
+      _initializeTransforms: function(domain, esConfig, serverConfig) {
         if(!domain || !esConfig) {
           return undefined;
         }
 
-        var util = commonTransforms(_, moment, domain);
+        var util = commonTransforms(_, moment, domain, serverConfig.pathPrefix);
 
         var transforms = {};
 

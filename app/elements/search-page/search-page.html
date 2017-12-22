@@ -159,7 +159,7 @@ limitations under the License.
     <iron-ajax
       auto
       handle-as="json"
-      url="/config"
+      url="/dig-ui/config"
       last-response="{{serverConfig}}">
     </iron-ajax>
 
@@ -453,6 +453,7 @@ limitations under the License.
       id="bulkSearchDialog"
       search-fields="[[searchFields]]"
       parameter-key="[[searchFields.0.key]]"
+      upload-endpoint="[[findDigUrl(serverConfig.pathPrefix, '/upload')]]"
       search-parameters="{{searchParameters}}"
       process-request="{{processRequest}}"
       build-search-state="[[buildSearchState]]">
@@ -511,13 +512,14 @@ limitations under the License.
     <paper-header-panel class="flex" mode="waterfall">
       <paper-toolbar slot="header" id="pageNavbar">
         <a id="logoLink" slot="top" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
-          <img id="logo" src="/images/dig-logo.png" alt="">
+          <img id="logo" src="[[findDigUrl(serverConfig.pathPrefix, '/images/dig-logo.png')]]" alt="">
         </a>
 
         <div slot="top" class="flex">
           <search-fields-dialog
             date-config="[[datePropertiesToKeys]]"
             hide-images="[[!validateImageServiceConfig(serverConfig.imageServiceConfig)]]"
+            image-upload-url="[[findDigUrl(serverConfig.pathPrefix, '/uploadImage')]]"
             image-url-prefix="[[esConfig.imageUrlPrefix]]"
             image-url-suffix="[[esConfig.imageUrlSuffix]]"
             images="{{imagesUploaded}}"
@@ -672,6 +674,7 @@ limitations under the License.
               <export-button
                 client="[[esClient]]"
                 data="[[searchResultsShown]]"
+                export-endpoint="[[findDigUrl(serverConfig.pathPrefix, '/export')]]"
                 filter-list="[]"
                 index-name="[[esConfig.esIndex]]"
                 index-types="[[esConfig.esType]]"
@@ -1114,6 +1117,10 @@ limitations under the License.
 
       exists: function(object) {
         return typeof object !== 'undefined';
+      },
+
+      findDigUrl: function(prefix, link) {
+        return prefix + link;
       },
 
       findDomain: function(parameters, serverConfig) {

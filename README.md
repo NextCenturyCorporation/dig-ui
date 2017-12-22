@@ -61,6 +61,7 @@ LOG_INDEX_NAME | The elasticsearch log index name. | 'dig-logs'
 LOG_INDEX_TYPE | The elasticsearch log index type. | 'log'
 OVERRIDE_CONFIG | The stringified config object.  Overrides the domain/project and the config from the CONFIG_ENDPOINT. | undefined
 OVERRIDE_SEARCH_ENDPOINT | The stringified object containing the project names mapped to the endpoints for the search and facets REST services.  Overrides the endpoints from the project configs. | undefined
+PATH_PREFIX | The prefix for the web browser URL path. | ''
 PROFILE_INDEX_NAME | The elasticsearch profile index name. | 'dig-profiles'
 PROFILE_INDEX_TYPE | The elasticsearch profile index type. | 'profile'
 SEARCH_CONFIG | The stringified object containing project names and/or locations for the Sandpaper search REST service (from project configs) mapped to replacement locations. | undefined
