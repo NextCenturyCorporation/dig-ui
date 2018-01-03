@@ -44,49 +44,54 @@ var exportTransforms = (function(_) {
     createExportDataForCsv: function(searchData, searchFields) {
       var linkPrefix = window.location.hostname + ':' + window.location.port;
       var exportData = [];
-      var header = ['Webpage URL', 'DIG URL', 'Title'];
+      var exportDataHeader = ['Webpage URL', 'DIG URL', 'Title'];
+
+      var keysToArrayIndexes = {};
 
       searchFields.forEach(function(field) {
         if(field.result === 'header') {
-          header.push(field.title);
+          keysToArrayIndexes[field.key] = exportDataHeader.length;
+          exportDataHeader.push(field.title);
         }
       });
 
       searchFields.forEach(function(field) {
         if(field.result === 'detail') {
-          header.push(field.title);
+          keysToArrayIndexes[field.key] = exportDataHeader.length;
+          exportDataHeader.push(field.title);
         }
       });
 
-      header.push('Content');
-      header.push('Image URLs');
-      exportData.push(header);
+      exportDataHeader.push('Content');
+      exportDataHeader.push('Image URLs');
+      exportData.push(exportDataHeader);
 
       searchData.forEach(function(result) {
         var imageLinks = (result.images || []).map(function(image) {
           return image.source;
         }).join(', ');
 
-        var exportDataBody = [
-            result.url,
-            linkPrefix + result.link,
-            result.title,
-        ];
+        var exportDataBody = new Array(exportDataHeader.length);
+        exportDataBody[0] = result.url;
+        exportDataBody[1] = linkPrefix + result.link;
+        exportDataBody[2] = result.title;
+        exportDataBody[exportDataHeader.length - 2] = result.description.replace(/\s/g, ' ');
+        exportDataBody[exportDataHeader.length - 1] = imageLinks;
 
         result.headerExtractions.forEach(function(elementArray) {
-          exportDataBody.push(elementArray.data.reduce(function(terms, element, index) {
+          var data = elementArray.data.reduce(function(terms, element, index) {
             return terms + (index ? ', ' : '') + element.text;
-          }, ''));
+          }, '');
+          exportDataBody[keysToArrayIndexes[elementArray.key]] = data;
         });
 
         result.detailExtractions.forEach(function(elementArray) {
-          exportDataBody.push(elementArray.data.reduce(function(terms, element, index) {
+          var data = elementArray.data.reduce(function(terms, element, index) {
             return terms + (index ? ', ' : '') + element.text;
-          }, ''));
+          }, '');
+          exportDataBody[keysToArrayIndexes[elementArray.key]] = data;
         });
 
-        exportDataBody.push(result.description.replace(/\s/g, ' '));
-        exportDataBody.push(imageLinks);
         exportData.push(exportDataBody);
       });
 
