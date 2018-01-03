@@ -315,7 +315,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         var begin = extractionObject.data[0];
         var end = extractionObject.data[extractionObject.data.length - 1];
         var clone = _.cloneDeep(begin);
-        clone.text = begin.text + ' and ' + end.text;
+        clone.text = 'From ' + begin.text + ' to ' + end.text;
         clone.provenances = extractionObject.data.reduce(function(provenances, extraction) {
           return provenances.concat(extraction.provenances);
         }, []);

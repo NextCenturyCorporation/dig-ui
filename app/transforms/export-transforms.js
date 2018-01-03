@@ -44,7 +44,7 @@ var exportTransforms = (function(_) {
     createExportDataForCsv: function(searchData, searchFields) {
       var linkPrefix = window.location.hostname + ':' + window.location.port;
       var exportData = [];
-      var header = ['Ad url', 'Dig url', 'Title'];
+      var header = ['Webpage URL', 'DIG URL', 'Title'];
 
       searchFields.forEach(function(field) {
         if(field.result === 'header') {
@@ -93,10 +93,15 @@ var exportTransforms = (function(_) {
       return exportData;
     },
 
-    createExportDataForPdf: function(searchData) {
+    createExportDataForPdf: function(searchData, searchFields) {
       var linkPrefix = window.location.hostname + ':' + window.location.port;
       var exportData = [];
       var nextId = 1;
+
+      var keysToTitles = {};
+      searchFields.forEach(function(field) {
+        keysToTitles[field.key] = field.title;
+      });
 
       searchData.forEach(function(result) {
         var item = {
@@ -112,7 +117,7 @@ var exportTransforms = (function(_) {
             label: result.title,
             value: ''
           }, {
-            label: 'URL:  ',
+            label: 'Webpage URL:  ',
             value: result.url
           }, {
             label: 'DIG URL:  ',
@@ -127,7 +132,7 @@ var exportTransforms = (function(_) {
 
           if(data !== '') {
             item.paragraphs.push({
-              label: elementArray.key + ': ',
+              label: keysToTitles[elementArray.key] + ': ',
               value: data
             });
           }
@@ -140,7 +145,7 @@ var exportTransforms = (function(_) {
 
           if(data !== '') {
             item.paragraphs.push({
-              label: elementArray.key + ': ',
+              label: keysToTitles[elementArray.key] + ': ',
               value: data
             });
           }

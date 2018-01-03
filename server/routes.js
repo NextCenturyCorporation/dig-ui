@@ -98,6 +98,12 @@ module.exports = function(app) {
     res.download(req.params.file);
   });
 
+  app.get(serverPath + '/downloadImage/:id', function(req, res) {
+    // Image URL used in testing.  Image URL used in development is set by DOWNLOAD_IMAGE_URL.
+    var link = 'https://content.tellfinder.com/image/' + decodeURIComponent(req.params.id) + '.jpg';
+    req.pipe(request(link)).pipe(res);
+  });
+
   app.get('/dig-ui/config/?', function(req, res) {
     // Whenever a page is loaded, initialize the DIG elasticsearch indices if needed.
     if(serverConfig.esHostString) {
@@ -151,8 +157,12 @@ module.exports = function(app) {
       });
       writer.pipe(fs.createWriteStream(filename));
       var done = false;
-      writer.on('data', function() {
-        if(done) {
+      var call = 0;
+      writer.on('data', function(stuff) {
+        ++call;
+        if(done && call > (req.body.length - 2)) {
+          // Unset done so the response is not sent twice.
+          done = false;
           writer.end();
           res.status(200).set('Cache-Control', 'no-cache').send(serverPath + '/file/' + filename);
         }
@@ -161,6 +171,7 @@ module.exports = function(app) {
         writer.write(req.body[i]);
       }
       done = true;
+      // Write once more because sometimes the data is processed before setting done.
       writer.write('');
     } else {
       res.status(200).send();
@@ -197,7 +208,6 @@ module.exports = function(app) {
   });
 
   app.get('/*', function(req, res) {
-             console.log('redirect to ' + serverPath + '/search.html');
     res.redirect(serverPath + '/search.html');
   });
 };
