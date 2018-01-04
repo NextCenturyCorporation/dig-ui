@@ -79,6 +79,7 @@ module.exports = function(app) {
       // If the token is in the URL, save the token and redirect to the URL without the query token.
       if(req.query.access_token) {
         req.session.token = token;
+        req.session.username = data.email;
         res.redirect(url);
       }
       else {
@@ -120,7 +121,7 @@ module.exports = function(app) {
 
     res.status(200).send({
       appVersion: serverConfig.appVersion,
-      username: req.headers.user ? req.headers.user : 'username',
+      username: req.session.username ? req.session.username : 'username',
       configEndpoint: serverConfig.configEndpoint,
       configPassword: serverConfig.configPassword,
       configUsername: serverConfig.configUsername,
