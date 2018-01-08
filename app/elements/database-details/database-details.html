@@ -1,0 +1,284 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
+<link rel="import" href="../../bower_components/elastic-client-aggregation-builder/elastic-client-aggregation-builder.html">
+<link rel="import" href="../../bower_components/elastic-client-filter-builder/elastic-client-filter-builder.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/moment-element/moment-with-locales-import.html">
+<link rel="import" href="../../bower_components/zoomable-bar-chart/zoomable-bar-chart.html">
+
+<dom-module id="database-details">
+  <template>
+    <style include="iron-flex"></style>
+
+    <style>
+      :host {
+        display: block;
+      }
+
+      .label {
+        color: var(--secondary-text-color);
+        font-size: 16px;
+        margin-right: 5px;
+      }
+
+      .row {
+        margin-bottom: 5px;
+      }
+
+      .value {
+        font-size: 16px;
+        font-weight: 500;
+      }
+    </style>
+
+    <build-and-run-query
+      type="match_all"
+      fields="[]"
+      values="[]"
+      client="[[client]]"
+      index-name="[[indexName]]"
+      index-types="[[indexTypes]]"
+      aggregations="[]"
+      filters="[]"
+      page-size="1"
+      sort-field="[[timestampField]]"
+      sort-order="desc"
+      source-include="[[_buildArray(timestampField)]]"
+      transform-function="[[_buildTransformFunctionToFindDate(timestampField)]]"
+      total="{{_latestTotal}}"
+      results="{{_latestResults}}"
+      loading="{{_latestLoading}}"
+      error="{{_latestError}}">
+    </build-and-run-query>
+
+    <elastic-client-aggregation-builder
+      name="latest_data"
+      type="date_histogram"
+      count="0"
+      field="[[timestampField]]"
+      interval="day"
+      ejs-aggregation="{{_timelineAggregation}}">
+    </elastic-client-aggregation-builder>
+
+    <elastic-client-filter-builder
+      type="range"
+      field="[[timestampField]]"
+      values="[[_timelineDates]]"
+      ejs-filter="{{_timelineFilter}}">
+    </elastic-client-filter-builder>
+
+    <template is="dom-if" if="[[_timelineAggregation]]">
+      <template is="dom-if" if="[[_timelineFilter]]">
+        <build-and-run-query
+          type="match_all"
+          fields="[]"
+          values="[]"
+          client="[[client]]"
+          index-name="[[indexName]]"
+          index-types="[[indexTypes]]"
+          aggregations="[[_buildArray(_timelineAggregation)]]"
+          filters="[[_buildArray(_timelineFilter)]]"
+          page-size="0"
+          transform-function="[[_buildTransformFunctionToCreateTimeline(timelineFunction)]]"
+          error="{{_timelineError}}"
+          loading="{{_timelineLoading}}"
+          results="{{_timelineResults}}">
+        </build-and-run-query>
+      </template>
+    </template>
+
+    <div class="layout horizontal row">
+      <div class="label">Domain</div>
+      <div class="value">[[domain]]</div>
+    </div>
+
+    <div class="layout horizontal row">
+      <div class="label">Total Count of [[resultType]]</div>
+      <template is="dom-if" if="[[_latestLoading]]">
+        <div class="value">Loading...</div>
+      </template>
+      <template is="dom-if" if="[[!_latestLoading]]">
+        <div class="value">[[_latestCount]]</div>
+      </template>
+    </div>
+
+    <div class="layout horizontal row">
+      <div class="label">Latest [[resultType]]</div>
+      <template is="dom-if" if="[[_latestLoading]]">
+        <div class="value">Loading...</div>
+      </template>
+      <template is="dom-if" if="[[!_latestLoading]]">
+        <div class="value">[[_latestResults]]</div>
+      </template>
+    </div>
+
+    <div class="layout horizontal row">
+      <div class="label">Timeline of the [[resultType]] in the Last Month</div>
+    </div>
+
+    <zoomable-bar-chart
+      id="timeline"
+      bar-property="date"
+      data="[[_timelineResults]]"
+      default-color="greenyellow"
+      default-label="[[resultType]]"
+      interval="day"
+      label-property="text"
+      load
+      loading="[[_timelineLoading]]"
+      source="[[resultType]]"
+      stack-property="data"
+      timeline>
+    </zoomable-bar-chart>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    /* globals moment */
+    Polymer({
+      is: 'database-details',
+
+      properties: {
+        client: {
+          type: Object
+        },
+
+        domain: {
+          type: String,
+          value: 'None'
+        },
+
+        indexName: {
+          type: String
+        },
+
+        indexTypes: {
+          type: Array
+        },
+
+        resultType: {
+          type: String,
+          value: 'Webpages'
+        },
+
+        show: {
+          observer: '_resizeTimeline',
+          type: Boolean,
+          value: false
+        },
+
+        timelineFunction: {
+          type: Object
+        },
+
+        timestampField: {
+          type: String
+        },
+
+        _latestCount: {
+          computed: '_buildCountString(_latestTotal)',
+          type: String
+        },
+
+        _latestError: {
+          type: Object
+        },
+
+        _latestLoading: {
+          type: Boolean
+        },
+
+        _latestResults: {
+          type: String
+        },
+
+        _latestTotal: {
+          type: Number
+        },
+
+        _timelineAggregation: {
+          type: Object
+        },
+
+        _timelineDates: {
+          type: Array,
+          value: function() {
+            var end = new Date();
+            var begin = new Date().setMonth(end.getMonth() - 1);
+            return [begin, end];
+          }
+        },
+
+        _timelineError: {
+          type: Object
+        },
+
+        _timelineFilter: {
+          type: Object
+        },
+
+        _timelineLoading: {
+          type: Boolean
+        },
+
+        _timelineResults: {
+          type: Array
+        }
+      },
+
+      _buildArray: function(string) {
+        return [string];
+      },
+
+      _buildCountString: function(totalCount) {
+        return (totalCount || '').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      },
+
+      _buildTransformFunctionToFindDate: function(timestampField) {
+        return function(data) {
+          if(data && data.hits && data.hits.hits && data.hits.hits.length && data.hits.hits[0]._source) {
+            var dateString = data.hits.hits[0]._source[timestampField];
+            return moment.utc(new Date(dateString)).format('MMM D, YYYY');
+          }
+          return 'None';
+        };
+      },
+
+      _buildTransformFunctionToCreateTimeline: function(timelineFunction) {
+        var type = this.resultType;
+        return function(data) {
+          var timeline = timelineFunction(data, {
+            name: 'latest_data',
+            unidentified: type
+          });
+          return timeline.histogram;
+        };
+      },
+
+      _resizeTimeline: function() {
+        if(this.show && this._timelineResults) {
+          this.$$('#timeline').resize();
+        }
+      }
+    });
+  })();
+  </script>
+</dom-module>

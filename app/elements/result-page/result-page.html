@@ -42,7 +42,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
 <link rel="import" href="../../bower_components/user-settings-dialog/user-settings-dialog.html">
 <link rel="import" href="../../elements/copy-button/copy-button.html">
-<link rel="import" href="../../elements/info-data/info-data.html">
 <link rel="import" href="../../elements/info-revisions/info-revisions.html">
 <link rel="import" href="../../elements/info-similar-results/info-similar-results.html">
 <link rel="import" href="../../elements/section-wrapper/section-wrapper.html">
@@ -328,15 +327,6 @@ limitations under the License.
       user-id="[[userId]]">
     </save-case-dialog>
 
-    <info-data
-      id="dataInfoDialog"
-      client="[[esClient]]"
-      index-name="[[esConfig.esIndex]]"
-      index-types="[[esConfig.esType]]"
-      domain="[[domain]]"
-      sort-field="@timestamp">
-    </info-data>
-
     <div class="page-head">
       <a id="logoLink" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
         <img id="logo" src="[[findDigUrl(serverConfig.pathPrefix, '/images/dig-logo.png')]]" alt="">
@@ -394,11 +384,6 @@ limitations under the License.
               View DIG Data Training Options
             </paper-icon-item>
           </template>
-
-          <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
-            <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
-            View DIG Database Information
-          </paper-icon-item>
 
           <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
             <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
@@ -937,11 +922,6 @@ limitations under the License.
       /************* MENU *************/
       emailSupport: function() {
         window.open('mailto:support@memex.software');
-      },
-
-      openDataInfoDialog: function() {
-        this.$$('#menuDropdown').close();
-        this.$$('#dataInfoDialog').open();
       },
 
       openHelpPage: function() {

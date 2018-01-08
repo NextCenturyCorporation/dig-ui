@@ -48,7 +48,6 @@ limitations under the License.
 <link rel="import" href="../../elements/copy-button/copy-button.html">
 <link rel="import" href="../../elements/dual-column/dual-column.html">
 <link rel="import" href="../../elements/info-aggregations/info-aggregations.html">
-<link rel="import" href="../../elements/info-data/info-data.html">
 <link rel="import" href="../../elements/section-wrapper/section-wrapper.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
 <link rel="import" href="../../styles/entity-page-styles.html">
@@ -379,15 +378,6 @@ limitations under the License.
       user-id="[[userId]]">
     </save-case-dialog>
 
-    <info-data
-      id="dataInfoDialog"
-      client="[[esClient]]"
-      index-name="[[esConfig.esIndex]]"
-      index-types="[[esConfig.esType]]"
-      domain="[[domain]]"
-      sort-field="@timestamp">
-    </info-data>
-
     <iron-ajax
       id="imageSimilaritySearch"
       content-type="application/x-www-form-urlencoded"
@@ -484,11 +474,6 @@ limitations under the License.
             </paper-icon-item>
           </template>
 
-          <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
-            <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
-            View DIG Database Information
-          </paper-icon-item>
-
           <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
             <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
             Open a DIG Search Page in a New Tab
@@ -571,10 +556,10 @@ limitations under the License.
                         properties-ready="{{processRequest}}"
                         source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
                         transform-config="[[createTimelineConfig(item.dateCollection, item.dateSelected, item.entity, pageConfig, pageId)]]"
-                        transform-function="[[transforms.entity.histograms]]"
-                        error="{{item.timelineDataError}}"
-                        loading="{{item.timelineDataLoading}}"
-                        results="{{item.timelineDataResults}}">
+                        transform-function="[[transforms.entity.timelines]]"
+                        error="{{item.timelineError}}"
+                        loading="{{item.timelineLoading}}"
+                        results="{{item.timelineResults}}">
                       </build-and-run-query>
                     </template>
                   </template>
@@ -664,13 +649,13 @@ limitations under the License.
                 </template>
 
                 <div class="layout horizontal center date-menu bottom-margin">
-                  <template is="dom-if" if="[[!item.timelineDataLoading]]">
-                    <template is="dom-if" if="[[!item.timelineDataResults.items.length]]">
+                  <template is="dom-if" if="[[!item.timelineLoading]]">
+                    <template is="dom-if" if="[[!item.timelineResults.sparklines.length]]">
                       <div class="flex">No Timelines of [[item.entity.title]] vs. [[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]</div>
                     </template>
 
-                    <template is="dom-if" if="[[item.timelineDataResults.items.length]]">
-                      <div class="flex">[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]] from [[item.timelineDataResults.begin]] to [[item.timelineDataResults.end]]</div>
+                    <template is="dom-if" if="[[item.timelineResults.sparklines.length]]">
+                      <div class="flex">[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]] from [[item.timelineResults.begin]] to [[item.timelineResults.end]]</div>
                     </template>
                   </template>
 
@@ -687,21 +672,21 @@ limitations under the License.
                   </template>
                 </div>
 
-                <elastic-error error="[[item.timelineDataError]]" message="{{item.timelineDataErrorMessage}}"></elastic-error>
+                <elastic-error error="[[item.timelineError]]" message="{{item.timelineErrorMessage}}"></elastic-error>
 
-                <template is="dom-if" if="[[!item.timelineDataResults.items.length]]">
+                <template is="dom-if" if="[[!item.timelineResults.sparklines.length]]">
                   <status-text
-                    count="[[item.timelineDataResults.items.length]]"
-                    error="[[item.timelineDataErrorMessage]]"
+                    count="[[item.timelineResults.sparklines.length]]"
+                    error="[[item.timelineErrorMessage]]"
                     label="Timelines"
-                    loading="[[item.timelineDataLoading]]"
+                    loading="[[item.timelineLoading]]"
                     empty="">
                   </status-text>
                 </template>
 
-                <template is="dom-if" if="[[!item.timelineDataLoading]]">
-                  <template is="dom-if" if="[[item.timelineDataResults.items.length]]">
-                    <sparkline-list hide-sparkline-chart="[[!item.loadData]]" data="[[item.timelineDataResults.items]]"></sparkline-list>
+                <template is="dom-if" if="[[!item.timelineLoading]]">
+                  <template is="dom-if" if="[[item.timelineResults.sparklines.length]]">
+                    <sparkline-list hide-sparkline-chart="[[!item.loadData]]" data="[[item.timelineResults.sparklines]]"></sparkline-list>
 
                     <div class="layout horizontal center bottom-margin">
                       <button-action icon="timeline" text="[[getBarChartButtonText(item.showBarChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
@@ -716,10 +701,10 @@ limitations under the License.
                       label-property="text"
                       stack-property="data"
                       interval="week"
-                      data="[[item.timelineDataResults.dates]]"
+                      data="[[item.timelineResults.histogram]]"
                       default-label="Unidentified [[item.entity.titlePlural]]"
                       source="Webpages"
-                      loading="[[item.timelineDataLoading]]"
+                      loading="[[item.timelineLoading]]"
                       display-filter-text>
                     </zoomable-bar-chart>
 
@@ -1525,11 +1510,6 @@ limitations under the License.
       /************* MENU *************/
       emailSupport: function() {
         window.open('mailto:support@memex.software');
-      },
-
-      openDataInfoDialog: function() {
-        this.$$('#menuDropdown').close();
-        this.$$('#dataInfoDialog').open();
       },
 
       openHelpPage: function() {

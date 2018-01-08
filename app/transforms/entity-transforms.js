@@ -69,7 +69,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       extraction.source = commonTransforms.getImageUrl(item.key, esConfig);
     }
 
-    extraction.textAndCount = extraction.text + (extraction.count ? (' (' + extraction.count + ')') : '');
+    var countLabel = extraction.count ? extraction.count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
+    extraction.textAndCount = extraction.text + (countLabel ? (' (' + countLabel + ')') : '');
     return extraction;
   }
 
@@ -421,12 +422,12 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return createResultObject(result, searchFields, searchFieldsObject.icon, searchFieldsObject.title, searchFieldsObject.styleClass, searchFieldsObject.key);
   }
 
-  function createDateHistogram(buckets, entityConfig) {
+  function createHistogram(buckets, entityConfig, unidentifiedBucketName) {
     if(buckets.length < 2) {
       return [];
     }
 
-    return buckets.reduce(function(histogram, dateBucket) {
+    return buckets.reduce(function(timeline, dateBucket) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var count = dateBucket.doc_count;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
@@ -449,42 +450,42 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         }, 0);
 
         if(sum < count) {
-          var text = '(Unidentified)';
+          var countLabel = count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
           dateObject.data.push({
             count: count - sum,
             icon: entityConfig ? entityConfig.icon : undefined,
             styleClass: entityConfig ? entityConfig.styleClass : undefined,
-            text: text,
-            textAndCount: text + ' (' + (count) + ')'
+            text: unidentifiedBucketName,
+            textAndCount: unidentifiedBucketName + ' (' + (countLabel) + ')'
           });
         }
 
         // The data list may be empty if none match the ID for the entity page.
         if(dateObject.data.length) {
-          histogram.push(dateObject);
+          timeline.push(dateObject);
         }
       }
 
-      return histogram;
+      return timeline;
     }, []).sort(function(a, b) {
       // Sort oldest first.
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
   }
 
-  function createItemHistograms(buckets, showUnidentified, timeBegin, timeEnd, entityConfig, pageConfig, pageId) {
+  function createSparklines(buckets, showUnidentified, timeBegin, timeEnd, entityConfig, pageConfig, pageId) {
     if(buckets.length < 2) {
       return [];
     }
 
-    var unidentifiedHistogram = {
+    var unidentifiedTimeline = {
       icon: entityConfig ? entityConfig.icon : undefined,
       name: '(Unidentified)',
       styleClass: entityConfig ? entityConfig.styleClass : undefined,
       points: []
     };
 
-    var histograms = buckets.reduce(function(histograms, dateBucket) {
+    var timelines = buckets.reduce(function(timelines, dateBucket) {
       var date = commonTransforms.getFormattedDate(dateBucket.key);
 
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
@@ -498,12 +499,12 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
           dateBucket[entityConfig.key].buckets.map(function(entityBucket, index) {
             return getExtraction(entityBucket, entityConfig, index);
           }).filter(commonTransforms.getExtractionFilterFunction(entityConfig.type)).forEach(function(dataItem) {
-            var histogramIndex = _.findIndex(histograms, function(histogramItem) {
-              return histogramItem.name === dataItem.text;
+            var timelineIndex = _.findIndex(timelines, function(timelineItem) {
+              return timelineItem.name === dataItem.text;
             });
 
-            if(histogramIndex < 0) {
-              histograms.push({
+            if(timelineIndex < 0) {
+              timelines.push({
                 icon: dataItem.icon,
                 id: dataItem.id,
                 link: dataItem.link,
@@ -511,10 +512,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
                 styleClass: dataItem.styleClass,
                 points: []
               });
-              histogramIndex = histograms.length - 1;
+              timelineIndex = timelines.length - 1;
             }
 
-            histograms[histogramIndex].points.push({
+            timelines[timelineIndex].points.push({
               count: dataItem.count,
               date: date
             });
@@ -524,14 +525,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         }
 
         if(sum < count) {
-          unidentifiedHistogram.points.push({
+          unidentifiedTimeline.points.push({
             count: count - sum,
             date: date
           });
         }
       }
 
-      return histograms;
+      return timelines;
     }, []).sort(function(a, b) {
       // Sort the page item to the top.
       if(entityConfig && pageConfig && entityConfig.key === pageConfig.key) {
@@ -552,21 +553,21 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
     });
 
-    if(showUnidentified && unidentifiedHistogram.points.length) {
-      histograms.push(unidentifiedHistogram);
+    if(showUnidentified && unidentifiedTimeline.points.length) {
+      timelines.push(unidentifiedTimeline);
     }
 
-    return histograms.map(function(histogramItem) {
-      histogramItem.points = histogramItem.points.filter(function(item) {
+    return timelines.map(function(timelineItem) {
+      timelineItem.points = timelineItem.points.filter(function(item) {
         var time = new Date(item.date).getTime();
         return (timeBegin ? time >= timeBegin : true) && (timeEnd ? time <= timeEnd : true);
       }).sort(function(a, b) {
         // Sort oldest first.
         return new Date(a.date).getTime() - new Date(b.date).getTime();
       });
-      return histogramItem;
-    }).filter(function(histogramItem) {
-      return histogramItem.points.length;
+      return timelineItem;
+    }).filter(function(timelineItem) {
+      return timelineItem.points.length;
     });
   }
 
@@ -650,32 +651,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
-     * Returns the histogram data for the given query results to show in a timeline bar chart (by date, then by item)
-     * and a sparkline chart (by item, then by date) in an object with the "dates" and "items" properties.
-     *
-     * @param {Object} data
-     * @param {Object} config
-     * @return {Object}
-     */
-    histograms: function(data, config) {
-      if(data && data.aggregations && data.aggregations[config.name] && data.aggregations[config.name][config.name]) {
-        var buckets = data.aggregations[config.name][config.name].buckets;
-        if(buckets.length > 1) {
-          return {
-            begin: commonTransforms.getFormattedDate(buckets[0].key),
-            end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
-            dates: createDateHistogram(buckets, config.entity),
-            items: createItemHistograms(buckets, false, null, null, config.entity, config.page, config.id)
-          };
-        }
-      }
-      return {
-        dates: [],
-        items: []
-      };
-    },
-
-    /**
      * Returns the link for the image entity page with the given ID.
      *
      * @param {String} id
@@ -721,7 +696,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
-     * Returns the histogram data for the search page sparkline chart (by item, then by date) with unidentified data.
+     * Returns the timeline data for the search page sparkline chart (by item, then by date) with unidentified data.
      *
      * @param {Object} data
      * @param {Object} config
@@ -734,12 +709,38 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
           return {
             begin: commonTransforms.getFormattedDate(config.begin || buckets[0].key),
             end: commonTransforms.getFormattedDate(config.end || buckets[buckets.length - 1].key),
-            points: createItemHistograms(buckets, true, (config.begin ? new Date(config.begin).getTime() : null), (config.end ? new Date(config.end).getTime() : null))
+            sparklines: createSparklines(buckets, true, (config.begin ? new Date(config.begin).getTime() : null), (config.end ? new Date(config.end).getTime() : null))
           };
         }
       }
       return {
         points: []
+      };
+    },
+
+    /**
+     * Returns the timeline data for the given query results to show in a timeline bar chart (by date, then by item)
+     * and a sparkline chart (by item, then by date) in an object with the "dates" and "items" properties.
+     *
+     * @param {Object} data
+     * @param {Object} config
+     * @return {Object}
+     */
+    timelines: function(data, config) {
+      if(data && data.aggregations && data.aggregations[config.name] && data.aggregations[config.name][config.name]) {
+        var buckets = data.aggregations[config.name][config.name].buckets;
+        if(buckets.length > 1) {
+          return {
+            begin: commonTransforms.getFormattedDate(buckets[0].key),
+            end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
+            histogram: createHistogram(buckets, config.entity, config.unidentified || '(Unidentified)'),
+            sparklines: createSparklines(buckets, false, null, null, config.entity, config.page, config.id)
+          };
+        }
+      }
+      return {
+        dates: [],
+        items: []
       };
     },
 

@@ -46,7 +46,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/state-manager/state-manager.html">
 <link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
 <link rel="import" href="../../bower_components/user-settings-dialog/user-settings-dialog.html">
-<link rel="import" href="../../elements/info-data/info-data.html">
+<link rel="import" href="../../elements/database-details/database-details.html">
 <link rel="import" href="../../elements/info-facets/info-facets.html">
 <link rel="import" href="../../elements/info-search/info-search.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
@@ -68,6 +68,8 @@ limitations under the License.
       }
 
       #pageDrawer {
+        top: 2px;
+        height: calc(100% - 2px);
         --paper-drawer-panel-left-drawer-container: {
           background-color: var(--primary-background-color);
           border-right: 1px solid rgba(0,0,0,var(--dark-divider-opacity));
@@ -100,7 +102,8 @@ limitations under the License.
       }
 
       #searchHeader,
-      #searchTimeline {
+      #searchTimeline,
+      database-details {
         padding: 10px;
       }
 
@@ -150,8 +153,9 @@ limitations under the License.
       }
 
       #searchTimeline .timeline-text {
-        color: var(--secondary-text-color);
+        color: var(--primary-text-color);
         font-size: 14px;
+        font-weight: 500;
         line-height: 24px;
       }
     </style>
@@ -440,15 +444,6 @@ limitations under the License.
       user-id="[[userId]]">
     </save-case-dialog>
 
-    <info-data
-      id="dataInfoDialog"
-      client="[[esClient]]"
-      index-name="[[esConfig.esIndex]]"
-      index-types="[[esConfig.esType]]"
-      domain="[[domain]]"
-      sort-field="@timestamp">
-    </info-data>
-
     <bulk-search
       id="bulkSearchDialog"
       search-fields="[[searchFields]]"
@@ -479,9 +474,9 @@ limitations under the License.
         page-size="0"
         transform-config="[[createSparklineAggregationConfig(dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
         transform-function="[[transforms.entity.searchPageTimeline]]"
-        error="{{sparklineError}}"
-        loading="{{sparklineLoading}}"
-        results="{{sparklineResults}}">
+        error="{{timelineError}}"
+        loading="{{timelineLoading}}"
+        results="{{timelineResults}}">
       </build-and-run-query>
     </template>
 
@@ -576,11 +571,6 @@ limitations under the License.
               View Your Search History
             </paper-icon-item>
 
-            <paper-icon-item title="View DIG Database Information" on-tap="openDataInfoDialog">
-              <iron-icon slot="item-icon" icon="fa:database" item-icon></iron-icon>
-              View DIG Database Information
-            </paper-icon-item>
-
             <template is="dom-if" if="[[serverConfig.tagsListEndpoint]]">
               <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
                 <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
@@ -611,7 +601,26 @@ limitations under the License.
         </iron-dropdown>
       </paper-toolbar>
 
-      <paper-drawer-panel drawer-width="320px" id="pageDrawer">
+      <paper-material slot="header" id="searchTabs" class="layout horizontal">
+        <paper-tabs class="flex" no-bar no-ink selected="{{selectedSearchTab}}">
+          <paper-tab class="flex-1">Database Details</paper-tab>
+          <paper-tab class="flex-1">Webpage Results</paper-tab>
+          <paper-tab class="flex-1">Image Results</paper-tab>
+        </paper-tabs>
+      </paper-material>
+
+      <database-details style$="[[getStyleToShowIfEqual(selectedSearchTab, 0)]]"
+        client="[[esClient]]"
+        domain="[[domain]]"
+        index-name="[[esConfig.esIndex]]"
+        index-types="[[esConfig.esType]]"
+        show="[[equals(selectedSearchTab, 0)]]"
+        timeline-function="[[transforms.entity.timelines]]"
+        timestamp-field="@timestamp">
+      </database-details>
+
+      <!-- Use the display style rather than a dom-if template so the search parameters in the facet panel update. -->
+      <paper-drawer-panel drawer-width="320px" id="pageDrawer" style$="[[getStyleToHideIfEqual(selectedSearchTab, 0)]]">
         <template is="dom-if" if="[[!serverConfig.sendSearchesDirectlyToES]]">
           <facet-panel slot="drawer" id="pageFacets"
             date-fields="[[dateFieldsToProperties]]"
@@ -691,13 +700,13 @@ limitations under the License.
             <template is="dom-if" if="[[searchResultsShown.length]]">
               <paper-material slot="header" id="searchTimeline" class="layout vertical">
                 <div class="layout horizontal center date-menu">
-                  <template is="dom-if" if="[[sparklineResults.points.length]]">
-                    <div class="layout flex">Timeline of Search Results</div>
+                  <template is="dom-if" if="[[timelineResults.sparklines.length]]">
+                    <div class="layout flex timeline-text">Timeline of Search Results</div>
                   </template>
 
-                  <template is="dom-if" if="[[!sparklineLoading]]">
-                    <template is="dom-if" if="[[!sparklineResults.points.length]]">
-                      <div class="layout flex">Timeline of Search Results Not Available</div>
+                  <template is="dom-if" if="[[!timelineLoading]]">
+                    <template is="dom-if" if="[[!timelineResults.sparklines.length]]">
+                      <div class="layout flex timeline-text">Timeline of Search Results Not Available</div>
                     </template>
                   </template>
 
@@ -714,73 +723,62 @@ limitations under the License.
                   </template>
                 </div>
 
-                <template is="dom-if" if="[[sparklineLoading]]">
+                <template is="dom-if" if="[[timelineLoading]]">
                   <loading-spinner show type="Timeline"></loading-spinner>
                 </template>
 
-                <template is="dom-if" if="[[!sparklineLoading]]">
-                  <template is="dom-if" if="[[sparklineResults.points.length]]">
-                    <sparkline-list time-interval="week" hide-name data="[[sparklineResults.points]]"></sparkline-list>
+                <template is="dom-if" if="[[!timelineLoading]]">
+                  <template is="dom-if" if="[[timelineResults.sparklines.length]]">
+                    <sparkline-list time-interval="week" hide-name data="[[timelineResults.sparklines]]"></sparkline-list>
 
                     <div class="layout horizontal timeline-text">
-                      <template is="dom-if" if="[[sparklineResults.begin]]">
-                        <div>[[sparklineResults.begin]]</div>
+                      <template is="dom-if" if="[[timelineResults.begin]]">
+                        <div>[[timelineResults.begin]]</div>
                       </template>
                       <div class="flex"></div>
-                      <template is="dom-if" if="[[sparklineResults.end]]">
-                        <div>[[sparklineResults.end]]</div>
+                      <template is="dom-if" if="[[timelineResults.end]]">
+                        <div>[[timelineResults.end]]</div>
                       </template>
                     </div>
                   </template>
                 </template>
               </paper-material>
-
-              <paper-material slot="header" id="searchTabs" class="layout horizontal">
-                <paper-tabs class="flex" no-bar no-ink selected="{{selectedSearchTab}}">
-                  <paper-tab class="flex-1">Webpage Results</paper-tab>
-                  <paper-tab class="flex-1">Image Results</paper-tab>
-                </paper-tabs>
-              </paper-material>
             </template>
 
-            <template is="dom-if" if="[[equals(0, selectedSearchTab)]]">
-              <result-list
-                id="searchResultList"
-                new-tab
-                text-property="title"
-                query-results="[[searchResults]]"
-                total-results="[[searchTotal]]"
-                shown-results="{{searchResultsShown}}"
-                page="{{searchPage}}"
-                page-size="10"
-                loading="[[searchLoading]]"
-                pretty-name="Webpage Results"
-                pretty-name-singular="Webpage Result"
-                header="{{searchTitle}}"
-                client="[[esClient]]"
-                index-name="[[esConfig.esIndex]]"
-                index-types="[[esConfig.esType]]"
-                id-field="_id"
-                search-fields="[[searchFields]]"
-                source-include-cached-page='["raw_content"]'
-                source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
-                transform-cached-page="[[transforms.entity.cache]]"
-                transform-nested-data="[[transforms.entity.nestedResults]]"
-                small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-                large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
-                hide-confidences
-                tag-manager="[[tagManager]]">
-              </result-list>
-            </template>
+            <result-list style$="[[getStyleToShowIfEqual(selectedSearchTab, 1)]]"
+              id="searchResultList"
+              new-tab
+              text-property="title"
+              query-results="[[searchResults]]"
+              total-results="[[searchTotal]]"
+              shown-results="{{searchResultsShown}}"
+              page="{{searchPage}}"
+              page-size="10"
+              loading="[[searchLoading]]"
+              pretty-name="Webpage Results"
+              pretty-name-singular="Webpage Result"
+              header="{{searchTitle}}"
+              client="[[esClient]]"
+              index-name="[[esConfig.esIndex]]"
+              index-types="[[esConfig.esType]]"
+              id-field="_id"
+              search-fields="[[searchFields]]"
+              source-include-cached-page='["raw_content"]'
+              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+              transform-cached-page="[[transforms.entity.cache]]"
+              transform-nested-data="[[transforms.entity.nestedResults]]"
+              small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+              large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+              hide-confidences
+              tag-manager="[[tagManager]]">
+            </result-list>
 
-            <template is="dom-if" if="[[equals(1, selectedSearchTab)]]">
-              <image-gallery
-                id="searchImageGallery"
-                images="[[imagesFromResults]]"
-                small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-                large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]">
-              </image-gallery>
-            </template>
+            <image-gallery style$="[[getStyleToShowIfEqual(selectedSearchTab, 2)]]"
+              id="searchImageGallery"
+              images="[[imagesFromResults]]"
+              small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+              large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]">
+            </image-gallery>
           </template>
         </paper-header-panel>
       </paper-drawer-panel>
@@ -1116,6 +1114,10 @@ limitations under the License.
         };
       },
 
+      equals: function(one, two) {
+        return one === two;
+      },
+
       exists: function(object) {
         return typeof object !== 'undefined';
       },
@@ -1205,10 +1207,6 @@ limitations under the License.
         };
       },
 
-      equals: function(one, two) {
-        return one === two;
-      },
-
       findImagesFromResults: function(searchResults) {
         var images = [];
         searchResults.forEach(function(result) {
@@ -1217,6 +1215,14 @@ limitations under the License.
           });
         });
         return images;
+      },
+
+      getStyleToHideIfEqual: function(one, two) {
+        return one === two ? 'display: none;' : '';
+      },
+
+      getStyleToShowIfEqual: function(one, two) {
+        return one === two ? '' : 'display: none;';
       },
 
       getUrlWithProject: function(domain) {
@@ -1451,11 +1457,6 @@ limitations under the License.
         this.$$('#bulkSearchDialog').open();
       },
 
-      openDataInfoDialog: function() {
-        this.$$('#menuDropdown').close();
-        this.$$('#dataInfoDialog').open();
-      },
-
       openHelpPage: function() {
         this.$$('#menuDropdown').close();
         window.open('./help.html');
@@ -1482,7 +1483,7 @@ limitations under the License.
 
       resetSearchTab: function() {
         if(!this.searchResults.length) {
-          this.set('selectedSearchTab',0);
+          this.set('selectedSearchTab', 1);
         }
       },
 
