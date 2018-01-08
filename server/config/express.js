@@ -61,6 +61,7 @@ module.exports = function(app) {
   if ('production' === env) {
     // Add paths to static files.  Do NOT add paths to search/entity pages because they must be loaded through the router with proper auth.
     app.use(serverPath + '/bower_components', express.static(path.join(serverConfig.root, 'dist/bower_components')));
+    app.use(serverPath + '/dig-logo.png', express.static(path.join(serverConfig.root, 'dist/dig-logo.png')));
     app.use(serverPath + '/elements', express.static(path.join(serverConfig.root, 'dist/elements')));
     app.use(serverPath + '/images', express.static(path.join(serverConfig.root, 'dist/images')));
     app.use(serverPath + '/styles', express.static(path.join(serverConfig.root, 'dist/styles')));
@@ -75,6 +76,7 @@ module.exports = function(app) {
   if ('development' === env || 'test' === env) {
     // Add paths to static files.  Do NOT add paths to search/entity pages because they must be loaded through the router with proper auth.
     app.use(serverPath + '/bower_components', express.static(path.join(serverConfig.root, 'app/bower_components')));
+    app.use(serverPath + '/dig-logo.png', express.static(path.join(serverConfig.root, 'app/dig-logo.png')));
     app.use(serverPath + '/elements', express.static(path.join(serverConfig.root, 'app/elements')));
     app.use(serverPath + '/images', express.static(path.join(serverConfig.root, 'app/images')));
     app.use(serverPath + '/styles', express.static(path.join(serverConfig.root, 'app/styles')));
