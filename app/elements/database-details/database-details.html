@@ -222,7 +222,8 @@ limitations under the License.
           type: Array,
           value: function() {
             var end = new Date();
-            var begin = new Date().setMonth(end.getMonth() - 1);
+            var begin = new Date();
+            begin.setMonth(end.getMonth() - 1);
             return [begin, end];
           }
         },
