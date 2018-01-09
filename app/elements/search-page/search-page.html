@@ -1208,10 +1208,14 @@ limitations under the License.
       },
 
       findImagesFromResults: function(searchResults) {
+        var ids = {};
         var images = [];
         searchResults.forEach(function(result) {
           (result.images || []).forEach(function(image) {
-            images.push(image);
+            if(!ids[image.id]) {
+              images.push(image);
+              ids[image.id] = true;
+            }
           });
         });
         return images;
