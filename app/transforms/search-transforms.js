@@ -48,7 +48,7 @@ var searchTransforms = (function(_) {
         operator: 'union'
       };
 
-      var createDateVariable = true;
+      var createVariable = true;
 
       _.keys(searchParameters[type]).forEach(function(term) {
         if(searchParameters[type][term].enabled) {
@@ -61,8 +61,34 @@ var searchTransforms = (function(_) {
             });
 
             // Only create one date variable per date type.
-            if(createDateVariable) {
-              createDateVariable = false;
+            if(createVariable) {
+              createVariable = false;
+
+              template.clauses.push({
+                isOptional: false,
+                predicate: type,
+                variable: '?' + type + '1'
+              });
+
+              // If network expansion is enabled for any type...
+              if(networkExpansionParameters) {
+                template.clauses[0].clauses.push({
+                  isOptional: false,
+                  predicate: type,
+                  variable: '?' + type + '1'
+                });
+              }
+            }
+          } else if(searchParameters[type][term].search === 'lessthan' || searchParameters[type][term].search === 'morethan') {
+            andFilter.clauses.push({
+              constraint: searchParameters[type][term].key,
+              operator: searchParameters[type][term].search === 'lessthan' ? '<' : '>',
+              variable: '?' + type + '1'
+            });
+
+            // Only create one number variable per number type.
+            if(createVariable) {
+              createVariable = false;
 
               template.clauses.push({
                 isOptional: false,
@@ -82,12 +108,6 @@ var searchTransforms = (function(_) {
           } else if(searchParameters[type][term].search === 'excluded') {
             notFilter.clauses.push({
               constraint: searchParameters[type][term].key,
-              predicate: type
-            });
-          } else if(searchParameters[type][term].search === 'union') {
-            unionClause.clauses.push({
-              constraint: searchParameters[type][term].key,
-              isOptional: false,
               predicate: type
             });
           } else if(searchParameters[type][term].search === 'union') {
