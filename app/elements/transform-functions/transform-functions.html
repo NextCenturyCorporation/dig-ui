@@ -129,7 +129,7 @@ limitations under the License.
             }
           }
 
-          if(esConfig.searchEndpoint.indexOf('/') === 0 && serverConfig.pathPrefix) {
+          if(esConfig.searchEndpoint && esConfig.searchEndpoint.indexOf('/') === 0 && serverConfig.pathPrefix) {
             esConfig.searchEndpoint = serverConfig.pathPrefix + esConfig.searchEndpoint;
           }
         }
@@ -145,7 +145,7 @@ limitations under the License.
       },
 
       _initializeTransforms: function(domain, esConfig, serverConfig) {
-        if(!domain || !esConfig) {
+        if(!domain || !esConfig || !serverConfig) {
           return undefined;
         }
 
