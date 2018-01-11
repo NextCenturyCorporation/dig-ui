@@ -15,7 +15,6 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/array-behavior/array-behavior.html">
 <link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
@@ -41,6 +40,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/tag-entity-buttons/tag-entity-buttons.html">
 <link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
 <link rel="import" href="../../bower_components/user-settings-dialog/user-settings-dialog.html">
+<link rel="import" href="../../elements/behaviors.html">
 <link rel="import" href="../../elements/copy-button/copy-button.html">
 <link rel="import" href="../../elements/info-revisions/info-revisions.html">
 <link rel="import" href="../../elements/info-similar-results/info-similar-results.html">
@@ -395,7 +395,7 @@ limitations under the License.
             Open the DIG Help Page
           </paper-icon-item>
 
-          <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="emailSupport">
+          <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="sendSupportEmail">
             <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
             Contact DIG / Memex Support
           </paper-icon-item>
@@ -464,8 +464,8 @@ limitations under the License.
               source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
-              small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-              large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+              small-image-style-class="[[findBlurStyleClass(blurImages)]]"
+              large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
               hide-confidences
               tag-manager="[[tagManager]]">
             </result-list>
@@ -528,8 +528,8 @@ limitations under the License.
               source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
-              small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-              large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+              small-image-style-class="[[findBlurStyleClass(blurImages)]]"
+              large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
               hide-confidences
               tag-manager="[[tagManager]]">
             </result-list>
@@ -580,8 +580,8 @@ limitations under the License.
               source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
-              small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-              large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+              small-image-style-class="[[findBlurStyleClass(blurImages)]]"
+              large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
               hide-confidences
               tag-manager="[[tagManager]]">
             </result-list>
@@ -600,7 +600,7 @@ limitations under the License.
       is: 'result-page',
 
       behaviors: [
-        DigBehaviors.ArrayBehavior
+        DigBehaviors.PageBehavior
       ],
 
       properties: {
@@ -730,7 +730,7 @@ limitations under the License.
         },
 
         parameters: {
-          computed: 'findUrlParameters()',
+          computed: 'getUrlParameters()',
           type: Object
         },
 
@@ -815,90 +815,6 @@ limitations under the License.
         }
       },
 
-      concat: function(a, b) {
-        if(a && b) {
-          return a + b;
-        }
-        return undefined;
-      },
-
-      createAuthHeader: function(serverConfig) {
-        if(serverConfig.configUsername && serverConfig.configPassword) {
-          return {
-            'Authorization': 'Basic ' + btoa(serverConfig.configUsername + ':' + serverConfig.configPassword)
-          };
-        }
-        return {};
-      },
-
-      createResetDatesFunction: function(searchFields) {
-        return function(searchParameters, startDateString, endDateString) {
-          searchFields.forEach(function(searchFieldsObject) {
-            if(searchFieldsObject.isDate) {
-              searchParameters[searchFieldsObject.key] = {};
-              if(startDateString) {
-                searchParameters[searchFieldsObject.key][searchFieldsObject.dateProperties.start.key] = {
-                  key: searchFieldsObject.dateProperties.start.key,
-                  category: searchFieldsObject.dateProperties.start.title,
-                  date: new Date(startDateString),
-                  enabled: true,
-                  text: startDateString
-                };
-              }
-              if(endDateString) {
-                searchParameters[searchFieldsObject.key][searchFieldsObject.dateProperties.end.key] = {
-                  key: searchFieldsObject.dateProperties.end.key,
-                  category: searchFieldsObject.dateProperties.end.title,
-                  date: new Date(endDateString),
-                  enabled: true,
-                  text: endDateString
-                };
-              }
-            }
-          });
-          return searchParameters;
-        };
-      },
-
-      exists: function(object) {
-        return typeof object !== 'undefined';
-      },
-
-      findDigUrl: function(prefix, link) {
-        return prefix + link;
-      },
-
-      findDomain: function(parameters, serverConfig) {
-        if(parameters && serverConfig) {
-          /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-          var override = serverConfig.overrideConfig ? serverConfig.overrideConfig.project_name : '';
-          /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
-          return override || parameters.domain || parameters.project || serverConfig.defaultProject;
-        }
-        return undefined;
-      },
-
-      findPageName: function(result) {
-        return result ? result.title : undefined;
-      },
-
-      findUrlParameters: function() {
-        var parameterInput = window.location.search;
-        var parameters = {};
-        if(parameterInput && parameterInput !== '?') {
-          (parameterInput.indexOf('?') === 0 ? parameterInput.slice(1) : parameterInput).split('&').forEach(function(parameter) {
-            var parameterSplit = parameter.split('=');
-            parameters[parameterSplit[0]] = (parameterSplit.length > 1 ? parameterSplit[1] : true);
-          });
-        }
-        return parameters;
-      },
-
-      getBlurStyleClass: function(blur, large) {
-        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
-      },
-
-      /************* PAGE *************/
       buildMoreLikeThisValue: function(title, description) {
         if(!title || !description) {
           return undefined;
@@ -912,45 +828,15 @@ limitations under the License.
         return sizeString + ' ' + (size === 1 ? searchFieldsObject.title : searchFieldsObject.titlePlural);
       },
 
+      findPageName: function(result) {
+        return result ? result.title : undefined;
+      },
+
       transformResultToArray: function(result) {
         result.detailExtractions = result.headerExtractions.concat(result.detailExtractions);
         result.headerExtractions = [];
         return [result];
-      },
-      /********************************/
-
-      /************* MENU *************/
-      emailSupport: function() {
-        window.open('mailto:support@memex.software');
-      },
-
-      openHelpPage: function() {
-        this.$$('#menuDropdown').close();
-        window.open('./help.html');
-      },
-
-      openNewTab: function() {
-        window.open('./?project=' + this.domain);
-      },
-
-      openSaveDialog: function() {
-        this.$$('#menuDropdown').close();
-        this.$$('#saveDialog').open();
-      },
-
-      openTagsDialog: function() {
-        this.$$('#menuDropdown').close();
-        this.$$('#tagManager').openDialog();
-      },
-
-      toggleMenu: function() {
-        if(this.$$('#menuDropdown').style.display === 'none') {
-          this.$$('#menuDropdown').open();
-        } else {
-          this.$$('#menuDropdown').close();
-        }
       }
-      /********************************/
     });
   })();
   </script>

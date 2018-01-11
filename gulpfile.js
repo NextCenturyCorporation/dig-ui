@@ -112,6 +112,7 @@ var optimizeHtmlTask = function(src, dest) {
 gulp.task('jslint', function() {
   return gulp.src([
       'app/*.html',
+      'app/behaviors/*.js',
       'app/elements/**/*.html',
       'app/test/*.html',
       'app/transforms/*.js',
@@ -182,9 +183,9 @@ gulp.task('copy', function() {
     'app/bower_components/{webcomponentsjs,platinum-sw,sw-toolbox,promise-polyfill,leaflet,leaflet-map,lodash}/**/*'
   ]).pipe(gulp.dest(dist('bower_components')));
 
-  var arrayBehavior = gulp.src([
-    'app/bower_components/array-behavior/array-behavior.*'
-  ]).pipe(gulp.dest(dist('bower_components/array-behavior')));
+  var behaviors = gulp.src([
+    'app/behaviors/*'
+  ]).pipe(gulp.dest(dist('behaviors')));
 
   var sourceMaps = gulp.src([
     'app/bower_components/web-animations-js/web-animations-next-lite.min.js.map',
@@ -192,7 +193,7 @@ gulp.task('copy', function() {
     'app/bower_components/pdfmake/build/pdfmake.min.js.map'
   ]).pipe(gulp.dest(dist('elements')));
 
-  return merge(app, bower, arrayBehavior, sourceMaps)
+  return merge(app, behaviors, bower, sourceMaps)
     .pipe($.size({
       title: 'copy'
     }));

@@ -16,7 +16,6 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/aggregation-query-and-display/aggregation-query-and-display.html">
-<link rel="import" href="../../bower_components/array-behavior/array-behavior.html">
 <link rel="import" href="../../bower_components/auto-paginated-image-gallery/auto-paginated-image-gallery.html">
 <link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
@@ -45,6 +44,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/terms-transformer/terms-transformer.html">
 <link rel="import" href="../../bower_components/user-settings-dialog/user-settings-dialog.html">
 <link rel="import" href="../../bower_components/zoomable-bar-chart/zoomable-bar-chart.html">
+<link rel="import" href="../../elements/behaviors.html">
 <link rel="import" href="../../elements/copy-button/copy-button.html">
 <link rel="import" href="../../elements/dual-column/dual-column.html">
 <link rel="import" href="../../elements/info-aggregations/info-aggregations.html">
@@ -426,7 +426,7 @@ limitations under the License.
             </json-combine>
 
             <a class="page-link" href="[[imageSrc]]" target="_blank" title="Open Image">
-              <iron-image class$="small-blur [[getNoBlurStyleClass(blurImages)]]" src="[[imageSrc]]"></iron-image>
+              <iron-image class$="small-blur [[findNoBlurStyleClass(blurImages)]]" src="[[imageSrc]]"></iron-image>
             </a>
           </template>
         </template>
@@ -484,7 +484,7 @@ limitations under the License.
             Open the DIG Help Page
           </paper-icon-item>
 
-          <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="emailSupport">
+          <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="sendSupportEmail">
             <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
             Contact DIG / Memex Support
           </paper-icon-item>
@@ -504,7 +504,7 @@ limitations under the License.
           <dual-column>
             <template is="dom-repeat" items="[[aggregationFields]]">
               <section-wrapper slot="top"
-                class$="[[getShowStyleClass(item.showData)]]"
+                class$="[[findShowDataStyleClass(item.showData)]]"
                 error="[[item.aggregatedDataError]]"
                 icon="[[item.entity.icon]]"
                 loading="[[item.aggregatedDataLoading]]"
@@ -621,8 +621,8 @@ limitations under the License.
                     query-values="[[pageId]]"
                     transform-config="[[createExtractionConfig(item.entity, pageConfig, pageId)]]"
                     transform-function="[[transforms.entity.extractions]]"
-                    small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-                    large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                    small-image-style-class="[[findBlurStyleClass(blurImages)]]"
+                    large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
                     error-message="{{item.aggregatedDataError}}"
                     images="{{item.aggregatedDataResults}}"
                     limit="0"
@@ -689,7 +689,7 @@ limitations under the License.
                     <sparkline-list hide-sparkline-chart="[[!item.loadData]]" data="[[item.timelineResults.sparklines]]"></sparkline-list>
 
                     <div class="layout horizontal center bottom-margin">
-                      <button-action icon="timeline" text="[[getBarChartButtonText(item.showBarChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
+                      <button-action icon="timeline" text="[[createBarChartButtonText(item.showBarChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
                     </div>
 
                     <zoomable-bar-chart
@@ -734,7 +734,7 @@ limitations under the License.
 
             <template is="dom-if" if="[[pageConfig.isImage]]">
               <section-wrapper slot="top"
-                class$="[[getShowStyleClass(showImageMatches)]]"
+                class$="[[findShowDataStyleClass(showImageMatches)]]"
                 icon="[[esConfig.imageField.icon]]"
                 loading="[[imageSearchLoading]]"
                 no-data="[[!imageSearchMatches.length]]"
@@ -744,11 +744,11 @@ limitations under the License.
 
                 <auto-paginated-image-gallery
                   class="results-gallery"
-                  large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+                  large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
                   new-tab
                   page-size="100"
                   show-labels
-                  small-image-style-class="[[getBlurStyleClass(blurImages)]]"
+                  small-image-style-class="[[findBlurStyleClass(blurImages)]]"
                   images="[[imageSearchMatches]]">
                 </auto-paginated-image-gallery>
               </section-wrapper>
@@ -836,8 +836,8 @@ limitations under the License.
               source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
-              small-image-style-class="[[getBlurStyleClass(blurImages)]]"
-              large-image-style-class="[[getBlurStyleClass(blurImages, 'large')]]"
+              small-image-style-class="[[findBlurStyleClass(blurImages)]]"
+              large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
               hide-confidences
               tag-manager="[[tagManager]]">
             </result-list>
@@ -856,7 +856,7 @@ limitations under the License.
       is: 'entity-page',
 
       behaviors: [
-        DigBehaviors.ArrayBehavior
+        DigBehaviors.PageBehavior
       ],
 
       properties: {
@@ -1015,7 +1015,7 @@ limitations under the License.
         },
 
         parameters: {
-          computed: 'findUrlParameters()',
+          computed: 'getUrlParameters()',
           observer: 'updateProcessRequest',
           type: Object
         },
@@ -1101,102 +1101,13 @@ limitations under the License.
       ],
 
       attached: function() {
-        var self = this;
-
-        window.onpopstate = function() {
-          // TODO: refreshing for now. Need to address issues with interrupting logging entries -- perhaps a better
-          // approach would to be not to reload the page, but to rerun the query with the changed parameters + make
-          // sure logging is done correctly in this case, which may involve adding processRequest to create-log-message.
-          window.location.reload();
-        };
-
-        window.onload = function() {
-          if(window.history.state && window.history.state.stateHistory) {
-            self.set('stateHistory', window.history.state.stateHistory);
-          }
-        };
+        this.assignWindowProperties(this);
       },
 
-      concat: function(a, b) {
-        if(a && b) {
-          return a + b;
-        }
-        return undefined;
+      createBarChartButtonText: function(shown) {
+        return (shown ? 'Hide' : 'Show') + ' Detailed Timeline';
       },
 
-      createAuthHeader: function(serverConfig) {
-        if(serverConfig.configUsername && serverConfig.configPassword) {
-          return {
-            'Authorization': 'Basic ' + btoa(serverConfig.configUsername + ':' + serverConfig.configPassword)
-          };
-        }
-        return {};
-      },
-
-      createResetDatesFunction: function(searchFields) {
-        return function(searchParameters, startDateString, endDateString) {
-          searchFields.forEach(function(searchFieldsObject) {
-            if(searchFieldsObject.isDate) {
-              searchParameters[searchFieldsObject.key] = {};
-              if(startDateString) {
-                searchParameters[searchFieldsObject.key][searchFieldsObject.dateProperties.start.key] = {
-                  key: searchFieldsObject.dateProperties.start.key,
-                  category: searchFieldsObject.dateProperties.start.title,
-                  date: new Date(startDateString),
-                  enabled: true,
-                  text: startDateString
-                };
-              }
-              if(endDateString) {
-                searchParameters[searchFieldsObject.key][searchFieldsObject.dateProperties.end.key] = {
-                  key: searchFieldsObject.dateProperties.end.key,
-                  category: searchFieldsObject.dateProperties.end.title,
-                  date: new Date(endDateString),
-                  enabled: true,
-                  text: endDateString
-                };
-              }
-            }
-          });
-          return searchParameters;
-        };
-      },
-
-      exists: function(object) {
-        return typeof object !== 'undefined';
-      },
-
-      findDigUrl: function(prefix, link) {
-        return prefix + link;
-      },
-
-      findDomain: function(parameters, serverConfig) {
-        if(parameters && serverConfig) {
-          /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
-          var override = serverConfig.overrideConfig ? serverConfig.overrideConfig.project_name : '';
-          /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
-          return override || parameters.domain || parameters.project || serverConfig.defaultProject;
-        }
-        return undefined;
-      },
-
-      findUrlParameters: function() {
-        var parameterInput = window.location.search;
-        var parameters = {};
-        if(parameterInput && parameterInput !== '?') {
-          (parameterInput.indexOf('?') === 0 ? parameterInput.slice(1) : parameterInput).split('&').forEach(function(parameter) {
-            var parameterSplit = parameter.split('=');
-            parameters[parameterSplit[0]] = (parameterSplit.length > 1 ? parameterSplit[1] : true);
-          });
-        }
-        return parameters;
-      },
-
-      getBlurStyleClass: function(blur, large) {
-        return (blur ? (large ? 'large-blur' : 'small-blur') : '');
-      },
-
-      /************* PAGE *************/
       createCopyTextFunction: function(isLocation) {
         if(!isLocation) {
           return function(item) {
@@ -1276,10 +1187,6 @@ limitations under the License.
         };
       },
 
-      equals: function(one, two) {
-        return one === two;
-      },
-
       findImageMatches: function(esConfig, pageConfig, pageId, transforms) {
         if(esConfig && pageConfig && pageConfig.isImage && pageId && transforms && transforms.config && transforms.config.imageSrc) {
           var imageLink = transforms.config.imageSrc(pageId, esConfig);
@@ -1314,8 +1221,12 @@ limitations under the License.
         }
       },
 
-      getBarChartButtonText: function(shown) {
-        return (shown ? 'Hide' : 'Show') + ' Detailed Timeline';
+      findNoBlurStyleClass: function(blur) {
+        return (blur ? '' : 'no-blur');
+      },
+
+      findShowDataStyleClass: function(showData) {
+        return showData ? '' : 'hide';
       },
 
       getDateProperty: function(collection, selected, property, suffix) {
@@ -1323,10 +1234,6 @@ limitations under the License.
           return undefined;
         }
         return collection[selected][property] + (suffix || '');
-      },
-
-      getNoBlurStyleClass: function(blur) {
-        return (blur ? '' : 'no-blur');
       },
 
       handleImageFaceSearchResults: function(event) {
@@ -1429,16 +1336,11 @@ limitations under the License.
         }
       },
 
-      getShowStyleClass: function(showData) {
-        return showData ? '' : 'hide';
-      },
-
       updateProcessRequest: function(parameters) {
         if(!parameters.state) {
           this.set('processRequest', true);
         }
       },
-      /********************************/
 
       /************ FILTER ************/
       createFilterSectionTitle: function(filterList) {
@@ -1504,46 +1406,7 @@ limitations under the License.
             }
           });
         });
-      },
-      /********************************/
-
-      /************* MENU *************/
-      emailSupport: function() {
-        window.open('mailto:support@memex.software');
-      },
-
-      openHelpPage: function() {
-        this.$$('#menuDropdown').close();
-        window.open('./help.html');
-      },
-
-      openNewTab: function() {
-        window.open('./?project=' + this.domain);
-      },
-
-      openSaveDialog: function() {
-        this.$$('#menuDropdown').close();
-        this.$$('#saveDialog').open();
-      },
-
-      openStateHistoryDialog: function() {
-        this.$$('#menuDropdown').close();
-        this.$$('#stateManager').openStateHistory();
-      },
-
-      openTagsDialog: function() {
-        this.$$('#menuDropdown').close();
-        this.$$('#tagManager').openDialog();
-      },
-
-      toggleMenu: function() {
-        if(this.$$('#menuDropdown').style.display === 'none') {
-          this.$$('#menuDropdown').open();
-        } else {
-          this.$$('#menuDropdown').close();
-        }
       }
-      /********************************/
     });
   })();
   </script>

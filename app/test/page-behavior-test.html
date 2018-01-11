@@ -1,0 +1,574 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>page-behavior</title>
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../bower_components/web-component-tester/browser.js"></script>
+  <script src="../bower_components/test-fixture/test-fixture-mocha.js"></script>
+  <link rel="import" href="../bower_components/test-fixture/test-fixture.html">
+  <link rel="import" href="../bower_components/polymer/polymer.html">
+  <script src="../behaviors/page-behavior.js"></script>
+</head>
+
+<body>
+<dom-module id="test-page-behavior-element">
+  <template>
+  </template>
+  <script>
+    /* globals DigBehaviors, HTMLImports, Polymer */
+    HTMLImports.whenReady(function() {
+      Polymer({
+        is: 'test-page-behavior-element',
+        behaviors: [DigBehaviors.PageBehavior]
+      });
+    });
+  </script>
+</dom-module>
+
+<test-fixture id="page-behavior-fixture">
+  <template>
+    <test-page-behavior-element></test-page-behavior-element>
+  </template>
+</test-fixture>
+
+<script>
+  /* globals fixture, suite, setup, test, expect */
+  /* jshint -W030 */
+  suite('page-behavior tests', function() {
+    var element;
+
+    setup(function() {
+      element = fixture('page-behavior-fixture');
+    });
+
+    test('assignWindowProperties is a function', function() {
+      expect(element.assignWindowProperties).to.be.a('Function');
+    });
+
+    test('buildArray does return expected array if given non-array arguments', function() {
+      expect(element.buildArray('value1')).to.deep.equal(['value1']);
+      expect(element.buildArray('value1', 'value2')).to.deep.equal(['value1', 'value2']);
+    });
+
+    test('buildArray does return expected array if given array arguments', function() {
+      expect(element.buildArray(['value1'])).to.deep.equal(['value1']);
+      expect(element.buildArray('value1', ['value2'])).to.deep.equal(['value1', 'value2']);
+      expect(element.buildArray(['value1'], ['value2'])).to.deep.equal(['value1', 'value2']);
+      expect(element.buildArray(['value1'], 'value2')).to.deep.equal(['value1', 'value2']);
+    });
+
+    test('buildArray does return expected array if given undefined or empty array arguments', function() {
+      expect(element.buildArray()).to.deep.equal([]);
+      expect(element.buildArray(undefined)).to.deep.equal([]);
+      expect(element.buildArray(undefined, 'value1')).to.deep.equal(['value1']);
+      expect(element.buildArray([])).to.deep.equal([]);
+      expect(element.buildArray([], 'value1')).to.deep.equal(['value1']);
+      expect(element.buildArray([undefined])).to.deep.equal([]);
+    });
+
+    test('concat does return expected string', function() {
+      expect(element.concat('a', 'b')).to.equal('ab');
+    });
+
+    test('createAuthHeader does return expected object', function() {
+      expect(element.createAuthHeader({})).to.deep.equal({});
+      expect(element.createAuthHeader({
+        configUsername: 'testUsername'
+      })).to.deep.equal({});
+      expect(element.createAuthHeader({
+        configPassword: 'testPassword'
+      })).to.deep.equal({});
+      expect(element.createAuthHeader({
+        configPassword: 'testPassword',
+        configUsername: 'testUsername'
+      })).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('testUsername:testPassword')
+      });
+    });
+
+    test('createResetDatesFunction does return expected function if given no date search fields', function() {
+      var func = element.createResetDatesFunction([{
+        isDate: false
+      }]);
+
+      expect(func).to.be.a('Function');
+      expect(func({}, '', '')).to.deep.equal({});
+      expect(func({}, '2018-01-01T00:00:00', '2018-01-02T00:00:00')).to.deep.equal({});
+    });
+
+    test('createResetDatesFunction does return expected function if given date search fields', function() {
+      var func = element.createResetDatesFunction([{
+        isDate: true,
+        key: 'testDate',
+        dateProperties: {
+          start: {
+            key: 'testStartKey',
+            title: 'Test Start Key'
+          },
+          end: {
+            key: 'testEndKey',
+            title: 'Test End Key'
+          }
+        }
+      }]);
+
+      expect(func).to.be.a('Function');
+      expect(func({}, '', '')).to.deep.equal({
+        testDate: {}
+      });
+      expect(func({}, '2018-01-01T00:00:00', '2018-01-02T00:00:00')).to.deep.equal({
+        testDate: {
+          testStartKey: {
+            key: 'testStartKey',
+            category: 'Test Start Key',
+            date: new Date('2018-01-01T00:00:00'),
+            enabled: true,
+            text: '2018-01-01T00:00:00'
+          },
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-02T00:00:00'),
+            enabled: true,
+            text: '2018-01-02T00:00:00'
+          }
+        }
+      });
+
+      expect(func({}, '2018-01-01T00:00:00', '')).to.deep.equal({
+        testDate: {
+          testStartKey: {
+            key: 'testStartKey',
+            category: 'Test Start Key',
+            date: new Date('2018-01-01T00:00:00'),
+            enabled: true,
+            text: '2018-01-01T00:00:00'
+          }
+        }
+      });
+
+      expect(func({}, '', '2018-01-02T00:00:00')).to.deep.equal({
+        testDate: {
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-02T00:00:00'),
+            enabled: true,
+            text: '2018-01-02T00:00:00'
+          }
+        }
+      });
+
+      expect(func({
+        testDate: {
+          testStartKey: {
+            key: 'testStartKey',
+            category: 'Test Start Key',
+            date: new Date('2018-01-03T00:00:00'),
+            enabled: true,
+            text: '2018-01-03T00:00:00'
+          },
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-04T00:00:00'),
+            enabled: true,
+            text: '2018-01-04T00:00:00'
+          }
+        }
+      }, '2018-01-01T00:00:00', '2018-01-02T00:00:00')).to.deep.equal({
+        testDate: {
+          testStartKey: {
+            key: 'testStartKey',
+            category: 'Test Start Key',
+            date: new Date('2018-01-01T00:00:00'),
+            enabled: true,
+            text: '2018-01-01T00:00:00'
+          },
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-02T00:00:00'),
+            enabled: true,
+            text: '2018-01-02T00:00:00'
+          }
+        }
+      });
+
+      expect(func({
+        testDate: {
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-04T00:00:00'),
+            enabled: true,
+            text: '2018-01-04T00:00:00'
+          }
+        }
+      }, '', '2018-01-02T00:00:00')).to.deep.equal({
+        testDate: {
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-02T00:00:00'),
+            enabled: true,
+            text: '2018-01-02T00:00:00'
+          }
+        }
+      });
+
+      expect(func({
+        testDate: {
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-04T00:00:00'),
+            enabled: true,
+            text: '2018-01-04T00:00:00'
+          }
+        }
+      }, '2018-01-01T00:00:00', '')).to.deep.equal({
+        testDate: {
+          testStartKey: {
+            key: 'testStartKey',
+            category: 'Test Start Key',
+            date: new Date('2018-01-01T00:00:00'),
+            enabled: true,
+            text: '2018-01-01T00:00:00'
+          }
+        }
+      });
+
+      expect(func({
+        testDate: {
+          testStartKey: {
+            key: 'testStartKey',
+            category: 'Test Start Key',
+            date: new Date('2018-01-03T00:00:00'),
+            enabled: true,
+            text: '2018-01-03T00:00:00'
+          },
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-04T00:00:00'),
+            enabled: true,
+            text: '2018-01-04T00:00:00'
+          }
+        }
+      }, '', '')).to.deep.equal({
+        testDate: {}
+      });
+    });
+
+    test('createResetDatesFunction does return expected function if given multiple date search fields', function() {
+      var func = element.createResetDatesFunction([{
+        isDate: true,
+        key: 'testDate',
+        dateProperties: {
+          start: {
+            key: 'testStartKey',
+            title: 'Test Start Key'
+          },
+          end: {
+            key: 'testEndKey',
+            title: 'Test End Key'
+          }
+        }
+      }, {
+        isDate: true,
+        key: 'testSecondDate',
+        dateProperties: {
+          start: {
+            key: 'testSecondStartKey',
+            title: 'Test Second Start Key'
+          },
+          end: {
+            key: 'testSecondEndKey',
+            title: 'Test Second End Key'
+          }
+        }
+      }]);
+
+      expect(func).to.be.a('Function');
+      expect(func({}, '', '')).to.deep.equal({
+        testDate: {},
+        testSecondDate: {}
+      });
+      expect(func({}, '2018-01-01T00:00:00', '2018-01-02T00:00:00')).to.deep.equal({
+        testDate: {
+          testStartKey: {
+            key: 'testStartKey',
+            category: 'Test Start Key',
+            date: new Date('2018-01-01T00:00:00'),
+            enabled: true,
+            text: '2018-01-01T00:00:00'
+          },
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-02T00:00:00'),
+            enabled: true,
+            text: '2018-01-02T00:00:00'
+          }
+        },
+        testSecondDate: {
+          testSecondStartKey: {
+            key: 'testSecondStartKey',
+            category: 'Test Second Start Key',
+            date: new Date('2018-01-01T00:00:00'),
+            enabled: true,
+            text: '2018-01-01T00:00:00'
+          },
+          testSecondEndKey: {
+            key: 'testSecondEndKey',
+            category: 'Test Second End Key',
+            date: new Date('2018-01-02T00:00:00'),
+            enabled: true,
+            text: '2018-01-02T00:00:00'
+          }
+        }
+      });
+
+      expect(func({
+        testDate: {
+          testStartKey: {
+            key: 'testStartKey',
+            category: 'Test Start Key',
+            date: new Date('2018-01-03T00:00:00'),
+            enabled: true,
+            text: '2018-01-03T00:00:00'
+          },
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-04T00:00:00'),
+            enabled: true,
+            text: '2018-01-04T00:00:00'
+          }
+        },
+        testSecondDate: {
+          testSecondStartKey: {
+            key: 'testSecondStartKey',
+            category: 'Test Second Start Key',
+            date: new Date('2018-01-05T00:00:00'),
+            enabled: true,
+            text: '2018-01-05T00:00:00'
+          },
+          testSecondEndKey: {
+            key: 'testSecondEndKey',
+            category: 'Test Second End Key',
+            date: new Date('2018-01-06T00:00:00'),
+            enabled: true,
+            text: '2018-01-06T00:00:00'
+          }
+        }
+      }, '2018-01-01T00:00:00', '2018-01-02T00:00:00')).to.deep.equal({
+        testDate: {
+          testStartKey: {
+            key: 'testStartKey',
+            category: 'Test Start Key',
+            date: new Date('2018-01-01T00:00:00'),
+            enabled: true,
+            text: '2018-01-01T00:00:00'
+          },
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-02T00:00:00'),
+            enabled: true,
+            text: '2018-01-02T00:00:00'
+          }
+        },
+        testSecondDate: {
+          testSecondStartKey: {
+            key: 'testSecondStartKey',
+            category: 'Test Second Start Key',
+            date: new Date('2018-01-01T00:00:00'),
+            enabled: true,
+            text: '2018-01-01T00:00:00'
+          },
+          testSecondEndKey: {
+            key: 'testSecondEndKey',
+            category: 'Test Second End Key',
+            date: new Date('2018-01-02T00:00:00'),
+            enabled: true,
+            text: '2018-01-02T00:00:00'
+          }
+        }
+      });
+
+      expect(func({
+        testDate: {
+          testStartKey: {
+            key: 'testStartKey',
+            category: 'Test Start Key',
+            date: new Date('2018-01-03T00:00:00'),
+            enabled: true,
+            text: '2018-01-03T00:00:00'
+          },
+          testEndKey: {
+            key: 'testEndKey',
+            category: 'Test End Key',
+            date: new Date('2018-01-04T00:00:00'),
+            enabled: true,
+            text: '2018-01-04T00:00:00'
+          }
+        },
+        testSecondDate: {
+          testSecondStartKey: {
+            key: 'testSecondStartKey',
+            category: 'Test Second Start Key',
+            date: new Date('2018-01-05T00:00:00'),
+            enabled: true,
+            text: '2018-01-05T00:00:00'
+          },
+          testSecondEndKey: {
+            key: 'testSecondEndKey',
+            category: 'Test Second End Key',
+            date: new Date('2018-01-06T00:00:00'),
+            enabled: true,
+            text: '2018-01-06T00:00:00'
+          }
+        }
+      }, '', '')).to.deep.equal({
+        testDate: {},
+        testSecondDate: {}
+      });
+    });
+
+    test('equals does return expected boolean', function() {
+      expect(element.equals('a', 'a')).to.be.true;
+      expect(element.equals('a', 'b')).to.be.false;
+      expect(element.equals(1, 1)).to.be.true;
+      expect(element.equals(1, 2)).to.be.false;
+    });
+
+    test('exists does return expected boolean', function() {
+      expect(element.exists()).to.be.false;
+      expect(element.exists(null)).to.be.true;
+      expect(element.exists('a')).to.be.true;
+      expect(element.exists(1)).to.be.true;
+      expect(element.exists(false)).to.be.true;
+      expect(element.exists([])).to.be.true;
+      expect(element.exists({})).to.be.true;
+      expect(element.exists(function() {})).to.be.true;
+    });
+
+    test('findDigUrl does return expected string', function() {
+      expect(element.findDigUrl('testPrefix', '/testLink')).to.equal('testPrefix/testLink');
+    });
+
+    test('findDomain does return expected string', function() {
+      expect(element.findDomain()).to.not.exist;
+      expect(element.findDomain({})).to.not.exist;
+      expect(element.findDomain({}, {})).to.not.exist;
+      expect(element.findDomain({}, {
+        defaultProject: 'testDefault'
+      })).to.equal('testDefault');
+
+      expect(element.findDomain({
+        project: 'testProject'
+      }, {
+        defaultProject: 'testDefault'
+      })).to.equal('testProject');
+
+      expect(element.findDomain({
+        domain: 'testDomain'
+      }, {
+        defaultProject: 'testDefault'
+      })).to.equal('testDomain');
+
+      expect(element.findDomain({
+        project: 'testProject'
+      }, {
+        defaultProject: 'testDefault',
+        overrideConfig: {
+          'project_name': 'testOverride'
+        }
+      })).to.equal('testOverride');
+
+      expect(element.findDomain({
+        domain: 'testDomain'
+      }, {
+        defaultProject: 'testDefault',
+        overrideConfig: {
+          'project_name': 'testOverride'
+        }
+      })).to.equal('testOverride');
+    });
+
+    test('findBlurStyleClass does return expected string', function() {
+      expect(element.findBlurStyleClass(false, false)).to.equal('');
+      expect(element.findBlurStyleClass(false, true)).to.equal('');
+      expect(element.findBlurStyleClass(true, false)).to.equal('small-blur');
+      expect(element.findBlurStyleClass(true, true)).to.equal('large-blur');
+    });
+
+    test('getUrlParametersHelper does return expected object', function() {
+      expect(element.getUrlParametersHelper('')).to.deep.equal({});
+      expect(element.getUrlParametersHelper('?')).to.deep.equal({});
+      expect(element.getUrlParametersHelper('field=myField')).to.deep.equal({
+        field: 'myField'
+      });
+      expect(element.getUrlParametersHelper('?field=myField')).to.deep.equal({
+        field: 'myField'
+      });
+      expect(element.getUrlParametersHelper('?field=myField&value=myValue')).to.deep.equal({
+        field: 'myField',
+        value: 'myValue'
+      });
+      expect(element.getUrlParametersHelper('?value')).to.deep.equal({
+        value: true
+      });
+    });
+
+    test('openHelpPage is a function', function() {
+      expect(element.openHelpPage).to.be.a('Function');
+    });
+
+    test('openNewTab is a function', function() {
+      expect(element.openNewTab).to.be.a('Function');
+    });
+
+    test('openSaveDialog is a function', function() {
+      expect(element.openSaveDialog).to.be.a('Function');
+    });
+
+    test('openStateHistoryDialog is a function', function() {
+      expect(element.openStateHistoryDialog).to.be.a('Function');
+    });
+
+    test('openTagsDialog is a function', function() {
+      expect(element.openTagsDialog).to.be.a('Function');
+    });
+
+    test('sendSupportEmail is a function', function() {
+      expect(element.sendSupportEmail).to.be.a('Function');
+    });
+
+    test('toggleMenu is a function', function() {
+      expect(element.toggleMenu).to.be.a('Function');
+    });
+  });
+</script>
+</body>
+</html>
