@@ -1,0 +1,103 @@
+<!--
+Copyright 2018 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>transform-functions</title>
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../bower_components/web-component-tester/browser.js"></script>
+  <link rel="import" href="../elements/transform-functions/transform-functions.html">
+</head>
+
+<body>
+<test-fixture id="transform-functions-fixture">
+  <template>
+    <transform-functions></transform-functions>
+  </template>
+</test-fixture>
+
+<script>
+  'use strict';
+  /* globals fixture, suite, setup, test, expect */
+  /* jshint -W030 */
+  suite('transform-functions tests', function() {
+    var element;
+
+    setup(function() {
+      element = fixture('transform-functions-fixture');
+    });
+
+    test('does not have defined properties', function() {
+      expect(element.clientConfig).to.not.exist;
+      expect(element.domain).to.not.exist;
+      expect(element.esConfig).to.not.exist;
+      expect(element.serverConfig).to.not.exist;
+      expect(element.transforms).to.not.exist;
+    });
+
+    test('_createImageFieldConfig does return object with expected properties', function() {
+      var object = element._createImageFieldConfig();
+      expect(object).to.be.an('Object');
+      expect(object.key).to.exist;
+      expect(object.color).to.exist;
+      expect(object.facets).to.exist;
+      expect(object.field).to.exist;
+      expect(object.group).to.exist;
+      expect(object.icon).to.exist;
+      expect(object.link).to.exist;
+      expect(object.result).to.exist;
+      expect(object.search).to.exist;
+      expect(object.title).to.exist;
+      expect(object.titlePlural).to.exist;
+      expect(object.type).to.exist;
+    });
+
+    test('_createWebpageFieldConfig does return object with expected properties', function() {
+      var object = element._createWebpageFieldConfig();
+      expect(object).to.be.an('Object');
+      expect(object.key).to.exist;
+      expect(object.color).to.exist;
+      expect(object.facets).to.exist;
+      expect(object.field).to.exist;
+      expect(object.group).to.exist;
+      expect(object.icon).to.exist;
+      expect(object.result).to.exist;
+      expect(object.search).to.exist;
+      expect(object.title).to.exist;
+      expect(object.titlePlural).to.exist;
+      expect(object.type).to.exist;
+    });
+
+    test('_initializeTransforms does return object with expected properties', function() {
+      expect(element._initializeTransforms()).to.not.exist;
+      expect(element._initializeTransforms('domain')).to.not.exist;
+      expect(element._initializeTransforms('domain', {})).to.not.exist;
+      var transforms = element._initializeTransforms('domain', {}, {
+        pathPrefix: 'testPrefix'
+      });
+      expect(transforms).to.be.an('Object');
+      expect(transforms.config).to.be.an('Object');
+      expect(transforms.entity).to.be.an('Object');
+      expect(transforms.export).to.be.an('Object');
+      expect(transforms.search).to.be.an('Object');
+    });
+  });
+</script>
+</body>
+</html>

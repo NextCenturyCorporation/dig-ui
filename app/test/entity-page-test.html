@@ -19,16 +19,16 @@ limitations under the License.
 <html>
 <head>
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>transform-functions-entity</title>
+  <title>entity-page</title>
   <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../bower_components/web-component-tester/browser.js"></script>
-  <link rel="import" href="../elements/transform-functions/transform-functions.html">
+  <link rel="import" href="../elements/entity-page/entity-page.html">
 </head>
 
 <body>
-<test-fixture id="transform-functions-fixture">
+<test-fixture id="entity-page-fixture">
   <template>
-    <transform-functions></transform-functions>
+    <entity-page></entity-page>
   </template>
 </test-fixture>
 
@@ -36,26 +36,11 @@ limitations under the License.
   'use strict';
   /* globals fixture, suite, setup, test, expect */
   /* jshint -W030 */
-  suite('transform-functions entity transforms tests', function() {
-    var transformFunctions;
+  suite('entity-page tests', function() {
+    var element;
 
     setup(function() {
-      transformFunctions = fixture('transform-functions-fixture');
-      transformFunctions.domain = 'domain';
-      transformFunctions.clientConfig = {};
-      transformFunctions.serverConfig = {};
-    });
-
-    test('does define entity object', function() {
-      expect(transformFunctions).to.exist;
-      expect(transformFunctions.transforms).to.exist;
-      expect(transformFunctions.transforms.entity).to.exist;
-      expect(transformFunctions.transforms.entity).to.be.an('Object');
-    });
-
-    test('does define entity functions', function() {
-      expect(transformFunctions.transforms.entity.result).to.be.a('Function');
-      expect(transformFunctions.transforms.entity.results).to.be.a('Function');
+      element = fixture('entity-page-fixture');
     });
   });
 </script>
