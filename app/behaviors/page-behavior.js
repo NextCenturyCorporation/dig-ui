@@ -144,39 +144,39 @@ DigBehaviors.PageBehavior = {
     return parameters;
   },
 
-  openHelpPage: function(self) {
-    self.$$('#menuDropdown').close();
+  openHelpPage: function() {
+    this.$$('#menuDropdown').close();
     window.open('./help.html');
   },
 
-  openNewTab: function(self) {
-    window.open('./?project=' + self.domain);
+  openNewTab: function() {
+    window.open('./?project=' + this.domain);
   },
 
-  openSaveDialog: function(self) {
-    self.$$('#menuDropdown').close();
-    self.$$('#saveDialog').open();
+  openSaveDialog: function() {
+    this.$$('#menuDropdown').close();
+    this.$$('#saveDialog').open();
   },
 
-  openStateHistoryDialog: function(self) {
-    self.$$('#menuDropdown').close();
-    self.$$('#stateManager').openStateHistory();
+  openStateHistoryDialog: function() {
+    this.$$('#menuDropdown').close();
+    this.$$('#stateManager').openStateHistory();
   },
 
-  openTagsDialog: function(self) {
-    self.$$('#menuDropdown').close();
-    self.$$('#tagManager').openDialog();
+  openTagsDialog: function() {
+    this.$$('#menuDropdown').close();
+    this.$$('#tagManager').openDialog();
   },
 
   sendSupportEmail: function() {
     window.open('mailto:support@memex.software');
   },
 
-  toggleMenu: function(self) {
-    if(self.$$('#menuDropdown').style.display === 'none') {
-      self.$$('#menuDropdown').open();
+  toggleMenu: function() {
+    if(this.$$('#menuDropdown').style.display === 'none') {
+      this.$$('#menuDropdown').open();
     } else {
-      self.$$('#menuDropdown').close();
+      this.$$('#menuDropdown').close();
     }
   }
 };
