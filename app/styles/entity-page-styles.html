@@ -67,10 +67,16 @@ limitations under the License.
       }
 
       .page-head .page-name {
+        display: -webkit-box;
         font-size: 20px;
         font-weight: 500;
         line-height: 30px;
-        word-break: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        word-break: break-all;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
       }
 
       .page-body {
