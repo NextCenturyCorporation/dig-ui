@@ -85,6 +85,7 @@ DigBehaviors.PageBehavior = {
               category: searchFieldsObject.dateProperties.start.title,
               date: new Date(startDateString),
               enabled: true,
+              search: 'required',
               text: startDateString
             };
           }
@@ -94,6 +95,7 @@ DigBehaviors.PageBehavior = {
               category: searchFieldsObject.dateProperties.end.title,
               date: new Date(endDateString),
               enabled: true,
+              search: 'required',
               text: endDateString
             };
           }
