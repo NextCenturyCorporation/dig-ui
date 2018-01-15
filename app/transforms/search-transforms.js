@@ -283,9 +283,25 @@ var searchTransforms = (function(_) {
           offset: (config.page - 1) * config.pageSize
         };
 
+        var orderBy;
+        if(config.sortKey && config.sortOrder) {
+          orderBy = {
+            values: [{
+              order: config.sortOrder,
+              variable: '?' + config.sortKey + 'Sort'
+            }]
+          };
+          template.clauses.push({
+            isOptional: false,
+            predicate: config.sortKey,
+            variable: '?' + config.sortKey + 'Sort'
+          });
+        }
+
         return {
           SPARQL: {
             'group-by': groupBy,
+            'order-by': orderBy,
             select: {
               variables: [{
                 type: 'simple',

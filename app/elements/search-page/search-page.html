@@ -276,6 +276,13 @@ limitations under the License.
     </json-combine>
 
     <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{sortedSearchFields}}"
+      combine-function="[[transforms.config.sortSearchFieldsAlphabetically]]">
+    </json-combine>
+
+    <json-combine
       data-in1="[[datePropertiesToKeys]]"
       data-in2="{}"
       data-out="{{searchQuery}}"
@@ -302,6 +309,8 @@ limitations under the License.
         search-parameters="[[searchParameters]]"
         search-config="[[networkExpansionParameters]]"
         search-function="[[searchQuery]]"
+        sort-key="[[sortKey]]"
+        sort-order="[[sortOrder]]"
         total-count-function="[[createTotalCountFunction()]]"
         total="{{searchTotal}}"
         url="[[esConfig.searchEndpoint]]">
@@ -445,7 +454,7 @@ limitations under the License.
 
     <bulk-search
       id="bulkSearchDialog"
-      search-fields="[[searchFields]]"
+      search-fields="[[sortedSearchFields]]"
       parameter-key="[[searchFields.0.key]]"
       upload-endpoint="[[findDigUrl(serverConfig.pathPrefix, '/upload')]]"
       search-parameters="{{searchParameters}}"
@@ -677,6 +686,24 @@ limitations under the License.
                     [[searchErrorMessage]]
                   </div>
                 </template>
+              </div>
+
+              <div class="layout horizontal center sort-menu">
+                <div>Sort By</div>
+
+                <paper-dropdown-menu label="Sort By" no-label-float>
+                  <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{sortKey}}">
+                    <paper-item value="">Relevance (Default)</paper-item>
+                    <template is="dom-repeat" items="[[sortedSearchFields]]" as="searchFieldsObject">
+                      <paper-item id$="[[searchFieldsObject.key]]" value="[[searchFieldsObject.key]]">[[searchFieldsObject.title]]</paper-item>
+                    </template>
+                  </paper-listbox>
+                </paper-dropdown-menu>
+
+                <aggregation-sort
+                  sort-options='[{"title":"Ascending","orderBy":"asc","icon":"fa:sort-amount-asc"},{"title":"Descending","orderBy":"desc","icon":"fa:sort-amount-desc"}]'
+                  order-by="{{sortOrder}}">
+                </aggregation-sort>
               </div>
 
               <export-button
@@ -1023,6 +1050,20 @@ limitations under the License.
 
         serverConfig: {
           type: Object
+        },
+
+        sortedSearchFields: {
+          type: Array
+        },
+
+        sortKey: {
+          type: String,
+          value: ''
+        },
+
+        sortOrder: {
+          type: String,
+          value: 'desc'
         },
 
         stateHistory: {

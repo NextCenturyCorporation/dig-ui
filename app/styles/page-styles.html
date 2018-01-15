@@ -101,7 +101,8 @@ limitations under the License.
         margin-left: 5px;
       }
 
-      .date-menu > div {
+      .date-menu > div,
+      .sort-menu > div {
         color: var(--secondary-text-color);
         font-size: 14px;
         line-height: 30px;
@@ -116,13 +117,23 @@ limitations under the License.
         };
       }
 
-      .date-menu paper-listbox {
+      .sort-menu paper-dropdown-menu {
+        margin-right: 5px;
+        --paper-input-container: {
+          padding: 4px 0 0;
+          width: 250px;
+        };
+      }
+
+      .date-menu paper-listbox,
+      .sort-menu paper-listbox {
         --paper-listbox: {
           padding: 0;
         };
       }
 
-      .date-menu paper-item {
+      .date-menu paper-item,
+      .sort-menu paper-item {
         --paper-item-min-height: 30px;
         --paper-item: {
           cursor: pointer;

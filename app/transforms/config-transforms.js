@@ -622,6 +622,12 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
 
         return terms;
       }, {});
+    },
+
+    sortSearchFieldsAlphabetically: function(searchFields) {
+      return searchFields.sort(function(a, b) {
+        return a.title < b.title ? -1 : (a.title > b.title ? 1 : 0);
+      });
     }
   };
 });
