@@ -137,13 +137,6 @@ limitations under the License.
     <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
-      data-out="{{dateFieldsToProperties}}"
-      combine-function="[[transforms.config.dateFieldsToProperties]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
       data-out="{{dateMenu}}"
       combine-function="[[transforms.config.dateMenu]]">
     </json-combine>
@@ -153,6 +146,13 @@ limitations under the License.
       data-in2="[[searchFields]]"
       data-out="{{maps}}"
       combine-function="[[transforms.entity.maps]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{moreLikeThisFields}}"
+      combine-function="[[transforms.config.moreLikeThisFields]]">
     </json-combine>
 
     <elastic-client
@@ -211,13 +211,19 @@ limitations under the License.
       results="{{result}}">
     </build-and-run-query>
 
-    <elastic-client-filter-builder
-      not
+    <elastic-client-query-builder
       type="term"
-      field="doc_id"
+      fields="doc_id"
       values="[[result.id]]"
-      ejs-filter="{{notThisDocFilter}}">
-    </elastic-client-filter-builder>
+      ejs-query="{{thisResultQuery}}">
+    </elastic-client-query-builder>
+
+    <elastic-client-query-builder
+      type="bool"
+      bool-function="must_not"
+      ejs-bool-queries="[[buildArray(thisResultQuery)]]"
+      ejs-query="{{notThisResultQuery}}">
+    </elastic-client-query-builder>
 
     <!-- Revisions Query -->
 
@@ -225,16 +231,22 @@ limitations under the License.
       type="term"
       fields='"url.raw"'
       values="[[result.url]]"
-      ejs-query="{{revisionQuery}}">
+      ejs-query="{{revisionQueryPart}}">
+    </elastic-client-query-builder>
+
+    <elastic-client-query-builder
+      type="bool"
+      bool-function="must"
+      ejs-bool-queries="[[buildArray(revisionQueryPart, notThisResultQuery)]]"
+      ejs-query="{{revisionQueryFull}}">
     </elastic-client-query-builder>
 
     <elastic-client-search
       client="[[esClient]]"
       index="[[esConfig.esIndex]]"
       elastic-types="[[esConfig.esType]]"
-      query="[[revisionQuery]]"
+      query="[[revisionQueryFull]]"
       aggregations="[]"
-      filters="[[buildArray(notThisDocFilter)]]"
       page="{{revisionPage}}"
       page-size="10"
       sort-field="[[dateMenu.selected]]"
@@ -258,18 +270,24 @@ limitations under the License.
     <elastic-client-query-builder
       type="mlt"
       mlt-config='{"minTermFreq":1,"minDocFreq":1,"maxQueryTerms":100,"minimumShouldMatch":"75%"}'
-      fields='["content_extraction.content_strict.text", "content_extraction.title.text", "knowledge_graph"]'
+      fields="[[moreLikeThisFields]]"
       values="[[buildMoreLikeThisValue(result.title, result.description)]]"
-      ejs-query="{{moreLikeThisQuery}}">
+      ejs-query="{{moreLikeThisQueryPart}}">
+    </elastic-client-query-builder>
+
+    <elastic-client-query-builder
+      type="bool"
+      bool-function="must"
+      ejs-bool-queries="[[buildArray(moreLikeThisQueryPart, notThisResultQuery)]]"
+      ejs-query="{{moreLikeThisQueryFull}}">
     </elastic-client-query-builder>
 
     <elastic-client-search
       client="[[esClient]]"
       index="[[esConfig.esIndex]]"
       elastic-types="[[esConfig.esType]]"
-      query="[[moreLikeThisQuery]]"
+      query="[[moreLikeThisQueryFull]]"
       aggregations="[]"
-      filters="[[buildArray(notThisDocFilter)]]"
       page="{{moreLikeThisPage}}"
       page-size="10"
       source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
@@ -292,8 +310,6 @@ limitations under the License.
       function-config="[[searchFields]]"
       index-name="[[serverConfig.profileIndexName]]"
       index-type="[[serverConfig.profileIndexType]]"
-      query-builder-config="[[searchFields]]"
-      query-builder-date-fields="[[dateFieldsToProperties]]"
       username="[[serverConfig.username]]"
       blur-images="{{blurImages}}"
       cases="{{cases}}"
@@ -633,10 +649,6 @@ limitations under the License.
           type: Object
         },
 
-        dateFieldsToProperties: {
-          type: Object
-        },
-
         dateMenu: {
           type: String
         },
@@ -679,11 +691,19 @@ limitations under the License.
           type: String
         },
 
+        moreLikeThisFields: {
+          type: Array
+        },
+
         moreLikeThisLoading: {
           type: Boolean
         },
 
-        moreLikeThisQuery: {
+        moreLikeThisQueryFull: {
+          type: Object
+        },
+
+        moreLikeThisQueryPart: {
           type: Object
         },
 
@@ -719,7 +739,7 @@ limitations under the License.
           type: String
         },
 
-        notThisDocFilter: {
+        notThisResultQuery: {
           type: Object
         },
 
@@ -762,7 +782,11 @@ limitations under the License.
           type: Boolean
         },
 
-        revisionQuery: {
+        revisionQueryFull: {
+          type: Object
+        },
+
+        revisionQueryPart: {
           type: Object
         },
 
@@ -802,6 +826,10 @@ limitations under the License.
           type: Object
         },
 
+        thisResultQuery: {
+          type: Object
+        },
+
         transforms: {
           type: Object
         },
@@ -820,7 +848,7 @@ limitations under the License.
           return undefined;
         }
         // Remove special characters.
-        return (title + ' ' + description).replace(/[^\w\s]/gi, '');
+        return (title + ' ' + description).replace(/[^\w\s]+/gi, ' ');
       },
 
       createSectionTitle: function(size, searchFieldsObject) {

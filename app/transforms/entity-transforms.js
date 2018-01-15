@@ -18,6 +18,16 @@
 /* jshint camelcase:false */
 
 var entityTransforms = (function(_, commonTransforms, esConfig) {
+  function getAggregationBuckets(data, name) {
+    if(data && data.aggregations && data.aggregations[name]) {
+      if(data.aggregations[name][name]) {
+        return data.aggregations[name][name].buckets || [];
+      }
+      return data.aggregations[name].buckets || [];
+    }
+    return [];
+  }
+
   function getExtraction(item, config, index, confidence) {
     /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
     var count = item.doc_count;
@@ -636,18 +646,12 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Array}
      */
     extractions: function(data, config) {
-      var extractions = [];
       var sayOther = false;
-
-      if(data && data.aggregations && data.aggregations[config.entity.key] && data.aggregations[config.entity.key][config.entity.key]) {
-        extractions = getExtractionsFromList(data.aggregations[config.entity.key][config.entity.key].buckets || [], config.entity).filter(function(extraction) {
-          var result = config.id && config.page && config.page.type === config.entity.type ? extraction.id !== config.id : true;
-          sayOther = sayOther || !result;
-          return result;
-        });
-      }
-
-      return extractions;
+      return getExtractionsFromList(getAggregationBuckets(data, config.entity.key), config.entity).filter(function(extraction) {
+        var result = config.id && config.page && config.page.type === config.entity.type ? extraction.id !== config.id : true;
+        sayOther = sayOther || !result;
+        return result;
+      });
     },
 
     /**
@@ -703,15 +707,13 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Object}
      */
     searchPageTimeline: function(data, config) {
-      if(data && data.aggregations && data.aggregations[config.name] && data.aggregations[config.name][config.name]) {
-        var buckets = data.aggregations[config.name][config.name].buckets;
-        if(buckets.length > 1) {
-          return {
-            begin: commonTransforms.getFormattedDate(config.begin || buckets[0].key),
-            end: commonTransforms.getFormattedDate(config.end || buckets[buckets.length - 1].key),
-            sparklines: createSparklines(buckets, true, (config.begin ? new Date(config.begin).getTime() : null), (config.end ? new Date(config.end).getTime() : null))
-          };
-        }
+      var buckets = getAggregationBuckets(data, config.name);
+      if(buckets.length > 1) {
+        return {
+          begin: commonTransforms.getFormattedDate(config.begin || buckets[0].key),
+          end: commonTransforms.getFormattedDate(config.end || buckets[buckets.length - 1].key),
+          sparklines: createSparklines(buckets, true, (config.begin ? new Date(config.begin).getTime() : null), (config.end ? new Date(config.end).getTime() : null))
+        };
       }
       return {
         points: []
@@ -727,16 +729,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Object}
      */
     timelines: function(data, config) {
-      if(data && data.aggregations && data.aggregations[config.name] && data.aggregations[config.name][config.name]) {
-        var buckets = data.aggregations[config.name][config.name].buckets;
-        if(buckets.length > 1) {
-          return {
-            begin: commonTransforms.getFormattedDate(buckets[0].key),
-            end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
-            histogram: createHistogram(buckets, config.entity, config.unidentified || '(Unidentified)'),
-            sparklines: createSparklines(buckets, false, null, null, config.entity, config.page, config.id)
-          };
-        }
+      var buckets = getAggregationBuckets(data, config.name);
+      if(buckets.length > 1) {
+        return {
+          begin: commonTransforms.getFormattedDate(buckets[0].key),
+          end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
+          histogram: createHistogram(buckets, config.entity, config.unidentified || '(Unidentified)'),
+          sparklines: createSparklines(buckets, false, null, null, config.entity, config.page, config.id)
+        };
       }
       return {
         dates: [],

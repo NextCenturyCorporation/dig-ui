@@ -55,7 +55,6 @@ limitations under the License.
       index-name="[[indexName]]"
       index-types="[[indexTypes]]"
       aggregations="[]"
-      filters="[]"
       page-size="1"
       sort-field="[[timestampField]]"
       sort-order="desc"
@@ -67,15 +66,6 @@ limitations under the License.
       error="{{_latestError}}">
     </build-and-run-query>
 
-    <elastic-client-aggregation-builder
-      name="latest_data"
-      type="date_histogram"
-      count="0"
-      field="[[timestampField]]"
-      interval="day"
-      ejs-aggregation="{{_timelineAggregation}}">
-    </elastic-client-aggregation-builder>
-
     <elastic-client-filter-builder
       type="range"
       field="[[timestampField]]"
@@ -83,8 +73,18 @@ limitations under the License.
       ejs-filter="{{_timelineFilter}}">
     </elastic-client-filter-builder>
 
-    <template is="dom-if" if="[[_timelineAggregation]]">
-      <template is="dom-if" if="[[_timelineFilter]]">
+    <template is="dom-if" if="[[_timelineFilter]]">
+      <elastic-client-aggregation-builder
+        name="latest_data"
+        type="date_histogram"
+        count="0"
+        field="[[timestampField]]"
+        interval="day"
+        filters="[[_buildArray(_timelineFilter)]]"
+        ejs-aggregation="{{_timelineAggregation}}">
+      </elastic-client-aggregation-builder>
+
+      <template is="dom-if" if="[[_timelineAggregation]]">
         <build-and-run-query
           type="match_all"
           fields="[]"
@@ -93,7 +93,6 @@ limitations under the License.
           index-name="[[indexName]]"
           index-types="[[indexTypes]]"
           aggregations="[[_buildArray(_timelineAggregation)]]"
-          filters="[[_buildArray(_timelineFilter)]]"
           page-size="0"
           transform-function="[[_buildTransformFunctionToCreateTimeline(timelineFunction)]]"
           error="{{_timelineError}}"

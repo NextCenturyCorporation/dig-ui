@@ -213,18 +213,18 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
-     * Returns the config for the filters-builder element.
+     * Returns the config for the query-builder and filters-builder elements for the filterCollection on the entity page.
      *
      * @param {Object} searchFields
      * @return {Object}
      */
-    filtersBuilderConfig: function(searchFields) {
-      return searchFields.reduce(function(filtersBuilderConfig, searchFieldsObject) {
-        filtersBuilderConfig[searchFieldsObject.key] = {
+    filterCollectionBuildersConfig: function(searchFields) {
+      return searchFields.reduce(function(config, searchFieldsObject) {
+        config[searchFieldsObject.key] = {
           field: searchFieldsObject.field,
           type: searchFieldsObject.type
         };
-        return filtersBuilderConfig;
+        return config;
       }, {});
     },
 
@@ -307,6 +307,20 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     imageSrc: function(id, esConfig) {
       return commonTransforms.getImageUrl(id, esConfig);
+    },
+
+    /**
+     * Returns the list of text fields (strings) for the more-like-this query.
+     *
+     * @param {Array} searchFields
+     * @return {Array}
+     */
+    moreLikeThisFields: function(searchFields) {
+      return searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.result === 'description' || searchFieldsObject.result === 'title';
+      }).map(function(searchFieldsObject) {
+        return searchFieldsObject.queryField;
+      });
     },
 
     /**

@@ -334,7 +334,6 @@ limitations under the License.
         index-name="[[esConfig.esIndex]]"
         index-types="[[esConfig.esType]]"
         aggregations="[]"
-        filters="[]"
         page="{{searchPage}}"
         page-size="10"
         properties-ready="[[processRequest]]"
@@ -460,6 +459,7 @@ limitations under the License.
       count="0"
       field="[[dateMenu.selected]]"
       interval="week"
+      filters="[]"
       ejs-aggregation="{{dateAggregation}}">
     </elastic-client-aggregation-builder>
 
@@ -470,7 +470,6 @@ limitations under the License.
         index-name="[[esConfig.esIndex]]"
         index-types="[[esConfig.esType]]"
         aggregations="[[buildArray(dateAggregation)]]"
-        filters="[]"
         page-size="0"
         transform-config="[[createSparklineAggregationConfig(dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
         transform-function="[[transforms.entity.searchPageTimeline]]"
@@ -684,7 +683,6 @@ limitations under the License.
                 client="[[esClient]]"
                 data="[[searchResultsShown]]"
                 export-endpoint="[[findDigUrl(serverConfig.pathPrefix, '/export')]]"
-                filter-list="[]"
                 index-name="[[esConfig.esIndex]]"
                 index-types="[[esConfig.esType]]"
                 search-fields="[[searchFields]]"

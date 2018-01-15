@@ -23,6 +23,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/elastic-client-aggregation-builder/elastic-client-aggregation-builder.html">
 <link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
 <link rel="import" href="../../bower_components/export-button/export-button.html">
+<link rel="import" href="../../bower_components/filters-builder/filters-builder.html">
 <link rel="import" href="../../bower_components/image-query-and-display/image-query-and-display.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/iron-dropdown/iron-dropdown.html">
@@ -35,6 +36,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/profile-manager/profile-manager.html">
+<link rel="import" href="../../bower_components/query-builder/query-builder.html">
 <link rel="import" href="../../bower_components/result-list/result-list.html">
 <link rel="import" href="../../bower_components/save-case-dialog/save-case-dialog.html">
 <link rel="import" href="../../bower_components/selected-facets-display/selected-facets-display.html">
@@ -196,13 +198,6 @@ limitations under the License.
     <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
-      data-out="{{dateFieldsToProperties}}"
-      combine-function="[[transforms.config.dateFieldsToProperties]]">
-    </json-combine>
-
-    <json-combine
-      data-in1="[[searchFields]]"
-      data-in2="{}"
       data-out="{{dateMenu}}"
       combine-function="[[transforms.config.dateMenu]]">
     </json-combine>
@@ -217,8 +212,8 @@ limitations under the License.
     <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
-      data-out="{{filtersBuilderConfig}}"
-      combine-function="[[transforms.config.filtersBuilderConfig]]">
+      data-out="{{buildersConfig}}"
+      combine-function="[[transforms.config.filterCollectionBuildersConfig]]">
     </json-combine>
 
     <json-combine
@@ -296,8 +291,6 @@ limitations under the License.
       function-config="[[searchFields]]"
       index-name="[[serverConfig.profileIndexName]]"
       index-type="[[serverConfig.profileIndexType]]"
-      query-builder-config="[[searchFields]]"
-      query-builder-date-fields="[[dateFieldsToProperties]]"
       username="[[serverConfig.username]]"
       blur-images="{{blurImages}}"
       cases="{{cases}}"
@@ -310,8 +303,7 @@ limitations under the License.
     </profile-manager>
 
     <build-and-run-query
-      fields="[[pageConfig.field]]"
-      values="[[pageId]]"
+      query="[[thisPageQuery]]"
       client="[[esClient]]"
       index-name="[[esConfig.esIndex]]"
       index-types="[[esConfig.esType]]"
@@ -330,9 +322,31 @@ limitations under the License.
       total="{{searchTotal}}">
     </build-and-run-query>
 
+    <query-builder
+      callback="[[builderCallbacks]]"
+      config="[[buildersConfig]]"
+      type="terms"
+      data="[[filterCollection]]"
+      query="{{thisPageFilterQuery}}">
+    </query-builder>
+
+    <elastic-client-query-builder
+      type="term"
+      fields="[[pageConfig.field]]"
+      values="[[pageId]]"
+      ejs-query="{{thisEntityQuery}}">
+    </elastic-client-query-builder>
+
+    <elastic-client-query-builder
+      type="bool"
+      bool-function="must"
+      ejs-bool-queries="[[buildArray(thisEntityQuery, thisPageFilterQuery)]]"
+      ejs-query="{{thisPageQuery}}">
+    </elastic-client-query-builder>
+
     <filters-builder
-      callback="[[filtersBuilderCallback]]"
-      config="[[filtersBuilderConfig]]"
+      callback="[[builderCallbacks]]"
+      config="[[buildersConfig]]"
       data="[[filterCollection]]"
       filters="{{filterList}}">
     </filters-builder>
@@ -528,6 +542,7 @@ limitations under the License.
                     order="_term"
                     direction="asc"
                     field="[[item.entity.field]]"
+                    filters="[]"
                     ejs-aggregation="{{item.entityAggregation}}">
                   </elastic-client-aggregation-builder>
 
@@ -539,19 +554,17 @@ limitations under the License.
                       field="[[getDateProperty(item.dateCollection, item.dateSelected, 'field')]]"
                       interval="week"
                       nested-aggregations="[[buildArray(item.entityAggregation)]]"
+                      filters="[]"
                       ejs-aggregation="{{item.dateAggregation}}">
                     </elastic-client-aggregation-builder>
 
                     <template is="dom-if" if="[[item.dateAggregation]]">
                       <build-and-run-query
-                        type="terms"
-                        fields="[[pageConfig.field]]"
-                        values="[[pageId]]"
+                        query="[[thisPageQuery]]"
                         client="[[esClient]]"
                         index-name="[[esConfig.esIndex]]"
                         index-types="[[esConfig.esType]]"
                         aggregations="[[buildArray(item.dateAggregation)]]"
-                        filters="[[filterList]]"
                         page-size="0"
                         properties-ready="{{processRequest}}"
                         source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
@@ -583,8 +596,7 @@ limitations under the License.
                     aggregation-field="[[item.entity.field]]"
                     selected-property="[[item.entity.key]]"
                     selected="{{filterCollection}}"
-                    query-field="[[pageConfig.field]]"
-                    query-value="[[pageId]]"
+                    query="[[thisEntityQuery]]"
                     client="[[esClient]]"
                     index-name="[[esConfig.esIndex]]"
                     index-types="[[esConfig.esType]]"
@@ -617,8 +629,7 @@ limitations under the License.
                     index-name="[[esConfig.esIndex]]"
                     index-types="[[esConfig.esType]]"
                     properties-ready="[[processRequest]]"
-                    query-fields="[[pageConfig.field]]"
-                    query-values="[[pageId]]"
+                    query="[[thisEntityQuery]]"
                     transform-config="[[createExtractionConfig(item.entity, pageConfig, pageId)]]"
                     transform-function="[[transforms.entity.extractions]]"
                     small-image-style-class="[[findBlurStyleClass(blurImages)]]"
@@ -868,6 +879,24 @@ limitations under the License.
           type: Boolean
         },
 
+        builderCallbacks: {
+          type: Object,
+          value: function() {
+            return {
+              dates: function(items) {
+                return items;
+              },
+              terms: function(items) {
+                return items;
+              }
+            };
+          }
+        },
+
+        buildersConfig: {
+          type: Object
+        },
+
         cases: {
           type: Array
         },
@@ -890,10 +919,6 @@ limitations under the License.
 
         configHeader: {
           computed: 'createAuthHeader(serverConfig)',
-          type: Object
-        },
-
-        dateFieldsToProperties: {
           type: Object
         },
 
@@ -929,24 +954,6 @@ limitations under the License.
 
         filterList: {
           type: Array
-        },
-
-        filtersBuilderCallback: {
-          type: Object,
-          value: function() {
-            return {
-              dates: function(items) {
-                return items;
-              },
-              terms: function(items) {
-                return items;
-              }
-            };
-          }
-        },
-
-        filtersBuilderConfig: {
-          type: Object
         },
 
         hasHistory: {
@@ -1079,6 +1086,18 @@ limitations under the License.
         },
 
         tagManager: {
+          type: Object
+        },
+
+        thisEntityQuery: {
+          type: Object
+        },
+
+        thisPageQuery: {
+          type: Object
+        },
+
+        thisPageFilterQuery: {
           type: Object
         },
 
