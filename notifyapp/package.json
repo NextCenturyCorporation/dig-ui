@@ -1,6 +1,6 @@
 {
   "name": "notifyapp",
-  "version": "3.0.0",
+  "version": "3.0.3",
   "author": "Next Century Corporation",
   "scripts": {
     "start": "forever app.js"

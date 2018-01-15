@@ -51,7 +51,7 @@ module.exports = function(logger, client, userIndexName, userIndexType, dataInde
   var createSearchArguments = function(search) {
     var data = {
       body: {
-        query: JSON.parse(search.esState.query),
+        query: JSON.parse(search.esState),
         sort: {}
       },
       size: 1,
@@ -60,9 +60,6 @@ module.exports = function(logger, client, userIndexName, userIndexType, dataInde
     data.body.sort[dateField] = {
       order: 'desc'
     };
-    if(search.esState.filter) {
-      data.body.filter = JSON.parse(search.esState.filter);
-    }
     logger.info('Search ES arguments ' + JSON.stringify(data));
     return data;
   };
