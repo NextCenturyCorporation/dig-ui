@@ -625,7 +625,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     sortSearchFieldsAlphabetically: function(searchFields) {
-      return searchFields.sort(function(a, b) {
+      return _.cloneDeep(searchFields).sort(function(a, b) {
         return a.title < b.title ? -1 : (a.title > b.title ? 1 : 0);
       });
     }
