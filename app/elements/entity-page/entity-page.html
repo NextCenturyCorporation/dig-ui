@@ -552,7 +552,7 @@ limitations under the License.
                       type="date_histogram"
                       count="0"
                       field="[[getDateProperty(item.dateCollection, item.dateSelected, 'field')]]"
-                      interval="week"
+                      interval="[[item.intervalSelected]]"
                       nested-aggregations="[[buildArray(item.entityAggregation)]]"
                       filters="[]"
                       ejs-aggregation="{{item.dateAggregation}}">
@@ -662,13 +662,15 @@ limitations under the License.
                 <div class="layout horizontal center date-menu bottom-margin">
                   <template is="dom-if" if="[[!item.timelineLoading]]">
                     <template is="dom-if" if="[[!item.timelineResults.sparklines.length]]">
-                      <div class="flex">No Timelines of [[item.entity.title]] vs. [[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]</div>
+                      <div>No Timelines of [[item.entity.title]] vs. [[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]</div>
                     </template>
 
                     <template is="dom-if" if="[[item.timelineResults.sparklines.length]]">
-                      <div class="flex">[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]] from [[item.timelineResults.begin]] to [[item.timelineResults.end]]</div>
+                      <div>[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]] from [[item.timelineResults.begin]] to [[item.timelineResults.end]]</div>
                     </template>
                   </template>
+
+                  <div class="flex"></div>
 
                   <template is="dom-if" if="[[item.showDateMenu]]">
                     <div>Date Field</div>
@@ -681,6 +683,16 @@ limitations under the License.
                       </paper-listbox>
                     </paper-dropdown-menu>
                   </template>
+
+                  <div>Interval</div>
+
+                  <paper-dropdown-menu label="Date" no-label-float>
+                    <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{item.intervalSelected}}">
+                      <paper-item value="day">Daily (Slow)</paper-item>
+                      <paper-item value="week">Weekly</paper-item>
+                      <paper-item value="month">Monthly</paper-item>
+                    </paper-listbox>
+                  </paper-dropdown-menu>
                 </div>
 
                 <elastic-error error="[[item.timelineError]]" message="{{item.timelineErrorMessage}}"></elastic-error>
@@ -711,7 +723,7 @@ limitations under the License.
                       bar-property="date"
                       label-property="text"
                       stack-property="data"
-                      interval="week"
+                      interval="[[item.intervalSelected]]"
                       data="[[item.timelineResults.histogram]]"
                       default-label="Unidentified [[item.entity.titlePlural]]"
                       source="Webpages"

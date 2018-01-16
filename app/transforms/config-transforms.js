@@ -114,6 +114,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
             dateList: dateMenu.fields,
             dateSelected: dateMenu.fields.length ? dateMenu.fields[0].key : undefined,
             entity: _.cloneDeep(entityFieldsObject),
+            intervalSelected: 'week',
             loadData: index === showFieldAtIndex,
             showData: index === showFieldAtIndex,
             showDateMenu: dateMenu.show
