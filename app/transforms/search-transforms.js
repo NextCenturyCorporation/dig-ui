@@ -55,7 +55,7 @@ var searchTransforms = (function(_) {
           // If the term is a date...
           if(dateConfig[term]) {
             // JS dates default to UTC but dates are saved otherwise in the DIG DB.  Ensure that constraint "X-Y-ZT05:00:00.000Z" will return results with date "X-Y-ZT00:00:00".
-            var date = new Date(searchParameters[type][term].date.getTime());
+            var date = new Date(searchParameters[type][term].date);
             date.setUTCHours(0);
 
             andFilter.clauses.push({
