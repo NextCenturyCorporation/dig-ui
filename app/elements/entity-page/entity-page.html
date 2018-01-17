@@ -1128,7 +1128,7 @@ limitations under the License.
 
       observers: [
         'findImageMatches(esConfig, pageConfig, pageId, transforms)',
-        'handleRemoveFilter(entityFilters.*)'
+        'handleChangeFilter(entityFilters.*)'
       ],
 
       attached: function() {
@@ -1146,7 +1146,7 @@ limitations under the License.
           };
         }
         return function(item) {
-          if(item.textAndCount.indexOf(',') >= 0) {
+          if(item.textAndCount && item.textAndCount.indexOf(',') >= 0) {
             return item.textAndCount.substring(0, item.textAndCount.indexOf(','));
           }
           return item.textAndCount;
@@ -1180,7 +1180,7 @@ limitations under the License.
         }
         var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         var totalCountString = config.totalCount !== undefined && config.totalCount > size ? ' of ' + config.totalCount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : '';
-        return sizeString + totalCountString + (config.sayOther ? ' Other ' : ' ') + (size === 1 ? config.name : config.namePlural);
+        return sizeString + totalCountString + (config.sayOther ? ' Other ' : ' ') + (size !== 1 || config.totalCount ? config.namePlural : config.name);
       },
 
       createSectionTitleConfig: function(pageConfig, searchFieldsObject, error, loading, totalCount) {
@@ -1261,7 +1261,7 @@ limitations under the License.
       },
 
       getDateProperty: function(collection, selected, property, suffix) {
-        if(!collection || !selected || !property) {
+        if(!collection || !selected || !property || !collection[selected] || !collection[selected][property]) {
           return undefined;
         }
         return collection[selected][property] + (suffix || '');
@@ -1270,6 +1270,7 @@ limitations under the License.
       handleImageFaceSearchResults: function(event) {
         if(event.detail.error || event.detail.response.error) {
           this.handleImageResults('Face', [], [], [], this.imageFaceSearchThreshold, (event.detail.error || event.detail.response.error));
+          return;
         }
 
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
@@ -1289,6 +1290,7 @@ limitations under the License.
       handleImageSimilaritySearchResults: function(event) {
         if(event.detail.error || event.detail.response.error) {
           this.handleImageResults('Similarity', [], [], [], this.imageSimilaritySearchThreshold, (event.detail.error || event.detail.response.error));
+          return;
         }
 
         var response = (event.detail.response || {}).images || [];
@@ -1364,6 +1366,7 @@ limitations under the License.
             self.set(['aggregationFields', index, 'loadData'], (aggregationField.entity.key === event.model.item.entity.key));
             self.set(['aggregationFields', index, 'showData'], (aggregationField.entity.key === event.model.item.entity.key));
           });
+          this.showImageMatches = false;
         }
       },
 
@@ -1394,8 +1397,8 @@ limitations under the License.
         if(!dateCollection || !dateSelected || !keyProperty) {
           return undefined;
         }
-        var key = dateCollection[dateSelected][keyProperty];
-        if(facetsCollection[key].length === 2) {
+        var key = dateCollection[dateSelected] ? dateCollection[dateSelected][keyProperty] : undefined;
+        if(key && facetsCollection[key] && facetsCollection[key].length === 2) {
           return [this.transforms.config.formatDate(facetsCollection[key][0]) + ' to ' + this.transforms.config.formatDate(facetsCollection[key][1])];
         }
         return [];
@@ -1424,16 +1427,22 @@ limitations under the License.
       /**
        * Handles removing a filter using the selected-facets-display.
        */
-      handleRemoveFilter: function() {
+      handleChangeFilter: function() {
         var self = this;
         _.keys(this.entityFilters).forEach(function(type) {
           _.keys(self.entityFilters[type]).forEach(function(term) {
-            if(!self.entityFilters[type][term].enabled && self.filterCollection[type] && self.filterCollection[type].indexOf(term) >= 0) {
+            var key = self.entityFilters[type][term].key;
+            if(!self.entityFilters[type][term].enabled && self.filterCollection[type] && self.filterCollection[type].indexOf(key) >= 0) {
               self.set(['filterCollection', type], self.filterCollection[type].map(function(id) {
                 return id;
               }).filter(function(id) {
-                return id !== self.entityFilters[type][term].key;
+                return id !== key;
               }));
+            }
+            if(self.entityFilters[type][term].enabled && self.filterCollection[type] && self.filterCollection[type].indexOf(key) < 0) {
+              self.set(['filterCollection', type], self.filterCollection[type].map(function(id) {
+                return id;
+              }).concat([key]));
             }
           });
         });

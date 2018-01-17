@@ -42,6 +42,1207 @@ limitations under the License.
     setup(function() {
       element = fixture('entity-page-fixture');
     });
+
+    test('does have PageBehavior functions', function() {
+      expect(element.assignWindowProperties).to.be.a('Function');
+      expect(element.buildArray).to.be.a('Function');
+      expect(element.concat).to.be.a('Function');
+      expect(element.createAuthHeader).to.be.a('Function');
+      expect(element.createResetDatesFunction).to.be.a('Function');
+      expect(element.equals).to.be.a('Function');
+      expect(element.exists).to.be.a('Function');
+      expect(element.findDigUrl).to.be.a('Function');
+      expect(element.findDomain).to.be.a('Function');
+      expect(element.findBlurStyleClass).to.be.a('Function');
+      expect(element.getUrlParameters).to.be.a('Function');
+      expect(element.openHelpPage).to.be.a('Function');
+      expect(element.openNewTab).to.be.a('Function');
+      expect(element.openSaveDialog).to.be.a('Function');
+      expect(element.openStateHistoryDialog).to.be.a('Function');
+      expect(element.openTagsDialog).to.be.a('Function');
+      expect(element.sendSupportEmail).to.be.a('Function');
+      expect(element.toggleMenu).to.be.a('Function');
+    });
+
+    test('createBarChartButtonText does return expected string', function() {
+      expect(element.createBarChartButtonText(false)).to.equal('Show Detailed Timeline');
+      expect(element.createBarChartButtonText(true)).to.equal('Hide Detailed Timeline');
+    });
+
+    test('createCopyTextFunction does return expected function for non-locations', function() {
+      var func = element.createCopyTextFunction(false);
+      expect(func).to.be.a('Function');
+      expect(func({})).to.not.exist;
+      expect(func({
+        id: 1234
+      })).to.equal(1234);
+      expect(func({
+        id: '1234'
+      })).to.equal('1234');
+    });
+
+    test('createCopyTextFunction does return expected function for locations', function() {
+      var func = element.createCopyTextFunction(true);
+      expect(func).to.be.a('Function');
+      expect(func({})).to.not.exist;
+      expect(func({
+        textAndCount: 'city'
+      })).to.equal('city');
+      expect(func({
+        textAndCount: 'city, state, country'
+      })).to.equal('city');
+    });
+
+    test('createExtractionConfig does return expected object', function() {
+      expect(element.createExtractionConfig({
+        a: 1
+      })).to.not.exist;
+
+      expect(element.createExtractionConfig({
+        a: 1
+      }, {
+        b: 2
+      })).to.not.exist;
+
+      expect(element.createExtractionConfig(null, null, 'id')).to.not.exist;
+
+      expect(element.createExtractionConfig({
+        a: 1
+      }, null, 'id')).to.not.exist;
+
+      expect(element.createExtractionConfig(null, {
+        b: 2
+      }, 'id')).to.not.exist;
+
+      expect(element.createExtractionConfig({
+        a: 1
+      }, {
+        b: 2
+      }, 'id')).to.deep.equal({
+        entity: {
+          a: 1
+        },
+        page: {
+          b: 2
+        },
+        id: 'id'
+      });
+    });
+
+    test('createSimilarImageMatchesTitle does return expected string', function() {
+      expect(element.createSimilarImageMatchesTitle(true, 0)).to.equal('Loading Similar Image Matches...');
+      expect(element.createSimilarImageMatchesTitle(true, 1)).to.equal('Loading Similar Image Matches...');
+      expect(element.createSimilarImageMatchesTitle(false, 0)).to.equal('No Similar Image Matches');
+      expect(element.createSimilarImageMatchesTitle(false, 1)).to.equal('1 Similar Image Match');
+      expect(element.createSimilarImageMatchesTitle(false, 2)).to.equal('2 Similar Image Matches');
+      expect(element.createSimilarImageMatchesTitle(false, 1000000)).to.equal('1,000,000 Similar Image Matches');
+    });
+
+    test('createSectionTitle does return expected string', function() {
+      expect(element.createSectionTitle(0, {
+        loading: true,
+        name: 'Item',
+        namePlural: 'Items',
+      })).to.equal('Loading Items...');
+      expect(element.createSectionTitle(0, {
+        loading: true,
+        name: 'Item',
+        namePlural: 'Items',
+        sayOther: true
+      })).to.equal('Loading Other Items...');
+
+      expect(element.createSectionTitle(0, {
+        error: 'Error',
+        namePlural: 'Items'
+      })).to.equal('Items Error');
+      expect(element.createSectionTitle(0, {
+        error: 'Error',
+        name: 'Item',
+        namePlural: 'Items',
+        sayOther: true
+      })).to.equal('Other Items Error');
+
+      expect(element.createSectionTitle(0, {
+        name: 'Item',
+        namePlural: 'Items'
+      })).to.equal('No Items');
+      expect(element.createSectionTitle(0, {
+        name: 'Item',
+        namePlural: 'Items',
+        sayOther: true
+      })).to.equal('No Other Items');
+
+      expect(element.createSectionTitle(1, {
+        name: 'Item',
+        namePlural: 'Items'
+      })).to.equal('1 Item');
+      expect(element.createSectionTitle(1, {
+        name: 'Item',
+        namePlural: 'Items',
+        sayOther: true
+      })).to.equal('1 Other Item');
+
+      expect(element.createSectionTitle(1000000, {
+        name: 'Item',
+        namePlural: 'Items'
+      })).to.equal('1,000,000 Items');
+      expect(element.createSectionTitle(1000000, {
+        name: 'Item',
+        namePlural: 'Items',
+        sayOther: true
+      })).to.equal('1,000,000 Other Items');
+
+      expect(element.createSectionTitle(1, {
+        name: 'Item',
+        namePlural: 'Items',
+        totalCount: 1000000
+      })).to.equal('1 of 1,000,000 Items');
+      expect(element.createSectionTitle(1, {
+        name: 'Item',
+        namePlural: 'Items',
+        sayOther: true,
+        totalCount: 1000000
+      })).to.equal('1 of 1,000,000 Other Items');
+
+      expect(element.createSectionTitle(1000000, {
+        name: 'Item',
+        namePlural: 'Items',
+        totalCount: 1000000
+      })).to.equal('1,000,000 Items');
+      expect(element.createSectionTitle(1000000, {
+        name: 'Item',
+        namePlural: 'Items',
+        sayOther: true,
+        totalCount: 1000000
+      })).to.equal('1,000,000 Other Items');
+    });
+
+    test('createSectionTitleConfig does return expected object', function() {
+      expect(element.createSectionTitleConfig({
+        key: 'key'
+      })).to.not.exist;
+
+      expect(element.createSectionTitleConfig(null, {
+        key: 'key',
+        title: 'singular',
+        titlePlural: 'plural'
+      })).to.not.exist;
+
+      expect(element.createSectionTitleConfig({
+        key: 'key'
+      }, {
+        key: 'key',
+        title: 'singular',
+        titlePlural: 'plural'
+      })).to.deep.equal({
+        error: undefined,
+        loading: undefined,
+        name: 'singular',
+        namePlural: 'plural',
+        sayOther: true,
+        totalCount: undefined
+      });
+
+      expect(element.createSectionTitleConfig({
+        key: 'key'
+      }, {
+        key: 'otherkey',
+        title: 'singular',
+        titlePlural: 'plural'
+      })).to.deep.equal({
+        error: undefined,
+        loading: undefined,
+        name: 'singular',
+        namePlural: 'plural',
+        sayOther: false,
+        totalCount: undefined
+      });
+
+      expect(element.createSectionTitleConfig({
+        key: 'key'
+      }, {
+        key: 'otherkey',
+        title: 'singular',
+        titlePlural: 'plural'
+      }, null, false, 0)).to.deep.equal({
+        error: null,
+        loading: false,
+        name: 'singular',
+        namePlural: 'plural',
+        sayOther: false,
+        totalCount: 0
+      });
+
+      expect(element.createSectionTitleConfig({
+        key: 'key'
+      }, {
+        key: 'otherkey',
+        title: 'singular',
+        titlePlural: 'plural'
+      }, 'error', true, 1234)).to.deep.equal({
+        error: 'error',
+        loading: true,
+        name: 'singular',
+        namePlural: 'plural',
+        sayOther: false,
+        totalCount: 1234
+      });
+    });
+
+    test('createTimelineConfig does return expected object', function() {
+      expect(element.createTimelineConfig({
+        date: {
+          key: 'key'
+        }
+      })).to.not.exist;
+
+      expect(element.createTimelineConfig({
+        date: {
+          key: 'key'
+        }
+      }, 'date')).to.not.exist;
+
+      expect(element.createTimelineConfig({
+        date: {
+          key: 'key'
+        }
+      }, 'date', {
+        a: 1
+      })).to.not.exist;
+
+      expect(element.createTimelineConfig({
+        date: {
+          key: 'key'
+        }
+      }, 'date', {
+        a: 1
+      }, {
+        b: 2
+      })).to.not.exist;
+
+      expect(element.createTimelineConfig(null, null, null, null, 'id')).to.not.exist;
+
+      expect(element.createTimelineConfig(null, 'date', {
+        a: 1
+      }, {
+        b: 2
+      }, 'id')).to.not.exist;
+
+      expect(element.createTimelineConfig({
+        date: {
+          key: 'key'
+        }
+      }, null, {
+        a: 1
+      }, {
+        b: 2
+      }, 'id')).to.not.exist;
+
+      expect(element.createTimelineConfig({
+        date: {
+          key: 'key'
+        }
+      }, 'date', null, {
+        b: 2
+      }, 'id')).to.not.exist;
+
+      expect(element.createTimelineConfig({
+        date: {
+          key: 'key'
+        }
+      }, 'date', {
+        a: 1
+      }, null, 'id')).to.not.exist;
+
+      expect(element.createTimelineConfig({
+        date: {
+          key: 'key'
+        }
+      }, 'date', {
+        a: 1
+      }, {
+        b: 2
+      }, 'id')).to.deep.equal({
+        entity: {
+          a: 1
+        },
+        name: 'key_timeline',
+        page: {
+          b: 2
+        },
+        id: 'id'
+      });
+    });
+
+    test('createToggleBarChartListener does return object with function to update aggregationFields as expected', function() {
+      element.aggregationFields = [{
+        showBarChart: false
+      }, {
+        showBarChart: false
+      }];
+
+      var func = element.createToggleBarChartListener(1);
+      expect(func).to.be.an('Object');
+      expect(func.onClick).to.be.a('Function');
+
+      func.onClick();
+      expect(element.aggregationFields).to.deep.equal([{
+        showBarChart: false
+      }, {
+        showBarChart: true
+      }]);
+
+      func.onClick();
+      expect(element.aggregationFields).to.deep.equal([{
+        showBarChart: false
+      }, {
+        showBarChart: false
+      }]);
+    });
+
+    test('findImageMatches does update search elements', function() {
+      element.serverConfig = {
+        imageServiceConfig: {
+          auth: {
+            password: 'TestPass',
+            user: 'TestUser'
+          },
+          endpoint: {
+            link: '/TestEndpoint'
+          },
+          host: {
+            face: 'FaceHost:FacePort',
+            similarity: 'SimilarityHost:SimilarityPort'
+          }
+        }
+      };
+
+      expect(element.$$('#imageFaceSearch')).to.exist;
+      expect(element.$$('#imageFaceSearch').body).to.not.exist;
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({});
+      expect(element.$$('#imageFaceSearch').url).to.not.exist;
+
+      expect(element.$$('#imageSimilaritySearch')).to.exist;
+      expect(element.$$('#imageSimilaritySearch').body).to.not.exist;
+      expect(element.$$('#imageSimilaritySearch').headers).to.deep.equal({});
+      expect(element.$$('#imageSimilaritySearch').url).to.not.exist;
+
+      expect(element.imageSearchLoading).to.be.false;
+
+      var called = 0;
+      var imageSrcFunc = function(pageId, esConfig) {
+        ++called;
+        expect(pageId).to.equal('TestPageID');
+        expect(esConfig).to.deep.equal({
+          key: 'value'
+        });
+        return 'TestImageUrl';
+      };
+
+      element.findImageMatches({
+        key: 'value'
+      }, {
+        isImage: true
+      }, 'TestPageID', {
+        config: {
+          imageSrc: imageSrcFunc
+        }
+      });
+
+      expect(called).to.equal(1);
+      expect(element.imageSearchLoading).to.be.true;
+
+      expect(element.$$('#imageFaceSearch').body).to.deep.equal({
+        data: 'TestImageUrl',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":0.1}'
+      });
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/TestEndpoint');
+
+      expect(element.$$('#imageSimilaritySearch').body).to.deep.equal({
+        data: 'TestImageUrl',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":0.3}'
+      });
+      expect(element.$$('#imageSimilaritySearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageSimilaritySearch').url).to.equal('SimilarityHost:SimilarityPort/TestEndpoint');
+    });
+
+    test('findImageMatchesOfType does update search element', function() {
+      element.serverConfig = {
+        imageServiceConfig: {
+          auth: {
+            password: 'TestPass',
+            user: 'TestUser'
+          },
+          endpoint: {
+            link: '/TestEndpoint'
+          },
+          host: {
+            face: 'FaceHost:FacePort'
+          }
+        }
+      };
+
+      expect(element.$$('#imageFaceSearch')).to.exist;
+      expect(element.$$('#imageFaceSearch').body).to.not.exist;
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({});
+      expect(element.$$('#imageFaceSearch').url).to.not.exist;
+
+      element.findImageMatchesOfType('face', 'imageFaceSearch', 'TestImageUrl', 1234);
+
+      expect(element.$$('#imageFaceSearch').body).to.deep.equal({
+        data: 'TestImageUrl',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":1234}'
+      });
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/TestEndpoint');
+    });
+
+    test('findNoBlurStyleClass does return expected string', function() {
+      expect(element.findNoBlurStyleClass(true)).to.equal('');
+      expect(element.findNoBlurStyleClass(false)).to.equal('no-blur');
+    });
+
+    test('findShowDataStyleClass does return expected string', function() {
+      expect(element.findShowDataStyleClass(true)).to.equal('');
+      expect(element.findShowDataStyleClass(false)).to.equal('hide');
+    });
+
+    test('getDateProperty does return expected property', function() {
+      expect(element.getDateProperty({})).to.not.exist;
+      expect(element.getDateProperty({}, 'selected')).to.not.exist;
+      expect(element.getDateProperty({}, null, 'property')).to.not.exist;
+      expect(element.getDateProperty({}, 'selected', 'property')).to.not.exist;
+      expect(element.getDateProperty({
+        property: {},
+        selected: {}
+      }, 'selected', 'property')).to.not.exist;
+      expect(element.getDateProperty({
+        property: {
+          selected: 'string'
+        }
+      }, 'selected', 'property')).to.not.exist;
+      expect(element.getDateProperty({
+        selected: {
+          property: 'string'
+        }
+      }, 'selected', 'property')).to.equal('string');
+      expect(element.getDateProperty({
+        selected: {
+          property: 'string'
+        }
+      }, 'selected', 'property', '-suffix')).to.equal('string-suffix');
+    });
+
+    test('handleImageFaceSearchResults given error does not set imageSearchMatches', function() {
+      element.handleImageFaceSearchResults({
+        detail: {
+          error: 'TestError'
+        }
+      });
+      expect(element.imageSearchMatches).to.deep.equal([]);
+    });
+
+    test('handleImageFaceSearchResults given response does set imageSearchMatches', function() {
+      element.handleImageFaceSearchResults({
+        detail: {
+          response: {
+            AllSimilarFaces: [{
+              SimilarFaces: {
+                CachedImageURLs: ['urlA', 'urlB'],
+                Distances: [0.01, 0.02],
+                ImageSha1s: ['idA', 'idB']
+              }
+            }]
+          }
+        }
+      });
+
+      expect(element.imageSearchMatches).to.deep.equal([{
+        id: 'idA',
+        link: '',
+        name: 'Match #1',
+        rank: 0.01,
+        source: 'urlA'
+      }, {
+        id: 'idB',
+        link: '',
+        name: 'Match #2',
+        rank: 0.02,
+        source: 'urlB'
+      }]);
+    });
+
+    test('handleImageSimilaritySearchResults given error does not set imageSearchMatches', function() {
+      element.handleImageSimilaritySearchResults({
+        detail: {
+          error: 'TestError'
+        }
+      });
+      expect(element.imageSearchMatches).to.deep.equal([]);
+    });
+
+    test('handleImageSimilaritySearchResults given response does set imageSearchMatches', function() {
+      element.handleImageSimilaritySearchResults({
+        detail: {
+          response: {
+            images: [{
+              similar_images: {
+                cached_image_urls: ['urlA', 'urlB'],
+                distance: [0.01, 0.02],
+                sha1: ['idA', 'idB']
+              }
+            }]
+          }
+        }
+      });
+
+      expect(element.imageSearchMatches).to.deep.equal([{
+        id: 'idA',
+        link: '',
+        name: 'Match #1',
+        rank: 0.01,
+        source: 'urlA'
+      }, {
+        id: 'idB',
+        link: '',
+        name: 'Match #2',
+        rank: 0.02,
+        source: 'urlB'
+      }]);
+    });
+
+    test('handleImageResults does set imageSearchMatches as expected in base case', function() {
+      expect(element.imageSearchMatches).to.deep.equal([]);
+
+      element.imageFaceSearchLoading = false;
+      element.imageSimilaritySearchLoading = false;
+      element.imageSearchLoading = true;
+      element.handleImageResults('type', ['urlA', 'urlB'], ['idA', 'idB'], [2, 4], 6);
+
+      expect(element.imageSearchMatches).to.deep.equal([{
+        id: 'idA',
+        link: '',
+        name: 'Match #1',
+        rank: 2,
+        source: 'urlA'
+      }, {
+        id: 'idB',
+        link: '',
+        name: 'Match #2',
+        rank: 4,
+        source: 'urlB'
+      }]);
+      expect(element.imageSearchLoading).to.be.false;
+    });
+
+    test('handleImageResults does set imageSearchMatches as expected with threshold', function() {
+      expect(element.imageSearchMatches).to.deep.equal([]);
+
+      element.imageFaceSearchLoading = false;
+      element.imageSimilaritySearchLoading = false;
+      element.imageSearchLoading = true;
+      element.handleImageResults('type', ['urlA', 'urlB'], ['idA', 'idB'], [2, 4], 3);
+
+      expect(element.imageSearchMatches).to.deep.equal([{
+        id: 'idA',
+        link: '',
+        name: 'Match #1',
+        rank: 2,
+        source: 'urlA'
+      }]);
+      expect(element.imageSearchLoading).to.be.false;
+    });
+
+    test('handleImageResults does set imageSearchMatches as expected with link function', function() {
+      expect(element.imageSearchMatches).to.deep.equal([]);
+
+      var called = 0;
+      element.transforms = {
+        entity: {
+          imagePageLink: function(id) {
+            ++called;
+            return 'link-' + id;
+          }
+        }
+      };
+      element.imageFaceSearchLoading = false;
+      element.imageSimilaritySearchLoading = false;
+      element.imageSearchLoading = true;
+      element.handleImageResults('type', ['urlA', 'urlB'], ['idA', 'idB'], [2, 4], 6);
+
+      expect(element.imageSearchMatches).to.deep.equal([{
+        id: 'idA',
+        link: 'link-idA',
+        name: 'Match #1',
+        rank: 2,
+        source: 'urlA'
+      }, {
+        id: 'idB',
+        link: 'link-idB',
+        name: 'Match #2',
+        rank: 4,
+        source: 'urlB'
+      }]);
+      expect(element.imageSearchLoading).to.be.false;
+      expect(called).to.equal(2);
+    });
+
+    test('handleImageResults does set imageSearchMatches as expected with previous imageSearchMatches', function() {
+      element.imageSearchMatches = [{
+        id: 'idC',
+        link: '',
+        name: 'Match #1',
+        rank: 1,
+        source: 'urlC'
+      }, {
+        id: 'idA',
+        link: '',
+        name: 'Match #2',
+        rank: 2,
+        source: 'urlA'
+      }, {
+        id: 'idD',
+        link: '',
+        name: 'Match #3',
+        rank: 3,
+        source: 'urlD'
+      }, {
+        id: 'idE',
+        link: '',
+        name: 'Match #4',
+        rank: 5,
+        source: 'urlE'
+      }];
+
+      element.imageFaceSearchLoading = false;
+      element.imageSimilaritySearchLoading = false;
+      element.imageSearchLoading = true;
+      element.handleImageResults('type', ['urlA', 'urlB'], ['idA', 'idB'], [2, 4], 6);
+
+      expect(element.imageSearchMatches).to.deep.equal([{
+        id: 'idC',
+        link: '',
+        name: 'Match #1',
+        rank: 1,
+        source: 'urlC'
+      }, {
+        id: 'idA',
+        link: '',
+        name: 'Match #2',
+        rank: 2,
+        source: 'urlA'
+      }, {
+        id: 'idD',
+        link: '',
+        name: 'Match #3',
+        rank: 3,
+        source: 'urlD'
+      }, {
+        id: 'idB',
+        link: '',
+        name: 'Match #4',
+        rank: 4,
+        source: 'urlB'
+      }, {
+        id: 'idE',
+        link: '',
+        name: 'Match #5',
+        rank: 5,
+        source: 'urlE'
+      }]);
+      expect(element.imageSearchLoading).to.be.false;
+    });
+
+    test('isEntity does return expected boolean', function() {
+      expect(element.isEntity({})).to.be.false;
+      expect(element.isEntity({
+        isEntity: true
+      })).to.be.false;
+      expect(element.isEntity({
+        link: 'text'
+      })).to.be.false;
+      expect(element.isEntity({
+        link: 'entity'
+      })).to.be.true;
+    });
+
+    test('isMapVisible does return expected boolean', function() {
+      expect(element.isMapVisible(true, [], false)).to.be.false;
+      expect(element.isMapVisible(false, [], true)).to.be.false;
+      expect(element.isMapVisible(false, [{}], false)).to.be.false;
+      expect(element.isMapVisible(true, [{}], true)).to.be.false;
+      expect(element.isMapVisible(true, [{}], false)).to.be.false;
+      expect(element.isMapVisible(false, [{}], true)).to.be.true;
+    });
+
+    test('showSimilarImageMatchesSection does not update aggregationFields and showImageMatches if input event value is false', function() {
+      element.aggregationFields = [{
+        loadData: false,
+        showData: false
+      }, {
+        loadData: true,
+        showData: true
+      }];
+
+      expect(element.showImageMatches).to.be.false;
+
+      element.showSimilarImageMatchesSection({
+        detail: {
+          value: false
+        }
+      });
+
+      expect(element.aggregationFields).to.deep.equal([{
+        loadData: false,
+        showData: false
+      }, {
+        loadData: true,
+        showData: true
+      }]);
+
+      expect(element.showImageMatches).to.be.false;
+    });
+
+    test('showSimilarImageMatchesSection does update aggregationFields and showImageMatches as expected', function() {
+      element.aggregationFields = [{
+        loadData: false,
+        showData: false
+      }, {
+        loadData: true,
+        showData: true
+      }];
+
+      expect(element.showImageMatches).to.be.false;
+
+      element.showSimilarImageMatchesSection({
+        detail: {
+          value: true
+        }
+      });
+
+      expect(element.aggregationFields).to.deep.equal([{
+        loadData: false,
+        showData: false
+      }, {
+        loadData: false,
+        showData: false
+      }]);
+
+      expect(element.showImageMatches).to.be.true;
+    });
+
+    test('showSectionAndRunQueries does not update aggregationFields and showImageMatches if input event value is false', function() {
+      element.aggregationFields = [{
+        entity: {
+          key: 'key1'
+        },
+        loadData: false,
+        showData: false
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: true,
+        showData: true
+      }];
+
+      element.showImageMatches = true;
+
+      element.showSectionAndRunQueries({
+        detail: {
+          value: false
+        },
+        model: {
+          item: {
+            entity: {
+              key: 'key1'
+            }
+          }
+        }
+      });
+
+      expect(element.aggregationFields).to.deep.equal([{
+        entity: {
+          key: 'key1'
+        },
+        loadData: false,
+        showData: false
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: true,
+        showData: true
+      }]);
+
+      expect(element.showImageMatches).to.be.true;
+    });
+
+    test('showSectionAndRunQueries does update aggregationFields and showImageMatches as expected', function() {
+      element.aggregationFields = [{
+        entity: {
+          key: 'key1'
+        },
+        loadData: false,
+        showData: false
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: true,
+        showData: true
+      }];
+
+      element.showImageMatches = true;
+
+      element.showSectionAndRunQueries({
+        detail: {
+          value: true
+        },
+        model: {
+          item: {
+            entity: {
+              key: 'key1'
+            }
+          }
+        }
+      });
+
+      expect(element.aggregationFields).to.deep.equal([{
+        entity: {
+          key: 'key1'
+        },
+        loadData: true,
+        showData: true
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: false,
+        showData: false
+      }]);
+
+      expect(element.showImageMatches).to.be.false;
+    });
+
+    test('updateProcessRequest does update processRequest if state is defined', function() {
+      element.processRequest = false;
+      expect(element.processRequest).to.be.false;
+
+      element.updateProcessRequest({
+        state: '1234'
+      });
+      expect(element.processRequest).to.be.false;
+
+      element.updateProcessRequest({});
+      expect(element.processRequest).to.be.true;
+
+      element.updateProcessRequest({
+        state: '1234'
+      });
+      expect(element.processRequest).to.be.true;
+    });
+
+    test('createFilterSectionTitle does return expected string', function() {
+      expect(element.createFilterSectionTitle([])).to.equal('No Filters');
+      expect(element.createFilterSectionTitle([{}])).to.equal('1 Filter');
+      expect(element.createFilterSectionTitle([{}, {}])).to.equal('2 Filters');
+      expect(element.createFilterSectionTitle([{}, {}, {}])).to.equal('3 Filters');
+    });
+
+    test('doesHaveFilters does return expected boolean', function() {
+      expect(element.doesHaveFilters({})).to.be.false;
+      expect(element.doesHaveFilters({
+        type1: {}
+      })).to.be.false;
+
+      expect(element.doesHaveFilters({
+        type1: {
+          term1: {}
+        }
+      })).to.be.false;
+
+      expect(element.doesHaveFilters({
+        type1: {
+          term1: {
+            enabled: false
+          }
+        }
+      })).to.be.false;
+
+      expect(element.doesHaveFilters({
+        type1: {
+          term1: {
+            enabled: true
+          }
+        }
+      })).to.be.true;
+
+      expect(element.doesHaveFilters({
+        type1: {
+          term1: {
+            enabled: false
+          },
+          term2: {
+            enabled: false
+          }
+        },
+        type2: {
+          term3: {
+            enabled: false
+          },
+          term4: {
+            enabled: true
+          }
+        }
+      })).to.be.true;
+    });
+
+    test('getDateFacetsList does return expected array', function() {
+      element.transforms = {
+        config: {
+          formatDate: function(text) {
+            return 'date-' + text;
+          }
+        }
+      };
+
+      expect(element.getDateFacetsList({})).to.not.exist;
+      expect(element.getDateFacetsList({}, {})).to.not.exist;
+      expect(element.getDateFacetsList({}, {}, 'selected')).to.not.exist;
+      expect(element.getDateFacetsList({}, {}, 'selected', 'property')).to.deep.equal([]);
+
+      expect(element.getDateFacetsList({
+        key: ['value1', 'value2']
+      }, {}, 'selected', 'property')).to.deep.equal([]);
+
+      expect(element.getDateFacetsList({}, {
+        selected: {}
+      }, 'selected', 'property')).to.deep.equal([]);
+
+      expect(element.getDateFacetsList({}, {
+        selected: {
+          property: 'key'
+        }
+      }, 'selected', 'property')).to.deep.equal([]);
+
+      expect(element.getDateFacetsList({
+        key: ['value1', 'value2']
+      }, {
+        selected: {
+          property: 'key'
+        }
+      }, 'selected', 'property')).to.deep.equal(['date-value1 to date-value2']);
+
+      expect(element.getDateFacetsList({
+        key: ['value3', 'value4']
+      }, {
+        selected: {
+          property: 'key'
+        }
+      }, 'selected', 'property')).to.deep.equal(['date-value3 to date-value4']);
+
+      expect(element.getDateFacetsList({
+        key: ['value5']
+      }, {
+        selected: {
+          property: 'key'
+        }
+      }, 'selected', 'property')).to.deep.equal([]);
+    });
+
+    test('getFacetsList does return expected object', function() {
+      expect(element.getFacetsList({}, 'key2')).to.not.exist;
+      expect(element.getFacetsList({
+        key1: 1234
+      }, 'key2')).to.not.exist;
+      expect(element.getFacetsList({
+        key2: 5678
+      }, 'key2')).to.equal(5678);
+      expect(element.getFacetsList({
+        key1: 1234,
+        key2: 5678
+      }, 'key2')).to.equal(5678);
+    });
+
+    test('getTextFunction does return expected function', function() {
+      var func = element.getTextFunction([{
+        id: 'id1',
+        text: 'text1'
+      }, {
+        id: 'id2',
+        text: 'text2'
+      }]);
+
+      expect(func).to.be.a('Function');
+      expect(func('id1')).to.equal('text1');
+      expect(func('id2')).to.equal('text2');
+      expect(func('id3')).to.equal('');
+    });
+
+    test('handleChangeFilter does update filterCollection as expected', function() {
+      element.filterCollection = {
+        type1: ['key1'],
+        type2: [],
+        type3: ['key3'],
+        type4: ['key6'],
+        type5: [],
+        type6: ['key9', 'key0']
+      };
+
+      element.entityFilters = {
+        // True to false
+        type1: {
+          term1: {
+            key: 'key1',
+            enabled: false
+          }
+        },
+        // False to true
+        type2: {
+          term2: {
+            key: 'key2',
+            enabled: true
+          }
+        },
+        // Multiple changes
+        type3: {
+          term3: {
+            key: 'key3',
+            enabled: false
+          },
+          term4: {
+            key: 'key4',
+            enabled: true
+          }
+        },
+        // No changes
+        type4: {
+          term5: {
+            key: 'key5',
+            enabled: false
+          },
+          term6: {
+            key: 'key6',
+            enabled: true
+          }
+        },
+        // Multiple adds
+        type5: {
+          term7: {
+            key: 'key7',
+            enabled: true
+          },
+          term8: {
+            key: 'key8',
+            enabled: true
+          }
+        },
+        // Multiple removes
+        type6: {
+          term9: {
+            key: 'key9',
+            enabled: false
+          },
+          term0: {
+            key: 'key0',
+            enabled: false
+          }
+        }
+      };
+
+      element.handleChangeFilter();
+
+      expect(element.filterCollection).to.deep.equal({
+        type1: [],
+        type2: ['key2'],
+        type3: ['key4'],
+        type4: ['key6'],
+        type5: ['key7', 'key8'],
+        type6: []
+      });
+    });
+
+    test('builderCallbacks does have expected properties', function() {
+      expect(element.builderCallbacks).to.be.an('Object');
+      expect(element.builderCallbacks.dates).to.be.a('Function');
+      expect(element.builderCallbacks.terms).to.be.a('Function');
+    });
+
+    test('setting serverConfig does set configHeader', function() {
+      expect(element.configHeader).to.not.exist;
+
+      element.serverConfig = {
+        configPassword: 'TestPass',
+        configUsername: 'TestUser'
+      };
+
+      expect(element.configHeader).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+    });
+
+    test('setting parameters does set domain', function() {
+      expect(element.domain).to.not.exist;
+
+      element.parameters = {
+        domain: 'TestDomain'
+      };
+
+      element.serverConfig = {};
+
+      expect(element.domain).to.equal('TestDomain');
+    });
+
+    test('setting entityFilters does set filterCollection', function() {
+      element.filterCollection = {
+        type1: [],
+        type2: []
+      };
+
+      element.entityFilters = {
+        type1: {},
+        type2: {}
+      };
+
+      element.filterCollection.type1 = ['key1'];
+
+      expect(element.filterCollection).to.deep.equal({
+        type1: ['key1'],
+        type2: []
+      });
+
+      element.set(['entityFilters', 'type1'], {
+        term1: {
+          key: 'key1',
+          enabled: false
+        }
+      });
+
+      expect(element.filterCollection).to.deep.equal({
+        type1: [],
+        type2: []
+      });
+
+      element.set(['entityFilters', 'type2'], {
+        term2: {
+          key: 'key2',
+          enabled: true
+        }
+      });
+
+      expect(element.filterCollection).to.deep.equal({
+        type1: [],
+        type2: ['key2']
+      });
+    });
   });
 </script>
 </body>
