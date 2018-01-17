@@ -56,10 +56,10 @@ var commonTransforms = (function(_, moment, domain, pathPrefix) {
    */
   function getLink(itemId, linkType, fieldType, fieldId) {
     if(linkType === 'result') {
-      return pathPrefix + '/result.html?domain=' + domain + '&id=' + itemId;
+      return (pathPrefix || '') + '/result.html?' + (domain ? 'domain=' + domain : '') + '&id=' + itemId;
     }
     if(itemId && linkType === 'entity') {
-      return pathPrefix + '/entity.html?domain=' + domain + '&id=' + encodeURIComponent(itemId) + '&type=' + fieldId;
+      return (pathPrefix || '') + '/entity.html?' + (domain ? 'domain=' + domain : '') + '&id=' + encodeURIComponent(itemId) + '&type=' + fieldId;
     }
     return undefined;
   }

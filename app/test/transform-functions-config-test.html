@@ -41,24 +41,1686 @@ limitations under the License.
 
     setup(function() {
       transformFunctions = fixture('transform-functions-fixture');
-      transformFunctions.domain = 'domain';
+      transformFunctions.domain = 'TestDomain';
       transformFunctions.clientConfig = {};
       transformFunctions.serverConfig = {};
     });
 
+    test('does define transforms object', function() {
+      expect(transformFunctions.transforms).to.be.an('Object');
+    });
+
     test('does define config object', function() {
-      expect(transformFunctions).to.exist;
-      expect(transformFunctions.transforms).to.exist;
-      expect(transformFunctions.transforms.config).to.exist;
       expect(transformFunctions.transforms.config).to.be.an('Object');
     });
 
-    test('does define config functions', function() {
-      // TODO
-      expect(transformFunctions.transforms.config.searchFields).to.be.a('Function');
-      expect(transformFunctions.transforms.config.searchFieldsDialogConfig).to.be.a('Function');
-      expect(transformFunctions.transforms.config.searchParameters).to.be.a('Function');
-      expect(transformFunctions.transforms.config.searchKeys).to.be.a('Function');
+    test('aggregationFields given empty array does return empty array', function() {
+      expect(transformFunctions.transforms.config.aggregationFields([])).to.deep.equal([]);
+    });
+
+    test('aggregationFields given no dates does return empty array', function() {
+      expect(transformFunctions.transforms.config.aggregationFields([{
+        key: 'entity1',
+        isDate: false
+      }])).to.deep.equal([]);
+    });
+
+    test('aggregationFields given no entities does return empty array', function() {
+      expect(transformFunctions.transforms.config.aggregationFields([{
+        key: 'date1',
+        isDate: true
+      }])).to.deep.equal([]);
+    });
+
+    test('aggregationFields given hidden dates does return empty array', function() {
+      expect(transformFunctions.transforms.config.aggregationFields([{
+        key: 'date1',
+        isDate: true,
+        isHidden: true
+      }, {
+        key: 'entity1',
+        isDate: false
+      }])).to.deep.equal([]);
+    });
+
+    test('aggregationFields given hidden entities does return empty array', function() {
+      expect(transformFunctions.transforms.config.aggregationFields([{
+        key: 'date1',
+        isDate: true
+      }, {
+        key: 'entity1',
+        isDate: false,
+        isHidden: true
+      }])).to.deep.equal([]);
+    });
+
+    test('aggregationFields given one date and one entity does return expected array', function() {
+      expect(transformFunctions.transforms.config.aggregationFields([{
+        key: 'date1',
+        isDate: true
+      }, {
+        key: 'entity1',
+        isDate: false
+      }])).to.deep.equal([{
+        dateCollection: {
+          date1: {
+            key: 'date1',
+            isDate: true
+          }
+        },
+        dateList: [{
+          key: 'date1',
+          isDate: true
+        }],
+        dateSelected: 'date1',
+        entity: {
+          key: 'entity1',
+          isDate: false
+        },
+        intervalSelected: 'week',
+        loadData: true,
+        showData: true,
+        showDateMenu: false
+      }]);
+    });
+
+    test('aggregationFields given multiple dates and multiple entities does return expected array', function() {
+      expect(transformFunctions.transforms.config.aggregationFields([{
+        key: 'date1',
+        isDate: true
+      }, {
+        key: 'date2',
+        isDate: true
+      }, {
+        key: 'entity1',
+        isDate: false
+      }, {
+        key: 'entity2',
+        isDate: false
+      }])).to.deep.equal([{
+        dateCollection: {
+          date1: {
+            key: 'date1',
+            isDate: true
+          },
+          date2: {
+            key: 'date2',
+            isDate: true
+          }
+        },
+        dateList: [{
+          key: 'date1',
+          isDate: true
+        }, {
+          key: 'date2',
+          isDate: true
+        }],
+        dateSelected: 'date1',
+        entity: {
+          key: 'entity1',
+          isDate: false
+        },
+        intervalSelected: 'week',
+        loadData: true,
+        showData: true,
+        showDateMenu: true
+      }, {
+        dateCollection: {
+          date1: {
+            key: 'date1',
+            isDate: true
+          },
+          date2: {
+            key: 'date2',
+            isDate: true
+          }
+        },
+        dateList: [{
+          key: 'date1',
+          isDate: true
+        }, {
+          key: 'date2',
+          isDate: true
+        }],
+        dateSelected: 'date1',
+        entity: {
+          key: 'entity2',
+          isDate: false
+        },
+        intervalSelected: 'week',
+        loadData: false,
+        showData: false,
+        showDateMenu: true
+      }]);
+    });
+
+    test('aggregationFields given a URL entity does return expected array', function() {
+      expect(transformFunctions.transforms.config.aggregationFields([{
+        key: 'date1',
+        isDate: true
+      }, {
+        key: 'entity1',
+        isDate: false
+      }, {
+        key: 'entity2',
+        isDate: false,
+        isUrl: true
+      }])).to.deep.equal([{
+        dateCollection: {
+          date1: {
+            key: 'date1',
+            isDate: true
+          }
+        },
+        dateList: [{
+          key: 'date1',
+          isDate: true
+        }],
+        dateSelected: 'date1',
+        entity: {
+          key: 'entity1',
+          isDate: false
+        },
+        intervalSelected: 'week',
+        loadData: false,
+        showData: false,
+        showDateMenu: false
+      }, {
+        dateCollection: {
+          date1: {
+            key: 'date1',
+            isDate: true
+          }
+        },
+        dateList: [{
+          key: 'date1',
+          isDate: true
+        }],
+        dateSelected: 'date1',
+        entity: {
+          key: 'entity2',
+          isDate: false,
+          isUrl: true
+        },
+        intervalSelected: 'week',
+        loadData: true,
+        showData: true,
+        showDateMenu: false
+      }]);
+    });
+
+    test('dateMenu does return expected object', function() {
+      expect(transformFunctions.transforms.config.dateMenu([])).to.deep.equal({
+        fields: [],
+        selected: undefined,
+        show: false
+      });
+
+      expect(transformFunctions.transforms.config.dateMenu([{
+        isDate: false
+      }])).to.deep.equal({
+        fields: [],
+        selected: undefined,
+        show: false
+      });
+
+      expect(transformFunctions.transforms.config.dateMenu([{
+        field: 'field1',
+        key: 'key1',
+        isDate: true
+      }])).to.deep.equal({
+        fields: [{
+          field: 'field1',
+          key: 'key1',
+          isDate: true
+        }],
+        selected: 'field1',
+        show: false
+      });
+
+      expect(transformFunctions.transforms.config.dateMenu([{
+        field: 'field1',
+        key: 'key1',
+        isDate: true
+      }, {
+        field: 'field2',
+        key: 'key2',
+        isDate: true
+      }])).to.deep.equal({
+        fields: [{
+          field: 'field1',
+          key: 'key1',
+          isDate: true
+        }, {
+          field: 'field2',
+          key: 'key2',
+          isDate: true
+        }],
+        selected: 'field1',
+        show: true
+      });
+    });
+
+    test('dateFieldsToProperties does return expected object', function() {
+      expect(transformFunctions.transforms.config.dateFieldsToProperties([])).to.deep.equal({});
+
+      expect(transformFunctions.transforms.config.dateFieldsToProperties([{
+        isDate: false
+      }])).to.deep.equal({});
+
+      expect(transformFunctions.transforms.config.dateFieldsToProperties([{
+        field: 'field1',
+        key: 'key1',
+        isDate: true,
+        dateProperties: {
+          end: {
+            key: 'end1'
+          },
+          start: {
+            key: 'start1'
+          }
+        }
+      }])).to.deep.equal({
+        field1: {
+          key: 'key1',
+          start: 'start1',
+          end: 'end1'
+        }
+      });
+
+      expect(transformFunctions.transforms.config.dateFieldsToProperties([{
+        field: 'field1',
+        key: 'key1',
+        isDate: true,
+        dateProperties: {
+          end: {
+            key: 'end1'
+          },
+          start: {
+            key: 'start1'
+          }
+        }
+      }, {
+        field: 'field2',
+        key: 'key2',
+        isDate: true,
+        dateProperties: {
+          end: {
+            key: 'end2'
+          },
+          start: {
+            key: 'start2'
+          }
+        }
+      }])).to.deep.equal({
+        field1: {
+          key: 'key1',
+          start: 'start1',
+          end: 'end1'
+        },
+        field2: {
+          key: 'key2',
+          start: 'start2',
+          end: 'end2'
+        }
+      });
+    });
+
+    test('datePropertiesToKeys does return expected object', function() {
+      expect(transformFunctions.transforms.config.datePropertiesToKeys([])).to.deep.equal({});
+
+      expect(transformFunctions.transforms.config.datePropertiesToKeys([{
+        isDate: false
+      }])).to.deep.equal({});
+
+      expect(transformFunctions.transforms.config.datePropertiesToKeys([{
+        field: 'field1',
+        key: 'key1',
+        isDate: true,
+        dateProperties: {
+          end: {
+            key: 'end1'
+          },
+          start: {
+            key: 'start1'
+          }
+        }
+      }])).to.deep.equal({
+        end1: 'key1',
+        start1: 'key1'
+      });
+
+      expect(transformFunctions.transforms.config.datePropertiesToKeys([{
+        field: 'field1',
+        key: 'key1',
+        isDate: true,
+        dateProperties: {
+          end: {
+            key: 'end1'
+          },
+          start: {
+            key: 'start1'
+          }
+        }
+      }, {
+        field: 'field2',
+        key: 'key2',
+        isDate: true,
+        dateProperties: {
+          end: {
+            key: 'end2'
+          },
+          start: {
+            key: 'start2'
+          }
+        }
+      }])).to.deep.equal({
+        end1: 'key1',
+        end2: 'key2',
+        start1: 'key1',
+        start2: 'key2'
+      });
+    });
+
+    test('entityFilters does return expected object', function() {
+      expect(transformFunctions.transforms.config.entityFilters([])).to.deep.equal({});
+      expect(transformFunctions.transforms.config.entityFilters([{
+        key: 'key1'
+      }, {
+        key: 'key2'
+      }])).to.deep.equal({
+        key1: {},
+        key2: {}
+      });
+    });
+
+    test('fields does return expected object', function() {
+      expect(transformFunctions.transforms.config.fields({})).to.deep.equal({});
+      expect(transformFunctions.transforms.config.fields({
+        fields: {}
+      })).to.deep.equal({});
+      expect(transformFunctions.transforms.config.fields({
+        fields: {
+          a: 1
+        }
+      })).to.deep.equal({
+        a: 1
+      });
+      expect(transformFunctions.transforms.config.fields({
+        fields: {
+          a: 1,
+          b: 2
+        }
+      })).to.deep.equal({
+        a: 1,
+        b: 2
+      });
+    });
+
+    test('filterCollection does return expected object', function() {
+      expect(transformFunctions.transforms.config.filterCollection([])).to.deep.equal({});
+      expect(transformFunctions.transforms.config.filterCollection([{
+        key: 'key1'
+      }, {
+        key: 'key2'
+      }])).to.deep.equal({
+        key1: [],
+        key2: []
+      });
+    });
+
+    test('filterCollectionBuildersConfig does return expected object', function() {
+      expect(transformFunctions.transforms.config.filterCollectionBuildersConfig([])).to.deep.equal({});
+      expect(transformFunctions.transforms.config.filterCollectionBuildersConfig([{
+        field: 'field1',
+        key: 'key1',
+        type: 'type1'
+      }, {
+        field: 'field2',
+        key: 'key2',
+        type: 'type2'
+      }])).to.deep.equal({
+        key1: {
+          field: 'field1',
+          type: 'type1'
+        },
+        key2: {
+          field: 'field2',
+          type: 'type2'
+        }
+      });
+    });
+
+    test('filterState does return expected object', function() {
+      expect(transformFunctions.transforms.config.filterState({}, [])).to.deep.equal({});
+
+      expect(transformFunctions.transforms.config.filterState({
+        key1: [1, 2],
+        key2: [3]
+      }, [])).to.deep.equal({});
+
+      expect(transformFunctions.transforms.config.filterState({}, [{
+        key: 'key1'
+      }, {
+        key: 'key2'
+      }])).to.deep.equal({
+        key1: [],
+        key2: []
+      });
+
+      expect(transformFunctions.transforms.config.filterState({
+        key1: [1, 2],
+        key2: [3]
+      }, [{
+        key: 'key1'
+      }, {
+        key: 'key2'
+      }])).to.deep.equal({
+        key1: [1, 2],
+        key2: [3]
+      });
+
+      expect(transformFunctions.transforms.config.filterState({
+        key1: [1, 2]
+      }, [{
+        key: 'key1'
+      }, {
+        key: 'key2'
+      }])).to.deep.equal({
+        key1: [1, 2],
+        key2: []
+      });
+
+      expect(transformFunctions.transforms.config.filterState({
+        key1: [1, 2],
+        key2: [3]
+      }, [{
+        key: 'key1'
+      }])).to.deep.equal({
+        key1: [1, 2]
+      });
+    });
+
+    test('filterTerms does return expected object', function() {
+      expect(transformFunctions.transforms.config.filterTerms({}, [])).to.deep.equal({});
+
+      expect(transformFunctions.transforms.config.filterTerms({
+        key1: [1, 2],
+        key2: [3]
+      }, [])).to.deep.equal({});
+
+      expect(transformFunctions.transforms.config.filterTerms({}, [{
+        key: 'key1',
+        title: 'title1'
+      }, {
+        key: 'key2',
+        title: 'title2'
+      }])).to.deep.equal({
+        title1: [],
+        title2: []
+      });
+
+      expect(transformFunctions.transforms.config.filterTerms({
+        key1: [1, 2],
+        key2: [3]
+      }, [{
+        key: 'key1',
+        title: 'title1'
+      }, {
+        key: 'key2',
+        title: 'title2'
+      }])).to.deep.equal({
+        title1: [1, 2],
+        title2: [3]
+      });
+    });
+
+    test('filterTerms given dates does return expected object', function() {
+      expect(transformFunctions.transforms.config.filterTerms({
+        key1: ['2018-01-01T00:00:00', '2018-01-15T00:00:00'],
+        key2: []
+      }, [{
+        key: 'key1',
+        title: 'title1',
+        isDate: true
+      }, {
+        key: 'key2',
+        title: 'title2',
+        isDate: true
+      }])).to.deep.equal({
+        'Begin title1': ['Jan 1, 2018'],
+        'End title1': ['Jan 15, 2018'],
+      });
+    });
+
+    test('formatDate does return date string', function() {
+      expect(transformFunctions.transforms.config.formatDate('2018-01-01T00:00:00')).to.equal('Jan 1, 2018');
+    });
+
+    test('formatId does return decoded ID', function() {
+      expect(transformFunctions.transforms.config.formatId('http%3A%2F%2Furl.com')).to.equal('http://url.com');
+    });
+
+    test('formatName does return extraction name', function() {
+      expect(transformFunctions.transforms.config.formatName('2018-01-01T00:00:00', 'date')).to.equal('Jan 1, 2018');
+      expect(transformFunctions.transforms.config.formatName('email%40address.com', 'email')).to.equal('email@address.com');
+      expect(transformFunctions.transforms.config.formatName('123-unit:lbs', 'hyphenated')).to.equal('123 lbs');
+      expect(transformFunctions.transforms.config.formatName('123456-site:tor', 'hyphenated')).to.equal('123456 (tor)');
+      expect(transformFunctions.transforms.config.formatName('100-currency:dollars-time_unit:60', 'hyphenated')).to.equal('100 dollars per 60 minutes');
+      expect(transformFunctions.transforms.config.formatName('ABCD', 'image')).to.equal('Image');
+      expect(transformFunctions.transforms.config.formatName('boston%3Amassachusetts%3Aunited%20states%3A-71.05977%3A42.35843', 'city')).to.equal('boston, massachusetts');
+      expect(transformFunctions.transforms.config.formatName('1234567890', 'phone')).to.equal('123-456-7890');
+      expect(transformFunctions.transforms.config.formatName('other', 'other')).to.equal('other');
+    });
+
+    test('imageSrc does return decoded ID', function() {
+      expect(transformFunctions.transforms.config.imageSrc('ABCD', {})).to.equal('ABCD');
+      expect(transformFunctions.transforms.config.imageSrc('ABCD', {
+        imageUrlPrefix: 'http://'
+      })).to.equal('http://ABCD');
+      expect(transformFunctions.transforms.config.imageSrc('ABCD', {
+        imageUrlSuffix: '.png'
+      })).to.equal('ABCD.png');
+      expect(transformFunctions.transforms.config.imageSrc('ABCD', {
+        imageUrlPrefix: 'http://',
+        imageUrlSuffix: '.png'
+      })).to.equal('http://ABCD.png');
+    });
+
+    test('moreLikeThisFields does return expected array', function() {
+      expect(transformFunctions.transforms.config.moreLikeThisFields([])).to.deep.equal([]);
+      expect(transformFunctions.transforms.config.moreLikeThisFields([{
+        queryField: 'field1',
+        result: 'no'
+      }, {
+        queryField: 'field2',
+        result: 'title'
+      }, {
+        queryField: 'field3',
+        result: 'description'
+      }, {
+        queryField: 'field4',
+        result: 'no'
+      }, {
+        queryField: 'field5',
+        result: 'title'
+      }, {
+        queryField: 'field6',
+        result: 'description'
+      }])).to.deep.equal(['field2', 'field3', 'field5', 'field6']);
+    });
+
+    test('networkExpansionParameters does return expected object', function() {
+      expect(transformFunctions.transforms.config.networkExpansionParameters([])).to.deep.equal({});
+      expect(transformFunctions.transforms.config.networkExpansionParameters([{
+        key: 'key1'
+      }, {
+        key: 'key2'
+      }])).to.deep.equal({
+        key1: false,
+        key2: false
+      });
+    });
+
+    test('pageConfig does return expected object', function() {
+      expect(transformFunctions.transforms.config.pageConfig([], 'key1')).to.deep.equal({});
+      expect(transformFunctions.transforms.config.pageConfig([{
+        key: 'key1'
+      }], 'key1')).to.deep.equal({
+        key: 'key1'
+      });
+
+      expect(transformFunctions.transforms.config.pageConfig([{
+        key: 'key1'
+      }], 'key2')).to.deep.equal({});
+      expect(transformFunctions.transforms.config.pageConfig([{
+        key: 'key1'
+      }, {
+        key: 'key2'
+      }], 'key2')).to.deep.equal({
+        key: 'key2'
+      });
+    });
+
+    test('resultLink does return expected link string', function() {
+      expect(transformFunctions.transforms.config.resultLink('ABC123')).to.equal('/result.html?domain=TestDomain&id=ABC123');
+    });
+
+    test('searchFieldsCollection does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchFieldsCollection([])).to.deep.equal({});
+
+      var collection = transformFunctions.transforms.config.searchFieldsCollection([{
+        icon: 'icon1',
+        key: 'key1',
+        link: 'entity',
+        queryField: 'field1',
+        styleClass: 'styleClass1',
+        title: 'title1',
+        type: 'type1'
+      }, {
+        icon: 'icon2',
+        key: 'key2',
+        link: 'result',
+        queryField: 'field2',
+        styleClass: 'styleClass2',
+        title: 'title2',
+        type: 'type2'
+      }]);
+
+      expect(collection.key1).to.be.an('Object');
+      expect(collection.key1.field).to.equal('field1');
+      expect(collection.key1.icon).to.equal('icon1');
+      expect(collection.key1.name).to.equal('title1');
+      expect(collection.key1.styleClass).to.equal('styleClass1');
+      expect(collection.key1.type).to.equal('type1');
+      expect(collection.key1.link).to.be.a('Function');
+      expect(collection.key1.link('ABC123')).to.equal('/entity.html?domain=TestDomain&id=ABC123&type=key1');
+
+      expect(collection.key2).to.be.an('Object');
+      expect(collection.key2.field).to.equal('field2');
+      expect(collection.key2.icon).to.equal('icon2');
+      expect(collection.key2.name).to.equal('title2');
+      expect(collection.key2.styleClass).to.equal('styleClass2');
+      expect(collection.key2.type).to.equal('type2');
+      expect(collection.key2.link).to.be.a('Function');
+      expect(collection.key2.link('ABC123')).to.equal('/result.html?domain=TestDomain&id=ABC123');
+    });
+
+    test('searchFieldsCollection given date fields does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchFieldsCollection([])).to.deep.equal({});
+
+      var collection = transformFunctions.transforms.config.searchFieldsCollection([{
+        field: 'field1',
+        icon: 'icon1',
+        isDate: true,
+        key: 'key1',
+        link: 'no',
+        styleClass: 'styleClass1',
+        title: 'title1',
+        type: 'type1'
+      }]);
+
+      expect(collection.key1).to.be.an('Object');
+      expect(collection.key1.field).to.equal('field1');
+      expect(collection.key1.icon).to.equal('icon1');
+      expect(collection.key1.name).to.equal('title1');
+      expect(collection.key1.styleClass).to.equal('styleClass1');
+      expect(collection.key1.type).to.equal('type1');
+      expect(collection.key1.link).to.be.a('Function');
+      expect(collection.key1.link('ABC123')).to.not.exist;
+    });
+
+    test('searchFieldsDialogConfig given no search fields does return empty array', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([])).to.deep.equal([]);
+    });
+
+    test('searchFieldsDialogConfig given search fields with search disabled does return empty array', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        search: false
+      }])).to.deep.equal([]);
+
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        isDate: true,
+        key: 'key1',
+        search: false,
+        title: 'title1',
+        dateProperties: {
+          start: {
+            field: 'field1',
+            icon: 'icon1',
+            key: 'key1_start',
+            styleClass: 'styleClass1',
+            title: 'title1 Begin'
+          },
+          end: {
+            field: 'field1',
+            icon: 'icon1',
+            key: 'key1_end',
+            styleClass: 'styleClass1',
+            title: 'title1 End'
+          }
+        }
+      }])).to.deep.equal([]);
+
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        field: 'field1',
+        icon: 'icon1',
+        isEntity: true,
+        key: 'key1',
+        search: false,
+        styleClass: 'styleClass1',
+        title: 'title1'
+      }])).to.deep.equal([]);
+
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        field: 'field1',
+        icon: 'icon1',
+        isImage: true,
+        key: 'key1',
+        search: false,
+        styleClass: 'styleClass1',
+        title: 'title1'
+      }])).to.deep.equal([]);
+    });
+
+    test('searchFieldsDialogConfig given search fields does return expected array', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        field: 'field1',
+        icon: 'icon1',
+        key: 'key1',
+        search: true,
+        styleClass: 'styleClass1',
+        title: 'title1'
+      }])).to.deep.equal([{
+        type: undefined,
+        name: 'Other',
+        data: [{
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1',
+          styleClass: 'styleClass1',
+          title: 'title1',
+          enableNetworkExpansion: false
+        }]
+      }]);
+    });
+
+    test('searchFieldsDialogConfig given date search fields does return expected array', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        isDate: true,
+        key: 'key1',
+        search: true,
+        title: 'title1',
+        dateProperties: {
+          start: {
+            field: 'field1',
+            icon: 'icon1',
+            key: 'key1_start',
+            styleClass: 'styleClass1',
+            title: 'title1 Begin'
+          },
+          end: {
+            field: 'field1',
+            icon: 'icon1',
+            key: 'key1_end',
+            styleClass: 'styleClass1',
+            title: 'title1 End'
+          }
+        }
+      }])).to.deep.equal([{
+        type: 'date',
+        name: 'title1',
+        data: [{
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1_start',
+          styleClass: 'styleClass1',
+          title: 'title1 Begin'
+        }, {
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1_end',
+          styleClass: 'styleClass1',
+          title: 'title1 End'
+        }]
+      }]);
+    });
+
+    test('searchFieldsDialogConfig given entity search fields does return expected array', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        field: 'field1',
+        icon: 'icon1',
+        isEntity: true,
+        key: 'key1',
+        search: true,
+        styleClass: 'styleClass1',
+        title: 'title1'
+      }])).to.deep.equal([{
+        type: undefined,
+        name: 'Other',
+        data: [{
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1',
+          styleClass: 'styleClass1',
+          title: 'title1',
+          enableNetworkExpansion: true
+        }]
+      }]);
+    });
+
+    test('searchFieldsDialogConfig given image search fields does return expected array', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        field: 'field1',
+        icon: 'icon1',
+        isImage: true,
+        key: 'key1',
+        search: true,
+        styleClass: 'styleClass1',
+        title: 'title1'
+      }])).to.deep.equal([{
+        type: 'image',
+        name: 'Other',
+        data: [{
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1',
+          styleClass: 'styleClass1',
+          title: 'title1',
+          enableNetworkExpansion: false
+        }]
+      }]);
+    });
+
+    test('searchFieldsDialogConfig given image entity search fields does return expected array', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        field: 'field1',
+        icon: 'icon1',
+        isEntity: true,
+        isImage: true,
+        key: 'key1',
+        search: true,
+        styleClass: 'styleClass1',
+        title: 'title1'
+      }])).to.deep.equal([{
+        type: 'image',
+        name: 'Other',
+        data: [{
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1',
+          styleClass: 'styleClass1',
+          title: 'title1',
+          enableNetworkExpansion: true
+        }]
+      }]);
+    });
+
+    test('searchFieldsDialogConfig given search fields with groups does return expected array', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        field: 'field1',
+        group: 'groupA',
+        icon: 'icon1',
+        key: 'key1',
+        search: true,
+        styleClass: 'styleClass1',
+        title: 'title1'
+      }])).to.deep.equal([{
+        type: undefined,
+        name: 'groupA',
+        data: [{
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1',
+          styleClass: 'styleClass1',
+          title: 'title1',
+          enableNetworkExpansion: false
+        }]
+      }]);
+    });
+
+    test('searchFieldsDialogConfig given search fields with non-matching groups does return expected array', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        field: 'field1',
+        group: 'groupA',
+        icon: 'icon1',
+        key: 'key1',
+        search: true,
+        styleClass: 'styleClass1',
+        title: 'title1'
+      }, {
+        field: 'field2',
+        group: 'groupB',
+        icon: 'icon2',
+        key: 'key2',
+        search: true,
+        styleClass: 'styleClass2',
+        title: 'title2'
+      }])).to.deep.equal([{
+        type: undefined,
+        name: 'groupA',
+        data: [{
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1',
+          styleClass: 'styleClass1',
+          title: 'title1',
+          enableNetworkExpansion: false
+        }]
+      }, {
+        type: undefined,
+        name: 'groupB',
+        data: [{
+          field: 'field2',
+          icon: 'icon2',
+          key: 'key2',
+          styleClass: 'styleClass2',
+          title: 'title2',
+          enableNetworkExpansion: false
+        }]
+      }]);
+    });
+
+    test('searchFieldsDialogConfig given search fields with matching groups does return expected array', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        field: 'field1',
+        group: 'groupA',
+        icon: 'icon1',
+        key: 'key1',
+        search: true,
+        styleClass: 'styleClass1',
+        title: 'title1'
+      }, {
+        field: 'field2',
+        group: 'groupA',
+        icon: 'icon2',
+        key: 'key2',
+        search: true,
+        styleClass: 'styleClass2',
+        title: 'title2'
+      }])).to.deep.equal([{
+        type: undefined,
+        name: 'groupA',
+        data: [{
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1',
+          styleClass: 'styleClass1',
+          title: 'title1',
+          enableNetworkExpansion: false
+        }, {
+          field: 'field2',
+          icon: 'icon2',
+          key: 'key2',
+          styleClass: 'styleClass2',
+          title: 'title2',
+          enableNetworkExpansion: false
+        }]
+      }]);
+    });
+
+    test('searchFieldsDialogConfig given date and non-date search fields does return expected array with dates first', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        field: 'field1',
+        group: 'groupA',
+        icon: 'icon1',
+        isEntity: true,
+        key: 'key1',
+        search: true,
+        styleClass: 'styleClass1',
+        title: 'title1'
+      }, {
+        isDate: true,
+        key: 'key2',
+        search: true,
+        title: 'title2',
+        dateProperties: {
+          start: {
+            field: 'field2',
+            icon: 'icon2',
+            key: 'key2_start',
+            styleClass: 'styleClass2',
+            title: 'title2 Begin'
+          },
+          end: {
+            field: 'field2',
+            icon: 'icon2',
+            key: 'key2_end',
+            styleClass: 'styleClass2',
+            title: 'title2 End'
+          }
+        }
+      }, {
+        field: 'field3',
+        group: 'groupB',
+        icon: 'icon3',
+        isEntity: true,
+        key: 'key3',
+        search: true,
+        styleClass: 'styleClass3',
+        title: 'title3'
+      }, {
+        isDate: true,
+        key: 'key4',
+        search: true,
+        title: 'title4',
+        dateProperties: {
+          start: {
+            field: 'field4',
+            icon: 'icon4',
+            key: 'key4_start',
+            styleClass: 'styleClass4',
+            title: 'title4 Begin'
+          },
+          end: {
+            field: 'field4',
+            icon: 'icon4',
+            key: 'key4_end',
+            styleClass: 'styleClass4',
+            title: 'title4 End'
+          }
+        }
+      }])).to.deep.equal([{
+        type: 'date',
+        name: 'title2',
+        data: [{
+          field: 'field2',
+          icon: 'icon2',
+          key: 'key2_start',
+          styleClass: 'styleClass2',
+          title: 'title2 Begin'
+        }, {
+          field: 'field2',
+          icon: 'icon2',
+          key: 'key2_end',
+          styleClass: 'styleClass2',
+          title: 'title2 End'
+        }]
+      }, {
+        type: 'date',
+        name: 'title4',
+        data: [{
+          field: 'field4',
+          icon: 'icon4',
+          key: 'key4_start',
+          styleClass: 'styleClass4',
+          title: 'title4 Begin'
+        }, {
+          field: 'field4',
+          icon: 'icon4',
+          key: 'key4_end',
+          styleClass: 'styleClass4',
+          title: 'title4 End'
+        }]
+      }, {
+        type: undefined,
+        name: 'groupA',
+        data: [{
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1',
+          styleClass: 'styleClass1',
+          title: 'title1',
+          enableNetworkExpansion: true
+        }]
+      }, {
+        type: undefined,
+        name: 'groupB',
+        data: [{
+          field: 'field3',
+          icon: 'icon3',
+          key: 'key3',
+          styleClass: 'styleClass3',
+          title: 'title3',
+          enableNetworkExpansion: true
+        }]
+      }]);
+    });
+
+    test('searchFieldsDialogConfig given many groups does return expected array', function() {
+      expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
+        field: 'field1',
+        group: 'groupA',
+        icon: 'icon1',
+        key: 'key1',
+        search: true,
+        styleClass: 'styleClass1',
+        title: 'title1'
+      }, {
+        field: 'field2',
+        group: 'groupB',
+        icon: 'icon2',
+        key: 'key2',
+        search: true,
+        styleClass: 'styleClass2',
+        title: 'title2'
+      }, {
+        field: 'field3',
+        icon: 'icon3',
+        key: 'key3',
+        search: true,
+        styleClass: 'styleClass3',
+        title: 'title3'
+      }, {
+        field: 'field4',
+        group: 'groupA',
+        icon: 'icon4',
+        key: 'key4',
+        search: true,
+        styleClass: 'styleClass4',
+        title: 'title4'
+      }, {
+        field: 'field5',
+        group: 'groupB',
+        icon: 'icon5',
+        key: 'key5',
+        search: true,
+        styleClass: 'styleClass5',
+        title: 'title5'
+      }, {
+        field: 'field6',
+        icon: 'icon6',
+        key: 'key6',
+        search: true,
+        styleClass: 'styleClass6',
+        title: 'title6'
+      }])).to.deep.equal([{
+        type: undefined,
+        name: 'groupA',
+        data: [{
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1',
+          styleClass: 'styleClass1',
+          title: 'title1',
+          enableNetworkExpansion: false
+        }, {
+          field: 'field4',
+          icon: 'icon4',
+          key: 'key4',
+          styleClass: 'styleClass4',
+          title: 'title4',
+          enableNetworkExpansion: false
+        }]
+      }, {
+        type: undefined,
+        name: 'groupB',
+        data: [{
+          field: 'field2',
+          icon: 'icon2',
+          key: 'key2',
+          styleClass: 'styleClass2',
+          title: 'title2',
+          enableNetworkExpansion: false
+        }, {
+          field: 'field5',
+          icon: 'icon5',
+          key: 'key5',
+          styleClass: 'styleClass5',
+          title: 'title5',
+          enableNetworkExpansion: false
+        }]
+      }, {
+        type: undefined,
+        name: 'Other',
+        data: [{
+          field: 'field3',
+          icon: 'icon3',
+          key: 'key3',
+          styleClass: 'styleClass3',
+          title: 'title3',
+          enableNetworkExpansion: false
+        }, {
+          field: 'field6',
+          icon: 'icon6',
+          key: 'key6',
+          styleClass: 'styleClass6',
+          title: 'title6',
+          enableNetworkExpansion: false
+        }]
+      }]);
+    });
+
+    test('searchKeys does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchKeys([])).to.deep.equal([]);
+      expect(transformFunctions.transforms.config.searchKeys([{
+        key: 'key1'
+      }, {
+        key: 'key2'
+      }])).to.deep.equal(['key1', 'key2']);
+    });
+
+    test('searchParameters does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchParameters([])).to.deep.equal({});
+      expect(transformFunctions.transforms.config.searchParameters([{
+        key: 'key1',
+      }, {
+        key: 'key2'
+      }])).to.deep.equal({
+        key1: {},
+        key2: {}
+      });
+    });
+
+    test('searchState given no search fields does return empty object', function() {
+      expect(transformFunctions.transforms.config.searchState({
+        type1: {
+          term1: {
+            enabled: true
+          }
+        }
+      }, [])).to.deep.equal({});
+    });
+
+    test('searchState given no search parameters does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchState({}, [{
+        key: 'type1'
+      }])).to.deep.equal({
+        type1: {}
+      });
+    });
+
+    test('searchState given search fields and disabled parameters does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchState({
+        type1: {
+          term1: {
+            enabled: false
+          }
+        }
+      }, [{
+        key: 'type1'
+      }])).to.deep.equal({
+        type1: {}
+      });
+    });
+
+    test('searchState given search fields and enabled parameters does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchState({
+        type1: {
+          term1: {
+            enabled: true
+          }
+        }
+      }, [{
+        key: 'type1'
+      }])).to.deep.equal({
+        type1: {
+          term1: {
+            enabled: true
+          }
+        }
+      });
+    });
+
+    test('searchState ignores enabled parameters not in search fields', function() {
+      expect(transformFunctions.transforms.config.searchState({
+        type1: {
+          term1: {
+            enabled: true
+          }
+        }
+      }, [{
+        key: 'type2'
+      }])).to.deep.equal({
+        type2: {}
+      });
+    });
+
+    test('searchState given many search fields and parameters does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchState({
+        type1: {
+          term1: {
+            enabled: true
+          }
+        },
+        type2: {
+          term2: {
+            enabled: true
+          },
+          term3: {
+            enabled: true
+          }
+        },
+        type3: {
+          term4: {
+            enabled: true
+          },
+          term5: {
+            enabled: false
+          }
+        },
+        type4: {
+          term6: {
+            enabled: false
+          }
+        }
+      }, [{
+        key: 'type1'
+      }, {
+        key: 'type2'
+      }, {
+        key: 'type3'
+      }, {
+        key: 'type4'
+      }])).to.deep.equal({
+        type1: {
+          term1: {
+            enabled: true
+          }
+        },
+        type2: {
+          term2: {
+            enabled: true
+          },
+          term3: {
+            enabled: true
+          }
+        },
+        type3: {
+          term4: {
+            enabled: true
+          }
+        },
+        type4: {}
+      });
+    });
+
+    test('searchTerms given no search fields does return empty object', function() {
+      expect(transformFunctions.transforms.config.searchTerms({
+        type1: {
+          term1: {
+            enabled: true,
+            text: 'Term 1'
+          }
+        }
+      }, [])).to.deep.equal({});
+    });
+
+    test('searchTerms given no search parameters does return empty object', function() {
+      expect(transformFunctions.transforms.config.searchTerms({}, [{
+        key: 'type1',
+        title: 'title1'
+      }])).to.deep.equal({});
+    });
+
+    test('searchTerms given search fields and primitive parameters does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchTerms({
+        type1: false
+      }, [{
+        key: 'type1',
+        title: 'title1'
+      }])).to.deep.equal({});
+
+      expect(transformFunctions.transforms.config.searchTerms({
+        type1: true
+      }, [{
+        key: 'type1',
+        title: 'title1'
+      }])).to.deep.equal({
+        title1: true
+      });
+
+      expect(transformFunctions.transforms.config.searchTerms({
+        type1: 1234
+      }, [{
+        key: 'type1',
+        title: 'title1'
+      }])).to.deep.equal({
+        title1: true
+      });
+
+      expect(transformFunctions.transforms.config.searchTerms({
+        type1: 'string'
+      }, [{
+        key: 'type1',
+        title: 'title1'
+      }])).to.deep.equal({
+        title1: true
+      });
+    });
+
+    test('searchTerms given search fields and disabled parameters does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchTerms({
+        type1: {
+          term1: {
+            enabled: false,
+            text: 'Term 1'
+          }
+        }
+      }, [{
+        key: 'type1',
+        title: 'title1'
+      }])).to.deep.equal({
+        title1: []
+      });
+    });
+
+    test('searchTerms given search fields and enabled parameters does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchTerms({
+        type1: {
+          term1: {
+            enabled: true,
+            text: 'Term 1'
+          }
+        }
+      }, [{
+        key: 'type1',
+        title: 'title1'
+      }])).to.deep.equal({
+        title1: ['Term 1']
+      });
+    });
+
+    test('searchTerms ignores enabled parameters not in search fields', function() {
+      expect(transformFunctions.transforms.config.searchTerms({
+        type1: {
+          term1: {
+            enabled: true,
+            text: 'Term 1'
+          }
+        }
+      }, [{
+        key: 'type2',
+        title: 'title2'
+      }])).to.deep.equal({});
+    });
+
+    test('searchTerms given many search fields and parameters does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchTerms({
+        type1: {
+          term1: {
+            enabled: true,
+            text: 'Term 1'
+          }
+        },
+        type2: {
+          term2: {
+            enabled: true,
+            text: 'Term 2'
+          },
+          term3: {
+            enabled: true,
+            text: 'Term 3'
+          }
+        },
+        type3: {
+          term4: {
+            enabled: true,
+            text: 'Term 4'
+          },
+          term5: {
+            enabled: false,
+            text: 'Term 5'
+          }
+        },
+        type4: {
+          term6: {
+            enabled: false,
+            text: 'Term 6'
+          }
+        }
+      }, [{
+        key: 'type1',
+        title: 'title1'
+      }, {
+        key: 'type2',
+        title: 'title2'
+      }, {
+        key: 'type3',
+        title: 'title3'
+      }, {
+        key: 'type4',
+        title: 'title4'
+      }])).to.deep.equal({
+        title1: ['Term 1'],
+        title2: ['Term 2', 'Term 3'],
+        title3: ['Term 4'],
+        title4: []
+      });
+    });
+
+    test('searchTerms given date fields and parameters does return expected object', function() {
+      expect(transformFunctions.transforms.config.searchTerms({
+        type1: {
+          start1: {
+            enabled: true,
+            text: '2018-01-01T00:00:00'
+          }
+        },
+        type2: {
+          end2: {
+            enabled: true,
+            text: '2018-01-02T00:00:00'
+          }
+        },
+        type3: {
+          start3: {
+            enabled: true,
+            text: '2018-01-03T00:00:00'
+          },
+          end3: {
+            enabled: true,
+            text: '2018-01-04T00:00:00'
+          }
+        },
+        type4: {
+          start4: {
+            enabled: true,
+            text: '2018-01-05T00:00:00'
+          },
+          end4: {
+            enabled: false,
+            text: '2018-01-06T00:00:00'
+          }
+        },
+        type5: {
+          start5: {
+            enabled: false,
+            text: '2018-01-07T00:00:00'
+          },
+          end5: {
+            enabled: true,
+            text: '2018-01-08T00:00:00'
+          }
+        },
+        type6: {
+          start5: {
+            enabled: false,
+            text: '2018-01-09T00:00:00'
+          }
+        }
+      }, [{
+        key: 'type1',
+        title: 'title1',
+        isDate: true,
+        dateProperties: {
+          start: {
+            key: 'start1'
+          },
+          end: {
+            key: 'end1'
+          }
+        }
+      }, {
+        key: 'type2',
+        title: 'title2',
+        isDate: true,
+        dateProperties: {
+          start: {
+            key: 'start2'
+          },
+          end: {
+            key: 'end2'
+          }
+        }
+      }, {
+        key: 'type3',
+        title: 'title3',
+        isDate: true,
+        dateProperties: {
+          start: {
+            key: 'start3'
+          },
+          end: {
+            key: 'end3'
+          }
+        }
+      }, {
+        key: 'type4',
+        title: 'title4',
+        isDate: true,
+        dateProperties: {
+          start: {
+            key: 'start4'
+          },
+          end: {
+            key: 'end4'
+          }
+        }
+      }, {
+        key: 'type5',
+        title: 'title5',
+        isDate: true,
+        dateProperties: {
+          start: {
+            key: 'start5'
+          },
+          end: {
+            key: 'end5'
+          }
+        }
+      }, {
+        key: 'type6',
+        title: 'title6',
+        isDate: true,
+        dateProperties: {
+          start: {
+            key: 'start6'
+          },
+          end: {
+            key: 'end6'
+          }
+        }
+      }])).to.deep.equal({
+        'Begin title1': ['Jan 1, 2018'],
+        'Begin title3': ['Jan 3, 2018'],
+        'Begin title4': ['Jan 5, 2018'],
+        'End title2': ['Jan 2, 2018'],
+        'End title3': ['Jan 4, 2018'],
+        'End title5': ['Jan 8, 2018']
+      });
+    });
+
+    test('sortSearchFieldsAlphabetically does return expected array', function() {
+      expect(transformFunctions.transforms.config.sortSearchFieldsAlphabetically([{
+        title: 'b'
+      }, {
+        title: 'a'
+      }])).to.deep.equal([{
+        title: 'a'
+      }, {
+        title: 'b'
+      }]);
+    });
+
+    test('sortSearchFieldsAlphabetically does not change input array', function() {
+      var array = [{
+        title: 'b'
+      }, {
+        title: 'a'
+      }];
+
+      expect(transformFunctions.transforms.config.sortSearchFieldsAlphabetically(array)).to.deep.equal([{
+        title: 'a'
+      }, {
+        title: 'b'
+      }]);
+
+      expect(array).to.deep.equal([{
+        title: 'b'
+      }, {
+        title: 'a'
+      }]);
     });
   });
 </script>

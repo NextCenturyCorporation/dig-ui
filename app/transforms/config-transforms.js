@@ -183,7 +183,6 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     entityFilters: function(searchFields) {
       var filters = {};
-
       searchFields.forEach(function(element) {
         filters[element.key] = {};
       });
@@ -252,15 +251,15 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      */
     filterTerms: function(filterCollection, searchFields) {
       return searchFields.reduce(function(terms, searchFieldsObject) {
-        var filterCollectionObject = filterCollection[searchFieldsObject.key];
+        var filters = filterCollection[searchFieldsObject.key];
         if(searchFieldsObject.isDate) {
-          if(_.isArray(filterCollectionObject) && filterCollectionObject.length === 2) {
-            terms['Begin ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(filterCollectionObject[0])];
-            terms['End ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(filterCollectionObject[1])];
+          if(_.isArray(filters) && filters.length === 2) {
+            terms['Begin ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(filters[0])];
+            terms['End ' + searchFieldsObject.title] = [commonTransforms.getFormattedDate(filters[1])];
           }
         } else {
           // Use map to create a new array.
-          terms[searchFieldsObject.title] = (filterCollectionObject || []).map(function(term) {
+          terms[searchFieldsObject.title] = (filters || []).map(function(term) {
             return term;
           });
         }
@@ -535,7 +534,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
             key: searchFieldsObject.key,
             styleClass: searchFieldsObject.styleClass,
             title: searchFieldsObject.title,
-            enableNetworkExpansion: esConfig.enableNetworkExpansion && (searchFieldsObject.isEntity)
+            enableNetworkExpansion: esConfig.enableNetworkExpansion && !!searchFieldsObject.isEntity
           });
         }
       });
