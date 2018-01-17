@@ -46,8 +46,8 @@ module.exports = function(app) {
   });
 
   app.use(function(req, res, next) {
-    // If auth is false, continue to the next step.
-    if(!serverConfig.auth) {
+    // If auth is false, or the user is being redirected to the login page, continue to the next step.
+    if(!serverConfig.auth || req.session.login) {
       next();
       return;
     }
@@ -59,12 +59,6 @@ module.exports = function(app) {
       return;
     }
 
-    // If the user is redirected to the login page, continue to the login page.
-    if(req.session.login) {
-      next();
-      return;
-    }
-
     // For all other requests, validate the user's authorization before continuing to the request.
     var token = (req.query.access_token ? decodeURIComponent(req.query.access_token) : req.session.token);
     request(serverConfig.authTokenUrl + encodeURIComponent(token), function(error, response, body) {
@@ -73,6 +67,8 @@ module.exports = function(app) {
       // If the token is invalid, redirect to the login page.
       var data = JSON.parse(body);
       if(data.error) {
+        console.log('Token Error', data.error);
+        req.session.token = undefined;
         res.redirect(serverPath + '/login' + url);
         return;
       }
