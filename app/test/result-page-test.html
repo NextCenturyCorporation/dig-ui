@@ -41,6 +41,124 @@ limitations under the License.
 
     setup(function() {
       element = fixture('result-page-fixture');
+      element.serverConfig = {};
+    });
+
+    test('does have PageBehavior functions', function() {
+      expect(element.assignWindowProperties).to.be.a('Function');
+      expect(element.buildArray).to.be.a('Function');
+      expect(element.concat).to.be.a('Function');
+      expect(element.createAuthHeader).to.be.a('Function');
+      expect(element.createResetDatesFunction).to.be.a('Function');
+      expect(element.equals).to.be.a('Function');
+      expect(element.exists).to.be.a('Function');
+      expect(element.findDigUrl).to.be.a('Function');
+      expect(element.findDomain).to.be.a('Function');
+      expect(element.findBlurStyleClass).to.be.a('Function');
+      expect(element.getUrlParameters).to.be.a('Function');
+      expect(element.openHelpPage).to.be.a('Function');
+      expect(element.openNewTab).to.be.a('Function');
+      expect(element.openSaveDialog).to.be.a('Function');
+      expect(element.openStateHistoryDialog).to.be.a('Function');
+      expect(element.openTagsDialog).to.be.a('Function');
+      expect(element.sendSupportEmail).to.be.a('Function');
+      expect(element.toggleMenu).to.be.a('Function');
+    });
+
+    test('buildMoreLikeThisValue does return expected string', function() {
+      expect(element.buildMoreLikeThisValue('title', null)).to.not.exist;
+      expect(element.buildMoreLikeThisValue(null, 'description')).to.not.exist;
+      expect(element.buildMoreLikeThisValue('title', 'description')).to.equal('title description');
+      expect(element.buildMoreLikeThisValue('the quick brown fox', 'jumps over the lazy dog')).to.equal('the quick brown fox jumps over the lazy dog');
+    });
+
+    test('createSectionTitle does return expected string', function() {
+      expect(element.createSectionTitle(0, {
+        title: 'Item',
+        titlePlural: 'Items',
+      })).to.equal('No Items');
+
+      expect(element.createSectionTitle(1, {
+        title: 'Item',
+        titlePlural: 'Items'
+      })).to.equal('1 Item');
+
+      expect(element.createSectionTitle(1234, {
+        title: 'Item',
+        titlePlural: 'Items'
+      })).to.equal('1,234 Items');
+
+      expect(element.createSectionTitle(987654321, {
+        title: 'Item',
+        titlePlural: 'Items'
+      })).to.equal('987,654,321 Items');
+    });
+
+    test('findPageName does return expected string', function() {
+      expect(element.findPageName({})).to.not.exist;
+      expect(element.findPageName({
+        title: 'TestFindPageName'
+      })).to.equal('TestFindPageName')
+    });
+
+    test('transformResultToArray does return expected array', function() {
+      expect(element.transformResultToArray({})).to.deep.equal([{
+        detailExtractions: [],
+        headerExtractions: []
+      }]);
+
+      expect(element.transformResultToArray({
+        detailExtractions: [1, 2]
+      })).to.deep.equal([{
+        detailExtractions: [1, 2],
+        headerExtractions: []
+      }]);
+
+      expect(element.transformResultToArray({
+        headerExtractions: [3, 4]
+      })).to.deep.equal([{
+        detailExtractions: [3, 4],
+        headerExtractions: []
+      }]);
+
+      expect(element.transformResultToArray({
+        detailExtractions: [1, 2],
+        headerExtractions: [3, 4]
+      })).to.deep.equal([{
+        detailExtractions: [3, 4, 1, 2],
+        headerExtractions: []
+      }]);
+    });
+
+    test('setting serverConfig does set configHeader', function() {
+      expect(element.configHeader).to.deep.equal({});
+
+      element.serverConfig = {
+        configPassword: 'TestPass',
+        configUsername: 'TestUser'
+      };
+
+      expect(element.configHeader).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+    });
+
+    test('setting parameters does set domain', function() {
+      expect(element.domain).to.not.exist;
+
+      element.parameters = {
+        domain: 'TestDomain'
+      };
+
+      expect(element.domain).to.equal('TestDomain');
+    });
+
+    test('setting result does set pageName', function() {
+      expect(element.pageName).to.not.exist;
+      element.result = {
+        title: 'TestPageName'
+      };
+      expect(element.pageName).to.equal('TestPageName');
     });
   });
 </script>

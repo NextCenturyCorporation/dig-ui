@@ -861,7 +861,7 @@ limitations under the License.
       },
 
       transformResultToArray: function(result) {
-        result.detailExtractions = result.headerExtractions.concat(result.detailExtractions);
+        result.detailExtractions = (result.headerExtractions || []).concat(result.detailExtractions || []);
         result.headerExtractions = [];
         return [result];
       }
