@@ -41,6 +41,1740 @@ limitations under the License.
 
     setup(function() {
       element = fixture('search-page-fixture');
+      element.serverConfig = {
+        imageServiceConfig: {
+          auth: {
+            password: 'TestPass',
+            user: 'TestUser'
+          },
+          endpoint: {
+            data: '/DataEndpoint',
+            link: '/LinkEndpoint'
+          },
+          host: {
+            face: 'FaceHost:FacePort',
+            similarity: 'SimilarityHost:SimilarityPort'
+          }
+        }
+      };
+    });
+
+    test('does have PageBehavior functions', function() {
+      expect(element.assignWindowProperties).to.be.a('Function');
+      expect(element.buildArray).to.be.a('Function');
+      expect(element.concat).to.be.a('Function');
+      expect(element.createAuthHeader).to.be.a('Function');
+      expect(element.createResetDatesFunction).to.be.a('Function');
+      expect(element.equals).to.be.a('Function');
+      expect(element.exists).to.be.a('Function');
+      expect(element.findDigUrl).to.be.a('Function');
+      expect(element.findDomain).to.be.a('Function');
+      expect(element.findBlurStyleClass).to.be.a('Function');
+      expect(element.getUrlParameters).to.be.a('Function');
+      expect(element.openHelpPage).to.be.a('Function');
+      expect(element.openNewTab).to.be.a('Function');
+      expect(element.openSaveDialog).to.be.a('Function');
+      expect(element.openStateHistoryDialog).to.be.a('Function');
+      expect(element.openTagsDialog).to.be.a('Function');
+      expect(element.sendSupportEmail).to.be.a('Function');
+      expect(element.toggleMenu).to.be.a('Function');
+    });
+
+    test('buildSearchState does return expected object', function() {
+      expect(element.buildSearchState({}, {})).to.deep.equal({});
+      expect(element.buildSearchState({
+        a: 1,
+        b: 2
+      }, {})).to.deep.equal({});
+      expect(element.buildSearchState({}, {
+        a: 3,
+        b: 4
+      })).to.deep.equal({
+        a: {},
+        b: {}
+      });
+      expect(element.buildSearchState({
+        a: 1,
+        b: 2
+      }, {
+        a: 3,
+        b: 4
+      })).to.deep.equal({
+        a: 1,
+        b: 2
+      });
+    });
+
+    test('createSearchResultConfig does return expected object', function() {
+      expect(element.createSearchResultConfig({})).to.deep.equal({
+        isNetworkExpansion: false
+      });
+      expect(element.createSearchResultConfig({
+        a: false
+      })).to.deep.equal({
+        isNetworkExpansion: false
+      });
+      expect(element.createSearchResultConfig({
+        a: true
+      })).to.deep.equal({
+        isNetworkExpansion: true
+      });
+      expect(element.createSearchResultConfig({
+        a: false,
+        b: true
+      })).to.deep.equal({
+        isNetworkExpansion: true
+      });
+    });
+
+    test('createSparklineAggregationConfig does return expected object', function() {
+      expect(element.createSparklineAggregationConfig({})).to.deep.equal({
+        name: undefined
+      });
+
+      expect(element.createSparklineAggregationConfig({
+        date1: {
+          key: 'key1',
+          start: 'start1',
+          end: 'end1'
+        }
+      }, 'date1', {
+        key1: {
+          start1: {
+            date: 'time1'
+          },
+          end1: {
+            date: undefined
+          }
+        }
+      })).to.deep.equal({
+        begin: 'time1',
+        end: undefined,
+        name: 'key1_timeline'
+      });
+
+      expect(element.createSparklineAggregationConfig({
+        date1: {
+          key: 'key1',
+          start: 'start1',
+          end: 'end1'
+        }
+      }, 'date1', {
+        key1: {
+          start1: {
+            date: undefined
+          },
+          end1: {
+            date: 'time2'
+          }
+        }
+      })).to.deep.equal({
+        begin: undefined,
+        end: 'time2',
+        name: 'key1_timeline'
+      });
+
+      expect(element.createSparklineAggregationConfig({
+        date1: {
+          key: 'key1',
+          start: 'start1',
+          end: 'end1'
+        }
+      }, 'date1', {
+        key1: {
+          start1: {
+            date: 'time1'
+          },
+          end1: {
+            date: 'time2'
+          }
+        }
+      })).to.deep.equal({
+        begin: 'time1',
+        end: 'time2',
+        name: 'key1_timeline'
+      });
+
+      expect(element.createSparklineAggregationConfig({
+        date1: {
+          key: 'key1',
+          start: 'start1',
+          end: 'end1'
+        },
+        date2: {
+          key: 'key2',
+          start: 'start2',
+          end: 'end2'
+        }
+      }, 'date1', {
+        key1: {
+          start1: {
+            date: 'time1'
+          },
+          end1: {
+            date: 'time2'
+          }
+        },
+        key2: {
+          start2: {
+            date: 'time3'
+          },
+          end2: {
+            date: 'time4'
+          }
+        }
+      })).to.deep.equal({
+        begin: 'time1',
+        end: 'time2',
+        name: 'key1_timeline'
+      });
+
+      expect(element.createSparklineAggregationConfig({
+        date1: {
+          key: 'key1',
+          start: 'start1',
+          end: 'end1'
+        },
+        date2: {
+          key: 'key2',
+          start: 'start2',
+          end: 'end2'
+        }
+      }, 'date2', {
+        key1: {
+          start1: {
+            date: 'time1'
+          },
+          end1: {
+            date: 'time2'
+          }
+        },
+        key2: {
+          start2: {
+            date: 'time3'
+          },
+          end2: {
+            date: 'time4'
+          }
+        }
+      })).to.deep.equal({
+        begin: 'time3',
+        end: 'time4',
+        name: 'key2_timeline'
+      });
+    });
+
+    test('createSparklineAggregationName does return expected object', function() {
+      expect(element.createSparklineAggregationName({})).to.not.exist;
+      expect(element.createSparklineAggregationName({}, 'date1')).to.not.exist;
+      expect(element.createSparklineAggregationName({
+        date1: {
+          key: 'key1'
+        }
+      })).to.not.exist;
+
+      expect(element.createSparklineAggregationName({
+        date1: {
+          key: 'key1'
+        }
+      }, 'date1')).to.equal('key1_timeline');
+
+      expect(element.createSparklineAggregationName({
+        date1: {
+          key: 'key1'
+        },
+        date2: {
+          key: 'key2'
+        }
+      }, 'date1')).to.equal('key1_timeline');
+
+      expect(element.createSparklineAggregationName({
+        date1: {
+          key: 'key1'
+        },
+        date2: {
+          key: 'key2'
+        }
+      }, 'date2')).to.equal('key2_timeline');
+    });
+
+    test('createTotalCountFunction does return function that does handle single result as expected', function() {
+      var func = element.createTotalCountFunction();
+      expect(func).to.be.a('Function');
+      expect(func([])).to.equal(0);
+      expect(func([{}])).to.equal(0);
+      expect(func([{
+        result: {}
+      }])).to.equal(0);
+
+      expect(func([{
+        result: {
+          hits: {}
+        }
+      }])).to.equal(0);
+
+      expect(func([{
+        result: {
+          hits: {
+            total: 1234
+          }
+        }
+      }])).to.equal(1234);
+    });
+
+    test('createTotalCountFunction does return function that does handle result array as expected', function() {
+      var func = element.createTotalCountFunction();
+      expect(func([{
+        result: []
+      }])).to.equal(0);
+
+      expect(func([{
+        result: [{}, {}]
+      }])).to.equal(0);
+
+      expect(func([{
+        result: [{
+          hits: {}
+        }, {
+          hits: {}
+        }]
+      }])).to.equal(0);
+
+      expect(func([{
+        result: [{
+          hits: {
+            total: 1234
+          }
+        }, {
+          hits: {
+            total: 5678
+          }
+        }]
+      }])).to.equal(5678);
+    });
+
+    test('findImagesFromResults does return expected array', function() {
+      expect(element.findImagesFromResults([])).to.deep.equal([]);
+      expect(element.findImagesFromResults([{}])).to.deep.equal([]);
+      expect(element.findImagesFromResults([{
+        images: []
+      }])).to.deep.equal([]);
+
+      expect(element.findImagesFromResults([{
+        images: [{
+          id: 1
+        }]
+      }])).to.deep.equal([{
+        id: 1
+      }]);
+
+      expect(element.findImagesFromResults([{
+        images: [{
+          id: 1
+        }, {
+          id: 2
+        }]
+      }])).to.deep.equal([{
+        id: 1
+      }, {
+        id: 2
+      }]);
+
+      expect(element.findImagesFromResults([{
+        images: [{
+          id: 1
+        }, {
+          id: 2
+        }]
+      }, {
+        images: [{
+          id: 3
+        }, {
+          id: 4
+        }]
+      }])).to.deep.equal([{
+        id: 1
+      }, {
+        id: 2
+      }, {
+        id: 3
+      }, {
+        id: 4
+      }]);
+
+      expect(element.findImagesFromResults([{
+        images: [{
+          id: 1
+        }, {
+          id: 1
+        }]
+      }])).to.deep.equal([{
+        id: 1
+      }]);
+
+      expect(element.findImagesFromResults([{
+        images: [{
+          id: 1
+        }]
+      }, {
+        images: [{
+          id: 1
+        }]
+      }])).to.deep.equal([{
+        id: 1
+      }]);
+    });
+
+    test('findStyleToHideIfEqual does return expected string', function() {
+      expect(element.findStyleToHideIfEqual(1, 1)).to.equal('display: none;');
+      expect(element.findStyleToHideIfEqual(1, 2)).to.equal('');
+      expect(element.findStyleToHideIfEqual('a', 'a')).to.equal('display: none;');
+      expect(element.findStyleToHideIfEqual('a', 'b')).to.equal('');
+      expect(element.findStyleToHideIfEqual(false, false)).to.equal('display: none;');
+      expect(element.findStyleToHideIfEqual(true, true)).to.equal('display: none;');
+      expect(element.findStyleToHideIfEqual(false, true)).to.equal('');
+      expect(element.findStyleToHideIfEqual(true, false)).to.equal('');
+    });
+
+    test('findStyleToShowIfEqual does return expected string', function() {
+      expect(element.findStyleToShowIfEqual(1, 1)).to.equal('');
+      expect(element.findStyleToShowIfEqual(1, 2)).to.equal('display: none;');
+      expect(element.findStyleToShowIfEqual('a', 'a')).to.equal('');
+      expect(element.findStyleToShowIfEqual('a', 'b')).to.equal('display: none;');
+      expect(element.findStyleToShowIfEqual(false, false)).to.equal('');
+      expect(element.findStyleToShowIfEqual(true, true)).to.equal('');
+      expect(element.findStyleToShowIfEqual(false, true)).to.equal('display: none;');
+      expect(element.findStyleToShowIfEqual(true, false)).to.equal('display: none;');
+    });
+
+    test('findUrlWithProject does return expected string', function() {
+      expect(element.findUrlWithProject('TestProject')).to.equal('./?project=TestProject');
+    });
+
+    test('handleImageFaceSearchResults given error does update imageFaceSearchList and imagesUploaded', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }];
+      element.imageFaceSearchList = [{
+        id: 'image1',
+        face: true
+      }];
+      element.imageFaceSearchRunning = true;
+
+      element.handleImageFaceSearchResults({
+        detail: {
+          error: 'TestError'
+        }
+      });
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 1,
+        hits: []
+      }]);
+      expect(element.imageFaceSearchList).to.deep.equal([]);
+      expect(element.imageFaceSearchRunning).to.be.false;
+    });
+
+    test('handleImageFaceSearchResults given response does update imageFaceSearchList and imagesUploaded', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }];
+      element.imageFaceSearchList = [{
+        id: 'image1',
+        face: true
+      }];
+      element.imageFaceSearchRunning = true;
+
+      element.handleImageFaceSearchResults({
+        detail: {
+          response: {
+            AllSimilarFaces: [{
+              SimilarFaces: {
+                CachedImageURLs: ['urlA', 'urlB'],
+                Distances: [0.01, 0.02],
+                ImageSha1s: ['idA', 'idB']
+              }
+            }]
+          }
+        }
+      });
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 1,
+        hits: [{
+          id: 'idA',
+          link: '',
+          name: 'Match #1 (image1)',
+          rank: 0.01,
+          source: 'urlA'
+        }, {
+          id: 'idB',
+          link: '',
+          name: 'Match #2 (image1)',
+          rank: 0.02,
+          source: 'urlB'
+        }]
+      }]);
+      expect(element.imageFaceSearchList).to.deep.equal([]);
+      expect(element.imageFaceSearchRunning).to.be.false;
+    });
+
+    test('handleImageFaceSearchResults given multiple responses does update imageFaceSearchList and imagesUploaded', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }, {
+        id: 'image2',
+        searches: 2
+      }];
+      element.imageFaceSearchList = [{
+        id: 'image1',
+        face: true
+      }, {
+        id: 'image2',
+        face: true
+      }];
+      element.imageFaceSearchRunning = true;
+
+      element.handleImageFaceSearchResults({
+        detail: {
+          response: {
+            AllSimilarFaces: [{
+              SimilarFaces: {
+                CachedImageURLs: ['urlA', 'urlB'],
+                Distances: [0.01, 0.02],
+                ImageSha1s: ['idA', 'idB']
+              }
+            }, {
+              SimilarFaces: {
+                CachedImageURLs: ['urlC', 'urlD'],
+                Distances: [0.03, 0.04],
+                ImageSha1s: ['idC', 'idD']
+              }
+            }]
+          }
+        }
+      });
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 1,
+        hits: [{
+          id: 'idA',
+          link: '',
+          name: 'Match #1 (image1)',
+          rank: 0.01,
+          source: 'urlA'
+        }, {
+          id: 'idB',
+          link: '',
+          name: 'Match #2 (image1)',
+          rank: 0.02,
+          source: 'urlB'
+        }]
+      }, {
+        id: 'image2',
+        searches: 1,
+        hits: [{
+          id: 'idC',
+          link: '',
+          name: 'Match #1 (image2)',
+          rank: 0.03,
+          source: 'urlC'
+        }, {
+          id: 'idD',
+          link: '',
+          name: 'Match #2 (image2)',
+          rank: 0.04,
+          source: 'urlD'
+        }]
+      }]);
+      expect(element.imageFaceSearchList).to.deep.equal([]);
+      expect(element.imageFaceSearchRunning).to.be.false;
+    });
+
+    test('handleImageFaceSearchResults does not update the request element if imageFaceSearchList is not bigger than the response', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }];
+      element.imageFaceSearchList = [{
+        id: 'image1',
+        face: true
+      }];
+
+      element.handleImageFaceSearchResults({
+        detail: {
+          response: {
+            AllSimilarFaces: [{
+              SimilarFaces: {
+                CachedImageURLs: [],
+                Distances: [],
+                ImageSha1s: []
+              }
+            }]
+          }
+        }
+      });
+
+      expect(element.imageFaceSearchRunning).to.be.false;
+      expect(element.$$('#imageFaceSearch').body).to.not.exist;
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({});
+      expect(element.$$('#imageFaceSearch').url).to.not.exist;
+    });
+
+    test('handleImageFaceSearchResults does update the request element if imageFaceSearchList is bigger than the response', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }, {
+        id: 'image2',
+        searches: 2
+      }];
+      element.imageFaceSearchList = [{
+        id: 'image1',
+        face: true
+      }, {
+        id: 'image2',
+        face: true,
+        source: 'image2',
+        type: 'LINK'
+      }];
+
+      element.handleImageFaceSearchResults({
+        detail: {
+          response: {
+            AllSimilarFaces: [{
+              SimilarFaces: {
+                CachedImageURLs: [],
+                Distances: [],
+                ImageSha1s: []
+              }
+            }]
+          }
+        }
+      });
+
+      expect(element.imageFaceSearchRunning).to.be.true;
+      expect(element.$$('#imageFaceSearch').body).to.deep.equal({
+        data: 'image2',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":0.1}'
+      });
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/LinkEndpoint');
+    });
+
+    test('handleImageSimilaritySearchResults given error does not set imagesUploaded', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }];
+      element.imageSimilaritySearchList = [{
+        id: 'image1',
+        similarity: true
+      }];
+      element.imageSimilaritySearchRunning = true;
+
+      element.handleImageSimilaritySearchResults({
+        detail: {
+          error: 'TestError'
+        }
+      });
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 1,
+        hits: []
+      }]);
+      expect(element.imageSimilaritySearchList).to.deep.equal([]);
+      expect(element.imageSimilaritySearchRunning).to.be.false;
+    });
+
+    test('handleImageSimilaritySearchResults given response does set imagesUploaded', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }];
+      element.imageSimilaritySearchList = [{
+        id: 'image1',
+        similarity: true
+      }];
+      element.imageSimilaritySearchRunning = true;
+
+      element.handleImageSimilaritySearchResults({
+        detail: {
+          response: {
+            images: [{
+              similar_images: {
+                cached_image_urls: ['urlA', 'urlB'],
+                distance: [0.01, 0.02],
+                sha1: ['idA', 'idB']
+              }
+            }]
+          }
+        }
+      });
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 1,
+        hits: [{
+          id: 'idA',
+          link: '',
+          name: 'Match #1 (image1)',
+          rank: 0.01,
+          source: 'urlA'
+        }, {
+          id: 'idB',
+          link: '',
+          name: 'Match #2 (image1)',
+          rank: 0.02,
+          source: 'urlB'
+        }]
+      }]);
+      expect(element.imageSimilaritySearchList).to.deep.equal([]);
+      expect(element.imageSimilaritySearchRunning).to.be.false;
+    });
+
+    test('handleImageSimilaritySearchResults given multiple responses does update imageSimilaritySearchList and imagesUploaded', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }, {
+        id: 'image2',
+        searches: 2
+      }];
+      element.imageSimilaritySearchList = [{
+        id: 'image1',
+        similarity: true
+      }, {
+        id: 'image2',
+        similarity: true
+      }];
+      element.imageSimilaritySearchRunning = true;
+
+      element.handleImageSimilaritySearchResults({
+        detail: {
+          response: {
+            images: [{
+              similar_images: {
+                cached_image_urls: ['urlA', 'urlB'],
+                distance: [0.01, 0.02],
+                sha1: ['idA', 'idB']
+              }
+            }, {
+              similar_images: {
+                cached_image_urls: ['urlC', 'urlD'],
+                distance: [0.03, 0.04],
+                sha1: ['idC', 'idD']
+              }
+            }]
+          }
+        }
+      });
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 1,
+        hits: [{
+          id: 'idA',
+          link: '',
+          name: 'Match #1 (image1)',
+          rank: 0.01,
+          source: 'urlA'
+        }, {
+          id: 'idB',
+          link: '',
+          name: 'Match #2 (image1)',
+          rank: 0.02,
+          source: 'urlB'
+        }]
+      }, {
+        id: 'image2',
+        searches: 1,
+        hits: [{
+          id: 'idC',
+          link: '',
+          name: 'Match #1 (image2)',
+          rank: 0.03,
+          source: 'urlC'
+        }, {
+          id: 'idD',
+          link: '',
+          name: 'Match #2 (image2)',
+          rank: 0.04,
+          source: 'urlD'
+        }]
+      }]);
+      expect(element.imageSimilaritySearchList).to.deep.equal([]);
+      expect(element.imageSimilaritySearchRunning).to.be.false;
+    });
+
+    test('handleImageSimilaritySearchResults does not update the request element if imageSimilaritySearchList is not bigger than the response', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }];
+      element.imageSimilaritySearchList = [{
+        id: 'image1',
+        similarity: true
+      }];
+
+      element.handleImageSimilaritySearchResults({
+        detail: {
+          response: {
+            images: [{
+              similar_images: {
+                cached_image_urls: [],
+                distance: [],
+                sha1: []
+              }
+            }]
+          }
+        }
+      });
+
+      expect(element.imageSimilaritySearchRunning).to.be.false;
+      expect(element.$$('#imageSimilaritySearch').body).to.not.exist;
+      expect(element.$$('#imageSimilaritySearch').headers).to.deep.equal({});
+      expect(element.$$('#imageSimilaritySearch').url).to.not.exist;
+    });
+
+    test('handleImageSimilaritySearchResults does update the request element if imageSimilaritySearchList is bigger than the response', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }, {
+        id: 'image2',
+        searches: 2
+      }];
+      element.imageSimilaritySearchList = [{
+        id: 'image1',
+        similarity: true
+      }, {
+        id: 'image2',
+        similarity: true,
+        source: 'image2',
+        type: 'LINK'
+      }];
+
+      element.handleImageSimilaritySearchResults({
+        detail: {
+          response: {
+            images: [{
+              similar_images: {
+                cached_image_urls: [],
+                distance: [],
+                sha1: []
+              }
+            }]
+          }
+        }
+      });
+
+      expect(element.imageSimilaritySearchRunning).to.be.true;
+      expect(element.$$('#imageSimilaritySearch').body).to.deep.equal({
+        data: 'image2',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":0.3}'
+      });
+      expect(element.$$('#imageSimilaritySearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageSimilaritySearch').url).to.equal('SimilarityHost:SimilarityPort/LinkEndpoint');
+    });
+
+    test('handleImageResults does update imagesUploaded as expected in base case', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }];
+      element.imagesProcessing = ['image1'];
+
+      element.handleImageResults('whatever', {
+        id: 'image1',
+        type: 'whatever'
+      }, ['urlA', 'urlB'], ['idA', 'idB'], [2, 4], 6);
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 1,
+        hits: [{
+          id: 'idA',
+          link: '',
+          name: 'Match #1 (image1)',
+          rank: 2,
+          source: 'urlA'
+        }, {
+          id: 'idB',
+          link: '',
+          name: 'Match #2 (image1)',
+          rank: 4,
+          source: 'urlB'
+        }]
+      }]);
+      expect(element.imagesProcessing).to.deep.equal(['image1']);
+    });
+
+    test('handleImageResults does set imagesUploaded as expected with threshold', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }];
+      element.imagesProcessing = ['image1'];
+
+      element.handleImageResults('whatever', {
+        id: 'image1',
+        type: 'whatever'
+      }, ['urlA', 'urlB'], ['idA', 'idB'], [2, 4], 3);
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 1,
+        hits: [{
+          id: 'idA',
+          link: '',
+          name: 'Match #1 (image1)',
+          rank: 2,
+          source: 'urlA'
+        }]
+      }]);
+      expect(element.imagesProcessing).to.deep.equal(['image1']);
+    });
+
+    test('handleImageResults does set imagesUploaded as expected with link function', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      var called = 0;
+      element.transforms = {
+        entity: {
+          imagePageLink: function(id) {
+            ++called;
+            return 'link-' + id;
+          }
+        }
+      };
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }];
+      element.imagesProcessing = ['image1'];
+
+      element.handleImageResults('whatever', {
+        id: 'image1',
+        type: 'whatever'
+      }, ['urlA', 'urlB'], ['idA', 'idB'], [2, 4], 6);
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 1,
+        hits: [{
+          id: 'idA',
+          link: 'link-idA',
+          name: 'Match #1 (image1)',
+          rank: 2,
+          source: 'urlA'
+        }, {
+          id: 'idB',
+          link: 'link-idB',
+          name: 'Match #2 (image1)',
+          rank: 4,
+          source: 'urlB'
+        }]
+      }]);
+      expect(element.imagesProcessing).to.deep.equal(['image1']);
+      expect(called).to.equal(2);
+    });
+
+    test('handleImageResults does update imagesUploaded and imagesProcessing as expected if searches=1', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 1
+      }];
+      element.imagesProcessing = ['image1'];
+
+      element.handleImageResults('whatever', {
+        id: 'image1',
+        type: 'whatever'
+      }, ['urlA', 'urlB'], ['idA', 'idB'], [2, 4], 6);
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 0,
+        hits: [{
+          id: 'idA',
+          link: '',
+          name: 'Match #1 (image1)',
+          rank: 2,
+          source: 'urlA'
+        }, {
+          id: 'idB',
+          link: '',
+          name: 'Match #2 (image1)',
+          rank: 4,
+          source: 'urlB'
+        }]
+      }]);
+      expect(element.imagesProcessing).to.deep.equal([]);
+    });
+
+    test('handleImageResults does update imagesUploaded as expected with multiple imagesUploaded', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2
+      }, {
+        id: 'image2',
+        searches: 2
+      }];
+      element.imagesProcessing = ['image1', 'image2'];
+
+      element.handleImageResults('whatever', {
+        id: 'image2',
+        type: 'whatever'
+      }, ['urlA', 'urlB'], ['idA', 'idB'], [2, 4], 6);
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 2
+      }, {
+        id: 'image2',
+        searches: 1,
+        hits: [{
+          id: 'idA',
+          link: '',
+          name: 'Match #1 (image2)',
+          rank: 2,
+          source: 'urlA'
+        }, {
+          id: 'idB',
+          link: '',
+          name: 'Match #2 (image2)',
+          rank: 4,
+          source: 'urlB'
+        }]
+      }]);
+      expect(element.imagesProcessing).to.deep.equal(['image1', 'image2']);
+    });
+
+    test('handleImageResults does set imagesUploaded as expected with previous hits', function() {
+      // Unset observer.
+      element.runBothImageSearches = function() {};
+
+      element.imagesUploaded = [{
+        id: 'image1',
+        searches: 2,
+        hits: [{
+          id: 'idC',
+          link: '',
+          name: 'Match #1 (image1)',
+          rank: 1,
+          source: 'urlC'
+        }, {
+          id: 'idA',
+          link: '',
+          name: 'Match #2 (image1)',
+          rank: 2,
+          source: 'urlA'
+        }, {
+          id: 'idD',
+          link: '',
+          name: 'Match #3 (image1)',
+          rank: 3,
+          source: 'urlD'
+        }, {
+          id: 'idE',
+          link: '',
+          name: 'Match #4 (image1)',
+          rank: 5,
+          source: 'urlE'
+        }]
+      }];
+      element.imagesProcessing = ['image1'];
+
+      element.handleImageResults('whatever', {
+        id: 'image1',
+        type: 'whatever'
+      }, ['urlA', 'urlB'], ['idA', 'idB'], [2, 4], 6);
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        id: 'image1',
+        searches: 1,
+        hits: [{
+          id: 'idC',
+          link: '',
+          name: 'Match #1 (image1)',
+          rank: 1,
+          source: 'urlC'
+        }, {
+          id: 'idA',
+          link: '',
+          name: 'Match #2 (image1)',
+          rank: 2,
+          source: 'urlA'
+        }, {
+          id: 'idD',
+          link: '',
+          name: 'Match #3 (image1)',
+          rank: 3,
+          source: 'urlD'
+        }, {
+          id: 'idB',
+          link: '',
+          name: 'Match #4 (image1)',
+          rank: 4,
+          source: 'urlB'
+        }, {
+          id: 'idE',
+          link: '',
+          name: 'Match #5 (image1)',
+          rank: 5,
+          source: 'urlE'
+        }]
+      }]);
+      expect(element.imagesProcessing).to.deep.equal(['image1']);
+    });
+
+    test('openBulkSearchDialog does exist', function() {
+      expect(element.openBulkSearchDialog).to.be.a('Function');
+    });
+
+    test('resetSearchTab does update selectedSearchTab if searchResults is empty', function() {
+      expect(element.selectedSearchTab).to.equal(0);
+      element.searchResults = [];
+      expect(element.searchResults).to.deep.equal([]);
+      element.resetSearchTab();
+      expect(element.selectedSearchTab).to.equal(1);
+    });
+
+    test('resetSearchTab does not update selectedSearchTab if searchResults is not empty', function() {
+      expect(element.selectedSearchTab).to.equal(0);
+      element.searchResults = [{}];
+      expect(element.searchResults).to.deep.equal([{}]);
+      element.resetSearchTab();
+      expect(element.selectedSearchTab).to.equal(0);
+    });
+
+    test('runBothImageSearches does work as expected if imagesUploaded is empty', function() {
+      element.runBothImageSearches();
+
+      expect(element.imagesUploaded).to.deep.equal([]);
+      expect(element.imagesProcessing).to.deep.equal([]);
+      expect(element.imageFaceSearchList).to.deep.equal([]);
+      expect(element.imageFaceSearchRunning).to.be.false;
+      expect(element.imageSimilaritySearchList).to.deep.equal([]);
+      expect(element.imageSimilaritySearchRunning).to.be.false;
+
+      expect(element.$$('#imageFaceSearch').body).to.not.exist;
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({});
+      expect(element.$$('#imageFaceSearch').url).to.not.exist;
+      expect(element.$$('#imageSimilaritySearch').body).to.not.exist;
+      expect(element.$$('#imageSimilaritySearch').headers).to.deep.equal({});
+      expect(element.$$('#imageSimilaritySearch').url).to.not.exist;
+    });
+
+    test('runBothImageSearches does work as expected if imagesUploaded is not empty', function() {
+      element.imagesUploaded = [{
+        id: 'image1',
+        source: 'url1',
+        type: 'LINK'
+      }, {
+        id: 'image2',
+        source: 'url2',
+        type: 'LINK'
+      }];
+
+      element.runBothImageSearches();
+
+      expect(element.imagesUploaded).to.deep.equal([{
+        face: true,
+        hits: null,
+        id: 'image1',
+        searches: 2,
+        similarity: true,
+        source: 'url1',
+        type: 'LINK'
+      }, {
+        face: true,
+        hits: null,
+        id: 'image2',
+        searches: 2,
+        similarity: true,
+        source: 'url2',
+        type: 'LINK'
+      }]);
+      expect(element.imagesProcessing).to.deep.equal(['image1', 'image2']);
+
+      expect(element.imageFaceSearchList).to.deep.equal([{
+        face: true,
+        hits: null,
+        id: 'image1',
+        searches: 2,
+        similarity: true,
+        source: 'url1',
+        type: 'LINK'
+      }, {
+        face: true,
+        hits: null,
+        id: 'image2',
+        searches: 2,
+        similarity: true,
+        source: 'url2',
+        type: 'LINK'
+      }]);
+      expect(element.imageFaceSearchRunning).to.be.true;
+
+      expect(element.$$('#imageFaceSearch').body).to.deep.equal({
+        data: 'url1,url2',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":0.1}'
+      });
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/LinkEndpoint');
+
+      expect(element.imageSimilaritySearchList).to.deep.equal([{
+        face: true,
+        hits: null,
+        id: 'image1',
+        searches: 2,
+        similarity: true,
+        source: 'url1',
+        type: 'LINK'
+      }, {
+        face: true,
+        hits: null,
+        id: 'image2',
+        searches: 2,
+        similarity: true,
+        source: 'url2',
+        type: 'LINK'
+      }]);
+      expect(element.imageSimilaritySearchRunning).to.be.true;
+
+      expect(element.$$('#imageSimilaritySearch').body).to.deep.equal({
+        data: 'url1,url2',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":0.3}'
+      });
+      expect(element.$$('#imageSimilaritySearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageSimilaritySearch').url).to.equal('SimilarityHost:SimilarityPort/LinkEndpoint');
+    });
+
+    test('runImageFaceSearch does set imageFaceSearchRunning to false if imageFaceSearchList is empty', function() {
+      element.imageFaceSearchRunning = true;
+      element.runImageFaceSearch();
+      expect(element.imageFaceSearchRunning).to.be.false;
+    });
+
+    test('runImageFaceSearch does set imageFaceSearchRunning to true and update the request element if imageFaceSearchList is not empty', function() {
+      element.imageFaceSearchRunning = false;
+      element.imageFaceSearchList = [{
+        source: 'url1',
+        type: 'LINK'
+      }];
+      element.runImageFaceSearch();
+
+      expect(element.imageFaceSearchRunning).to.be.true;
+      expect(element.$$('#imageFaceSearch').body).to.deep.equal({
+        data: 'url1',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":0.1}'
+      });
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/LinkEndpoint');
+    });
+
+    test('runImageSimilaritySearch does set imageSimilaritySearchRunning to false if imageSimilaritySearchList is empty', function() {
+      element.imageSimilaritySearchRunning = true;
+      element.runImageSimilaritySearch();
+      expect(element.imageSimilaritySearchRunning).to.be.false;
+    });
+
+    test('runImageSimilaritySearch does set imageSimilaritySearchRunning to true and update the request element if imageSimilaritySearchList is not empty', function() {
+      element.imageSimilaritySearchRunning = false;
+      element.imageSimilaritySearchList = [{
+        source: 'url1',
+        type: 'LINK'
+      }];
+      element.runImageSimilaritySearch();
+
+      expect(element.imageSimilaritySearchRunning).to.be.true;
+      expect(element.$$('#imageSimilaritySearch').body).to.deep.equal({
+        data: 'url1',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":0.3}'
+      });
+      expect(element.$$('#imageSimilaritySearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageSimilaritySearch').url).to.equal('SimilarityHost:SimilarityPort/LinkEndpoint');
+    });
+
+    test('searchParametersDisabled does return expected boolean', function() {
+      expect(element.searchParametersDisabled({})).to.be.true;
+      expect(element.searchParametersDisabled({
+        type1: {
+          term1: {
+            enabled: false
+          }
+        }
+      })).to.be.true;
+      expect(element.searchParametersDisabled({
+        type1: {
+          term1: {
+            enabled: false
+          },
+          term2: {
+            enabled: true
+          }
+        }
+      })).to.be.false;
+      expect(element.searchParametersDisabled({
+        type1: {
+          term1: {
+            enabled: false
+          }
+        },
+        type2: {
+          term2: {
+            enabled: true
+          }
+        }
+      })).to.be.false;
+    });
+
+    test('sendImageSearchRequest given one data image does work as expected', function() {
+      expect(element.$$('#imageFaceSearch')).to.exist;
+      expect(element.$$('#imageFaceSearch').body).to.not.exist;
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({});
+      expect(element.$$('#imageFaceSearch').url).to.not.exist;
+
+      element.sendImageSearchRequest('face', 'imageFaceSearch', [{
+        source: 'data:image/png;base64,value1',
+        type: 'DATA'
+      }], 1234);
+
+      expect(element.$$('#imageFaceSearch').body).to.deep.equal({
+        data: 'value1',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":1234}'
+      });
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/DataEndpoint');
+    });
+
+    test('sendImageSearchRequest given multiple data images does search on five', function() {
+      expect(element.$$('#imageFaceSearch')).to.exist;
+      expect(element.$$('#imageFaceSearch').body).to.not.exist;
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({});
+      expect(element.$$('#imageFaceSearch').url).to.not.exist;
+
+      element.sendImageSearchRequest('face', 'imageFaceSearch', [{
+        source: 'data:image/png;base64,value1',
+        type: 'DATA'
+      }, {
+        source: 'data:image/png;base64,value2',
+        type: 'DATA'
+      }, {
+        source: 'data:image/png;base64,value3',
+        type: 'DATA'
+      }, {
+        source: 'data:image/png;base64,value4',
+        type: 'DATA'
+      }, {
+        source: 'data:image/png;base64,value5',
+        type: 'DATA'
+      }, {
+        source: 'data:image/png;base64,value6',
+        type: 'DATA'
+      }], 1234);
+
+      expect(element.$$('#imageFaceSearch').body).to.deep.equal({
+        data: 'value1,value2,value3,value4,value5',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":1234}'
+      });
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/DataEndpoint');
+    });
+
+    test('sendImageSearchRequest given one link image does work as expected', function() {
+      expect(element.$$('#imageFaceSearch')).to.exist;
+      expect(element.$$('#imageFaceSearch').body).to.not.exist;
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({});
+      expect(element.$$('#imageFaceSearch').url).to.not.exist;
+
+      element.sendImageSearchRequest('face', 'imageFaceSearch', [{
+        source: 'value1',
+        type: 'LINK'
+      }], 1234);
+
+      expect(element.$$('#imageFaceSearch').body).to.deep.equal({
+        data: 'value1',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":1234}'
+      });
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/LinkEndpoint');
+    });
+
+    test('sendImageSearchRequest given multiple link images does search on five', function() {
+      expect(element.$$('#imageFaceSearch')).to.exist;
+      expect(element.$$('#imageFaceSearch').body).to.not.exist;
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({});
+      expect(element.$$('#imageFaceSearch').url).to.not.exist;
+
+      element.sendImageSearchRequest('face', 'imageFaceSearch', [{
+        source: 'url1',
+        type: 'LINK'
+      }, {
+        source: 'url2',
+        type: 'LINK'
+      }, {
+        source: 'url3',
+        type: 'LINK'
+      }, {
+        source: 'url4',
+        type: 'LINK'
+      }, {
+        source: 'url5',
+        type: 'LINK'
+      }, {
+        source: 'url6',
+        type: 'LINK'
+      }], 1234);
+
+      expect(element.$$('#imageFaceSearch').body).to.deep.equal({
+        data: 'url1,url2,url3,url4,url5',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":1234}'
+      });
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/LinkEndpoint');
+    });
+
+    test('sendImageSearchRequest given multiple data and link images does use the type of the first image', function() {
+      expect(element.$$('#imageFaceSearch')).to.exist;
+      expect(element.$$('#imageFaceSearch').body).to.not.exist;
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({});
+      expect(element.$$('#imageFaceSearch').url).to.not.exist;
+
+      element.sendImageSearchRequest('face', 'imageFaceSearch', [{
+        source: 'data:image/png;base64,value1',
+        type: 'DATA'
+      }, {
+        source: 'url1',
+        type: 'LINK'
+      }, {
+        source: 'data:image/png;base64,value2',
+        type: 'DATA'
+      }, {
+        source: 'url2',
+        type: 'LINK'
+      }], 1234);
+
+      expect(element.$$('#imageFaceSearch').body).to.deep.equal({
+        data: 'value1,value2',
+        options: '{"max_returned":1000,"near_dup":1,"near_dup_th":1234}'
+      });
+      expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/DataEndpoint');
+    });
+
+    test('sendImageSearchRequest does update images in input array', function() {
+      var dataImages = [{
+        source: 'data:image/png;base64,value1',
+        type: 'DATA'
+      }, {
+        source: 'data:image/png;base64,value2',
+        type: 'DATA'
+      }];
+
+      element.sendImageSearchRequest('face', 'imageFaceSearch', dataImages, 1234);
+
+      expect(dataImages).to.deep.equal([{
+        face: true,
+        source: 'data:image/png;base64,value1',
+        type: 'DATA'
+      }, {
+        face: true,
+        source: 'data:image/png;base64,value2',
+        type: 'DATA'
+      }]);
+
+      element.sendImageSearchRequest('similarity', 'imageSimilaritySearch', dataImages, 1234);
+
+      expect(dataImages).to.deep.equal([{
+        face: true,
+        similarity: true,
+        source: 'data:image/png;base64,value1',
+        type: 'DATA'
+      }, {
+        face: true,
+        similarity: true,
+        source: 'data:image/png;base64,value2',
+        type: 'DATA'
+      }]);
+
+      var linkImages = [{
+        source: 'url3',
+        type: 'LINK'
+      }, {
+        source: 'url4',
+        type: 'LINK'
+      }];
+
+      element.sendImageSearchRequest('face', 'imageFaceSearch', linkImages, 1234);
+
+      expect(linkImages).to.deep.equal([{
+        face: true,
+        source: 'url3',
+        type: 'LINK'
+      }, {
+        face: true,
+        source: 'url4',
+        type: 'LINK'
+      }]);
+
+      element.sendImageSearchRequest('similarity', 'imageSimilaritySearch', linkImages, 1234);
+
+      expect(linkImages).to.deep.equal([{
+        face: true,
+        similarity: true,
+        source: 'url3',
+        type: 'LINK'
+      }, {
+        face: true,
+        similarity: true,
+        source: 'url4',
+        type: 'LINK'
+      }]);
+    });
+
+    test('validateImageServiceConfig does return expected boolean', function() {
+      expect(element.validateImageServiceConfig({})).to.be.false;
+
+      expect(element.validateImageServiceConfig({
+        auth: {
+          user: 'user'
+        },
+        endpoint: {
+          data: 'data',
+          link: 'link'
+        },
+        host: {
+          face: 'face',
+          similarity: 'similarity'
+        }
+      })).to.be.false;
+
+      expect(element.validateImageServiceConfig({
+        auth: {
+          password: 'password'
+        },
+        endpoint: {
+          data: 'data',
+          link: 'link'
+        },
+        host: {
+          face: 'face',
+          similarity: 'similarity'
+        }
+      })).to.be.false;
+
+      expect(element.validateImageServiceConfig({
+        auth: {
+          password: 'password',
+          user: 'user'
+        },
+        endpoint: {
+          link: 'link'
+        },
+        host: {
+          face: 'face',
+          similarity: 'similarity'
+        }
+      })).to.be.false;
+
+      expect(element.validateImageServiceConfig({
+        auth: {
+          password: 'password',
+          user: 'user'
+        },
+        endpoint: {
+          data: 'data'
+        },
+        host: {
+          face: 'face',
+          similarity: 'similarity'
+        }
+      })).to.be.false;
+
+      expect(element.validateImageServiceConfig({
+        auth: {
+          password: 'password',
+          user: 'user'
+        },
+        endpoint: {
+          data: 'data',
+          link: 'link'
+        },
+        host: {
+          similarity: 'similarity'
+        }
+      })).to.be.false;
+
+      expect(element.validateImageServiceConfig({
+        auth: {
+          password: 'password',
+          user: 'user'
+        },
+        endpoint: {
+          data: 'data',
+          link: 'link'
+        },
+        host: {
+          face: 'face'
+        }
+      })).to.be.false;
+
+      expect(element.validateImageServiceConfig({
+        auth: {
+          password: 'password',
+          user: 'user'
+        },
+        endpoint: {
+          data: 'data',
+          link: 'link'
+        },
+        host: {
+          face: 'face',
+          similarity: 'similarity'
+        }
+      })).to.be.true;
+    });
+
+    test('setting serverConfig does set configHeader', function() {
+      expect(element.configHeader).to.deep.equal({});
+
+      element.serverConfig = {
+        configPassword: 'TestPass',
+        configUsername: 'TestUser'
+      };
+
+      expect(element.configHeader).to.deep.equal({
+        'Authorization': 'Basic ' + btoa('TestUser:TestPass')
+      });
+    });
+
+    test('setting parameters does set domain', function() {
+      expect(element.domain).to.not.exist;
+
+      element.parameters = {
+        domain: 'TestDomain'
+      };
+
+      expect(element.domain).to.equal('TestDomain');
+    });
+
+    test('setting searchResultsShown does set imagesFromResults', function() {
+      element.searchResultsShown = [{
+        images: [{
+          id: 1
+        }, {
+          id: 2
+        }]
+      }, {
+        images: []
+      }, {
+        images: [{
+          id: 1
+        }, {
+          id: 3
+        }]
+      }, {
+        images: [{
+          id: 2
+        }, {
+          id: 4
+        }]
+      }];
+
+      expect(element.imagesFromResults).to.deep.equal([{
+        id: 1
+      }, {
+        id: 2
+      }, {
+        id: 3
+      }, {
+        id: 4
+      }]);
+    });
+
+    test('setting searchResults does set selectedSearchTab if needed', function() {
+      expect(element.selectedSearchTab).to.equal(0);
+      element.searchResults = [{}];
+      expect(element.selectedSearchTab).to.equal(0);
+      element.searchResults = [];
+      expect(element.selectedSearchTab).to.equal(1);
+      element.searchResults = [{}];
+      expect(element.selectedSearchTab).to.equal(1);
     });
   });
 </script>

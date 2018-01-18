@@ -624,7 +624,7 @@ limitations under the License.
         index-types="[[esConfig.esType]]"
         show="[[equals(selectedSearchTab, 0)]]"
         timeline-function="[[transforms.entity.timelines]]"
-        timestamp-field="@timestamp">
+        timestamp-field="timestamp_crawl">
       </database-details>
 
       <!-- Use the display style rather than a dom-if template so the search parameters in the facet panel update. -->
@@ -1092,7 +1092,7 @@ limitations under the License.
       ],
 
       attached: function() {
-        //this.assignWindowProperties(this);
+        this.assignWindowProperties(this);
       },
 
       /************* PAGE *************/
@@ -1301,6 +1301,7 @@ limitations under the License.
         var images = this.imagesUploaded.filter(function(object) {
           var search = _.isUndefined(object.hits);
           object.hits = object.hits || null;
+          object.searches = object.searches >= 0 ? object.searches : 2;
           return search;
         });
 
@@ -1308,9 +1309,10 @@ limitations under the License.
           return object.id;
         })));
 
-        this.set('imageFaceSearchList', this.imageFaceSearchList.concat(images));
-
-        // Use the map function to create a new array.
+        // Use the map function to create new arrays (same objects though).
+        this.set('imageFaceSearchList', this.imageFaceSearchList.concat(images.map(function(object) {
+          return object;
+        })));
         this.set('imageSimilaritySearchList', this.imageSimilaritySearchList.concat(images.map(function(object) {
           return object;
         })));
@@ -1364,7 +1366,7 @@ limitations under the License.
         var objectList = searchList.filter(function(object) {
           return object.type === dataType;
         }).slice(0, 5);
-        var sourceList = searchList.map(function(object) {
+        var sourceList = objectList.map(function(object) {
           // Set the 'face' or 'similarity' property to 'true' for the objects in the search.
           object[searchType.toLowerCase()] = true;
           if(dataType === 'DATA') {
@@ -1401,7 +1403,7 @@ limitations under the License.
       },
 
       validateImageServiceConfig: function(config) {
-        return config && config.auth && config.auth.user && config.auth.password && config.endpoint && config.endpoint.data && config.endpoint.link && config.host && config.host.face && config.host.similarity;
+        return !!(config && config.auth && config.auth.user && config.auth.password && config.endpoint && config.endpoint.data && config.endpoint.link && config.host && config.host.face && config.host.similarity);
       }
     });
   })();
