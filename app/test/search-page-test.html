@@ -728,6 +728,7 @@ limitations under the License.
       }];
       element.imageSimilaritySearchRunning = true;
 
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       element.handleImageSimilaritySearchResults({
         detail: {
           response: {
@@ -741,6 +742,7 @@ limitations under the License.
           }
         }
       });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
       expect(element.imagesUploaded).to.deep.equal([{
         id: 'image1',
@@ -783,6 +785,7 @@ limitations under the License.
       }];
       element.imageSimilaritySearchRunning = true;
 
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       element.handleImageSimilaritySearchResults({
         detail: {
           response: {
@@ -802,6 +805,7 @@ limitations under the License.
           }
         }
       });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
       expect(element.imagesUploaded).to.deep.equal([{
         id: 'image1',
@@ -853,6 +857,7 @@ limitations under the License.
         similarity: true
       }];
 
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       element.handleImageSimilaritySearchResults({
         detail: {
           response: {
@@ -866,6 +871,7 @@ limitations under the License.
           }
         }
       });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
       expect(element.imageSimilaritySearchRunning).to.be.false;
       expect(element.$$('#imageSimilaritySearch').body).to.not.exist;
@@ -894,6 +900,7 @@ limitations under the License.
         type: 'LINK'
       }];
 
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       element.handleImageSimilaritySearchResults({
         detail: {
           response: {
@@ -907,6 +914,7 @@ limitations under the License.
           }
         }
       });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
       expect(element.imageSimilaritySearchRunning).to.be.true;
       expect(element.$$('#imageSimilaritySearch').body).to.deep.equal({

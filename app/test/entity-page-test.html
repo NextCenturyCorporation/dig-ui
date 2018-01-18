@@ -41,6 +41,21 @@ limitations under the License.
 
     setup(function() {
       element = fixture('entity-page-fixture');
+      element.serverConfig = {
+        imageServiceConfig: {
+          auth: {
+            password: 'TestPass',
+            user: 'TestUser'
+          },
+          endpoint: {
+            link: '/LinkEndpoint'
+          },
+          host: {
+            face: 'FaceHost:FacePort',
+            similarity: 'SimilarityHost:SimilarityPort'
+          }
+        }
+      };
     });
 
     test('does have PageBehavior functions', function() {
@@ -401,22 +416,6 @@ limitations under the License.
     });
 
     test('findImageMatches does update search elements', function() {
-      element.serverConfig = {
-        imageServiceConfig: {
-          auth: {
-            password: 'TestPass',
-            user: 'TestUser'
-          },
-          endpoint: {
-            link: '/TestEndpoint'
-          },
-          host: {
-            face: 'FaceHost:FacePort',
-            similarity: 'SimilarityHost:SimilarityPort'
-          }
-        }
-      };
-
       expect(element.$$('#imageFaceSearch')).to.exist;
       expect(element.$$('#imageFaceSearch').body).to.not.exist;
       expect(element.$$('#imageFaceSearch').headers).to.deep.equal({});
@@ -459,7 +458,7 @@ limitations under the License.
       expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
         'Authorization': 'Basic ' + btoa('TestUser:TestPass')
       });
-      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/TestEndpoint');
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/LinkEndpoint');
 
       expect(element.$$('#imageSimilaritySearch').body).to.deep.equal({
         data: 'TestImageUrl',
@@ -468,25 +467,10 @@ limitations under the License.
       expect(element.$$('#imageSimilaritySearch').headers).to.deep.equal({
         'Authorization': 'Basic ' + btoa('TestUser:TestPass')
       });
-      expect(element.$$('#imageSimilaritySearch').url).to.equal('SimilarityHost:SimilarityPort/TestEndpoint');
+      expect(element.$$('#imageSimilaritySearch').url).to.equal('SimilarityHost:SimilarityPort/LinkEndpoint');
     });
 
     test('findImageMatchesOfType does update search element', function() {
-      element.serverConfig = {
-        imageServiceConfig: {
-          auth: {
-            password: 'TestPass',
-            user: 'TestUser'
-          },
-          endpoint: {
-            link: '/TestEndpoint'
-          },
-          host: {
-            face: 'FaceHost:FacePort'
-          }
-        }
-      };
-
       expect(element.$$('#imageFaceSearch')).to.exist;
       expect(element.$$('#imageFaceSearch').body).to.not.exist;
       expect(element.$$('#imageFaceSearch').headers).to.deep.equal({});
@@ -501,7 +485,7 @@ limitations under the License.
       expect(element.$$('#imageFaceSearch').headers).to.deep.equal({
         'Authorization': 'Basic ' + btoa('TestUser:TestPass')
       });
-      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/TestEndpoint');
+      expect(element.$$('#imageFaceSearch').url).to.equal('FaceHost:FacePort/LinkEndpoint');
     });
 
     test('findNoBlurStyleClass does return expected string', function() {
@@ -550,6 +534,7 @@ limitations under the License.
     });
 
     test('handleImageFaceSearchResults given response does set imageSearchMatches', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       element.handleImageFaceSearchResults({
         detail: {
           response: {
@@ -563,6 +548,7 @@ limitations under the License.
           }
         }
       });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
       expect(element.imageSearchMatches).to.deep.equal([{
         id: 'idA',
@@ -589,6 +575,7 @@ limitations under the License.
     });
 
     test('handleImageSimilaritySearchResults given response does set imageSearchMatches', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       element.handleImageSimilaritySearchResults({
         detail: {
           response: {
@@ -602,6 +589,7 @@ limitations under the License.
           }
         }
       });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
       expect(element.imageSearchMatches).to.deep.equal([{
         id: 'idA',
@@ -1177,7 +1165,7 @@ limitations under the License.
     });
 
     test('setting serverConfig does set configHeader', function() {
-      expect(element.configHeader).to.not.exist;
+      expect(element.configHeader).to.deep.equal({});
 
       element.serverConfig = {
         configPassword: 'TestPass',
@@ -1195,8 +1183,6 @@ limitations under the License.
       element.parameters = {
         domain: 'TestDomain'
       };
-
-      element.serverConfig = {};
 
       expect(element.domain).to.equal('TestDomain');
     });
