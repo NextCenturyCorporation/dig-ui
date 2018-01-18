@@ -292,14 +292,40 @@ var searchTransforms = (function(_) {
           orderBy = {
             values: [{
               order: config.sortOrder,
-              variable: '?' + config.sortKey + 'Sort'
+              variable: '?' + config.sortKey + '_sort'
             }]
           };
           template.clauses.push({
             isOptional: false,
             predicate: config.sortKey,
-            variable: '?' + config.sortKey + 'Sort'
+            variable: '?' + config.sortKey + '_sort'
           });
+
+          // If sort by date, add timestamp clauses.
+          var dateFields = _.keys(dateConfig).reduce(function(dateFields, property) {
+            dateFields[dateConfig[property]] = true;
+            return dateFields;
+          }, {});
+          if(dateFields[config.sortKey]) {
+            orderBy.values.push({
+              order: config.sortOrder,
+              variable: '?timestamp_crawl_sort'
+            });
+            orderBy.values.push({
+              order: config.sortOrder,
+              variable: '?timestamp_sort'
+            });
+            template.clauses.push({
+              isOptional: false,
+              predicate: 'timestamp_crawl',
+              variable: '?timestamp_crawl_sort'
+            });
+            template.clauses.push({
+              isOptional: false,
+              predicate: 'timestamp',
+              variable: '?timestamp_sort'
+            });
+          }
         }
 
         return {
