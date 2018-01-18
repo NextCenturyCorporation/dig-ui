@@ -20,24 +20,22 @@
 var exportTransforms = (function(_) {
   return {
     createBulkSearchData: function(searchParameters, searchFields) {
-      return _.keys(searchParameters).reduce(function(data, type) {
-        _.keys(searchParameters[type]).filter(function(term) {
-          return searchParameters[type][term].enabled;
-        }).map(function(term) {
-          return searchParameters[type][term].key;
-        }).forEach(function(id) {
-          searchFields.forEach(function(fieldObject) {
-            if(fieldObject.key === type) {
-              data.push({
-                field: fieldObject.queryField,
-                value: id
-              });
+      if(!searchParameters || !searchFields) {
+        return [];
+      }
 
-              return;
-            }
+      return searchFields.reduce(function(bulkData, searchFieldsObject) {
+        _.keys(searchParameters[searchFieldsObject.key] || {}).filter(function(term) {
+          return searchParameters[searchFieldsObject.key][term].enabled;
+        }).map(function(term) {
+          return searchParameters[searchFieldsObject.key][term].key;
+        }).forEach(function(id) {
+          bulkData.push({
+            field: searchFieldsObject.queryField,
+            value: id
           });
         });
-        return data;
+        return bulkData;
       }, []);
     },
 
@@ -75,7 +73,7 @@ var exportTransforms = (function(_) {
         exportDataBody[0] = result.url;
         exportDataBody[1] = linkPrefix + result.link;
         exportDataBody[2] = result.title;
-        exportDataBody[exportDataHeader.length - 2] = result.description.replace(/\s/g, ' ');
+        exportDataBody[exportDataHeader.length - 2] = result.description.replace(/\s/g, ' ').trim();
         exportDataBody[exportDataHeader.length - 1] = imageLinks;
 
         result.headerExtractions.forEach(function(elementArray) {
@@ -158,7 +156,7 @@ var exportTransforms = (function(_) {
 
         item.paragraphs.push({
           label: 'Content:  ',
-          value: result.description.replace(/\n/g, ' ')
+          value: result.description.replace(/\t/g, ' ').trim()
         });
 
         exportData.push(item);
