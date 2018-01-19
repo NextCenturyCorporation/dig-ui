@@ -433,10 +433,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function createHistogram(buckets, entityConfig, unidentifiedBucketName) {
-    if(buckets.length < 2) {
-      return [];
-    }
-
     return buckets.reduce(function(timeline, dateBucket) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var count = dateBucket.doc_count;
