@@ -579,59 +579,26 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
   return {
     /**
-     * Returns the result object for the given query results to show in the result page.
+     * Returns the cached page data for the given query results.
      *
      * @param {Object} data
-     * @param {Object} searchFields
-     * @return {Object}
+     * @return {String}
      */
-    result: function(data, searchFields) {
+    cache: function(data) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
-        return getWebpageResultObject(data.hits.hits[0], searchFields);
+        return _.get(data.hits.hits[0], '_source.raw_content', '');
       }
-      return {};
+      return '';
     },
 
     /**
-     * Returns the list of result objects for the given query results to show in a result-list.
+     * Returns the link for the image entity page with the given ID.
      *
-     * @param {Object} data
-     * @param {Object} searchFields
-     * @return {Array}
+     * @param {String} id
+     * @return {String}
      */
-    results: function(data, searchFields) {
-      if(data && data.hits && data.hits.hits && data.hits.hits.length) {
-        var returnData = data.hits.hits.map(function(result) {
-          // Data returned by the searchResults function from the searchTransforms will have a "highlights" property.
-          return getWebpageResultObject(result, searchFields, data.highlights);
-        }).filter(function(object) {
-          return !_.isUndefined(object);
-        });
-        return returnData;
-      }
-      return [];
-    },
-
-    /**
-     * Returns the collection of result IDs mapped to result objects for the given query results to show as nested data in a result-list.
-     *
-     * @param {Object} data
-     * @param {Object} config
-     * @return {Object}
-     */
-    nestedResults: function(data, config) {
-      if(data && data.hits && data.hits.hits && data.hits.hits.length) {
-        var returnData = data.hits.hits.map(function(result) {
-          return getQueryResultObject(result, config.searchFields, config.extractionId);
-        }).filter(function(object) {
-          return !_.isUndefined(object);
-        });
-        return returnData.reduce(function(collection, result) {
-          collection[result.id] = result;
-          return collection;
-        }, {});
-      }
-      return {};
+    entityPageLinkForImageId: function(id) {
+      return commonTransforms.getLink(id, esConfig.imageField.link, esConfig.imageField.type, esConfig.imageField.key);
     },
 
     /**
@@ -648,16 +615,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         sayOther = sayOther || !result;
         return result;
       });
-    },
-
-    /**
-     * Returns the link for the image entity page with the given ID.
-     *
-     * @param {String} id
-     * @return {String}
-     */
-    imagePageLink: function(id) {
-      return commonTransforms.getLink(id, esConfig.imageField.link, esConfig.imageField.type, esConfig.imageField.key);
     },
 
     /**
@@ -693,6 +650,62 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
         return info;
       }, []);
+    },
+
+    /**
+     * Returns the collection of result IDs mapped to result objects for the given query results to show as nested data in a result-list.
+     *
+     * @param {Object} data
+     * @param {Object} config
+     * @return {Object}
+     */
+    nestedResults: function(data, config) {
+      if(data && data.hits && data.hits.hits && data.hits.hits.length) {
+        var returnData = data.hits.hits.map(function(result) {
+          return getQueryResultObject(result, config.searchFields, config.extractionId);
+        }).filter(function(object) {
+          return !_.isUndefined(object);
+        });
+        return returnData.reduce(function(collection, result) {
+          collection[result.id] = result;
+          return collection;
+        }, {});
+      }
+      return {};
+    },
+
+    /**
+     * Returns the result object for the given query results to show in the result page.
+     *
+     * @param {Object} data
+     * @param {Object} searchFields
+     * @return {Object}
+     */
+    result: function(data, searchFields) {
+      if(data && data.hits && data.hits.hits && data.hits.hits.length) {
+        return getWebpageResultObject(data.hits.hits[0], searchFields);
+      }
+      return {};
+    },
+
+    /**
+     * Returns the list of result objects for the given query results to show in a result-list.
+     *
+     * @param {Object} data
+     * @param {Object} searchFields
+     * @return {Array}
+     */
+    results: function(data, searchFields) {
+      if(data && data.hits && data.hits.hits && data.hits.hits.length) {
+        var returnData = data.hits.hits.map(function(result) {
+          // Data returned by the searchResults function from the searchTransforms will have a "highlights" property.
+          return getWebpageResultObject(result, searchFields, data.highlights);
+        }).filter(function(object) {
+          return !_.isUndefined(object);
+        });
+        return returnData;
+      }
+      return [];
     },
 
     /**
@@ -738,19 +751,6 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         dates: [],
         items: []
       };
-    },
-
-    /**
-     * Returns the cached page data for the given query results.
-     *
-     * @param {Object} data
-     * @return {String}
-     */
-    cache: function(data) {
-      if(data && data.hits && data.hits.hits && data.hits.hits.length) {
-        return _.get(data.hits.hits[0], '_source.raw_content', '');
-      }
-      return '';
     }
   };
 });

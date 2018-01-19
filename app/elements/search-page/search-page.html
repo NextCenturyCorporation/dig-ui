@@ -1239,7 +1239,7 @@ limitations under the License.
           return;
         }
 
-        var linkFunction = this.transforms && this.transforms.entity ? this.transforms.entity.imagePageLink : null;
+        var linkFunction = this.transforms && this.transforms.entity ? this.transforms.entity.entityPageLinkForImageId : null;
 
         // Remove images with distances over the threshold.
         var sliceIndex = _.findIndex(imageDistances, function(distance) {

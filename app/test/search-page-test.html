@@ -998,7 +998,7 @@ limitations under the License.
       var called = 0;
       element.transforms = {
         entity: {
-          imagePageLink: function(id) {
+          entityPageLinkForImageId: function(id) {
             ++called;
             return 'link-' + id;
           }

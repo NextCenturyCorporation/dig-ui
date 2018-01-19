@@ -1306,7 +1306,7 @@ limitations under the License.
       },
 
       handleImageResults: function(searchType, imageUrls, imageIds, imageDistances, imageThreshold, error) {
-        var linkFunction = this.transforms && this.transforms.entity ? this.transforms.entity.imagePageLink : null;
+        var linkFunction = this.transforms && this.transforms.entity ? this.transforms.entity.entityPageLinkForImageId : null;
         var pageId = this.pageId;
 
         // Remove images with distances over the threshold.
