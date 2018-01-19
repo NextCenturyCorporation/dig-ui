@@ -46,17 +46,3802 @@ limitations under the License.
       transformFunctions.serverConfig = {};
     });
 
+    test('does define transforms object', function() {
+      expect(transformFunctions.transforms).to.be.an('Object');
+    });
+
     test('does define search object', function() {
-      expect(transformFunctions).to.exist;
-      expect(transformFunctions.transforms).to.exist;
-      expect(transformFunctions.transforms.search).to.exist;
       expect(transformFunctions.transforms.search).to.be.an('Object');
     });
 
-    test('does define search functions', function() {
-      expect(transformFunctions.transforms.search.createFacetsQuery).to.be.a('Function');
-      expect(transformFunctions.transforms.search.createSearchQuery).to.be.a('Function');
-      expect(transformFunctions.transforms.search.searchResults).to.be.a('Function');
+    test('createFacetsQuery does return function', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      expect(func).to.be.a('Function');
+    });
+
+    test('createFacetsQuery function given config page and sort options does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({}, {
+        aggregationType: 'name',
+        pageSize: 100,
+        sortOrder: '_term'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 100,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': undefined,
+          order: 'asc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given one disabled search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: false,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given one optional search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given one required search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'required'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'phone1',
+          isOptional: false,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given one excluded search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'excluded'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 'phone1',
+            predicate: 'phone'
+          }],
+          operator: 'not exists'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given one union search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'union'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'phone1',
+          isOptional: false,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given multiple union search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'union'
+          },
+          phone2: {
+            enabled: true,
+            key: 'phone2',
+            search: 'union'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: false,
+            predicate: 'phone'
+          }, {
+            constraint: 'phone2',
+            isOptional: false,
+            predicate: 'phone'
+          }],
+          operator: 'union'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given many optional, required, excluded, and union search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          },
+          phone2: {
+            enabled: true,
+            key: 'phone2',
+            search: 'optional'
+          },
+          phone3: {
+            enabled: true,
+            key: 'phone3',
+            search: 'required'
+          },
+          phone4: {
+            enabled: true,
+            key: 'phone4',
+            search: 'required'
+          },
+          phone5: {
+            enabled: true,
+            key: 'phone5',
+            search: 'excluded'
+          },
+          phone6: {
+            enabled: true,
+            key: 'phone6',
+            search: 'excluded'
+          },
+          phone7: {
+            enabled: true,
+            key: 'phone7',
+            search: 'union'
+          },
+          phone8: {
+            enabled: true,
+            key: 'phone8',
+            search: 'union'
+          },
+          phone9: {
+            enabled: false,
+            key: 'phone9',
+            search: 'optional'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          constraint: 'phone2',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          constraint: 'phone3',
+          isOptional: false,
+          predicate: 'phone'
+        }, {
+          constraint: 'phone4',
+          isOptional: false,
+          predicate: 'phone'
+        }, {
+          clauses: [{
+            constraint: 'phone7',
+            isOptional: false,
+            predicate: 'phone'
+          }, {
+            constraint: 'phone8',
+            isOptional: false,
+            predicate: 'phone'
+          }],
+          operator: 'union'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 'phone5',
+            predicate: 'phone'
+          }, {
+            constraint: 'phone6',
+            predicate: 'phone'
+          }],
+          operator: 'not exists'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given many types of search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        city: {
+          city1: {
+            enabled: true,
+            key: 'city1',
+            search: 'optional'
+          }
+        },
+        email: {
+          email1: {
+            enabled: true,
+            key: 'email1',
+            search: 'optional'
+          }
+        },
+        name: {
+          name1: {
+            enabled: true,
+            key: 'name1',
+            search: 'optional'
+          }
+        },
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'city1',
+          isOptional: true,
+          predicate: 'city'
+        }, {
+          constraint: 'email1',
+          isOptional: true,
+          predicate: 'email'
+        }, {
+          constraint: 'name1',
+          isOptional: true,
+          predicate: 'name'
+        }, {
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given one date start search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        date: {
+          'date_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given one date end search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        date: {
+          'date_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given date start and end search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        date: {
+          'date_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          },
+          'date_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?date_filter'
+          }, {
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function multiple types of dates does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({
+        'dateA_end': 'dateA',
+        'dateA_start': 'dateA',
+        'dateB_end': 'dateB',
+        'dateB_start': 'dateB'
+      });
+      var output = func({
+        dateA: {
+          'dateA_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          },
+          'dateA_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        },
+        dateB: {
+          'dateB_end': {
+            date: '2018-01-04T00:00:00',
+            enabled: true
+          },
+          'dateB_start': {
+            date: '2018-01-03T00:00:00',
+            enabled: true
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'dateA',
+          variable: '?dateA_filter'
+        }, {
+          isOptional: false,
+          predicate: 'dateB',
+          variable: '?dateB_filter'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?dateA_filter'
+          }, {
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?dateA_filter'
+          }, {
+            constraint: '2018-01-04T00:00:00',
+            operator: '<=',
+            variable: '?dateB_filter'
+          }, {
+            constraint: '2018-01-03T00:00:00',
+            operator: '>=',
+            variable: '?dateB_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given dates and other types of search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        city: {
+          city1: {
+            enabled: true,
+            key: 'city1',
+            search: 'optional'
+          }
+        },
+        date: {
+          'date_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          },
+          'date_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'city1',
+          isOptional: true,
+          predicate: 'city'
+        }, {
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?date_filter'
+          }, {
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given morethan search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        age: {
+          15: {
+            enabled: true,
+            key: 15,
+            search: 'morethan'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 15,
+            operator: '>',
+            variable: '?age_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given lessthan search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        age: {
+          25: {
+            enabled: true,
+            key: 25,
+            search: 'lessthan'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 25,
+            operator: '<',
+            variable: '?age_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given both morethan and lessthan search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        age: {
+          15: {
+            enabled: true,
+            key: 15,
+            search: 'morethan'
+          },
+          25: {
+            enabled: true,
+            key: 25,
+            search: 'lessthan'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 15,
+            operator: '>',
+            variable: '?age_filter'
+          }, {
+            constraint: 25,
+            operator: '<',
+            variable: '?age_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given morethan/lessthan and excluded search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        age: {
+          15: {
+            enabled: true,
+            key: 15,
+            search: 'morethan'
+          },
+          20: {
+            enabled: true,
+            key: 20,
+            search: 'excluded'
+          },
+          25: {
+            enabled: true,
+            key: 25,
+            search: 'lessthan'
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 15,
+            operator: '>',
+            variable: '?age_filter'
+          }, {
+            constraint: 25,
+            operator: '<',
+            variable: '?age_filter'
+          }],
+          operator: 'and'
+        }, {
+          clauses: [{
+            constraint: 20,
+            predicate: 'age'
+          }],
+          operator: 'not exists'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given morethan/lessthan and date search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        age: {
+          15: {
+            enabled: true,
+            key: 15,
+            search: 'morethan'
+          },
+          25: {
+            enabled: true,
+            key: 25,
+            search: 'lessthan'
+          }
+        },
+        date: {
+          'date_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          },
+          'date_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        }
+      }, {
+        aggregationType: 'name'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }, {
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 15,
+            operator: '>',
+            variable: '?age_filter'
+          }, {
+            constraint: 25,
+            operator: '<',
+            variable: '?age_filter'
+          }, {
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?date_filter'
+          }, {
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given one network expansion parameter does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {
+        aggregationType: 'name',
+        custom: {
+          email: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: true,
+            predicate: 'phone'
+          }, {
+            isOptional: false,
+            predicate: 'email',
+            variable: '?email'
+          }, {
+            isOptional: false,
+            predicate: 'name',
+            variable: '?name'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'email',
+          variable: '?email'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given one network expansion parameter matching one search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {
+        aggregationType: 'name',
+        custom: {
+          phone: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: true,
+            predicate: 'phone'
+          }, {
+            isOptional: false,
+            predicate: 'phone',
+            variable: '?phone'
+          }, {
+            isOptional: false,
+            predicate: 'name',
+            variable: '?name'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'phone',
+          variable: '?phone'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given one network expansion parameter matching aggregation type does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {
+        aggregationType: 'name',
+        custom: {
+          name: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: true,
+            predicate: 'phone'
+          }, {
+            isOptional: false,
+            predicate: 'name',
+            variable: '?name'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given multiple network expansion parameters does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {
+        aggregationType: 'name',
+        custom: {
+          email: true,
+          name: true,
+          phone: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: true,
+            predicate: 'phone'
+          }, {
+            isOptional: false,
+            predicate: 'email',
+            variable: '?email'
+          }, {
+            isOptional: false,
+            predicate: 'name',
+            variable: '?name'
+          }, {
+            isOptional: false,
+            predicate: 'phone',
+            variable: '?phone'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          clauses: [{
+            isOptional: false,
+            predicate: 'email',
+            variable: '?email'
+          }, {
+            isOptional: false,
+            predicate: 'name',
+            variable: '?name'
+          }, {
+            isOptional: false,
+            predicate: 'phone',
+            variable: '?phone'
+          }],
+          operator: 'union'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given network expansion parameters and required search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'required'
+          }
+        }
+      }, {
+        aggregationType: 'name',
+        custom: {
+          phone: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: false,
+            predicate: 'phone'
+          }, {
+            isOptional: false,
+            predicate: 'phone',
+            variable: '?phone'
+          }, {
+            isOptional: false,
+            predicate: 'name',
+            variable: '?name'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'phone',
+          variable: '?phone'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given network expansion parameters and union search terms does return expected objects', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'union'
+          },
+          phone2: {
+            enabled: true,
+            key: 'phone2',
+            search: 'union'
+          },
+          phone3: {
+            enabled: true,
+            key: 'phone3',
+            search: 'optional'
+          }
+        }
+      }, {
+        aggregationType: 'name',
+        custom: {
+          phone: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone3',
+            isOptional: true,
+            predicate: 'phone'
+          }, {
+            clauses: [{
+              constraint: 'phone1',
+              isOptional: false,
+              predicate: 'phone'
+            }, {
+              constraint: 'phone2',
+              isOptional: false,
+              predicate: 'phone'
+            }],
+            isOptional: true,
+            operator: 'union'
+          }, {
+            isOptional: false,
+            predicate: 'phone',
+            variable: '?phone'
+          }, {
+            isOptional: false,
+            predicate: 'name',
+            variable: '?name'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          constraint: 'phone3',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: false,
+            predicate: 'phone'
+          }, {
+            constraint: 'phone2',
+            isOptional: false,
+            predicate: 'phone'
+          }],
+          operator: 'union'
+        }, {
+          isOptional: false,
+          predicate: 'phone',
+          variable: '?phone'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given network expansion parameters and morethan/lessthan search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({});
+      var output = func({
+        age: {
+          15: {
+            enabled: true,
+            key: 15,
+            search: 'morethan'
+          },
+          20: {
+            enabled: true,
+            key: 20,
+            search: 'optional'
+          },
+          25: {
+            enabled: true,
+            key: 25,
+            search: 'lessthan'
+          }
+        }
+      }, {
+        aggregationType: 'name',
+        custom: {
+          age: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            isOptional: false,
+            predicate: 'age',
+            variable: '?age_filter'
+          }, {
+            constraint: 20,
+            isOptional: true,
+            predicate: 'age'
+          }, {
+            isOptional: false,
+            predicate: 'age',
+            variable: '?age'
+          }, {
+            isOptional: false,
+            predicate: 'name',
+            variable: '?name'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }, {
+          constraint: 20,
+          isOptional: true,
+          predicate: 'age'
+        }, {
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 15,
+            operator: '>',
+            variable: '?age_filter'
+          }, {
+            constraint: 25,
+            operator: '<',
+            variable: '?age_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createFacetsQuery function given given network expansion parameters and start/end date search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createFacetsQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        date: {
+          'date_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          },
+          'date_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        }
+      }, {
+        aggregationType: 'name',
+        custom: {
+          date: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 0,
+        offset: 0,
+        variables: [{
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          'function': 'count',
+          order: 'desc',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          'function': 'count',
+          type: 'function',
+          variable: '?name'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            isOptional: false,
+            predicate: 'date',
+            variable: '?date_filter'
+          }, {
+            isOptional: false,
+            predicate: 'date',
+            variable: '?date'
+          }, {
+            isOptional: false,
+            predicate: 'name',
+            variable: '?name'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }, {
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date'
+        }, {
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?date_filter'
+          }, {
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Aggregation');
+    });
+
+    test('createSearchQuery does return function', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      expect(func).to.be.a('Function');
+    });
+
+    test('createSearchQuery function given config page and sort options does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({}, {
+        page: 5,
+        pageSize: 100,
+        sortKey: 'name',
+        sortOrder: 'asc'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.deep.equal({
+        limit: 100,
+        offset: 400
+      });
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          order: 'asc',
+          variable: '?name_sort'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'name',
+          variable: '?name_sort'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given one disabled search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: false,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given one optional search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given one required search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'required'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'phone1',
+          isOptional: false,
+          predicate: 'phone'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given one excluded search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'excluded'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [],
+        filters: [{
+          clauses: [{
+            constraint: 'phone1',
+            predicate: 'phone'
+          }],
+          operator: 'not exists'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given one union search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'union'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'phone1',
+          isOptional: false,
+          predicate: 'phone'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given multiple union search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'union'
+          },
+          phone2: {
+            enabled: true,
+            key: 'phone2',
+            search: 'union'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: false,
+            predicate: 'phone'
+          }, {
+            constraint: 'phone2',
+            isOptional: false,
+            predicate: 'phone'
+          }],
+          operator: 'union'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given many optional, required, excluded, and union search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          },
+          phone2: {
+            enabled: true,
+            key: 'phone2',
+            search: 'optional'
+          },
+          phone3: {
+            enabled: true,
+            key: 'phone3',
+            search: 'required'
+          },
+          phone4: {
+            enabled: true,
+            key: 'phone4',
+            search: 'required'
+          },
+          phone5: {
+            enabled: true,
+            key: 'phone5',
+            search: 'excluded'
+          },
+          phone6: {
+            enabled: true,
+            key: 'phone6',
+            search: 'excluded'
+          },
+          phone7: {
+            enabled: true,
+            key: 'phone7',
+            search: 'union'
+          },
+          phone8: {
+            enabled: true,
+            key: 'phone8',
+            search: 'union'
+          },
+          phone9: {
+            enabled: false,
+            key: 'phone9',
+            search: 'optional'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          constraint: 'phone2',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          constraint: 'phone3',
+          isOptional: false,
+          predicate: 'phone'
+        }, {
+          constraint: 'phone4',
+          isOptional: false,
+          predicate: 'phone'
+        }, {
+          clauses: [{
+            constraint: 'phone7',
+            isOptional: false,
+            predicate: 'phone'
+          }, {
+            constraint: 'phone8',
+            isOptional: false,
+            predicate: 'phone'
+          }],
+          operator: 'union'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 'phone5',
+            predicate: 'phone'
+          }, {
+            constraint: 'phone6',
+            predicate: 'phone'
+          }],
+          operator: 'not exists'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given many types of search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        city: {
+          city1: {
+            enabled: true,
+            key: 'city1',
+            search: 'optional'
+          }
+        },
+        email: {
+          email1: {
+            enabled: true,
+            key: 'email1',
+            search: 'optional'
+          }
+        },
+        name: {
+          name1: {
+            enabled: true,
+            key: 'name1',
+            search: 'optional'
+          }
+        },
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'city1',
+          isOptional: true,
+          predicate: 'city'
+        }, {
+          constraint: 'email1',
+          isOptional: true,
+          predicate: 'email'
+        }, {
+          constraint: 'name1',
+          isOptional: true,
+          predicate: 'name'
+        }, {
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given one date start search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        date: {
+          'date_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given one date end search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        date: {
+          'date_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given date start and end search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        date: {
+          'date_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          },
+          'date_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?date_filter'
+          }, {
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function multiple types of dates does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({
+        'dateA_end': 'dateA',
+        'dateA_start': 'dateA',
+        'dateB_end': 'dateB',
+        'dateB_start': 'dateB'
+      });
+      var output = func({
+        dateA: {
+          'dateA_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          },
+          'dateA_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        },
+        dateB: {
+          'dateB_end': {
+            date: '2018-01-04T00:00:00',
+            enabled: true
+          },
+          'dateB_start': {
+            date: '2018-01-03T00:00:00',
+            enabled: true
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'dateA',
+          variable: '?dateA_filter'
+        }, {
+          isOptional: false,
+          predicate: 'dateB',
+          variable: '?dateB_filter'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?dateA_filter'
+          }, {
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?dateA_filter'
+          }, {
+            constraint: '2018-01-04T00:00:00',
+            operator: '<=',
+            variable: '?dateB_filter'
+          }, {
+            constraint: '2018-01-03T00:00:00',
+            operator: '>=',
+            variable: '?dateB_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given dates and other types of search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        city: {
+          city1: {
+            enabled: true,
+            key: 'city1',
+            search: 'optional'
+          }
+        },
+        date: {
+          'date_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          },
+          'date_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'city1',
+          isOptional: true,
+          predicate: 'city'
+        }, {
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?date_filter'
+          }, {
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given morethan search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        age: {
+          15: {
+            enabled: true,
+            key: 15,
+            search: 'morethan'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 15,
+            operator: '>',
+            variable: '?age_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given lessthan search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        age: {
+          25: {
+            enabled: true,
+            key: 25,
+            search: 'lessthan'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 25,
+            operator: '<',
+            variable: '?age_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given both morethan and lessthan search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        age: {
+          15: {
+            enabled: true,
+            key: 15,
+            search: 'morethan'
+          },
+          25: {
+            enabled: true,
+            key: 25,
+            search: 'lessthan'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 15,
+            operator: '>',
+            variable: '?age_filter'
+          }, {
+            constraint: 25,
+            operator: '<',
+            variable: '?age_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given morethan/lessthan and excluded search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        age: {
+          15: {
+            enabled: true,
+            key: 15,
+            search: 'morethan'
+          },
+          20: {
+            enabled: true,
+            key: 20,
+            search: 'excluded'
+          },
+          25: {
+            enabled: true,
+            key: 25,
+            search: 'lessthan'
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 15,
+            operator: '>',
+            variable: '?age_filter'
+          }, {
+            constraint: 25,
+            operator: '<',
+            variable: '?age_filter'
+          }],
+          operator: 'and'
+        }, {
+          clauses: [{
+            constraint: 20,
+            predicate: 'age'
+          }],
+          operator: 'not exists'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given morethan/lessthan and date search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        age: {
+          15: {
+            enabled: true,
+            key: 15,
+            search: 'morethan'
+          },
+          25: {
+            enabled: true,
+            key: 25,
+            search: 'lessthan'
+          }
+        },
+        date: {
+          'date_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          },
+          'date_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        }
+      }, {});
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }, {
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 15,
+            operator: '>',
+            variable: '?age_filter'
+          }, {
+            constraint: 25,
+            operator: '<',
+            variable: '?age_filter'
+          }, {
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?date_filter'
+          }, {
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given one network expansion parameter does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {
+        custom: {
+          email: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad2'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: true,
+            predicate: 'phone'
+          }, {
+            isOptional: false,
+            predicate: 'email',
+            variable: '?email'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'email',
+          variable: '?email'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given one network expansion parameter matching one search term does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {
+        custom: {
+          phone: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad2'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: true,
+            predicate: 'phone'
+          }, {
+            isOptional: false,
+            predicate: 'phone',
+            variable: '?phone'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'phone',
+          variable: '?phone'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given multiple network expansion parameters does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {
+        custom: {
+          email: true,
+          name: true,
+          phone: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad2'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: true,
+            predicate: 'phone'
+          }, {
+            isOptional: false,
+            predicate: 'email',
+            variable: '?email'
+          }, {
+            isOptional: false,
+            predicate: 'name',
+            variable: '?name'
+          }, {
+            isOptional: false,
+            predicate: 'phone',
+            variable: '?phone'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          clauses: [{
+            isOptional: false,
+            predicate: 'email',
+            variable: '?email'
+          }, {
+            isOptional: false,
+            predicate: 'name',
+            variable: '?name'
+          }, {
+            isOptional: false,
+            predicate: 'phone',
+            variable: '?phone'
+          }],
+          operator: 'union'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given network expansion parameters and required search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'required'
+          }
+        }
+      }, {
+        custom: {
+          phone: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad2'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: false,
+            predicate: 'phone'
+          }, {
+            isOptional: false,
+            predicate: 'phone',
+            variable: '?phone'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'phone',
+          variable: '?phone'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given network expansion parameters and union search terms does return expected objects', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'union'
+          },
+          phone2: {
+            enabled: true,
+            key: 'phone2',
+            search: 'union'
+          },
+          phone3: {
+            enabled: true,
+            key: 'phone3',
+            search: 'optional'
+          }
+        }
+      }, {
+        custom: {
+          phone: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad2'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            constraint: 'phone3',
+            isOptional: true,
+            predicate: 'phone'
+          }, {
+            clauses: [{
+              constraint: 'phone1',
+              isOptional: false,
+              predicate: 'phone'
+            }, {
+              constraint: 'phone2',
+              isOptional: false,
+              predicate: 'phone'
+            }],
+            isOptional: true,
+            operator: 'union'
+          }, {
+            isOptional: false,
+            predicate: 'phone',
+            variable: '?phone'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          constraint: 'phone3',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          clauses: [{
+            constraint: 'phone1',
+            isOptional: false,
+            predicate: 'phone'
+          }, {
+            constraint: 'phone2',
+            isOptional: false,
+            predicate: 'phone'
+          }],
+          operator: 'union'
+        }, {
+          isOptional: false,
+          predicate: 'phone',
+          variable: '?phone'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given network expansion parameters and morethan/lessthan search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({});
+      var output = func({
+        age: {
+          15: {
+            enabled: true,
+            key: 15,
+            search: 'morethan'
+          },
+          20: {
+            enabled: true,
+            key: 20,
+            search: 'optional'
+          },
+          25: {
+            enabled: true,
+            key: 25,
+            search: 'lessthan'
+          }
+        }
+      }, {
+        custom: {
+          age: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad2'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            isOptional: false,
+            predicate: 'age',
+            variable: '?age_filter'
+          }, {
+            constraint: 20,
+            isOptional: true,
+            predicate: 'age'
+          }, {
+            isOptional: false,
+            predicate: 'age',
+            variable: '?age'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age_filter'
+        }, {
+          constraint: 20,
+          isOptional: true,
+          predicate: 'age'
+        }, {
+          isOptional: false,
+          predicate: 'age',
+          variable: '?age'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: 15,
+            operator: '>',
+            variable: '?age_filter'
+          }, {
+            constraint: 25,
+            operator: '<',
+            variable: '?age_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given given network expansion parameters and start/end date search terms does return expected object', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        date: {
+          'date_end': {
+            date: '2018-01-02T00:00:00',
+            enabled: true
+          },
+          'date_start': {
+            date: '2018-01-01T00:00:00',
+            enabled: true
+          }
+        }
+      }, {
+        custom: {
+          date: true
+        }
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.not.exist;
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad2'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          clauses: [{
+            isOptional: false,
+            predicate: 'date',
+            variable: '?date_filter'
+          }, {
+            isOptional: false,
+            predicate: 'date',
+            variable: '?date'
+          }],
+          type: 'Ad',
+          variable: '?ad1'
+        }, {
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_filter'
+        }, {
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date'
+        }],
+        filters: [{
+          clauses: [{
+            constraint: '2018-01-02T00:00:00',
+            operator: '<=',
+            variable: '?date_filter'
+          }, {
+            constraint: '2018-01-01T00:00:00',
+            operator: '>=',
+            variable: '?date_filter'
+          }],
+          operator: 'and'
+        }],
+        type: 'Ad',
+        variable: '?ad2'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('createSearchQuery function given date sort does add timestamp sort and clauses', function() {
+      var func = transformFunctions.transforms.search.createSearchQuery({
+        'date_end': 'date',
+        'date_start': 'date'
+      });
+      var output = func({
+        phone: {
+          phone1: {
+            enabled: true,
+            key: 'phone1',
+            search: 'optional'
+          }
+        }
+      }, {
+        sortKey: 'date',
+        sortOrder: 'desc'
+      });
+
+      expect(output.SPARQL).to.be.an('Object');
+      expect(output.SPARQL['group-by']).to.not.exist;
+      expect(output.SPARQL['order-by']).to.deep.equal({
+        values: [{
+          order: 'desc',
+          variable: '?date_sort'
+        }, {
+          order: 'desc',
+          variable: '?timestamp_crawl_sort'
+        }, {
+          order: 'desc',
+          variable: '?timestamp_sort'
+        }]
+      });
+      expect(output.SPARQL.select).to.deep.equal({
+        variables: [{
+          type: 'simple',
+          variable: '?ad'
+        }]
+      });
+      expect(output.SPARQL.where).to.deep.equal({
+        clauses: [{
+          constraint: 'phone1',
+          isOptional: true,
+          predicate: 'phone'
+        }, {
+          isOptional: false,
+          predicate: 'date',
+          variable: '?date_sort'
+        }, {
+          isOptional: false,
+          predicate: 'timestamp_crawl',
+          variable: '?timestamp_crawl_sort'
+        }, {
+          isOptional: false,
+          predicate: 'timestamp',
+          variable: '?timestamp_sort'
+        }],
+        filters: [],
+        type: 'Ad',
+        variable: '?ad'
+      });
+      expect(output.type).to.equal('Point Fact');
+    });
+
+    test('searchResults given no response does return expected object', function() {
+      var output = transformFunctions.transforms.search.searchResults([], {});
+      expect(output).to.deep.equal({
+        highlights: {},
+        hits: {}
+      });
+    });
+
+    test('searchResults given response with hits and no highlights does return expected object', function() {
+      var output = transformFunctions.transforms.search.searchResults([{
+        result: {
+          hits: {
+            hits: [1, 2, 3, 4, 5],
+            score: 0.5,
+            total: 10
+          }
+        }
+      }], {});
+
+      expect(output).to.deep.equal({
+        highlights: {},
+        hits: {
+          hits: [1, 2, 3, 4, 5],
+          score: 0.5,
+          total: 10
+        }
+      });
+    });
+
+    test('searchResults given response with hits and highlights does return expected object', function() {
+      var output = transformFunctions.transforms.search.searchResults([{
+        query: {
+          SPARQL: {
+            where: {
+              clauses: [{
+                _id: 'A',
+                constraint: 'value1',
+                predicate: 'key1'
+              }, {
+                _id: 'B',
+                constraint: 'value2',
+                predicate: 'key1'
+              }, {
+                _id: 'C',
+                constraint: 'value3',
+                predicate: 'key2'
+              }, {
+                _id: 'D',
+                constraint: 'value4',
+                predicate: 'key2'
+              }]
+            }
+          }
+        },
+        result: {
+          hits: {
+            hits: [1, 2, 3, 4, 5],
+            score: 0.5,
+            total: 10
+          }
+        }
+      }], {});
+
+      expect(output).to.deep.equal({
+        highlights: {
+          _all: {
+            value1: 'A',
+            value2: 'B',
+            value3: 'C',
+            value4: 'D'
+          },
+          key1: {
+            value1: 'A',
+            value2: 'B'
+          },
+          key2: {
+            value3: 'C',
+            value4: 'D'
+          }
+        },
+        hits: {
+          hits: [1, 2, 3, 4, 5],
+          score: 0.5,
+          total: 10
+        }
+      });
+    });
+
+    test('searchResults given response with hits and highlights with nested clauses does return expected object', function() {
+      var output = transformFunctions.transforms.search.searchResults([{
+        query: {
+          SPARQL: {
+            where: {
+              clauses: [{
+                _id: 'A',
+                constraint: 'value1',
+                predicate: 'key1'
+              }, {
+                clauses: [{
+                  _id: 'B',
+                  constraint: 'value2',
+                  predicate: 'key1'
+                }, {
+                  _id: 'C',
+                  constraint: 'value3',
+                  predicate: 'key2'
+                }]
+              }, {
+                _id: 'D',
+                constraint: 'value4',
+                predicate: 'key2'
+              }]
+            }
+          }
+        },
+        result: {
+          hits: {
+            hits: [1, 2, 3, 4, 5],
+            score: 0.5,
+            total: 10
+          }
+        }
+      }], {});
+
+      expect(output).to.deep.equal({
+        highlights: {
+          _all: {
+            value1: 'A',
+            value2: 'B',
+            value3: 'C',
+            value4: 'D'
+          },
+          key1: {
+            value1: 'A',
+            value2: 'B'
+          },
+          key2: {
+            value3: 'C',
+            value4: 'D'
+          }
+        },
+        hits: {
+          hits: [1, 2, 3, 4, 5],
+          score: 0.5,
+          total: 10
+        }
+      });
+    });
+
+    test('searchResults given response and network expansion is active does return expected object', function() {
+      var output = transformFunctions.transforms.search.searchResults([{
+        query: {
+          SPARQL: {
+            where: {
+              clauses: [{
+                _id: 'A',
+                constraint: 'value1',
+                predicate: 'key1'
+              }, {
+                clauses: [{
+                  _id: 'B',
+                  constraint: 'value2',
+                  predicate: 'key1'
+                }, {
+                  _id: 'C',
+                  constraint: 'value3',
+                  predicate: 'key2'
+                }]
+              }, {
+                _id: 'D',
+                constraint: 'value4',
+                predicate: 'key2'
+              }]
+            }
+          }
+        },
+        result: [{
+          hits: {
+            hits: [1, 2, 3, 4, 5],
+            score: 0.5,
+            total: 10
+          }
+        }, {
+          hits: {
+            hits: [6, 7, 8, 9, 0],
+            score: 0.1,
+            total: 100
+          }
+        }]
+      }], {
+        isNetworkExpansion: true
+      });
+
+      expect(output).to.deep.equal({
+        highlights: {
+          _all: {
+            value1: 'A',
+            value2: 'B',
+            value3: 'C',
+            value4: 'D'
+          },
+          key1: {
+            value1: 'A',
+            value2: 'B'
+          },
+          key2: {
+            value3: 'C',
+            value4: 'D'
+          }
+        },
+        hits: {
+          hits: [6, 7, 8, 9, 0],
+          score: 0.1,
+          total: 100
+        }
+      });
+    });
+
+    test('searchResults does lowercase constraints in highlights', function() {
+      var output = transformFunctions.transforms.search.searchResults([{
+        query: {
+          SPARQL: {
+            where: {
+              clauses: [{
+                _id: 'A',
+                constraint: 'Value1',
+                predicate: 'key1'
+              }, {
+                _id: 'B',
+                constraint: 'VALUE2',
+                predicate: 'key2'
+              }]
+            }
+          }
+        },
+        result: {
+          hits: {
+            hits: [1, 2, 3, 4, 5],
+            score: 0.5,
+            total: 10
+          }
+        }
+      }], {});
+
+      expect(output).to.deep.equal({
+        highlights: {
+          _all: {
+            value1: 'A',
+            value2: 'B'
+          },
+          key1: {
+            value1: 'A'
+          },
+          key2: {
+            value2: 'B'
+          }
+        },
+        hits: {
+          hits: [1, 2, 3, 4, 5],
+          score: 0.5,
+          total: 10
+        }
+      });
     });
   });
 </script>

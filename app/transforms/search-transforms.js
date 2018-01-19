@@ -61,7 +61,7 @@ var searchTransforms = (function(_) {
             andFilter.clauses.push({
               constraint: date.toISOString().split('.')[0],
               operator: term.includes('start') ? '>=' : '<=',
-              variable: '?' + type + '1'
+              variable: '?' + type + '_filter'
             });
 
             // Only create one date variable per date type.
@@ -71,7 +71,7 @@ var searchTransforms = (function(_) {
               template.clauses.push({
                 isOptional: false,
                 predicate: type,
-                variable: '?' + type + '1'
+                variable: '?' + type + '_filter'
               });
 
               // If network expansion is enabled for any type...
@@ -79,7 +79,7 @@ var searchTransforms = (function(_) {
                 template.clauses[0].clauses.push({
                   isOptional: false,
                   predicate: type,
-                  variable: '?' + type + '1'
+                  variable: '?' + type + '_filter'
                 });
               }
             }
@@ -87,7 +87,7 @@ var searchTransforms = (function(_) {
             andFilter.clauses.push({
               constraint: searchParameters[type][term].key,
               operator: searchParameters[type][term].search === 'lessthan' ? '<' : '>',
-              variable: '?' + type + '1'
+              variable: '?' + type + '_filter'
             });
 
             // Only create one number variable per number type.
@@ -97,7 +97,7 @@ var searchTransforms = (function(_) {
               template.clauses.push({
                 isOptional: false,
                 predicate: type,
-                variable: '?' + type + '1'
+                variable: '?' + type + '_filter'
               });
 
               // If network expansion is enabled for any type...
@@ -105,7 +105,7 @@ var searchTransforms = (function(_) {
                 template.clauses[0].clauses.push({
                   isOptional: false,
                   predicate: type,
-                  variable: '?' + type + '1'
+                  variable: '?' + type + '_filter'
                 });
               }
             }
@@ -265,7 +265,7 @@ var searchTransforms = (function(_) {
               clauses: template.clauses,
               filters: template.filters,
               type: 'Ad',
-              variable: '?ad'
+              variable: !isNetworkExpansion ? '?ad' : '?ad2'
             }
           },
           type: 'Aggregation'
@@ -301,7 +301,7 @@ var searchTransforms = (function(_) {
             variable: '?' + config.sortKey + '_sort'
           });
 
-          // If sort by date, add timestamp clauses.
+          // If sort by date, add timestamp sort and clauses.
           var dateFields = _.keys(dateConfig).reduce(function(dateFields, property) {
             dateFields[dateConfig[property]] = true;
             return dateFields;
