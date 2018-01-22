@@ -346,7 +346,7 @@ limitations under the License.
         page="{{searchPage}}"
         page-size="10"
         properties-ready="[[processRequest]]"
-        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+        source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
         transform-config="[[searchFields]]"
         transform-function="[[transforms.entity.results]]"
         error="{{searchError}}"
@@ -714,7 +714,7 @@ limitations under the License.
                 index-types="[[esConfig.esType]]"
                 search-fields="[[searchFields]]"
                 search-parameters="[[searchParameters]]"
-                source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+                source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
                 transform-csv-function="[[transforms.export.createExportDataForCsv]]"
                 transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
                 transform-search-input-function="[[transforms.export.createBulkSearchData]]"
@@ -789,7 +789,7 @@ limitations under the License.
               id-field="_id"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+              source-include-nested-data='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"

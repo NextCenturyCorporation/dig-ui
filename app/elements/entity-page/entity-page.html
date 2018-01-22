@@ -313,7 +313,7 @@ limitations under the License.
       page-size="10"
       properties-ready="{{processRequest}}"
       sort-field="[[dateMenu.selected]]"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+      source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.results]]"
       error="{{searchError}}"
@@ -567,7 +567,7 @@ limitations under the License.
                         aggregations="[[buildArray(item.dateAggregation)]]"
                         page-size="0"
                         properties-ready="{{processRequest}}"
-                        source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+                        source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
                         transform-config="[[createTimelineConfig(item.dateCollection, item.dateSelected, item.entity, pageConfig, pageId)]]"
                         transform-function="[[transforms.entity.timelines]]"
                         error="{{item.timelineError}}"
@@ -856,7 +856,7 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+              source-include-nested-data='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"
@@ -1128,7 +1128,7 @@ limitations under the License.
 
       observers: [
         'findImageMatches(esConfig, pageConfig, pageId, transforms)',
-        'handleChangeFilter(entityFilters.*)'
+        'removeDisabledFromFilterCollection(entityFilters.*)'
       ],
 
       attached: function() {
@@ -1427,7 +1427,7 @@ limitations under the License.
       /**
        * Handles removing a filter using the selected-facets-display.
        */
-      handleChangeFilter: function() {
+      removeDisabledFromFilterCollection: function() {
         var self = this;
         _.keys(this.entityFilters).forEach(function(type) {
           _.keys(self.entityFilters[type]).forEach(function(term) {
@@ -1438,11 +1438,6 @@ limitations under the License.
               }).filter(function(id) {
                 return id !== key;
               }));
-            }
-            if(self.entityFilters[type][term].enabled && self.filterCollection[type] && self.filterCollection[type].indexOf(key) < 0) {
-              self.set(['filterCollection', type], self.filterCollection[type].map(function(id) {
-                return id;
-              }).concat([key]));
             }
           });
         });

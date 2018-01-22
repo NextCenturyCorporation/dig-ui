@@ -23,7 +23,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/elastic-client-search/elastic-client-search.html">
 <link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
 <link rel="import" href="../../bower_components/export-button/export-button.html">
-<link rel="import" href="../../bower_components/image-gallery/image-gallery.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/iron-dropdown/iron-dropdown.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
@@ -202,7 +201,7 @@ limitations under the License.
       filters="[]"
       page-size="1"
       properties-ready="{{processRequest}}"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+      source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.result]]"
       error="{{resultError}}"
@@ -250,7 +249,7 @@ limitations under the License.
       page-size="10"
       sort-field="[[dateMenu.selected]]"
       sort-order="desc"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+      source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
       loading="{{revisionLoading}}"
       last-error="{{revisionError}}"
       results="{{revisionQueryResults}}"
@@ -289,7 +288,7 @@ limitations under the License.
       aggregations="[]"
       page="{{moreLikeThisPage}}"
       page-size="10"
-      source-include='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+      source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
       loading="{{moreLikeThisLoading}}"
       last-error="{{moreLikeThisError}}"
       results="{{moreLikeThisQueryResults}}"
@@ -476,7 +475,7 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+              source-include-nested-data='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"
@@ -540,7 +539,7 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+              source-include-nested-data='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"
@@ -592,7 +591,7 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["content_extraction.content_strict.text", "content_extraction.title.text", "doc_id", "knowledge_graph", "objects", "tld", "url"]'
+              source-include-nested-data='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"

@@ -1075,7 +1075,7 @@ limitations under the License.
       expect(func('id3')).to.equal('');
     });
 
-    test('handleChangeFilter does update filterCollection as expected', function() {
+    test('removeDisabledFromFilterCollection does update filterCollection as expected', function() {
       element.filterCollection = {
         type1: ['key1'],
         type2: [],
@@ -1146,14 +1146,15 @@ limitations under the License.
         }
       };
 
-      element.handleChangeFilter();
+      element.removeDisabledFromFilterCollection();
 
+      // Only observes adds.
       expect(element.filterCollection).to.deep.equal({
         type1: [],
-        type2: ['key2'],
-        type3: ['key4'],
+        type2: [],
+        type3: [],
         type4: ['key6'],
-        type5: ['key7', 'key8'],
+        type5: [],
         type6: []
       });
     });
@@ -1215,18 +1216,6 @@ limitations under the License.
       expect(element.filterCollection).to.deep.equal({
         type1: [],
         type2: []
-      });
-
-      element.set(['entityFilters', 'type2'], {
-        term2: {
-          key: 'key2',
-          enabled: true
-        }
-      });
-
-      expect(element.filterCollection).to.deep.equal({
-        type1: [],
-        type2: ['key2']
       });
     });
   });
