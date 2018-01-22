@@ -156,9 +156,9 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return output.indexOf('<em>') >= 0 && output.indexOf('</em>') >= 0 ? !!(output.replace(/<\/?em\>/g, '')) : false;
   }
 
-  function getHighlightedText(itemId, itemText, result, type, highlights) {
+  function getHighlightedText(itemId, itemText, result, type, highlights, overridePath) {
     // Get the paths from the highlight mapping to explore in the result highlights specifically for the given item.
-    var pathList = getHighlightPathList(('' + itemId).toLowerCase(), ('' + itemText).toLowerCase(), result, type, highlights);
+    var pathList = overridePath ? [overridePath] : getHighlightPathList(('' + itemId).toLowerCase(), ('' + itemText).toLowerCase(), result, type, highlights);
     var textList = [];
     if(result.highlight && pathList.length) {
       // Find the highlighted text in the result highlights using a highlights path.  Use the first because they are all the same.
@@ -170,6 +170,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         });
       });
     }
+
     return textList.length ? textList[0] : undefined;
   }
 
@@ -236,7 +237,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       if(_.isObject(extraction) || _.isArray(extraction)) {
         returnObject.text = getTitleOrDescriptionText(extraction);
         if(highlights) {
-          var highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlights[searchFieldsObject.key]);
+          var path = (type === 'title' ? 'content_extraction.title.text' : 'content_extraction.content_strict.text');
+          var highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlights[searchFieldsObject.key], path);
           returnObject.highlight = highlight || returnObject.highlight || returnObject.text;
         }
       }
@@ -283,7 +285,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return undefined;
     }
 
-    var crawlTimestamp = commonTransforms.getFormattedDate(_.get(result, '_source.@timestamp'));
+    var crawlTimestamp = commonTransforms.getFormattedDate(_.get(result, '_source.timestamp_crawl'));
     if(crawlTimestamp === 'None') {
       crawlTimestamp = commonTransforms.getFormattedDate(_.get(result, '_source.timestamp'));
     }
@@ -295,7 +297,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var resultObject = {
       id: id,
       url: _.get(result, '_source.url'),
-      crawlTimestamp: (crawlTimestamp === 'None' ? 'Unknown' : crawlTimestamp),
+      crawlTimestamp: (crawlTimestamp === 'None' ? undefined : crawlTimestamp),
       type: type,
       icon: icon,
       link: commonTransforms.getLink(id, 'result'),
@@ -304,7 +306,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       tags: getResultTags(result, '_source.knowledge_graph._tags'),
       esData: esDataEndpoint,
       title: title.text,
-      description: description.text || 'None',
+      description: description.text || '',
       headerExtractions: [],
       detailExtractions: [],
       nestedExtractions: [],
@@ -342,7 +344,11 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         extractionObject.data = [clone];
       }
 
-      extractionObject.index = index;
+      // Ignore undefined indexes.
+      if(typeof index !== 'undefined') {
+        extractionObject.index = index;
+      }
+
       return extractionObject;
     };
 
@@ -689,7 +695,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      */
     result: function(data, searchFields) {
       if(data && data.hits && data.hits.hits && data.hits.hits.length) {
-        return getWebpageResultObject(data.hits.hits[0], searchFields);
+        return getWebpageResultObject(data.hits.hits[0], searchFields) || {};
       }
       return {};
     },
