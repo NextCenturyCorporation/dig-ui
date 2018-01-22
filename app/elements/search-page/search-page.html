@@ -20,6 +20,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
 <link rel="import" href="../../bower_components/export-button/export-button.html">
 <link rel="import" href="../../bower_components/facet-panel/facet-panel.html">
+<link rel="import" href="../../bower_components/image-gallery/image-gallery.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/iron-dropdown/iron-dropdown.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
@@ -801,6 +802,7 @@ limitations under the License.
             <image-gallery style$="[[findStyleToShowIfEqual(selectedSearchTab, 2)]]"
               id="searchImageGallery"
               images="[[imagesFromResults]]"
+              new-tab
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"
               large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]">
             </image-gallery>
