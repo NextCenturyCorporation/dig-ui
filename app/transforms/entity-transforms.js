@@ -236,7 +236,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       if(_.isObject(extraction) || _.isArray(extraction)) {
         returnObject.text = getTitleOrDescriptionText(extraction);
         if(highlights) {
-          var highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlights._all);
+          var highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlights[searchFieldsObject.key]);
           returnObject.highlight = highlight || returnObject.highlight || returnObject.text;
         }
       }

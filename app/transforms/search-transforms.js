@@ -359,16 +359,12 @@ var searchTransforms = (function(_) {
           var clauses = response[0].query.SPARQL.where.clauses;
           clauses.forEach(function(clause) {
             if(clause.predicate && clause.constraint && clause._id) {
-              highlights._all = highlights._all || {};
-              highlights._all[('' + clause.constraint).toLowerCase()] = clause._id;
               highlights[clause.predicate] = highlights[clause.predicate] || {};
               highlights[clause.predicate][('' + clause.constraint).toLowerCase()] = clause._id;
             }
             if(clause.clauses) {
               clause.clauses.forEach(function(nestedClause) {
                 if(nestedClause.predicate && nestedClause.constraint && nestedClause._id) {
-                  highlights._all = highlights._all || {};
-                  highlights._all[('' + nestedClause.constraint).toLowerCase()] = nestedClause._id;
                   highlights[nestedClause.predicate] = highlights[nestedClause.predicate] || {};
                   highlights[nestedClause.predicate][('' + nestedClause.constraint).toLowerCase()] = nestedClause._id;
                 }
