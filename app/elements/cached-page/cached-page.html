@@ -1,0 +1,193 @@
+<!--
+Copyright 2018 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/build-and-run-query/build-and-run-query.html">
+<link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
+<link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/loading-spinner/loading-spinner.html">
+<link rel="import" href="../../elements/behaviors.html">
+<link rel="import" href="../../elements/transform-functions/transform-functions.html">
+
+<dom-module id="cached-page">
+  <template>
+    <style include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning"></style>
+
+    <style>
+      :host {
+        background-color: white;
+        display: block;
+        @apply --layout-fullbleed;
+      }
+
+      iframe {
+        height: 100%;
+        width: 100%;
+        border: none;
+        position: absolute;
+      }
+    </style>
+
+    <iron-ajax
+      auto
+      handle-as="json"
+      url="/dig-ui/config"
+      last-response="{{serverConfig}}">
+    </iron-ajax>
+
+    <template is="dom-if" if="[[serverConfig.overrideConfig]]">
+      <transform-functions
+        client-config="[[serverConfig.overrideConfig]]"
+        domain="[[domain]]"
+        server-config="[[serverConfig]]"
+        es-config="{{esConfig}}"
+        transforms="{{transforms}}">
+      </transform-functions>
+    </template>
+
+    <template is="dom-if" if="[[!serverConfig.overrideConfig]]">
+      <iron-ajax
+        auto="[[exists(configHeader)]]"
+        handle-as="json"
+        headers="[[configHeader]]"
+        url="[[concat(serverConfig.configEndpoint, domain)]]"
+        with-credentials
+        loading="{{clientConfigLoading}}"
+        last-error="{{clientConfigError}}"
+        last-response="{{clientConfig}}">
+      </iron-ajax>
+
+      <transform-functions
+        client-config="[[clientConfig]]"
+        domain="[[domain]]"
+        server-config="[[serverConfig]]"
+        es-config="{{esConfig}}"
+        transforms="{{transforms}}">
+      </transform-functions>
+    </template>
+
+    <elastic-client
+      config="[[serverConfig.esHost]]"
+      client="{{esClient}}">
+    </elastic-client>
+
+    <!-- Logger for Page View -->
+    <dig-logger log-page-view
+      es-client="[[esClient]]"
+      es-index="[[serverConfig.logIndexName]]"
+      es-type="[[serverConfig.logIndexType]]"
+      type="Cache-Open"
+      username="[[serverConfig.username]]"
+      logger="{{logger}}">
+    </dig-logger>
+
+    <!-- Cache Query -->
+
+    <build-and-run-query
+      fields='"_id"'
+      values="[[parameters.id]]"
+      client="[[esClient]]"
+      index-name="[[esConfig.esIndex]]"
+      index-types="[[esConfig.esType]]"
+      aggregations="[]"
+      filters="[]"
+      page-size="1"
+      properties-ready
+      source-include='["raw_content"]'
+      transform-function="[[transforms.entity.cache]]"
+      error="{{cacheQueryError}}"
+      loading="{{cacheQueryLoading}}"
+      results="{{cacheQueryResults}}">
+    </build-and-run-query>
+
+    <iframe srcdoc="[[cacheQueryResults]]"></iframe>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      /* globals DigBehaviors */
+      is: 'cached-page',
+
+      behaviors: [
+        DigBehaviors.PageBehavior
+      ],
+
+      properties: {
+        cacheQueryError: {
+          type: Object
+        },
+
+        cacheQueryLoading: {
+          type: Boolean
+        },
+
+        cacheQueryResults: {
+          type: Object
+        },
+
+        clientConfig: {
+          type: Object
+        },
+
+        clientConfigError: {
+          type: Object
+        },
+
+        clientConfigLoading: {
+          type: Boolean
+        },
+
+        configHeader: {
+          computed: 'createAuthHeader(serverConfig)',
+          type: Object
+        },
+
+        domain: {
+          computed: 'findDomain(parameters, serverConfig)',
+          notify: true,
+          type: String
+        },
+
+        esClient: {
+          type: Object
+        },
+
+        esConfig: {
+          type: Object
+        },
+
+        logger: {
+          type: Object
+        },
+
+        parameters: {
+          computed: 'getUrlParameters()',
+          type: Object
+        },
+
+        serverConfig: {
+          type: Object
+        }
+      }
+    });
+  })();
+  </script>
+</dom-module>

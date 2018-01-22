@@ -55,6 +55,9 @@ var commonTransforms = (function(_, moment, domain, pathPrefix) {
    * Returns the link for the given ID.
    */
   function getLink(itemId, linkType, fieldType, fieldId) {
+    if(linkType === 'cached') {
+      return (pathPrefix || '') + '/cached.html?' + (domain ? 'domain=' + domain : '') + '&id=' + itemId;
+    }
     if(linkType === 'result') {
       return (pathPrefix || '') + '/result.html?' + (domain ? 'domain=' + domain : '') + '&id=' + itemId;
     }

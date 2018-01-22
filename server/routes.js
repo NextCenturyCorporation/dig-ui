@@ -188,6 +188,10 @@ module.exports = function(app) {
     res.sendFile(path.resolve(app.get('appPath') + '/result.html'));
   });
 
+  app.get(serverPath + '/cached.html', function(req, res) {
+    res.sendFile(path.resolve(app.get('appPath') + '/cached.html'));
+  });
+
   app.get(serverPath + '/entity.html', function(req, res) {
     res.sendFile(path.resolve(app.get('appPath') + '/entity.html'));
   });
