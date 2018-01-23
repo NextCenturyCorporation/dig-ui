@@ -747,6 +747,7 @@ limitations under the License.
                 loading="[[item.aggregatedDataLoading]]"
                 no-data="[[!item.aggregatedDataResults.length]]"
                 section-title="[[item.sectionTitle]]"
+                selected="[[item.showData]]"
                 style-class="[[item.entity.styleClass]]"
                 on-tapped-changed="showSectionAndRunQueries"
                 hide-section-content
@@ -1360,7 +1361,7 @@ limitations under the License.
       },
 
       showSectionAndRunQueries: function(event) {
-        if(event.detail.value) {
+        if(event.detail.value && !event.model.item.aggregatedDataError && !event.model.item.aggregatedDataLoading && event.model.item.aggregatedDataResults.length) {
           var self = this;
           this.aggregationFields.forEach(function(aggregationField, index) {
             self.set(['aggregationFields', index, 'loadData'], (aggregationField.entity.key === event.model.item.entity.key));

@@ -35,6 +35,7 @@ limitations under the License.
         min-height: var(--section-wrapper-min-height, none);
       }
 
+      paper-material.selected,
       paper-material.tappable:hover {
         background-color: rgba(0,0,0,0.1);
       }
@@ -169,7 +170,7 @@ limitations under the License.
       }
     </style>
 
-    <paper-material class$="[[_isTappable(error, loading, noData, tappable)]]">
+    <paper-material class$="[[_isSelected(selected)]] [[_isTappable(error, loading, noData, tappable)]]">
       <template is="dom-if" if="[[!hideSectionTitle]]">
         <div class="section-title layout horizontal start center" on-tap="_updateTapped">
           <iron-icon class$="header-icon [[styleClass]]" icon="[[icon]]"></iron-icon>
@@ -322,6 +323,19 @@ limitations under the License.
         /**
          * (Optional)
          *
+         * Whether the section is selected.
+         *
+         * @type {Boolean}
+         * @default false
+         */
+        selected: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * (Optional)
+         *
          * Whether to show the loading success or failure icons.
          *
          * @type {Boolean}
@@ -371,6 +385,17 @@ limitations under the License.
           type: Boolean,
           value: false
         }
+      },
+
+      /**
+       * Returns the selected style class if needed.
+       *
+       * @param {Boolean} selected
+       * @return {String}
+       * @private
+       */
+      _isSelected: function(selected) {
+        return selected ? 'selected' : '';
       },
 
       /**
