@@ -421,14 +421,14 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     // The images should be undefined by default.
     var images = _.get(result, '_source.objects');
-    resultObject.images = images ? getExtractionsFromList(images.map(function(object) {
+    resultObject.images = images ? getExtractionsFromList(_.uniqBy(images.map(function(object) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var id = object.img_sha1;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
       return {
         key: id
       };
-    }), esConfig.imageField || {}) : undefined;
+    }), 'key'), esConfig.imageField || {}) : undefined;
 
     return resultObject;
   }
