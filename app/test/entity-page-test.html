@@ -826,7 +826,7 @@ limitations under the License.
       expect(element.showImageMatches).to.be.true;
     });
 
-    test('showSectionAndRunQueries does not update aggregationFields and showImageMatches if input event value is false', function() {
+    test('showSectionAndRunQueries does not update aggregationFields if input event value is false', function() {
       element.aggregationFields = [{
         entity: {
           key: 'key1'
@@ -841,14 +841,15 @@ limitations under the License.
         showData: true
       }];
 
-      element.showImageMatches = true;
-
       element.showSectionAndRunQueries({
         detail: {
           value: false
         },
         model: {
           item: {
+            aggregatedDataError: null,
+            aggregatedDataLoading: false,
+            aggregatedDataResults: [1, 2],
             entity: {
               key: 'key1'
             }
@@ -869,11 +870,9 @@ limitations under the License.
         loadData: true,
         showData: true
       }]);
-
-      expect(element.showImageMatches).to.be.true;
     });
 
-    test('showSectionAndRunQueries does update aggregationFields and showImageMatches as expected', function() {
+    test('showSectionAndRunQueries does not update aggregationFields if aggregated data error is defined', function() {
       element.aggregationFields = [{
         entity: {
           key: 'key1'
@@ -886,6 +885,190 @@ limitations under the License.
         },
         loadData: true,
         showData: true
+      }];
+
+      element.showSectionAndRunQueries({
+        detail: {
+          value: true
+        },
+        model: {
+          item: {
+            aggregatedDataError: {},
+            aggregatedDataLoading: false,
+            aggregatedDataResults: [1, 2],
+            entity: {
+              key: 'key1'
+            }
+          }
+        }
+      });
+
+      expect(element.aggregationFields).to.deep.equal([{
+        entity: {
+          key: 'key1'
+        },
+        loadData: false,
+        showData: false
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: true,
+        showData: true
+      }]);
+    });
+
+    test('showSectionAndRunQueries does not update aggregationFields if aggregated data loading is true', function() {
+      element.aggregationFields = [{
+        entity: {
+          key: 'key1'
+        },
+        loadData: false,
+        showData: false
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: true,
+        showData: true
+      }];
+
+      element.showSectionAndRunQueries({
+        detail: {
+          value: true
+        },
+        model: {
+          item: {
+            aggregatedDataError: null,
+            aggregatedDataLoading: true,
+            aggregatedDataResults: [1, 2],
+            entity: {
+              key: 'key1'
+            }
+          }
+        }
+      });
+
+      expect(element.aggregationFields).to.deep.equal([{
+        entity: {
+          key: 'key1'
+        },
+        loadData: false,
+        showData: false
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: true,
+        showData: true
+      }]);
+    });
+
+    test('showSectionAndRunQueries does not update aggregationFields if aggregated data results is empty', function() {
+      element.aggregationFields = [{
+        entity: {
+          key: 'key1'
+        },
+        loadData: false,
+        showData: false
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: true,
+        showData: true
+      }];
+
+      element.showSectionAndRunQueries({
+        detail: {
+          value: true
+        },
+        model: {
+          item: {
+            aggregatedDataError: null,
+            aggregatedDataLoading: false,
+            aggregatedDataResults: [],
+            entity: {
+              key: 'key1'
+            }
+          }
+        }
+      });
+
+      expect(element.aggregationFields).to.deep.equal([{
+        entity: {
+          key: 'key1'
+        },
+        loadData: false,
+        showData: false
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: true,
+        showData: true
+      }]);
+    });
+
+    test('showSectionAndRunQueries does update aggregationFields as expected', function() {
+      element.aggregationFields = [{
+        entity: {
+          key: 'key1'
+        },
+        loadData: false,
+        showData: false
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: true,
+        showData: true
+      }];
+
+      element.showSectionAndRunQueries({
+        detail: {
+          value: true
+        },
+        model: {
+          item: {
+            aggregatedDataError: null,
+            aggregatedDataLoading: false,
+            aggregatedDataResults: [1, 2],
+            entity: {
+              key: 'key1'
+            }
+          }
+        }
+      });
+
+      expect(element.aggregationFields).to.deep.equal([{
+        entity: {
+          key: 'key1'
+        },
+        loadData: true,
+        showData: true
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: false,
+        showData: false
+      }]);
+    });
+
+    test('showSectionAndRunQueries does update showImageMatches as expected', function() {
+      element.aggregationFields = [{
+        entity: {
+          key: 'key1'
+        },
+        loadData: false,
+        showData: false
+      }, {
+        entity: {
+          key: 'key2'
+        },
+        loadData: false,
+        showData: false
       }];
 
       element.showImageMatches = true;
@@ -896,26 +1079,15 @@ limitations under the License.
         },
         model: {
           item: {
+            aggregatedDataError: null,
+            aggregatedDataLoading: false,
+            aggregatedDataResults: [1, 2],
             entity: {
               key: 'key1'
             }
           }
         }
       });
-
-      expect(element.aggregationFields).to.deep.equal([{
-        entity: {
-          key: 'key1'
-        },
-        loadData: true,
-        showData: true
-      }, {
-        entity: {
-          key: 'key2'
-        },
-        loadData: false,
-        showData: false
-      }]);
 
       expect(element.showImageMatches).to.be.false;
     });

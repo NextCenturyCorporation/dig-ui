@@ -98,7 +98,7 @@ limitations under the License.
 
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var esConfig = {
-          downloadImageUrl: serverConfig.pathPrefix + (serverConfig.downloadImageUrl || ''),
+          downloadImageUrl: (serverConfig.pathPrefix || '') + (serverConfig.downloadImageUrl || ''),
           enableNetworkExpansion: !serverConfig.sendSearchesDirectlyToES,
           esIndex: (clientConfig.index && serverConfig.databaseType ? clientConfig.index[serverConfig.databaseType] : undefined),
           esType: clientConfig.root_name,

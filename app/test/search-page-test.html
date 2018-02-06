@@ -425,28 +425,6 @@ limitations under the License.
       }]);
     });
 
-    test('findStyleToHideIfEqual does return expected string', function() {
-      expect(element.findStyleToHideIfEqual(1, 1)).to.equal('display: none;');
-      expect(element.findStyleToHideIfEqual(1, 2)).to.equal('');
-      expect(element.findStyleToHideIfEqual('a', 'a')).to.equal('display: none;');
-      expect(element.findStyleToHideIfEqual('a', 'b')).to.equal('');
-      expect(element.findStyleToHideIfEqual(false, false)).to.equal('display: none;');
-      expect(element.findStyleToHideIfEqual(true, true)).to.equal('display: none;');
-      expect(element.findStyleToHideIfEqual(false, true)).to.equal('');
-      expect(element.findStyleToHideIfEqual(true, false)).to.equal('');
-    });
-
-    test('findStyleToShowIfEqual does return expected string', function() {
-      expect(element.findStyleToShowIfEqual(1, 1)).to.equal('');
-      expect(element.findStyleToShowIfEqual(1, 2)).to.equal('display: none;');
-      expect(element.findStyleToShowIfEqual('a', 'a')).to.equal('');
-      expect(element.findStyleToShowIfEqual('a', 'b')).to.equal('display: none;');
-      expect(element.findStyleToShowIfEqual(false, false)).to.equal('');
-      expect(element.findStyleToShowIfEqual(true, true)).to.equal('');
-      expect(element.findStyleToShowIfEqual(false, true)).to.equal('display: none;');
-      expect(element.findStyleToShowIfEqual(true, false)).to.equal('display: none;');
-    });
-
     test('findUrlWithProject does return expected string', function() {
       expect(element.findUrlWithProject('TestProject')).to.equal('./?project=TestProject');
     });
@@ -1195,22 +1173,6 @@ limitations under the License.
       expect(element.openBulkSearchDialog).to.be.a('Function');
     });
 
-    test('resetSearchTab does update selectedSearchTab if searchResults is empty', function() {
-      expect(element.selectedSearchTab).to.equal(0);
-      element.searchResults = [];
-      expect(element.searchResults).to.deep.equal([]);
-      element.resetSearchTab();
-      expect(element.selectedSearchTab).to.equal(1);
-    });
-
-    test('resetSearchTab does not update selectedSearchTab if searchResults is not empty', function() {
-      expect(element.selectedSearchTab).to.equal(0);
-      element.searchResults = [{}];
-      expect(element.searchResults).to.deep.equal([{}]);
-      element.resetSearchTab();
-      expect(element.selectedSearchTab).to.equal(0);
-    });
-
     test('runBothImageSearches does work as expected if imagesUploaded is empty', function() {
       element.runBothImageSearches();
 
@@ -1615,6 +1577,33 @@ limitations under the License.
       }]);
     });
 
+    test('shouldHideNewPageElements does return false if searchParameters are empty', function() {
+      expect(element.shouldHideNewPageElements()).to.be.false;
+    });
+
+    test('shouldHideNewPageElements does return true if searchParameters are not empty', function() {
+      element.searchParameters = {
+        type: {
+          term: {
+            enabled: true
+          }
+        }
+      };
+      expect(element.shouldHideNewPageElements()).to.be.true;
+    });
+
+    test('shouldHideNewPageElements does return true if searchParameters are empty but they were previously not empty', function() {
+      element.searchParameters = {
+        type: {
+          term: {
+            enabled: true
+          }
+        }
+      };
+      element.searchParameters = {};
+      expect(element.shouldHideNewPageElements()).to.be.true;
+    });
+
     test('validateImageServiceConfig does return expected boolean', function() {
       expect(element.validateImageServiceConfig({})).to.be.false;
 
@@ -1773,16 +1762,6 @@ limitations under the License.
       }, {
         id: 4
       }]);
-    });
-
-    test('setting searchResults does set selectedSearchTab if needed', function() {
-      expect(element.selectedSearchTab).to.equal(0);
-      element.searchResults = [{}];
-      expect(element.selectedSearchTab).to.equal(0);
-      element.searchResults = [];
-      expect(element.selectedSearchTab).to.equal(1);
-      element.searchResults = [{}];
-      expect(element.selectedSearchTab).to.equal(1);
     });
   });
 </script>

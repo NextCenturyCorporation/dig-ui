@@ -34,18 +34,19 @@ limitations under the License.
 
 <script>
   'use strict';
-  /* globals fixture, suite, setup, test, expect */
+  /* globals fixture, suite, setup, flush, test, expect */
   /* jshint -W030 */
   suite('database-details tests', function() {
     var element;
 
-    setup(function() {
+    setup(function(done) {
       element = fixture('database-details-fixture');
       element.domain = 'testDomain';
       element.indexName = 'testIndexName';
       element.indexTypes = ['testIndexType'];
       element.resultType = 'testResultType';
       element.timestampField = 'testTimestampField';
+      flush(done);
     });
 
     test('does have expected properties', function() {
@@ -59,8 +60,8 @@ limitations under the License.
       expect(element.timestampField).to.equal('testTimestampField');
       expect(element._latestCount).to.not.exist;
       expect(element._timelineDates).to.be.an('Array');
-      expect(element._timelineAggregation).to.be.an('Object');
       expect(element._timelineFilter).to.be.an('Object');
+      expect(element._timelineAggregation).to.be.an('Object');
     });
 
     test('does have expected timelineDates', function() {
@@ -79,7 +80,6 @@ limitations under the License.
       expect(element.$$('build-and-run-query').indexName).to.equal('testIndexName');
       expect(element.$$('build-and-run-query').indexTypes).to.deep.equal(['testIndexType']);
       expect(element.$$('build-and-run-query').aggregations).to.deep.equal([]);
-      expect(element.$$('build-and-run-query').filters).to.deep.equal([]);
       expect(element.$$('build-and-run-query').pageSize).to.equal(1);
       expect(element.$$('build-and-run-query').sortField).to.equal('testTimestampField');
       expect(element.$$('build-and-run-query').sortOrder).to.equal('desc');

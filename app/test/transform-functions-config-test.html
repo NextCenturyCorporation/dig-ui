@@ -1039,7 +1039,7 @@ limitations under the License.
       }]);
     });
 
-    test('searchFieldsDialogConfig given date and non-date search fields does return expected array with dates first', function() {
+    test('searchFieldsDialogConfig given date and non-date search fields does return expected array with dates in order', function() {
       expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
         field: 'field1',
         group: 'groupA',
@@ -1101,6 +1101,17 @@ limitations under the License.
           }
         }
       }])).to.deep.equal([{
+        type: undefined,
+        name: 'groupA',
+        data: [{
+          field: 'field1',
+          icon: 'icon1',
+          key: 'key1',
+          styleClass: 'styleClass1',
+          title: 'title1',
+          enableNetworkExpansion: true
+        }]
+      }, {
         type: 'date',
         name: 'title2',
         data: [{
@@ -1117,6 +1128,17 @@ limitations under the License.
           title: 'title2 End'
         }]
       }, {
+        type: undefined,
+        name: 'groupB',
+        data: [{
+          field: 'field3',
+          icon: 'icon3',
+          key: 'key3',
+          styleClass: 'styleClass3',
+          title: 'title3',
+          enableNetworkExpansion: true
+        }]
+      }, {
         type: 'date',
         name: 'title4',
         data: [{
@@ -1131,28 +1153,6 @@ limitations under the License.
           key: 'key4_end',
           styleClass: 'styleClass4',
           title: 'title4 End'
-        }]
-      }, {
-        type: undefined,
-        name: 'groupA',
-        data: [{
-          field: 'field1',
-          icon: 'icon1',
-          key: 'key1',
-          styleClass: 'styleClass1',
-          title: 'title1',
-          enableNetworkExpansion: true
-        }]
-      }, {
-        type: undefined,
-        name: 'groupB',
-        data: [{
-          field: 'field3',
-          icon: 'icon3',
-          key: 'key3',
-          styleClass: 'styleClass3',
-          title: 'title3',
-          enableNetworkExpansion: true
         }]
       }]);
     });
