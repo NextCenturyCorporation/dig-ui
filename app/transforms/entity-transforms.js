@@ -141,7 +141,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   function checkHighlightedText(text, type) {
     // TODO Do we have to hard-code <em> or can we make it a config variable?
     // Ignore partial matches for emails and websites.
-    if((type === 'email' || type === 'website') && (!_.startsWith(text, '<em>') || !_.endsWith(text, '</em>'))) {
+    if((type === 'email' || type === 'tld' || type === 'url') && (!_.startsWith(text, '<em>') || !_.endsWith(text, '</em>'))) {
       return false;
     }
 
@@ -149,28 +149,28 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     // Usernames are formatted "<website> <username>".  Ignore matches on the <website>.
     if(type === 'username') {
-      output = output.indexOf(' ') ? output.substring(output.indexOf(' ') + 1) : output;
+      if(output.indexOf(' ')) {
+        var startHighlight = (output.indexOf('<em>') === 0);
+        output = (startHighlight ? '<em>' : '') + output.substring(output.indexOf(' ') + 1);
+      }
     }
 
     // Return whether the given text has both start and end tags.
     return output.indexOf('<em>') >= 0 && output.indexOf('</em>') >= 0 ? !!(output.replace(/<\/?em\>/g, '')) : false;
   }
 
-  function getHighlightedText(itemId, itemText, result, type, highlights, overridePath) {
-    // Get the paths from the highlight mapping to explore in the result highlights specifically for the given item.
-    var pathList = overridePath ? [overridePath] : getHighlightPathList(('' + itemId).toLowerCase(), ('' + itemText).toLowerCase(), result, type, highlights);
+  function getHighlightedText(highlightsPathList, resultHighlights, type) {
     var textList = [];
-    if(result.highlight && pathList.length) {
+    if(resultHighlights) {
       // Find the highlighted text in the result highlights using a highlights path.  Use the first because they are all the same.
-      pathList.forEach(function(path) {
-        (result.highlight[path] || []).forEach(function(text) {
-          if(checkHighlightedText(text)) {
+      (highlightsPathList || []).forEach(function(path) {
+        (resultHighlights[path] || []).forEach(function(text) {
+          if(checkHighlightedText(text, type)) {
             textList.push(text);
           }
         });
       });
     }
-
     return textList.length ? textList[0] : undefined;
   }
 
@@ -178,8 +178,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var data = getExtractionsFromResult(result, '_source.' + config.extractionField, config);
     if(highlights) {
       data = data.map(function(item) {
+        // Get the paths from the highlight mapping to search in the result highlights specifically for the given item.
+        var pathList = getHighlightPathList(('' + item.id).toLowerCase(), ('' + item.text).toLowerCase(), result, config.type, highlights[config.key]);
         // The highlight in the extraction object is a boolean (YES or NO).
-        item.highlight = !!(getHighlightedText(item.id, item.text, result, config.type, highlights[config.key]));
+        item.highlight = !!(getHighlightedText(pathList, result.highlight, config.type));
         return item;
       });
     }
@@ -207,54 +209,40 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }, {});
   }
 
-  function getTitleOrDescription(type, searchFields, result, highlights) {
-    var getTitleOrDescriptionText = function(data) {
+  function getTitleOrDescription(type, searchFields, result) {
+    var textList = searchFields.filter(function(searchFieldsObject) {
+      return searchFieldsObject.result === type;
+    }).map(function(searchFieldsObject) {
+      var data = _.get(result, '_source.' + searchFieldsObject.extractionField);
       if(_.isArray(data)) {
-        return data.map(function(object) {
-          return object.value;
+        return data.map(function(searchFieldsObject) {
+          return searchFieldsObject.value;
         }).join(' ');
       }
       if(_.isObject(data)) {
         return data.value;
       }
       return '';
-    };
-
-    var searchFieldsObject = _.find(searchFields.filter(function(object) {
-      return object.result === type;
-    }), function(object) {
-      return getTitleOrDescriptionText(_.get(result, '_source.' + object.extractionField));
     });
 
-    var returnObject = {
-      text: '',
-      highlight: ''
-    };
-
-    // Use the extraction data from the field in the searchFieldsObject if possible.  This overwrites the default.
-    if(searchFieldsObject) {
-      var extraction = _.get(result, '_source.' + searchFieldsObject.extractionField);
-      if(_.isObject(extraction) || _.isArray(extraction)) {
-        returnObject.text = getTitleOrDescriptionText(extraction);
-        if(highlights) {
-          var path = (type === 'title' ? 'content_extraction.title.text' : 'content_extraction.content_strict.text');
-          var highlight = getHighlightedText(returnObject.text, returnObject.text, result, type, highlights[searchFieldsObject.key], path);
-          returnObject.highlight = highlight || returnObject.highlight || returnObject.text;
-        }
-      }
-    }
+    var text = textList.length ? textList[0] : '';
+    var path = (type === 'title' ? 'content_extraction.title.text' : 'content_extraction.content_strict.text');
+    var highlight = getHighlightedText([path], result.highlight, type);
 
     // Change newlines to breaks and remove repeat newlines.
-    returnObject.text = (returnObject.text || '').replace(/[\n\r][\s]*/g, '<br/>');
-    returnObject.highlight = (returnObject.highlight || '').replace(/[\n\r][\s]*/g, '<br/>');
+    text = (text || '').replace(/[\n\r][\s]*/g, '<br/>');
+    highlight = (highlight || '').replace(/[\n\r][\s]*/g, '<br/>');
 
     if(type === 'title') {
       // Remove breaks from titles.
-      returnObject.text = (returnObject.text || '').replace(/<br\/>/g, '');
-      returnObject.highlight = (returnObject.highlight || '').replace(/<br\/>/g, '');
+      text = (text || '').replace(/<br\/>/g, '');
+      highlight = (highlight || '').replace(/<br\/>/g, '');
     }
 
-    return returnObject;
+    return {
+      text: text,
+      highlight: highlight || text
+    };
   }
 
   /**
@@ -291,8 +279,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
-    var title = getTitleOrDescription('title', searchFields, result, highlights);
-    var description = getTitleOrDescription('description', searchFields, result, highlights);
+    var title = getTitleOrDescription('title', searchFields, result);
+    var description = getTitleOrDescription('description', searchFields, result);
 
     var resultObject = {
       id: id,
@@ -338,9 +326,9 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         var confidences = extractionObject.data.map(function(extraction) {
           return extraction.confidence;
         }).filter(function(confidence) {
-          return !!confidence;
+          return confidence >= 0;
         });
-        clone.confidence = (confidences.length ? (_.sum(confidences) / confidences.length) : 0);
+        clone.confidence = (confidences.length ? (_.sum(confidences) / confidences.length) : undefined);
         extractionObject.data = [clone];
       }
 
@@ -386,7 +374,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
 
     if(esDataEndpoint) {
       resultObject.details.push({
-        name: 'Raw ES Document',
+        name: 'Raw ES Data',
         link: esDataEndpoint,
         text: 'Open'
       });
@@ -408,7 +396,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
 
     resultObject.details.push({
-      name: 'Content',
+      name: 'Description',
       highlightedText: description.highlight || resultObject.description,
       text: resultObject.description
     });
@@ -438,9 +426,12 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
   }
 
   function getQueryResultObject(result, searchFields, extractionId) {
-    var searchFieldsObject = _.find(searchFields, function(object) {
+    var searchFieldsObject = _.find((searchFields || []), function(object) {
       return object.key === extractionId;
     });
+    if(!searchFieldsObject) {
+      return undefined;
+    }
     return createResultObject(result, searchFields, searchFieldsObject.icon, searchFieldsObject.title, searchFieldsObject.styleClass, searchFieldsObject.key);
   }
 
@@ -468,7 +459,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         }, 0);
 
         if(sum < count) {
-          var countLabel = count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+          var countLabel = (count - sum).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
           dateObject.data.push({
             count: count - sum,
             icon: entityConfig ? entityConfig.icon : undefined,
@@ -585,7 +576,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       });
       return timelineItem;
     }).filter(function(timelineItem) {
-      return timelineItem.points.length;
+      return timelineItem.points.length > 1;
     });
   }
 
@@ -621,10 +612,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Array}
      */
     extractions: function(data, config) {
-      var sayOther = false;
       return getExtractionsFromList(getAggregationBuckets(data, config.entity.key), config.entity).filter(function(extraction) {
-        var result = config.id && config.page && config.page.type === config.entity.type ? extraction.id !== config.id : true;
-        sayOther = sayOther || !result;
+        var result = config.id && config.page && config.page.type === config.entity.key ? extraction.id !== config.id : true;
         return result;
       });
     },
@@ -649,16 +638,24 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         var headerIndex = _.findIndex(result.headerExtractions, function(extraction) {
           return extraction.key === searchFieldsObject.key;
         });
+
+        if(headerIndex >= 0) {
+          info.push({
+            config: searchFieldsObject,
+            data: result.headerExtractions[headerIndex].data
+          });
+        }
+
         var detailIndex = _.findIndex(result.detailExtractions, function(extraction) {
           return extraction.key === searchFieldsObject.key;
         });
 
-        var extraction = (headerIndex >= 0 ? result.headerExtractions[headerIndex] : (detailIndex >= 0 ? result.detailExtractions[detailIndex] : {}));
-
-        info.push({
-          config: searchFieldsObject,
-          data: extraction.data
-        });
+        if(detailIndex >= 0) {
+          info.push({
+            config: searchFieldsObject,
+            data: result.detailExtractions[headerIndex].data
+          });
+        }
 
         return info;
       }, []);
@@ -737,7 +734,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         };
       }
       return {
-        points: []
+        sparklines: []
       };
     },
 
@@ -760,8 +757,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         };
       }
       return {
-        dates: [],
-        items: []
+        histogram: [],
+        sparklines: []
       };
     }
   };
