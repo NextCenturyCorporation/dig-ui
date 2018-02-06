@@ -65,7 +65,9 @@ module.exports = function(app) {
       // Clone the URL without the query token.
       var url = req.originalUrl.split(/[?&]access_token=/)[0];
       // If the token is invalid, redirect to the login page.
-      var data = JSON.parse(body);
+      var data = body ? JSON.parse(body) : {
+        error: 'undefined'
+      };
       if(data.error) {
         console.log('Token Error', data.error);
         req.session.token = undefined;
