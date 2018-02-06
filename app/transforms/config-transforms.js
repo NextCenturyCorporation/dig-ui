@@ -416,14 +416,10 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
 
         return searchFieldsObject;
       }).map(function(searchFieldsObject) {
-        if(searchFieldsObject.type === 'date') {
-          searchFieldsObject.groupOrder = maxGroup + 3;
-          return searchFieldsObject;
-        }
-        if(!searchFieldsObject.groupOrder) {
+        if(!searchFieldsObject.groupOrder && searchFieldsObject.groupOrder !== 0) {
           searchFieldsObject.groupOrder = maxGroup + (searchFieldsObject.group ? 1 : 2);
         }
-        if(!searchFieldsObject.fieldOrder) {
+        if(!searchFieldsObject.fieldOrder && searchFieldsObject.fieldOrder !== 0) {
           searchFieldsObject.fieldOrder = maxField + 1;
         }
         return searchFieldsObject;
@@ -500,42 +496,40 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     searchFieldsDialogConfig: function(searchFields) {
       var dialogConfig = [];
 
-      searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.search && searchFieldsObject.isDate;
-      }).forEach(function(searchFieldsObject) {
-        dialogConfig.push({
-          type: 'date',
-          name: searchFieldsObject.title,
-          data: [
-            searchFieldsObject.dateProperties.start,
-            searchFieldsObject.dateProperties.end
-          ]
-        });
-      });
-
       searchFields.forEach(function(searchFieldsObject) {
-        if(searchFieldsObject.search && !searchFieldsObject.isDate) {
-          var index = _.findIndex(dialogConfig, function(configObject) {
-            return configObject.name === (searchFieldsObject.group || 'Other');
-          });
-
-          if(index < 0) {
+        if(searchFieldsObject.search) {
+          if(searchFieldsObject.isDate) {
             dialogConfig.push({
-              type: searchFieldsObject.isImage ? 'image' : undefined,
-              name: searchFieldsObject.group || 'Other',
-              data: []
+              type: 'date',
+              name: searchFieldsObject.title,
+              data: [
+                searchFieldsObject.dateProperties.start,
+                searchFieldsObject.dateProperties.end
+              ]
             });
-            index = dialogConfig.length - 1;
-          }
+          } else {
+            var index = _.findIndex(dialogConfig, function(configObject) {
+              return configObject.name === (searchFieldsObject.group || 'Other');
+            });
 
-          dialogConfig[index].data.push({
-            field: searchFieldsObject.field,
-            icon: searchFieldsObject.icon,
-            key: searchFieldsObject.key,
-            styleClass: searchFieldsObject.styleClass,
-            title: searchFieldsObject.title,
-            enableNetworkExpansion: esConfig.enableNetworkExpansion && !!searchFieldsObject.isEntity
-          });
+            if(index < 0) {
+              dialogConfig.push({
+                type: searchFieldsObject.isImage ? 'image' : undefined,
+                name: searchFieldsObject.group || 'Other',
+                data: []
+              });
+              index = dialogConfig.length - 1;
+            }
+
+            dialogConfig[index].data.push({
+              field: searchFieldsObject.field,
+              icon: searchFieldsObject.icon,
+              key: searchFieldsObject.key,
+              styleClass: searchFieldsObject.styleClass,
+              title: searchFieldsObject.title,
+              enableNetworkExpansion: esConfig.enableNetworkExpansion && !!searchFieldsObject.isEntity
+            });
+          }
         }
       });
 
