@@ -135,6 +135,7 @@ module.exports = function(app) {
       overrideConfig: serverConfig.overrideConfig,
       overrideSearchEndpoint: serverConfig.overrideSearchEndpoint,
       pathPrefix: serverPath,
+      prettyDomain: serverConfig.prettyDomain,
       profileIndexName: serverConfig.profileIndexName,
       profileIndexType: serverConfig.profileIndexType,
       searchConfig: serverConfig.searchConfig,

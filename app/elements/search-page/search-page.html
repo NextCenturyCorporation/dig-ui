@@ -64,13 +64,8 @@ limitations under the License.
         @apply --layout-fullbleed;
       }
 
-      search-fields-dialog {
-        margin: 0 auto;
-      }
-
       #pageDrawer {
-        top: 2px;
-        height: calc(100% - 2px);
+        height: 100%;
         --paper-drawer-panel-left-drawer-container: {
           background-color: var(--primary-background-color);
           border-right: 1px solid rgba(0,0,0,var(--dark-divider-opacity));
@@ -79,36 +74,51 @@ limitations under the License.
 
       #pageNavbar {
         background-color: var(--navbar-color);
-        color: var(--text-primary-color);
+        color: white;
+        padding: 0 10px;
         --paper-toolbar-height: 50px;
+        --paper-toolbar-sm-height: 50px;
         --paper-toolbar-content: {
-          padding: 0 10px;
+          padding: 0;
         };
+        @apply --shadow-elevation-4dp;
       }
 
-      #reloadButton {
-        height: 30px;
-        width: 30px;
-        padding: 0;
+      #searchTermList {
+        background-color: var(--primary-background-color);
+        color: var(--primary-text-color);
+        max-height: 200px;
+        min-height: 45px;
+        overflow-y: auto;
+        padding: 10px 10px 5px;
+        --paper-toolbar-height: auto;
+        --paper-toolbar-sm-height: auto;
+        --paper-toolbar-content: {
+          padding: 0;
+        };
+        @apply --shadow-elevation-4dp;
       }
 
-      #pageFacets {
-        --facet-panel-selected-facet-icon-hover-color: #fff;
+      selected-facets-display {
+        --selected-facet-bg-color: var(--paper-grey-400);
+        --selected-facet-icon-color: var(--primary-text-color);
+        --selected-facet-icon-hover-color: white;
+        --selected-facet-text-color: var(--primary-text-color);
       }
 
       #pageSearch {
         --paper-header-panel-container: {
-          background-color: #ffffff;
+          background-color: white;
         };
       }
 
       #searchHeader,
-      #searchTimeline,
-      database-details {
+      #searchTimeline {
         padding: 10px;
+        @apply --shadow-elevation-4dp;
       }
 
-      #searchHeader .search-results-title {
+      .search-header-text {
         font-size: 20px;
         font-weight: 500;
         /* Match the height of the export button. */
@@ -123,41 +133,27 @@ limitations under the License.
         -webkit-box-orient: vertical;
       }
 
+      .no-facets-text {
+        color: var(--primary-text-color);
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 30px;
+      }
+
+      .timeline-info-text {
+        color: var(--primary-text-color);
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 24px;
+      }
+
       sparkline-list {
-        height: 25px;
+        height: 30px;
         margin-top: 10px;
       }
 
       #searchResultList {
         --result-list-max-height: none;
-      }
-
-      #searchTabs paper-tabs {
-        height: 40px;
-      }
-
-      #searchTabs paper-tab {
-        color: var(--secondary-text-color);
-        font-size: 16px;
-        font-weight: 500;
-        padding: 0 15px;
-      }
-
-      #searchTabs paper-tab:hover {
-        background-color: rgba(0,0,0,0.05);
-        color: var(--primary-text-color);
-      }
-
-      #searchTabs paper-tab.iron-selected {
-        background-color: rgba(0,0,0,0.1);
-        color: var(--primary-text-color);
-      }
-
-      #searchTimeline .timeline-text {
-        color: var(--primary-text-color);
-        font-size: 14px;
-        font-weight: 500;
-        line-height: 24px;
       }
     </style>
 
@@ -513,14 +509,37 @@ limitations under the License.
       on-response="handleImageFaceSearchResults">
     </iron-ajax>
 
+    <styled-dialog fill header="Database Details" opened="{{openedDatabaseDetail}}">
+      <database-details
+        client="[[esClient]]"
+        index-name="[[esConfig.esIndex]]"
+        index-types="[[esConfig.esType]]"
+        pretty-domain="[[prettyDomain]]"
+        show="[[openedDatabaseDetail]]"
+        timeline-function="[[transforms.entity.timelines]]"
+        timestamp-field="timestamp_crawl">
+      </database-details>
+    </styled-dialog>
+
+    <styled-dialog fill header="Image Gallery of Webpage Results" opened="{{openedSearchImageGallery}}">
+      <image-gallery
+        id="searchImageGallery"
+        images="[[imagesFromResults]]"
+        new-tab
+        small-image-style-class="[[findBlurStyleClass(blurImages)]]"
+        large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]">
+      </image-gallery>
+    </styled-dialog>
+
     <paper-header-panel class="flex" mode="waterfall">
       <paper-toolbar slot="header" id="pageNavbar">
-        <a id="logoLink" slot="top" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
-          <img id="logo" src="/dig-ui/dig-logo.png" alt="">
-        </a>
+        <div slot="top" class="layout horizontal flex">
+          <a id="logoLink" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
+            <img id="logo" src="/dig-ui/dig-logo.png" alt="">
+          </a>
 
-        <div slot="top" class="flex">
           <search-fields-dialog
+            class="layout vertical center flex"
             date-config="[[datePropertiesToKeys]]"
             hide-images="[[!validateImageServiceConfig(serverConfig.imageServiceConfig)]]"
             image-upload-url="[[findDigUrl(serverConfig.pathPrefix, '/uploadImage')]]"
@@ -535,218 +554,215 @@ limitations under the License.
             process-request="{{processRequest}}"
             search-parameters="{{searchParameters}}">
           </search-fields-dialog>
+
+          <user-settings-dialog
+            enable-email-address
+            enable-search
+            build-popup-data-function="[[transforms.config.searchTerms]]"
+            build-state-data-function="[[transforms.config.searchState]]"
+            data-config="[[searchFieldsCollection]]"
+            function-config="[[searchFields]]"
+            profile-manager="[[profileManager]]"
+            reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
+            result-link-function="[[transforms.config.resultLink]]"
+            user-id="[[userId]]"
+            user-loading="[[userLoading]]"
+            username="[[serverConfig.username]]"
+            blur-images="{{blurImages}}"
+            cases="{{cases}}"
+            email-address="{{emailAddress}}"
+            network-expansion-parameters="{{networkExpansionParameters}}"
+            notifications="{{notifications}}"
+            notification-date="{{notificationDate}}"
+            notification-interval="{{notificationInterval}}"
+            process-request="{{processRequest}}"
+            search-parameters="{{searchParameters}}">
+          </user-settings-dialog>
+
+          <paper-icon-button id="menuButton" icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
         </div>
-
-        <a slot="top" href="[[findUrlWithProject(domain)]]" style="color: #ffffff;">
-          <paper-icon-button id="reloadButton" icon="fa:times" title="Reset Page"></paper-icon-button>
-        </a>
-
-        <user-settings-dialog
-          slot="top"
-          enable-email-address
-          enable-search
-          build-popup-data-function="[[transforms.config.searchTerms]]"
-          build-state-data-function="[[transforms.config.searchState]]"
-          data-config="[[searchFieldsCollection]]"
-          function-config="[[searchFields]]"
-          profile-manager="[[profileManager]]"
-          reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
-          result-link-function="[[transforms.config.resultLink]]"
-          user-id="[[userId]]"
-          user-loading="[[userLoading]]"
-          username="[[serverConfig.username]]"
-          blur-images="{{blurImages}}"
-          cases="{{cases}}"
-          email-address="{{emailAddress}}"
-          network-expansion-parameters="{{networkExpansionParameters}}"
-          notifications="{{notifications}}"
-          notification-date="{{notificationDate}}"
-          notification-interval="{{notificationInterval}}"
-          process-request="{{processRequest}}"
-          search-parameters="{{searchParameters}}">
-        </user-settings-dialog>
-
-        <paper-icon-button id="menuButton" icon="fa:bars" slot="top" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
-
-        <iron-dropdown id="menuDropdown" slot="top" horizontal-align="right" vertical-align="top" vertical-offset="50">
-          <div slot="dropdown-content">
-            <paper-icon-item disabled="[[searchParametersDisabled(searchParameters, searchParameters.*)]]" title="Save Search to Case..." on-tap="openSaveDialog">
-              <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
-              Save Search to Case...
-            </paper-icon-item>
-
-            <paper-icon-item disabled="[[!hasHistory]]" title="View Your Search History" on-tap="openStateHistoryDialog">
-              <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
-              View Your Search History
-            </paper-icon-item>
-
-            <template is="dom-if" if="[[serverConfig.tagsListEndpoint]]">
-              <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
-                <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
-                View DIG Data Training Options
-              </paper-icon-item>
-            </template>
-
-            <paper-icon-item title="Upload a File with Search Terms or Copy & Paste Text" on-tap="openBulkSearchDialog">
-              <iron-icon slot="item-icon" icon="fa:upload" item-icon></iron-icon>
-              Bulk Search from Uploaded File or Text
-            </paper-icon-item>
-
-            <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
-              <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
-              Open a DIG Search Page in a New Tab
-            </paper-icon-item>
-
-            <paper-icon-item title="Open DIG Help Page" on-tap="openHelpPage">
-              <iron-icon slot="item-icon" icon="fa:question-circle" item-icon></iron-icon>
-              Open the DIG Help Page
-            </paper-icon-item>
-
-            <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="sendSupportEmail">
-              <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
-              Contact DIG / Memex Support
-            </paper-icon-item>
-          </div>
-        </iron-dropdown>
       </paper-toolbar>
 
-      <paper-material slot="header" id="searchTabs" class="layout horizontal">
-        <paper-tabs class="flex" no-bar no-ink selected="{{selectedSearchTab}}">
-          <paper-tab class="flex-1">Database Details</paper-tab>
-          <paper-tab class="flex-1">Webpage Results</paper-tab>
-          <paper-tab class="flex-1">Image Results</paper-tab>
-        </paper-tabs>
-      </paper-material>
+      <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="50">
+        <div slot="dropdown-content">
+          <paper-icon-item disabled="[[searchParametersDisabled(searchParameters, searchParameters.*)]]" title="Save Search to Case..." on-tap="openSaveDialog">
+            <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
+            Save Search to Case...
+          </paper-icon-item>
 
-      <database-details style$="[[findStyleToShowIfEqual(selectedSearchTab, 0)]]"
-        client="[[esClient]]"
-        domain="[[domain]]"
-        index-name="[[esConfig.esIndex]]"
-        index-types="[[esConfig.esType]]"
-        show="[[equals(selectedSearchTab, 0)]]"
-        timeline-function="[[transforms.entity.timelines]]"
-        timestamp-field="timestamp_crawl">
-      </database-details>
+          <paper-icon-item disabled="[[!hasHistory]]" title="View Your Search History" on-tap="openStateHistoryDialog">
+            <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
+            View Your Search History
+          </paper-icon-item>
+
+          <template is="dom-if" if="[[serverConfig.tagsListEndpoint]]">
+            <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
+              <iron-icon slot="item-icon" icon="fa:check-circle" item-icon></iron-icon>
+              View DIG Data Training Options
+            </paper-icon-item>
+          </template>
+
+          <paper-icon-item title="Upload a File with Search Terms or Copy & Paste Text" on-tap="openBulkSearchDialog">
+            <iron-icon slot="item-icon" icon="fa:upload" item-icon></iron-icon>
+            Bulk Search from Uploaded File or Text
+          </paper-icon-item>
+
+          <paper-icon-item disabled="[[!imagesFromResults.length]]" title="View the Webpage Results in an Image Gallery" on-tap="openSearchImageGallery">
+            <iron-icon slot="item-icon" icon="image:photo" item-icon></iron-icon>
+            View Webpage Results in Image Gallery
+          </paper-icon-item>
+
+          <paper-icon-item title="View the DIG Database Details" on-tap="openDatabaseDetail">
+            <iron-icon slot="item-icon" icon="fa:info-circle" item-icon></iron-icon>
+            View DIG Database Details
+          </paper-icon-item>
+
+          <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
+            <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
+            Open a DIG Search Page in a New Tab
+          </paper-icon-item>
+
+          <paper-icon-item title="Open DIG Help Page" on-tap="openHelpPage">
+            <iron-icon slot="item-icon" icon="fa:question-circle" item-icon></iron-icon>
+            Open the DIG Help Page
+          </paper-icon-item>
+
+          <paper-icon-item title="Contact DIG / Memex Support (support@memex.software)" on-tap="sendSupportEmail">
+            <iron-icon slot="item-icon" icon="fa:envelope" item-icon></iron-icon>
+            Contact DIG / Memex Support
+          </paper-icon-item>
+        </div>
+      </iron-dropdown>
+
+      <paper-toolbar slot="header" id="searchTermList">
+        <div slot="top" class="layout horizontal">
+          <template is="dom-if" if="[[searchParametersDisabled(searchParameters, searchParameters.*)]]">
+            <div class="no-facets-text">
+              No Search Terms
+            </div>
+          </template>
+
+          <div class="layout horizontal wrap">
+            <template is="dom-repeat" items="[[getNetworkExpansionFields(networkExpansionParameters, searchFields, networkExpansionParameters.*)]]">
+              <breadbox-item icon="fa:arrows-alt" icon-text="Network Expansion Active" text="[[item]]"></breadbox-item>
+            </template>
+            <template is="dom-repeat" items="[[searchKeys]]">
+              <selected-facets-display facet-key="[[item]]" facets="{{searchParameters}}"></selected-facets-display>
+            </template>
+          </div>
+        </div>
+      </paper-toolbar>
 
       <!-- Use the display style rather than a dom-if template so the search parameters in the facet panel update. -->
-      <paper-drawer-panel drawer-width="320px" id="pageDrawer" style$="[[findStyleToHideIfEqual(selectedSearchTab, 0)]]">
-        <template is="dom-if" if="[[!serverConfig.sendSearchesDirectlyToES]]">
-          <facet-panel slot="drawer" id="pageFacets"
-            date-fields="[[dateFieldsToProperties]]"
-            facets-query="[[facetsQuery]]"
-            image-style-class="[[findBlurStyleClass(blurImages)]]"
-            network-expansion-parameters="[[networkExpansionParameters]]"
-            process-request="{{processRequest}}"
-            search-endpoint="[[esConfig.searchEndpoint]]"
-            search-keys="[[searchKeys]]"
-            search-fields="[[searchFields]]"
-            search-parameters="{{searchParameters}}">
+      <paper-drawer-panel drawer-width="320px" id="pageDrawer">
+        <div class="layout veritcal" slot="drawer">
+          <template is="dom-if" if="[[!serverConfig.sendSearchesDirectlyToES]]">
+            <facet-panel id="pageFacets"
+              date-fields="[[dateFieldsToProperties]]"
+              facets-query="[[facetsQuery]]"
+              image-style-class="[[findBlurStyleClass(blurImages)]]"
+              network-expansion-parameters="[[networkExpansionParameters]]"
+              process-request="{{processRequest}}"
+              search-endpoint="[[esConfig.searchEndpoint]]"
+              search-keys="[[searchKeys]]"
+              search-fields="[[searchFields]]"
+              search-parameters="{{searchParameters}}">
 
-            <info-facets></info-facets>
-          </facet-panel>
-        </template>
+              <info-facets></info-facets>
+            </facet-panel>
+          </template>
 
-        <template is="dom-if" if="[[serverConfig.sendSearchesDirectlyToES]]">
-          <facet-panel slot="drawer" id="pageFacets"
-            client="[[esClient]]"
-            date-fields="[[dateFieldsToProperties]]"
-            image-style-class="[[findBlurStyleClass(blurImages)]]"
-            index-name="[[esConfig.esIndex]]"
-            index-types="[[esConfig.esType]]"
-            process-request="{{processRequest}}"
-            query-builder-config="[[searchFieldsCollection]]"
-            search-keys="[[searchKeys]]"
-            search-fields="[[searchFields]]"
-            search-parameters="{{searchParameters}}">
+          <template is="dom-if" if="[[serverConfig.sendSearchesDirectlyToES]]">
+            <facet-panel id="pageFacets"
+              client="[[esClient]]"
+              date-fields="[[dateFieldsToProperties]]"
+              image-style-class="[[findBlurStyleClass(blurImages)]]"
+              index-name="[[esConfig.esIndex]]"
+              index-types="[[esConfig.esType]]"
+              process-request="{{processRequest}}"
+              query-builder-config="[[searchFieldsCollection]]"
+              search-keys="[[searchKeys]]"
+              search-fields="[[searchFields]]"
+              search-parameters="{{searchParameters}}">
 
-            <info-facets></info-facets>
-          </facet-panel>
-        </template>
+              <info-facets></info-facets>
+            </facet-panel>
+          </template>
+        </div>
 
         <paper-header-panel slot="main" id="pageSearch">
           <template is="dom-if" if="[[clientConfigLoading]]">
-            <loading-spinner slot="header" class="layout horizontal" show type="Configuration"></loading-spinner>
+            <loading-spinner class="layout horizontal" show type="Configuration"></loading-spinner>
           </template>
 
           <template is="dom-if" if="[[esConfig]]">
-            <paper-material slot="header" id="searchHeader" class="layout horizontal center">
-              <div class="layout vertical flex">
-                <template is="dom-if" if="[[!searchError]]">
-                  <div class="layout horizontal">
-                    <div class="search-results-title">[[searchTitle]]</div>
+            <template is="dom-if" if="[[pageWasNotJustOpened]]">
+              <paper-material slot="header" id="searchHeader" class="layout horizontal center">
+                <div class="search-header-text flex">
+                  <template is="dom-if" if="[[!searchError]]">
+                    [[searchTitle]]
+                  </template>
 
-                    <template is="dom-if" if="[[searchTotal]]">
-                      <info-search search-parameters="[[searchParameters]]"></info-search>
-                    </template>
-                  </div>
-                </template>
-
-                <template is="dom-if" if="[[searchError]]">
-                  <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
-                  <div class="search-results-title flex">
+                  <template is="dom-if" if="[[searchError]]">
+                    <elastic-error error="[[searchError]]" message="{{searchErrorMessage}}"></elastic-error>
                     [[searchErrorMessage]]
-                  </div>
-                </template>
-              </div>
+                  </template>
+                </div>
 
-              <div class="layout horizontal center sort-menu">
-                <div>Sort By</div>
+                <div class="layout horizontal center fields-menu">
+                  <div>Sort By</div>
 
-                <paper-dropdown-menu label="Sort By" no-label-float>
-                  <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{sortKey}}">
-                    <paper-item value="">Relevance (Default)</paper-item>
-                    <template is="dom-repeat" items="[[sortedSearchFields]]" as="searchFieldsObject">
-                      <paper-item id$="[[searchFieldsObject.key]]" value="[[searchFieldsObject.key]]">[[searchFieldsObject.title]]</paper-item>
-                    </template>
-                  </paper-listbox>
-                </paper-dropdown-menu>
+                  <paper-dropdown-menu class="large" label="Sort By" no-label-float style="margin-right: 10px;">
+                    <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{sortKey}}">
+                      <paper-item value="">Relevance (Default)</paper-item>
+                      <template is="dom-repeat" items="[[sortedSearchFields]]" as="searchFieldsObject">
+                        <paper-item id$="[[searchFieldsObject.key]]" value="[[searchFieldsObject.key]]">[[searchFieldsObject.title]]</paper-item>
+                      </template>
+                    </paper-listbox>
+                  </paper-dropdown-menu>
 
-                <aggregation-sort
-                  sort-options='[{"title":"Ascending","orderBy":"asc","icon":"fa:sort-amount-asc"},{"title":"Descending","orderBy":"desc","icon":"fa:sort-amount-desc"}]'
-                  order-by="{{sortOrder}}">
-                </aggregation-sort>
-              </div>
+                  <aggregation-sort
+                    sort-options='[{"title":"Ascending","orderBy":"asc","icon":"fa:sort-amount-asc"},{"title":"Descending","orderBy":"desc","icon":"fa:sort-amount-desc"}]'
+                    order-by="{{sortOrder}}">
+                  </aggregation-sort>
+                </div>
 
-              <export-button
-                client="[[esClient]]"
-                data="[[searchResultsShown]]"
-                export-endpoint="[[findDigUrl(serverConfig.pathPrefix, '/export')]]"
-                index-name="[[esConfig.esIndex]]"
-                index-types="[[esConfig.esType]]"
-                search-fields="[[searchFields]]"
-                search-parameters="[[searchParameters]]"
-                source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
-                transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
-                transform-search-input-function="[[transforms.export.createBulkSearchData]]"
-                transform-search-results-function="[[transforms.entity.results]]">
-              </export-button>
-            </paper-material>
+                <export-button
+                  client="[[esClient]]"
+                  data="[[searchResultsShown]]"
+                  export-endpoint="[[findDigUrl(serverConfig.pathPrefix, '/export')]]"
+                  index-name="[[esConfig.esIndex]]"
+                  index-types="[[esConfig.esType]]"
+                  search-fields="[[searchFields]]"
+                  search-parameters="[[searchParameters]]"
+                  source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
+                  transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+                  transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
+                  transform-search-input-function="[[transforms.export.createBulkSearchData]]"
+                  transform-search-results-function="[[transforms.entity.results]]">
+                </export-button>
+              </paper-material>
+            </template>
 
             <template is="dom-if" if="[[searchResultsShown.length]]">
               <paper-material slot="header" id="searchTimeline" class="layout vertical">
-                <div class="layout horizontal center date-menu">
-                  <template is="dom-if" if="[[timelineResults.sparklines.length]]">
-                    <div class="layout flex timeline-text">Timeline of Search Results</div>
-                  </template>
-
+                <div class="layout horizontal center fields-menu">
                   <template is="dom-if" if="[[!timelineLoading]]">
+                    <template is="dom-if" if="[[timelineResults.sparklines.length]]">
+                      <div class="layout flex timeline-info-text">Timeline of Search Results</div>
+                    </template>
                     <template is="dom-if" if="[[!timelineResults.sparklines.length]]">
-                      <div class="layout flex timeline-text">Timeline of Search Results Not Available</div>
+                      <div class="layout flex timeline-info-text">Timeline of Search Results Not Available</div>
                     </template>
                   </template>
 
-                  <template is="dom-if" if="[[dateMenu.show]]">
-                    <div>Date Field</div>
-
-                    <paper-dropdown-menu label="Date" no-label-float>
-                      <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{dateMenu.selected}}">
-                        <template is="dom-repeat" items="[[dateMenu.fields]]" as="dateFieldsObject">
-                          <paper-item id$="[[dateFieldsObject.field]]" value="[[dateFieldsObject.field]]">[[dateFieldsObject.title]]</paper-item>
-                        </template>
-                      </paper-listbox>
-                    </paper-dropdown-menu>
-                  </template>
+                  <paper-dropdown-menu label="Date" no-label-float>
+                    <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{dateMenu.selected}}">
+                      <template is="dom-repeat" items="[[dateMenu.fields]]" as="dateFieldsObject">
+                        <paper-item id$="[[dateFieldsObject.field]]" value="[[dateFieldsObject.field]]">[[dateFieldsObject.title]]</paper-item>
+                      </template>
+                    </paper-listbox>
+                  </paper-dropdown-menu>
                 </div>
 
                 <template is="dom-if" if="[[timelineLoading]]">
@@ -757,7 +773,7 @@ limitations under the License.
                   <template is="dom-if" if="[[timelineResults.sparklines.length]]">
                     <sparkline-list time-interval="week" hide-name data="[[timelineResults.sparklines]]"></sparkline-list>
 
-                    <div class="layout horizontal timeline-text">
+                    <div class="layout horizontal timeline-info-text">
                       <template is="dom-if" if="[[timelineResults.begin]]">
                         <div>[[timelineResults.begin]]</div>
                       </template>
@@ -771,7 +787,19 @@ limitations under the License.
               </paper-material>
             </template>
 
-            <result-list style$="[[findStyleToShowIfEqual(selectedSearchTab, 1)]]"
+            <template is="dom-if" if="[[!pageWasNotJustOpened]]">
+              <database-details
+                client="[[esClient]]"
+                pretty-domain="[[prettyDomain]]"
+                index-name="[[esConfig.esIndex]]"
+                index-types="[[esConfig.esType]]"
+                show="[[!pageWasNotJustOpened]]"
+                timeline-function="[[transforms.entity.timelines]]"
+                timestamp-field="timestamp_crawl">
+              </database-details>
+            </template>
+
+            <result-list
               id="searchResultList"
               new-tab
               text-property="title"
@@ -798,14 +826,6 @@ limitations under the License.
               hide-confidences
               tag-manager="[[tagManager]]">
             </result-list>
-
-            <image-gallery style$="[[findStyleToShowIfEqual(selectedSearchTab, 2)]]"
-              id="searchImageGallery"
-              images="[[imagesFromResults]]"
-              new-tab
-              small-image-style-class="[[findBlurStyleClass(blurImages)]]"
-              large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]">
-            </image-gallery>
           </template>
         </paper-header-panel>
       </paper-drawer-panel>
@@ -973,9 +993,29 @@ limitations under the License.
           type: String
         },
 
+        openedDatabaseDetail: {
+          type: Boolean
+        },
+
+        openedSearchImageGallery: {
+          type: Boolean
+        },
+
+        pageWasNotJustOpened: {
+          computed: 'computePageWasNotJustOpened(searchParameters, searchParameters.*)',
+          type: Boolean,
+          value: false
+        },
+
         parameters: {
           computed: 'getUrlParameters()',
           type: Object
+        },
+
+        prettyDomain: {
+          computed: 'findPrettyDomain(domain, serverConfig)',
+          notify: true,
+          type: String
         },
 
         processRequest: {
@@ -1028,7 +1068,6 @@ limitations under the License.
         },
 
         searchResults: {
-          observer: 'resetSearchTab',
           type: Array
         },
 
@@ -1042,12 +1081,6 @@ limitations under the License.
 
         searchTotal: {
           type: Number
-        },
-
-        selectedSearchTab: {
-          notify: true,
-          type: Number,
-          value: 0
         },
 
         serverConfig: {
@@ -1104,6 +1137,10 @@ limitations under the License.
           state[key] = config[key] || {};
         });
         return state;
+      },
+
+      computePageWasNotJustOpened: function() {
+        return this.pageWasNotJustOpened || !this.searchParametersDisabled(this.searchParameters);
       },
 
       createSearchResultConfig: function(networkExpansionParameters) {
@@ -1166,16 +1203,25 @@ limitations under the License.
         return images;
       },
 
-      findStyleToHideIfEqual: function(one, two) {
-        return one === two ? 'display: none;' : '';
-      },
+      /**
+       * Returns the list of active fields in the given network expansion parameters.
+       *
+       * @param {Object} networkExpansionParameters
+       * @param {Array} searchFields
+       * @return {Array}
+       * @private
+       */
+      getNetworkExpansionFields: function(networkExpansionParameters, searchFields) {
+        if(!networkExpansionParameters) {
+          return [];
+        }
 
-      findStyleToShowIfEqual: function(one, two) {
-        return one === two ? '' : 'display: none;';
-      },
-
-      findUrlWithProject: function(domain) {
-        return './?project=' + domain;
+        return searchFields.reduce(function(networkExpansionFields, searchFieldsObject) {
+          if(networkExpansionParameters[searchFieldsObject.key]) {
+            networkExpansionFields.push(searchFieldsObject.title);
+          }
+          return networkExpansionFields;
+        }, []);
       },
 
       handleImageFaceSearchResults: function(event) {
@@ -1287,10 +1333,12 @@ limitations under the License.
         this.$$('#bulkSearchDialog').open();
       },
 
-      resetSearchTab: function() {
-        if(!this.searchResults.length) {
-          this.set('selectedSearchTab', 1);
-        }
+      openDatabaseDetail: function() {
+        this.openedDatabaseDetail = true;
+      },
+
+      openSearchImageGallery: function() {
+        this.openedSearchImageGallery = true;
       },
 
       runBothImageSearches: function() {

@@ -425,10 +425,6 @@ limitations under the License.
       }]);
     });
 
-    test('findUrlWithProject does return expected string', function() {
-      expect(element.findUrlWithProject('TestProject')).to.equal('./?project=TestProject');
-    });
-
     test('handleImageFaceSearchResults given error does update imageFaceSearchList and imagesUploaded', function() {
       // Unset observer.
       element.runBothImageSearches = function() {};
@@ -1577,11 +1573,11 @@ limitations under the License.
       }]);
     });
 
-    test('shouldHideNewPageElements does return false if searchParameters are empty', function() {
-      expect(element.shouldHideNewPageElements()).to.be.false;
+    test('computePageWasNotJustOpened does return false if searchParameters are empty', function() {
+      expect(element.computePageWasNotJustOpened()).to.be.false;
     });
 
-    test('shouldHideNewPageElements does return true if searchParameters are not empty', function() {
+    test('computePageWasNotJustOpened does return true if searchParameters are not empty', function() {
       element.searchParameters = {
         type: {
           term: {
@@ -1589,10 +1585,10 @@ limitations under the License.
           }
         }
       };
-      expect(element.shouldHideNewPageElements()).to.be.true;
+      expect(element.computePageWasNotJustOpened()).to.be.true;
     });
 
-    test('shouldHideNewPageElements does return true if searchParameters are empty but they were previously not empty', function() {
+    test('computePageWasNotJustOpened does return true if searchParameters are empty but they were previously not empty', function() {
       element.searchParameters = {
         type: {
           term: {
@@ -1601,7 +1597,7 @@ limitations under the License.
         }
       };
       element.searchParameters = {};
-      expect(element.shouldHideNewPageElements()).to.be.true;
+      expect(element.computePageWasNotJustOpened()).to.be.true;
     });
 
     test('validateImageServiceConfig does return expected boolean', function() {
@@ -1762,6 +1758,27 @@ limitations under the License.
       }, {
         id: 4
       }]);
+    });
+
+    test('getNetworkExpansionFields does return expected list', function() {
+      expect(element.getNetworkExpansionFields({
+        a: true,
+        b: true,
+        c: false,
+        d: false
+      }, [{
+        key: 'a',
+        title: 'Field A'
+      }, {
+        key: 'b',
+        title: 'Field B'
+      }, {
+        key: 'c',
+        title: 'Field C'
+      }, {
+        key: 'd',
+        title: 'Field D'
+      }])).to.deep.equal(['Field A', 'Field B']);
     });
   });
 </script>

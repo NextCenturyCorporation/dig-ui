@@ -53,6 +53,7 @@ module.exports = {
     overrideConfig: process.env.OVERRIDE_CONFIG ? JSON.parse(process.env.OVERRIDE_CONFIG) : undefined,
     overrideSearchEndpoint: process.env.OVERRIDE_SEARCH_ENDPOINT ? JSON.parse(process.env.OVERRIDE_SEARCH_ENDPOINT) : undefined,
     pathPrefix: process.env.PATH_PREFIX || '',
+    prettyDomain: process.env.PRETTY_DOMAIN ? JSON.parse(process.env.PRETTY_DOMAIN) : undefined,
     profileIndexName: process.env.PROFILE_INDEX_NAME || 'dig-profiles',
     profileIndexType: process.env.PROFILE_INDEX_TYPE || 'profile',
     searchConfig: process.env.SEARCH_CONFIG ? JSON.parse(process.env.SEARCH_CONFIG) : undefined,

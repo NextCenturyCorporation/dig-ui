@@ -659,34 +659,28 @@ limitations under the License.
                   <info-aggregations slot="title" entity="[[isEntity(item.entity)]]" page="[[pageName]]" type="[[item.entity.title]]"></info-aggregations>
                 </template>
 
-                <div class="layout horizontal center date-menu bottom-margin">
+                <div class="layout horizontal center fields-menu bottom-margin">
                   <template is="dom-if" if="[[!item.timelineLoading]]">
                     <template is="dom-if" if="[[!item.timelineResults.sparklines.length]]">
-                      <div>No Timelines of [[item.entity.title]] vs. [[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]</div>
+                      <div>No Timelines [[item.entity.title]] v. [[getDateProperty(item.dateCollection, item.dateSelected, 'title')]]</div>
                     </template>
 
                     <template is="dom-if" if="[[item.timelineResults.sparklines.length]]">
-                      <div>[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]] from [[item.timelineResults.begin]] to [[item.timelineResults.end]]</div>
+                      <div>[[getDateProperty(item.dateCollection, item.dateSelected, 'title')]] [[item.timelineResults.begin]] - [[item.timelineResults.end]]</div>
                     </template>
                   </template>
 
                   <div class="flex"></div>
 
-                  <template is="dom-if" if="[[item.showDateMenu]]">
-                    <div>Date Field</div>
-
-                    <paper-dropdown-menu label="Date" no-label-float>
-                      <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{item.dateSelected}}">
-                        <template is="dom-repeat" items="[[item.dateList]]" as="dateFieldsObject">
-                          <paper-item id$="[[dateFieldsObject.key]]" value="[[dateFieldsObject.key]]">[[dateFieldsObject.title]]</paper-item>
-                        </template>
-                      </paper-listbox>
-                    </paper-dropdown-menu>
-                  </template>
-
-                  <div>Interval</div>
-
                   <paper-dropdown-menu label="Date" no-label-float>
+                    <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{item.dateSelected}}">
+                      <template is="dom-repeat" items="[[item.dateList]]" as="dateFieldsObject">
+                        <paper-item id$="[[dateFieldsObject.key]]" value="[[dateFieldsObject.key]]">[[dateFieldsObject.title]]</paper-item>
+                      </template>
+                    </paper-listbox>
+                  </paper-dropdown-menu>
+
+                  <paper-dropdown-menu class="small" label="Date" no-label-float>
                     <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{item.intervalSelected}}">
                       <paper-item value="day">Daily (Slow)</paper-item>
                       <paper-item value="week">Weekly</paper-item>
@@ -812,19 +806,17 @@ limitations under the License.
             section-title="[[searchTitle]]"
             class="results-section">
 
-            <template is="dom-if" if="[[dateMenu.show]]">
-              <div slot="title" class="layout horizontal center date-menu">
-                <div>Sort By</div>
+            <div slot="title" class="layout horizontal center fields-menu">
+              <div>Sort By</div>
 
-                <paper-dropdown-menu label="Date" no-label-float>
-                  <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{dateMenu.selected}}">
-                    <template is="dom-repeat" items="[[dateMenu.fields]]" as="dateFieldsObject">
-                      <paper-item id$="[[dateFieldsObject.field]]" value="[[dateFieldsObject.field]]">[[dateFieldsObject.title]]</paper-item>
-                    </template>
-                  </paper-listbox>
-                </paper-dropdown-menu>
-              </div>
-            </template>
+              <paper-dropdown-menu label="Date" no-label-float>
+                <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{dateMenu.selected}}">
+                  <template is="dom-repeat" items="[[dateMenu.fields]]" as="dateFieldsObject">
+                    <paper-item id$="[[dateFieldsObject.field]]" value="[[dateFieldsObject.field]]">[[dateFieldsObject.title]]</paper-item>
+                  </template>
+                </paper-listbox>
+              </paper-dropdown-menu>
+            </div>
 
             <export-button
               slot="title"

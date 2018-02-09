@@ -117,6 +117,10 @@ DigBehaviors.PageBehavior = {
     return prefix + link;
   },
 
+  findBlurStyleClass: function(blur, large) {
+    return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+  },
+
   findDomain: function(parameters, serverConfig) {
     if(parameters && serverConfig) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
@@ -127,8 +131,8 @@ DigBehaviors.PageBehavior = {
     return undefined;
   },
 
-  findBlurStyleClass: function(blur, large) {
-    return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+  findPrettyDomain: function(domain, serverConfig) {
+    return (serverConfig && serverConfig.prettyDomain ? serverConfig.prettyDomain[domain] : domain) || domain;
   },
 
   getUrlParameters: function() {

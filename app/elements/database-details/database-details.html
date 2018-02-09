@@ -29,6 +29,7 @@ limitations under the License.
     <style>
       :host {
         display: block;
+        padding: 10px;
       }
 
       .label {
@@ -44,6 +45,7 @@ limitations under the License.
       .value {
         font-size: 16px;
         font-weight: 500;
+        margin-right: 5px;
       }
     </style>
 
@@ -103,32 +105,14 @@ limitations under the License.
     </template>
 
     <div class="layout horizontal row">
-      <div class="label">Domain</div>
-      <div class="value">[[domain]]</div>
-    </div>
-
-    <div class="layout horizontal row">
-      <div class="label">Total Count of [[resultType]]</div>
       <template is="dom-if" if="[[_latestLoading]]">
         <div class="value">Loading...</div>
       </template>
       <template is="dom-if" if="[[!_latestLoading]]">
         <div class="value">[[_latestCount]]</div>
-      </template>
-    </div>
-
-    <div class="layout horizontal row">
-      <div class="label">Latest [[resultType]]</div>
-      <template is="dom-if" if="[[_latestLoading]]">
-        <div class="value">Loading...</div>
-      </template>
-      <template is="dom-if" if="[[!_latestLoading]]">
+        <div class="label">[[prettyDomain]] [[resultType]] up to</div>
         <div class="value">[[_latestResults]]</div>
       </template>
-    </div>
-
-    <div class="layout horizontal row">
-      <div class="label">Timeline of the [[resultType]] in the Last Month</div>
     </div>
 
     <zoomable-bar-chart
@@ -160,17 +144,17 @@ limitations under the License.
           type: Object
         },
 
-        domain: {
-          type: String,
-          value: 'None'
-        },
-
         indexName: {
           type: String
         },
 
         indexTypes: {
           type: Array
+        },
+
+        prettyDomain: {
+          type: String,
+          value: ''
         },
 
         resultType: {

@@ -490,19 +490,17 @@ limitations under the License.
             section-title="[[revisionTitle]]"
             class="results-section">
 
-            <template is="dom-if" if="[[dateMenu.show]]">
-              <div slot="title" class="layout horizontal center date-menu">
-                <div>Sort By</div>
+            <div slot="title" class="layout horizontal center fields-menu">
+              <div>Sort By</div>
 
-                <paper-dropdown-menu label="Date" no-label-float>
-                  <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{dateMenu.selected}}">
-                    <template is="dom-repeat" items="[[dateMenu.fields]]" as="dateFieldsObject">
-                      <paper-item id$="[[dateFieldsObject.field]]" value="[[dateFieldsObject.field]]">[[dateFieldsObject.title]]</paper-item>
-                    </template>
-                  </paper-listbox>
-                </paper-dropdown-menu>
-              </div>
-            </template>
+              <paper-dropdown-menu label="Date" no-label-float>
+                <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{dateMenu.selected}}">
+                  <template is="dom-repeat" items="[[dateMenu.fields]]" as="dateFieldsObject">
+                    <paper-item id$="[[dateFieldsObject.field]]" value="[[dateFieldsObject.field]]">[[dateFieldsObject.title]]</paper-item>
+                  </template>
+                </paper-listbox>
+              </paper-dropdown-menu>
+            </div>
 
             <export-button
               slot="title"
