@@ -586,11 +586,14 @@ limitations under the License.
                       text-property="textAndCount"
                       data="[[item.aggregatedDataResults]]">
                     </leaflet-wrapper>
+
+                    <paper-icon-button slot="title" icon="list" title$="Scroll to [[item.entity.title]] List (Below Map)" on-tap="scrollBelowMap"></paper-icon-button>
                   </template>
                 </template>
 
                 <template is="dom-if" if="[[!item.entity.isImage]]">
                   <aggregation-query-and-display
+                    id$="[[item.entity.key]]_list"
                     hide-bar-chart="[[!item.loadData]]"
                     aggregation-name="[[item.entity.key]]"
                     aggregation-field="[[item.entity.field]]"
@@ -1338,6 +1341,11 @@ limitations under the License.
       isMapVisible: function(loading, data, opened) {
         // Ensure the map section is opened prior to rendering.
         return !loading && !!(data && data.length) && opened;
+      },
+
+      scrollBelowMap: function(event) {
+        var list = this.$$('#' + event.model.item.entity.key + '_list');
+        list.scrollIntoView();
       },
 
       showSimilarImageMatchesSection: function(event) {
