@@ -672,21 +672,20 @@ limitations under the License.
 
                   <div class="flex"></div>
 
-                  <paper-dropdown-menu label="Date" no-label-float>
-                    <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{item.dateSelected}}">
-                      <template is="dom-repeat" items="[[item.dateList]]" as="dateFieldsObject">
-                        <paper-item id$="[[dateFieldsObject.key]]" value="[[dateFieldsObject.key]]">[[dateFieldsObject.title]]</paper-item>
-                      </template>
-                    </paper-listbox>
-                  </paper-dropdown-menu>
+                  <dropdown-menu
+                    data="[[item.dateList]]"
+                    label="Date"
+                    no-label-float
+                    selected="{{item.dateSelected}}"
+                    value-property="key">
+                  </dropdown-menu>
 
-                  <paper-dropdown-menu class="small" label="Date" no-label-float>
-                    <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{item.intervalSelected}}">
-                      <paper-item value="day">Daily (Slow)</paper-item>
-                      <paper-item value="week">Weekly</paper-item>
-                      <paper-item value="month">Monthly</paper-item>
-                    </paper-listbox>
-                  </paper-dropdown-menu>
+                  <dropdown-menu
+                    data='[{"title":"Daily (Slow)","value":"day"},{"title":"Weekly","value":"week"},{"title":"Monthly","value":"month"}]'
+                    label="Date"
+                    no-label-float
+                    selected="{{item.intervalSelected}}">
+                  </dropdown-menu>
                 </div>
 
                 <elastic-error error="[[item.timelineError]]" message="{{item.timelineErrorMessage}}"></elastic-error>
@@ -809,13 +808,13 @@ limitations under the License.
             <div slot="title" class="layout horizontal center fields-menu">
               <div>Sort By</div>
 
-              <paper-dropdown-menu label="Date" no-label-float>
-                <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{dateMenu.selected}}">
-                  <template is="dom-repeat" items="[[dateMenu.fields]]" as="dateFieldsObject">
-                    <paper-item id$="[[dateFieldsObject.field]]" value="[[dateFieldsObject.field]]">[[dateFieldsObject.title]]</paper-item>
-                  </template>
-                </paper-listbox>
-              </paper-dropdown-menu>
+              <dropdown-menu
+                data="[[dateMenu.fields]]"
+                label="Date"
+                no-label-float
+                selected="{{dateMenu.selected}}"
+                value-property="field">
+              </dropdown-menu>
             </div>
 
             <export-button

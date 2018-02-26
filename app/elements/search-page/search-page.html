@@ -16,6 +16,7 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
+<link rel="import" href="../../bower_components/dropdown-menu/dropdown-menu.html">
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
 <link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
 <link rel="import" href="../../bower_components/export-button/export-button.html">
@@ -712,14 +713,16 @@ limitations under the License.
                 <div class="layout horizontal center fields-menu">
                   <div>Sort By</div>
 
-                  <paper-dropdown-menu class="large" label="Sort By" no-label-float style="margin-right: 10px;">
-                    <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{sortKey}}">
-                      <paper-item value="">Relevance (Default)</paper-item>
-                      <template is="dom-repeat" items="[[sortedSearchFields]]" as="searchFieldsObject">
-                        <paper-item id$="[[searchFieldsObject.key]]" value="[[searchFieldsObject.key]]">[[searchFieldsObject.title]]</paper-item>
-                      </template>
-                    </paper-listbox>
-                  </paper-dropdown-menu>
+                  <dropdown-menu
+                    data="[[sortedSearchFields]]"
+                    empty-item-title="Relevance"
+                    label="Sort By"
+                    large
+                    no-label-float
+                    selected="{{sortKey}}"
+                    style="margin-right: 10px;"
+                    value-property="key">
+                  </dropdown-menu>
 
                   <aggregation-sort
                     sort-options='[{"title":"Ascending","orderBy":"asc","icon":"fa:sort-amount-asc"},{"title":"Descending","orderBy":"desc","icon":"fa:sort-amount-desc"}]'
@@ -756,13 +759,13 @@ limitations under the License.
                     </template>
                   </template>
 
-                  <paper-dropdown-menu label="Date" no-label-float>
-                    <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{dateMenu.selected}}">
-                      <template is="dom-repeat" items="[[dateMenu.fields]]" as="dateFieldsObject">
-                        <paper-item id$="[[dateFieldsObject.field]]" value="[[dateFieldsObject.field]]">[[dateFieldsObject.title]]</paper-item>
-                      </template>
-                    </paper-listbox>
-                  </paper-dropdown-menu>
+                  <dropdown-menu
+                    data="[[dateMenu.fields]]"
+                    label="Date"
+                    no-label-float
+                    selected="{{dateMenu.selected}}"
+                    value-property="field">
+                  </dropdown-menu>
                 </div>
 
                 <template is="dom-if" if="[[timelineLoading]]">
