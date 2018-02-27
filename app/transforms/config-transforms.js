@@ -527,6 +527,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
               key: searchFieldsObject.key,
               styleClass: searchFieldsObject.styleClass,
               title: searchFieldsObject.title,
+              type: searchFieldsObject.type,
               enableNetworkExpansion: esConfig.enableNetworkExpansion && !!searchFieldsObject.isEntity
             });
           }
@@ -618,9 +619,27 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       }, {});
     },
 
+    /**
+     * Returns the list of search fields sorted alphabetically.
+     *
+     * @param {Array} searchFields
+     * @return {Array}
+     */
     sortSearchFieldsAlphabetically: function(searchFields) {
       return _.cloneDeep(searchFields).sort(function(a, b) {
         return a.title < b.title ? -1 : (a.title > b.title ? 1 : 0);
+      });
+    },
+
+    /**
+     * Returns the list of title and description search fields.
+     *
+     * @param {Array} searchFields
+     * @return {Array}
+     */
+    titleAndDescriptionSearchFields: function(searchFields) {
+      return searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.result === 'description' || searchFieldsObject.result === 'title';
       });
     }
   };

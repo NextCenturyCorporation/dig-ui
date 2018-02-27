@@ -1722,6 +1722,84 @@ limitations under the License.
         title: 'a'
       }]);
     });
+
+    test('titleAndDescriptionSearchFields does return expected array', function() {
+      expect(transformFunctions.transforms.config.titleAndDescriptionSearchFields([{
+        key: 'id',
+        result: 'header',
+        title: 'ID',
+        type: 'string'
+      }, {
+        key: 'name',
+        result: 'detail',
+        title: 'Name',
+        type: 'string'
+      }, {
+        key: 'label',
+        result: 'title',
+        title: 'Label',
+        type: 'string'
+      }, {
+        key: 'content',
+        result: 'description',
+        title: 'Content',
+        type: 'string'
+      }])).to.deep.equal([{
+        key: 'label',
+        result: 'title',
+        title: 'Label',
+        type: 'string'
+      }, {
+        key: 'content',
+        result: 'description',
+        title: 'Content',
+        type: 'string'
+      }]);
+    });
+
+    test('titleAndDescriptionSearchFields does return multiple title and description search fields', function() {
+      expect(transformFunctions.transforms.config.titleAndDescriptionSearchFields([{
+        key: 'title1',
+        result: 'title',
+        title: 'Title 1',
+        type: 'string'
+      }, {
+        key: 'description1',
+        result: 'description',
+        title: 'Descrition 1',
+        type: 'string'
+      }, {
+        key: 'title2',
+        result: 'title',
+        title: 'Title 2',
+        type: 'string'
+      }, {
+        key: 'description2',
+        result: 'description',
+        title: 'Descrition 2',
+        type: 'string'
+      }])).to.deep.equal([{
+        key: 'title1',
+        result: 'title',
+        title: 'Title 1',
+        type: 'string'
+      }, {
+        key: 'description1',
+        result: 'description',
+        title: 'Descrition 1',
+        type: 'string'
+      }, {
+        key: 'title2',
+        result: 'title',
+        title: 'Title 2',
+        type: 'string'
+      }, {
+        key: 'description2',
+        result: 'description',
+        title: 'Descrition 2',
+        type: 'string'
+      }]);
+    });
   });
 </script>
 </body>
