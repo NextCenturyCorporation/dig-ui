@@ -646,6 +646,10 @@ limitations under the License.
       </iron-dropdown>
 
       <paper-toolbar slot="header" id="searchTermList">
+        <template is="dom-if" if="[[drawerNarrow]]">
+          <paper-icon-button slot="top" id="toggleDrawerButton" icon="[[getDrawerToggleIcon(drawerOpened)]]" title$="[[getDrawerToggleText(drawerOpened)]]" on-tap="toggleDrawer"></paper-icon-button>
+        </template>
+
         <div slot="top" class="layout horizontal">
           <template is="dom-if" if="[[searchParametersDisabled(searchParameters, searchParameters.*)]]">
             <div class="no-facets-text">
@@ -665,7 +669,12 @@ limitations under the License.
       </paper-toolbar>
 
       <!-- Use the display style rather than a dom-if template so the search parameters in the facet panel update. -->
-      <paper-drawer-panel drawer-width="320px" id="pageDrawer">
+      <paper-drawer-panel
+        id="pageDrawer"
+        drawer-width="320px"
+        narrow="{{drawerNarrow}}"
+        responsive-width="640px">
+
         <div class="layout veritcal" slot="drawer">
           <template is="dom-if" if="[[!serverConfig.sendSearchesDirectlyToES]]">
             <facet-panel id="pageFacets"
@@ -898,6 +907,15 @@ limitations under the License.
 
         datePropertiesToKeys: {
           type: Object
+        },
+
+        drawerNarrow: {
+          type: Boolean
+        },
+
+        drawerOpened: {
+          type: Boolean,
+          value: false
         },
 
         domain: {
@@ -1242,6 +1260,14 @@ limitations under the License.
         }, []);
       },
 
+      getDrawerToggleIcon: function(drawerOpened) {
+        return drawerOpened ? 'icons:visibility-off' : 'icons:visibility';
+      },
+
+      getDrawerToggleText: function(drawerOpened) {
+        return drawerOpened ? 'Showing Facets (Click to Close)' : 'Hiding Facets (Click to Open)';
+      },
+
       handleImageFaceSearchResults: function(event) {
         if(event.detail.error || event.detail.response.error) {
           while(this.imageFaceSearchList.length && this.imageFaceSearchList[0].face) {
@@ -1468,6 +1494,11 @@ limitations under the License.
           requestElement.headers.Authorization = auth;
           requestElement.generateRequest();
         }
+      },
+
+      toggleDrawer: function() {
+        this.drawerOpened = !this.drawerOpened;
+        this.$$('#pageDrawer').togglePanel();
       },
 
       validateImageServiceConfig: function(config) {
