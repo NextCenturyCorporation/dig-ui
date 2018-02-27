@@ -358,7 +358,12 @@ limitations under the License.
       transformFunctions = fixture('transform-functions-fixture');
       transformFunctions.domain = 'TestDomain';
       transformFunctions.clientConfig = {};
-      transformFunctions.serverConfig = {};
+      transformFunctions.serverConfig = {
+        resultIcon: 'TestIcon',
+        resultNamePlural: 'TestResults',
+        resultNameSingular: 'TestResult',
+        resultQueryField: 'TestQueryField'
+      };
     });
 
     test('does define transforms object', function() {
@@ -1554,9 +1559,9 @@ limitations under the License.
       expect(output.id).to.equal('ABC123');
       expect(output.description).to.equal('');
       expect(output.highlightedText).to.equal('');
-      expect(output.icon).to.equal('av:web-asset');
+      expect(output.icon).to.equal('TestIcon');
       expect(output.link).to.equal('/result.html?domain=TestDomain&id=ABC123');
-      expect(output.name).to.equal('Webpage');
+      expect(output.name).to.equal('TestResult');
       expect(output.tags).to.deep.equal({});
       expect(output.title).to.equal('');
       expect(output.type).to.equal('webpage');
@@ -1667,9 +1672,9 @@ limitations under the License.
       expect(output.id).to.equal('ABC123');
       expect(output.description).to.equal('This is description 1 This is description 2');
       expect(output.highlightedText).to.equal('Title 1 Title 2');
-      expect(output.icon).to.equal('av:web-asset');
+      expect(output.icon).to.equal('TestIcon');
       expect(output.link).to.equal('/result.html?domain=TestDomain&id=ABC123');
-      expect(output.name).to.equal('Webpage');
+      expect(output.name).to.equal('TestResult');
       expect(output.tags).to.deep.equal({});
       expect(output.title).to.equal('Title 1 Title 2');
       expect(output.type).to.equal('webpage');
@@ -2280,7 +2285,11 @@ limitations under the License.
         databaseType: 'sample',
         esHost: {
           host: 'TestHost'
-        }
+        },
+        resultIcon: 'TestIcon',
+        resultNamePlural: 'TestResults',
+        resultNameSingular: 'TestResult',
+        resultQueryField: 'TestQueryField'
       };
       expect(transformFunctions.esConfig.esDataEndpoint).to.equal('TestHost/TestIndexName/TestIndexType/');
 
@@ -2369,9 +2378,9 @@ limitations under the License.
       expect(output[0].id).to.equal('ABC123');
       expect(output[0].description).to.equal('');
       expect(output[0].highlightedText).to.equal('');
-      expect(output[0].icon).to.equal('av:web-asset');
+      expect(output[0].icon).to.equal('TestIcon');
       expect(output[0].link).to.equal('/result.html?domain=TestDomain&id=ABC123');
-      expect(output[0].name).to.equal('Webpage');
+      expect(output[0].name).to.equal('TestResult');
       expect(output[0].tags).to.deep.equal({});
       expect(output[0].title).to.equal('');
       expect(output[0].type).to.equal('webpage');
@@ -2472,9 +2481,9 @@ limitations under the License.
       expect(output[1].id).to.equal('DEF456');
       expect(output[1].description).to.equal('');
       expect(output[1].highlightedText).to.equal('');
-      expect(output[1].icon).to.equal('av:web-asset');
+      expect(output[1].icon).to.equal('TestIcon');
       expect(output[1].link).to.equal('/result.html?domain=TestDomain&id=DEF456');
-      expect(output[1].name).to.equal('Webpage');
+      expect(output[1].name).to.equal('TestResult');
       expect(output[1].tags).to.deep.equal({});
       expect(output[1].title).to.equal('');
       expect(output[1].type).to.equal('webpage');
@@ -2587,9 +2596,9 @@ limitations under the License.
       expect(output[0].id).to.equal('ABC123');
       expect(output[0].description).to.equal('This is description 1 This is description 2');
       expect(output[0].highlightedText).to.equal('Title 1 Title 2');
-      expect(output[0].icon).to.equal('av:web-asset');
+      expect(output[0].icon).to.equal('TestIcon');
       expect(output[0].link).to.equal('/result.html?domain=TestDomain&id=ABC123');
-      expect(output[0].name).to.equal('Webpage');
+      expect(output[0].name).to.equal('TestResult');
       expect(output[0].tags).to.deep.equal({});
       expect(output[0].title).to.equal('Title 1 Title 2');
       expect(output[0].type).to.equal('webpage');
@@ -2884,9 +2893,9 @@ limitations under the License.
       expect(output[1].id).to.equal('DEF456');
       expect(output[1].description).to.equal('This is description 3');
       expect(output[1].highlightedText).to.equal('Title 3');
-      expect(output[1].icon).to.equal('av:web-asset');
+      expect(output[1].icon).to.equal('TestIcon');
       expect(output[1].link).to.equal('/result.html?domain=TestDomain&id=DEF456');
-      expect(output[1].name).to.equal('Webpage');
+      expect(output[1].name).to.equal('TestResult');
       expect(output[1].tags).to.deep.equal({});
       expect(output[1].title).to.equal('Title 3');
       expect(output[1].type).to.equal('webpage');

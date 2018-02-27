@@ -43,7 +43,9 @@ limitations under the License.
       transformFunctions = fixture('transform-functions-fixture');
       transformFunctions.domain = 'domain';
       transformFunctions.clientConfig = {};
-      transformFunctions.serverConfig = {};
+      transformFunctions.serverConfig = {
+        resultNameSingular: 'TestResult'
+      };
     });
 
     test('does define transforms object', function() {
@@ -201,7 +203,7 @@ limitations under the License.
 
     test('createExportDataForCsv given no data or search fields does return expected array', function() {
       var output = transformFunctions.transforms.export.createExportDataForCsv([], []);
-      expect(output).to.deep.equal([['Webpage URL', 'DIG URL', 'Title', 'Content', 'Image URLs']]);
+      expect(output).to.deep.equal([['TestResult', 'DIG URL', 'Title', 'Description', 'Images']]);
     });
 
     test('createExportDataForCsv given data and search fields does return expected array', function() {
@@ -255,7 +257,7 @@ limitations under the License.
       }]);
 
       expect(output.length).to.equal(2);
-      expect(output[0]).to.deep.equal(['Webpage URL', 'DIG URL', 'Title', 'Dates', 'Locations', 'Phones', 'Emails', 'Content', 'Image URLs']);
+      expect(output[0]).to.deep.equal(['TestResult', 'DIG URL', 'Title', 'Dates', 'Locations', 'Phones', 'Emails', 'Description', 'Images']);
       expect(output[1].length).to.equal(9);
       expect(output[1][0]).to.equal('google.com');
       expect(output[1][1]).to.equal(window.location.hostname + ':' + window.location.port + '/result.html?id=1234');
@@ -350,7 +352,7 @@ limitations under the License.
       }]);
 
       expect(output.length).to.equal(3);
-      expect(output[0]).to.deep.equal(['Webpage URL', 'DIG URL', 'Title', 'Dates', 'Locations', 'Phones', 'Emails', 'Content', 'Image URLs']);
+      expect(output[0]).to.deep.equal(['TestResult', 'DIG URL', 'Title', 'Dates', 'Locations', 'Phones', 'Emails', 'Description', 'Images']);
       expect(output[1].length).to.equal(9);
       expect(output[1][0]).to.equal('google.com');
       expect(output[1][1]).to.equal(window.location.hostname + ':' + window.location.port + '/result.html?id=1234');
@@ -413,7 +415,7 @@ limitations under the License.
       }]);
 
       expect(output.length).to.equal(2);
-      expect(output[0]).to.deep.equal(['Webpage URL', 'DIG URL', 'Title', 'Locations', 'Phones', 'Content', 'Image URLs']);
+      expect(output[0]).to.deep.equal(['TestResult', 'DIG URL', 'Title', 'Locations', 'Phones', 'Description', 'Images']);
       expect(output[1].length).to.equal(7);
       expect(output[1][0]).to.equal('google.com');
       expect(output[1][1]).to.equal(window.location.hostname + ':' + window.location.port + '/result.html?id=1234');
@@ -435,7 +437,7 @@ limitations under the License.
       }], []);
 
       expect(output.length).to.equal(2);
-      expect(output[0]).to.deep.equal(['Webpage URL', 'DIG URL', 'Title', 'Content', 'Image URLs']);
+      expect(output[0]).to.deep.equal(['TestResult', 'DIG URL', 'Title', 'Description', 'Images']);
       expect(output[1].length).to.equal(5);
       expect(output[1][0]).to.equal('google.com');
       expect(output[1][1]).to.equal(window.location.hostname + ':' + window.location.port + '/result.html?id=1234');
@@ -491,7 +493,7 @@ limitations under the License.
       }]);
 
       expect(output.length).to.equal(2);
-      expect(output[0]).to.deep.equal(['Webpage URL', 'DIG URL', 'Title', 'Dates', 'Locations', 'Phones', 'Emails', 'Content', 'Image URLs']);
+      expect(output[0]).to.deep.equal(['TestResult', 'DIG URL', 'Title', 'Dates', 'Locations', 'Phones', 'Emails', 'Description', 'Images']);
       expect(output[1].length).to.equal(9);
       expect(output[1][0]).to.equal('google.com');
       expect(output[1][1]).to.equal(window.location.hostname + ':' + window.location.port + '/result.html?id=1234');
@@ -573,7 +575,7 @@ limitations under the License.
         value: ''
       });
       expect(output[0].paragraphs[1]).to.deep.equal({
-        label: 'Webpage URL:  ',
+        label: 'TestResult:  ',
         value: 'google.com'
       });
       expect(output[0].paragraphs[2]).to.deep.equal({
@@ -597,7 +599,7 @@ limitations under the License.
         value: 'abc@xyz.com'
       });
       expect(output[0].paragraphs[7]).to.deep.equal({
-        label: 'Content:  ',
+        label: 'Description:  ',
         value: 'Test description.'
       });
     });
@@ -697,7 +699,7 @@ limitations under the License.
         value: ''
       });
       expect(output[0].paragraphs[1]).to.deep.equal({
-        label: 'Webpage URL:  ',
+        label: 'TestResult:  ',
         value: 'google.com'
       });
       expect(output[0].paragraphs[2]).to.deep.equal({
@@ -721,7 +723,7 @@ limitations under the License.
         value: 'abc@xyz.com'
       });
       expect(output[0].paragraphs[7]).to.deep.equal({
-        label: 'Content:  ',
+        label: 'Description:  ',
         value: 'Test description 1.'
       });
       expect(output[1].images.length).to.equal(1);
@@ -737,7 +739,7 @@ limitations under the License.
         value: ''
       });
       expect(output[1].paragraphs[1]).to.deep.equal({
-        label: 'Webpage URL:  ',
+        label: 'TestResult:  ',
         value: 'bing.com'
       });
       expect(output[1].paragraphs[2]).to.deep.equal({
@@ -761,7 +763,7 @@ limitations under the License.
         value: 'xyz@abc.com'
       });
       expect(output[1].paragraphs[7]).to.deep.equal({
-        label: 'Content:  ',
+        label: 'Description:  ',
         value: 'Test description 2.'
       });
     });
@@ -823,7 +825,7 @@ limitations under the License.
         value: ''
       });
       expect(output[0].paragraphs[1]).to.deep.equal({
-        label: 'Webpage URL:  ',
+        label: 'TestResult:  ',
         value: 'google.com'
       });
       expect(output[0].paragraphs[2]).to.deep.equal({
@@ -839,7 +841,7 @@ limitations under the License.
         value: '123-456-7890, 987-654-3210'
       });
       expect(output[0].paragraphs[5]).to.deep.equal({
-        label: 'Content:  ',
+        label: 'Description:  ',
         value: 'Test description.'
       });
     });
@@ -863,7 +865,7 @@ limitations under the License.
         value: ''
       });
       expect(output[0].paragraphs[1]).to.deep.equal({
-        label: 'Webpage URL:  ',
+        label: 'TestResult:  ',
         value: 'google.com'
       });
       expect(output[0].paragraphs[2]).to.deep.equal({
@@ -871,7 +873,7 @@ limitations under the License.
         value: window.location.hostname + ':' + window.location.port + '/result.html?id=1234'
       });
       expect(output[0].paragraphs[3]).to.deep.equal({
-        label: 'Content:  ',
+        label: 'Description:  ',
         value: 'A quick brown fox\njumps over the lazy dog.'
       });
     });

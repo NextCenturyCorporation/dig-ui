@@ -17,7 +17,7 @@
 /* exported exportTransforms */
 /* jshint camelcase:false */
 
-var exportTransforms = (function(_) {
+var exportTransforms = (function(_, esConfig) {
   return {
     createBulkSearchData: function(searchParameters, searchFields) {
       if(!searchParameters || !searchFields) {
@@ -42,7 +42,7 @@ var exportTransforms = (function(_) {
     createExportDataForCsv: function(searchData, searchFields) {
       var linkPrefix = window.location.hostname + ':' + window.location.port;
       var exportData = [];
-      var exportDataHeader = ['Webpage URL', 'DIG URL', 'Title'];
+      var exportDataHeader = [esConfig.webpageField.title, 'DIG URL', 'Title'];
 
       var keysToArrayIndexes = {};
 
@@ -60,8 +60,8 @@ var exportTransforms = (function(_) {
         }
       });
 
-      exportDataHeader.push('Content');
-      exportDataHeader.push('Image URLs');
+      exportDataHeader.push('Description');
+      exportDataHeader.push('Images');
       exportData.push(exportDataHeader);
 
       searchData.forEach(function(result) {
@@ -120,7 +120,7 @@ var exportTransforms = (function(_) {
             label: result.title,
             value: ''
           }, {
-            label: 'Webpage URL:  ',
+            label: esConfig.webpageField.title + ':  ',
             value: result.url
           }, {
             label: 'DIG URL:  ',
@@ -155,7 +155,7 @@ var exportTransforms = (function(_) {
         });
 
         item.paragraphs.push({
-          label: 'Content:  ',
+          label: 'Description:  ',
           value: result.description.replace(/\t/g, ' ').trim()
         });
 

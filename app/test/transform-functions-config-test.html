@@ -764,6 +764,7 @@ limitations under the License.
         key: 'key1',
         search: false,
         title: 'title1',
+        type: 'type1',
         dateProperties: {
           start: {
             field: 'field1',
@@ -789,7 +790,8 @@ limitations under the License.
         key: 'key1',
         search: false,
         styleClass: 'styleClass1',
-        title: 'title1'
+        title: 'title1',
+        type: 'type1'
       }])).to.deep.equal([]);
 
       expect(transformFunctions.transforms.config.searchFieldsDialogConfig([{
@@ -799,7 +801,8 @@ limitations under the License.
         key: 'key1',
         search: false,
         styleClass: 'styleClass1',
-        title: 'title1'
+        title: 'title1',
+        type: 'type1'
       }])).to.deep.equal([]);
     });
 
@@ -810,7 +813,8 @@ limitations under the License.
         key: 'key1',
         search: true,
         styleClass: 'styleClass1',
-        title: 'title1'
+        title: 'title1',
+        type: 'type1'
       }])).to.deep.equal([{
         type: undefined,
         name: 'Other',
@@ -820,6 +824,7 @@ limitations under the License.
           key: 'key1',
           styleClass: 'styleClass1',
           title: 'title1',
+          type: 'type1',
           enableNetworkExpansion: false
         }]
       }]);
@@ -874,7 +879,8 @@ limitations under the License.
         key: 'key1',
         search: true,
         styleClass: 'styleClass1',
-        title: 'title1'
+        title: 'title1',
+        type: 'type1'
       }])).to.deep.equal([{
         type: undefined,
         name: 'Other',
@@ -884,6 +890,7 @@ limitations under the License.
           key: 'key1',
           styleClass: 'styleClass1',
           title: 'title1',
+          type: 'type1',
           enableNetworkExpansion: true
         }]
       }]);
@@ -897,7 +904,8 @@ limitations under the License.
         key: 'key1',
         search: true,
         styleClass: 'styleClass1',
-        title: 'title1'
+        title: 'title1',
+        type: 'type1'
       }])).to.deep.equal([{
         type: 'image',
         name: 'Other',
@@ -907,6 +915,7 @@ limitations under the License.
           key: 'key1',
           styleClass: 'styleClass1',
           title: 'title1',
+          type: 'type1',
           enableNetworkExpansion: false
         }]
       }]);
@@ -921,7 +930,8 @@ limitations under the License.
         key: 'key1',
         search: true,
         styleClass: 'styleClass1',
-        title: 'title1'
+        title: 'title1',
+        type: 'type1'
       }])).to.deep.equal([{
         type: 'image',
         name: 'Other',
@@ -931,6 +941,7 @@ limitations under the License.
           key: 'key1',
           styleClass: 'styleClass1',
           title: 'title1',
+          type: 'type1',
           enableNetworkExpansion: true
         }]
       }]);
@@ -944,7 +955,8 @@ limitations under the License.
         key: 'key1',
         search: true,
         styleClass: 'styleClass1',
-        title: 'title1'
+        title: 'title1',
+        type: 'type1'
       }])).to.deep.equal([{
         type: undefined,
         name: 'groupA',
@@ -954,6 +966,7 @@ limitations under the License.
           key: 'key1',
           styleClass: 'styleClass1',
           title: 'title1',
+          type: 'type1',
           enableNetworkExpansion: false
         }]
       }]);
@@ -967,7 +980,8 @@ limitations under the License.
         key: 'key1',
         search: true,
         styleClass: 'styleClass1',
-        title: 'title1'
+        title: 'title1',
+        type: 'type1'
       }, {
         field: 'field2',
         group: 'groupB',
@@ -975,7 +989,8 @@ limitations under the License.
         key: 'key2',
         search: true,
         styleClass: 'styleClass2',
-        title: 'title2'
+        title: 'title2',
+        type: 'type2'
       }])).to.deep.equal([{
         type: undefined,
         name: 'groupA',
@@ -985,6 +1000,7 @@ limitations under the License.
           key: 'key1',
           styleClass: 'styleClass1',
           title: 'title1',
+          type: 'type1',
           enableNetworkExpansion: false
         }]
       }, {
@@ -996,6 +1012,7 @@ limitations under the License.
           key: 'key2',
           styleClass: 'styleClass2',
           title: 'title2',
+          type: 'type2',
           enableNetworkExpansion: false
         }]
       }]);
@@ -1009,7 +1026,8 @@ limitations under the License.
         key: 'key1',
         search: true,
         styleClass: 'styleClass1',
-        title: 'title1'
+        title: 'title1',
+        type: 'type1'
       }, {
         field: 'field2',
         group: 'groupA',
@@ -1017,7 +1035,8 @@ limitations under the License.
         key: 'key2',
         search: true,
         styleClass: 'styleClass2',
-        title: 'title2'
+        title: 'title2',
+        type: 'type2'
       }])).to.deep.equal([{
         type: undefined,
         name: 'groupA',
@@ -1027,6 +1046,7 @@ limitations under the License.
           key: 'key1',
           styleClass: 'styleClass1',
           title: 'title1',
+          type: 'type1',
           enableNetworkExpansion: false
         }, {
           field: 'field2',
@@ -1034,6 +1054,7 @@ limitations under the License.
           key: 'key2',
           styleClass: 'styleClass2',
           title: 'title2',
+          type: 'type2',
           enableNetworkExpansion: false
         }]
       }]);
@@ -1048,12 +1069,14 @@ limitations under the License.
         key: 'key1',
         search: true,
         styleClass: 'styleClass1',
-        title: 'title1'
+        title: 'title1',
+        type: 'type1'
       }, {
         isDate: true,
         key: 'key2',
         search: true,
         title: 'title2',
+        type: 'type2',
         dateProperties: {
           start: {
             field: 'field2',
@@ -1078,12 +1101,14 @@ limitations under the License.
         key: 'key3',
         search: true,
         styleClass: 'styleClass3',
-        title: 'title3'
+        title: 'title3',
+        type: 'type3'
       }, {
         isDate: true,
         key: 'key4',
         search: true,
         title: 'title4',
+        type: 'type4',
         dateProperties: {
           start: {
             field: 'field4',
@@ -1109,6 +1134,7 @@ limitations under the License.
           key: 'key1',
           styleClass: 'styleClass1',
           title: 'title1',
+          type: 'type1',
           enableNetworkExpansion: true
         }]
       }, {
@@ -1136,6 +1162,7 @@ limitations under the License.
           key: 'key3',
           styleClass: 'styleClass3',
           title: 'title3',
+          type: 'type3',
           enableNetworkExpansion: true
         }]
       }, {
@@ -1165,7 +1192,8 @@ limitations under the License.
         key: 'key1',
         search: true,
         styleClass: 'styleClass1',
-        title: 'title1'
+        title: 'title1',
+        type: 'type1'
       }, {
         field: 'field2',
         group: 'groupB',
@@ -1173,14 +1201,16 @@ limitations under the License.
         key: 'key2',
         search: true,
         styleClass: 'styleClass2',
-        title: 'title2'
+        title: 'title2',
+        type: 'type2'
       }, {
         field: 'field3',
         icon: 'icon3',
         key: 'key3',
         search: true,
         styleClass: 'styleClass3',
-        title: 'title3'
+        title: 'title3',
+        type: 'type3'
       }, {
         field: 'field4',
         group: 'groupA',
@@ -1188,7 +1218,8 @@ limitations under the License.
         key: 'key4',
         search: true,
         styleClass: 'styleClass4',
-        title: 'title4'
+        title: 'title4',
+        type: 'type4'
       }, {
         field: 'field5',
         group: 'groupB',
@@ -1196,14 +1227,16 @@ limitations under the License.
         key: 'key5',
         search: true,
         styleClass: 'styleClass5',
-        title: 'title5'
+        title: 'title5',
+        type: 'type5'
       }, {
         field: 'field6',
         icon: 'icon6',
         key: 'key6',
         search: true,
         styleClass: 'styleClass6',
-        title: 'title6'
+        title: 'title6',
+        type: 'type6'
       }])).to.deep.equal([{
         type: undefined,
         name: 'groupA',
@@ -1213,6 +1246,7 @@ limitations under the License.
           key: 'key1',
           styleClass: 'styleClass1',
           title: 'title1',
+          type: 'type1',
           enableNetworkExpansion: false
         }, {
           field: 'field4',
@@ -1220,6 +1254,7 @@ limitations under the License.
           key: 'key4',
           styleClass: 'styleClass4',
           title: 'title4',
+          type: 'type4',
           enableNetworkExpansion: false
         }]
       }, {
@@ -1231,6 +1266,7 @@ limitations under the License.
           key: 'key2',
           styleClass: 'styleClass2',
           title: 'title2',
+          type: 'type2',
           enableNetworkExpansion: false
         }, {
           field: 'field5',
@@ -1238,6 +1274,7 @@ limitations under the License.
           key: 'key5',
           styleClass: 'styleClass5',
           title: 'title5',
+          type: 'type5',
           enableNetworkExpansion: false
         }]
       }, {
@@ -1249,6 +1286,7 @@ limitations under the License.
           key: 'key3',
           styleClass: 'styleClass3',
           title: 'title3',
+          type: 'type3',
           enableNetworkExpansion: false
         }, {
           field: 'field6',
@@ -1256,6 +1294,7 @@ limitations under the License.
           key: 'key6',
           styleClass: 'styleClass6',
           title: 'title6',
+          type: 'type6',
           enableNetworkExpansion: false
         }]
       }]);

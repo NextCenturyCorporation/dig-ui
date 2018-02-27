@@ -69,19 +69,24 @@ limitations under the License.
     });
 
     test('_createWebpageFieldConfig does return object with expected properties', function() {
-      var object = element._createWebpageFieldConfig();
+      var object = element._createWebpageFieldConfig({
+        resultIcon: 'TestIcon',
+        resultNamePlural: 'TestResults',
+        resultNameSingular: 'TestResult',
+        resultQueryField: 'TestQueryField'
+      });
       expect(object).to.be.an('Object');
-      expect(object.key).to.exist;
-      expect(object.color).to.exist;
-      expect(object.facets).to.exist;
-      expect(object.field).to.exist;
-      expect(object.group).to.exist;
-      expect(object.icon).to.exist;
-      expect(object.result).to.exist;
-      expect(object.search).to.exist;
-      expect(object.title).to.exist;
-      expect(object.titlePlural).to.exist;
-      expect(object.type).to.exist;
+      expect(object.key).to.equal('webpage');
+      expect(object.color).to.equal('');
+      expect(object.facets).to.be.false;
+      expect(object.field).to.equal('TestQueryField');
+      expect(object.group).to.equal('');
+      expect(object.icon).to.equal('TestIcon');
+      expect(object.result).to.equal('nested');
+      expect(object.search).to.be.false;
+      expect(object.title).to.equal('TestResult');
+      expect(object.titlePlural).to.equal('TestResults');
+      expect(object.type).to.equal('kg_id');
     });
 
     test('_initializeTransforms does return object with expected properties', function() {

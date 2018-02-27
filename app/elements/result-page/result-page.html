@@ -387,9 +387,9 @@ limitations under the License.
 
       <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="50">
         <div slot="dropdown-content">
-          <paper-icon-item disabled="[[!result.id]]" title$="Save This Result to Case..." on-tap="openSaveDialog">
+          <paper-icon-item disabled="[[!result.id]]" title$="Save This [[serverConfig.resultNameSingular]] to Case..." on-tap="openSaveDialog">
             <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
-            Save This Result to Case...
+            Save This [[serverConfig.resultNameSingular]] to Case...
           </paper-icon-item>
 
           <template is="dom-if" if="[[serverConfig.tagsListEndpoint]]">
@@ -419,13 +419,13 @@ limitations under the License.
 
     <template is="dom-if" if="[[resultLoading]]">
       <div class="layout horizontal center-justified flex">
-        <loading-spinner show type="Result"></loading-spinner>
+        <loading-spinner show type="[[serverConfig.resultNameSingular]]"></loading-spinner>
       </div>
     </template>
 
     <template is="dom-if" if="[[!resultLoading]]">
       <template is="dom-if" if="[[!result.id]]">
-        <div class="layout horizontal flex center-justified" style="padding: 10px;">Result Not Found</div>
+        <div class="layout horizontal flex center-justified" style="padding: 10px;">[[serverConfig.resultNameSingular]] Not Found</div>
       </template>
     </template>
 
@@ -580,8 +580,8 @@ limitations under the License.
               page="{{moreLikeThisPage}}"
               page-size="10"
               loading="[[moreLikeThisLoading]]"
-              pretty-name="Similar [[result.name]] Results"
-              pretty-name-singular="Similar [[result.name]] Result"
+              pretty-name="Similar [[serverConfig.resultNamePlural]]"
+              pretty-name-singular="Similar [[serverConfig.resultNameSingular]]"
               header="{{moreLikeThisTitle}}"
               client="[[esClient]]"
               id-field="_id"

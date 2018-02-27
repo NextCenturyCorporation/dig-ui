@@ -523,13 +523,14 @@ limitations under the License.
         index-name="[[esConfig.esIndex]]"
         index-types="[[esConfig.esType]]"
         pretty-domain="[[prettyDomain]]"
+        result-type="[[serverConfig.resultNameSingular]]"
         show="[[openedDatabaseDetail]]"
         timeline-function="[[transforms.entity.timelines]]"
         timestamp-field="timestamp_crawl">
       </database-details>
     </styled-dialog>
 
-    <styled-dialog fill header="Image Gallery of Webpage Results" opened="{{openedSearchImageGallery}}">
+    <styled-dialog fill header="Image Gallery of [[serverConfig.resultNamePlural]]" opened="{{openedSearchImageGallery}}">
       <image-gallery
         id="searchImageGallery"
         images="[[imagesFromResults]]"
@@ -617,9 +618,9 @@ limitations under the License.
             Bulk Search from Uploaded File or Text
           </paper-icon-item>
 
-          <paper-icon-item disabled="[[!imagesFromResults.length]]" title="View the Webpage Results in an Image Gallery" on-tap="openSearchImageGallery">
+          <paper-icon-item disabled="[[!imagesFromResults.length]]" title="View the [[serverConfig.resultNamePlural]] in an Image Gallery" on-tap="openSearchImageGallery">
             <iron-icon slot="item-icon" icon="image:photo" item-icon></iron-icon>
-            View Webpage Results in Image Gallery
+            View [[serverConfig.resultNamePlural]] in Image Gallery
           </paper-icon-item>
 
           <paper-icon-item title="View the DIG Database Details" on-tap="openDatabaseDetail">
@@ -761,10 +762,10 @@ limitations under the License.
                 <div class="layout horizontal center fields-menu">
                   <template is="dom-if" if="[[!timelineLoading]]">
                     <template is="dom-if" if="[[timelineResults.sparklines.length]]">
-                      <div class="layout flex timeline-info-text">Timeline of Search Results</div>
+                      <div class="layout flex timeline-info-text">Timeline of [[serverConfig.resultNamePlural]]</div>
                     </template>
                     <template is="dom-if" if="[[!timelineResults.sparklines.length]]">
-                      <div class="layout flex timeline-info-text">Timeline of Search Results Not Available</div>
+                      <div class="layout flex timeline-info-text">Timeline of [[serverConfig.resultNamePlural]] Not Available</div>
                     </template>
                   </template>
 
@@ -802,9 +803,10 @@ limitations under the License.
             <template is="dom-if" if="[[!pageWasNotJustOpened]]">
               <database-details
                 client="[[esClient]]"
-                pretty-domain="[[prettyDomain]]"
                 index-name="[[esConfig.esIndex]]"
                 index-types="[[esConfig.esType]]"
+                pretty-domain="[[prettyDomain]]"
+                result-type="[[serverConfig.resultNameSingular]]"
                 show="[[!pageWasNotJustOpened]]"
                 timeline-function="[[transforms.entity.timelines]]"
                 timestamp-field="timestamp_crawl">
@@ -821,8 +823,8 @@ limitations under the License.
               page="{{searchPage}}"
               page-size="10"
               loading="[[searchLoading]]"
-              pretty-name="Webpage Results"
-              pretty-name-singular="Webpage Result"
+              pretty-name="[[serverConfig.resultNamePlural]]"
+              pretty-name-singular="[[serverConfig.resultNameSingular]]"
               header="{{searchTitle}}"
               client="[[esClient]]"
               index-name="[[esConfig.esIndex]]"
