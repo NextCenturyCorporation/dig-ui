@@ -105,6 +105,8 @@ limitations under the License.
           imageField: this._createImageFieldConfig(),
           imageUrlPrefix: clientConfig.image_prefix || serverConfig.imageUrlPrefix || '',
           imageUrlSuffix: clientConfig.image_suffix || serverConfig.imageUrlSuffix || '',
+          showImagesInFacets: clientConfig.show_images_in_facets || false,
+          showImagesInSearch: clientConfig.show_images_in_search || false,
           webpageField: this._createWebpageFieldConfig(serverConfig)
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */

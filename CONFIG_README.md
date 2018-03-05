@@ -12,14 +12,14 @@ The project configuration can be set in one of two ways:
 
 ### Example
 
+The required project configuration properties are:
+
 ```
 {
   configuration: {
     sandpaper_<databaseType>_url: <searchEndpoint>
   },
   fields: { ... },
-  image_prefix: <string>,
-  image_suffix: <string>,
   index: {
     <databaseType>: <elasticsearchIndexName>
   },
@@ -27,7 +27,18 @@ The project configuration can be set in one of two ways:
 }
 ```
 
-Here, `<databaseType>` is the `DATABASE_TYPE` you set in the Server Configuration.  The `image_prefix` and `image_suffix` properties are optional.
+Here, `<databaseType>` is the `DATABASE_TYPE` you set in the Server Configuration.
+
+The optional project configuration properties are:
+
+```
+{
+  image_prefix: <string>,
+  image_suffix: <string>,
+  show_images_in_facets: <boolean>,
+  show_images_in_search: <boolean>
+}
+```
 
 ### Fields Config Options
 

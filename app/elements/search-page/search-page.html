@@ -552,7 +552,7 @@ limitations under the License.
             style="margin-left: 10px;"
             date-config="[[datePropertiesToKeys]]"
             free-text-search-fields="[[titleAndDescriptionSearchFields]]"
-            hide-images="[[!validateImageServiceConfig(serverConfig.imageServiceConfig)]]"
+            hide-images="[[!esConfig.showImagesInSearch]]"
             image-upload-url="[[findDigUrl(serverConfig.pathPrefix, '/uploadImage')]]"
             image-url-prefix="[[esConfig.imageUrlPrefix]]"
             image-url-suffix="[[esConfig.imageUrlSuffix]]"

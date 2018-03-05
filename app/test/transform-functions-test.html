@@ -51,6 +51,14 @@ limitations under the License.
       expect(element.transforms).to.not.exist;
     });
 
+    test('setting domain, clientConfig, and serverConfig does update esConfig and transforms', function() {
+      element.domain = 'TestDomain';
+      element.clientConfig = {};
+      element.serverConfig = {};
+      expect(element.esConfig).to.exist;
+      expect(element.transforms).to.exist;
+    });
+
     test('_createImageFieldConfig does return object with expected properties', function() {
       var object = element._createImageFieldConfig();
       expect(object).to.be.an('Object');
@@ -89,12 +97,239 @@ limitations under the License.
       expect(object.type).to.equal('kg_id');
     });
 
+    test('_initializeEsConfig with no domain or config does return undefined', function() {
+      expect(element._initializeEsConfig('TestDomain')).to.not.exist;
+      expect(element._initializeEsConfig(null, {})).to.not.exist;
+      expect(element._initializeEsConfig(null, {}, {})).to.not.exist;
+      expect(element._initializeEsConfig(null, null, {})).to.not.exist;
+      expect(element._initializeEsConfig('TestDomain', {}, null)).to.not.exist;
+      expect(element._initializeEsConfig('TestDomain', null, {})).to.not.exist;
+    });
+
+    test('_initializeEsConfig with only required config does return object with expected properties', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var config = element._initializeEsConfig('TestDomain', {
+        configuration: {
+          sandpaper_sample_url: '/TestSandpaperUrl'
+        },
+        index: {
+          sample: 'TestIndexName'
+        },
+        root_name: 'TestIndexType'
+      }, {
+        databaseType: 'sample',
+        esHost: {
+          host: 'TestHost'
+        }
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(config.downloadImageUrl).to.equal('');
+      expect(config.enableNetworkExpansion).to.be.true;
+      expect(config.esDataEndpoint).to.not.exist;
+      expect(config.esIndex).to.equal('TestIndexName');
+      expect(config.esType).to.equal('TestIndexType');
+      expect(config.imageField).to.deep.equal(element._createImageFieldConfig());
+      expect(config.imageUrlPrefix).to.equal('');
+      expect(config.imageUrlSuffix).to.equal('');
+      expect(config.searchEndpoint).to.equal('/TestSandpaperUrl/search/coarse?project=TestDomain');
+      expect(config.showImagesInFacets).to.be.false;
+      expect(config.showImagesInSearch).to.be.false;
+      expect(config.webpageField).to.deep.equal(element._createWebpageFieldConfig({}));
+    });
+
+    test('_initializeEsConfig with required and optional config does return object with expected properties', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var config = element._initializeEsConfig('TestDomain', {
+        configuration: {
+          sandpaper_full_url: '/TestSandpaperUrl'
+        },
+        index: {
+          full: 'TestIndexName'
+        },
+        image_prefix: 'TestClientConfigPrefix',
+        image_suffix: 'TestClientConfigSuffix',
+        show_images_in_facets: 'TestShowImagesInFacets',
+        show_images_in_search: 'TestShowImagesInSearch',
+        root_name: 'TestIndexType'
+      }, {
+        databaseType: 'full',
+        downloadImageUrl: '/TestDownloadImageUrl',
+        esHost: {
+          host: 'TestHost'
+        },
+        imageUrlPrefix: 'TestServerConfigPrefix',
+        imageUrlSuffix: 'TestServerConfigSuffix',
+        resultIcon: 'TestIcon',
+        resultNamePlural: 'TestResults',
+        resultNameSingular: 'TestResult',
+        resultQueryField: 'TestQueryField',
+        showEsData: true
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(config.downloadImageUrl).to.equal('/TestDownloadImageUrl');
+      expect(config.enableNetworkExpansion).to.be.true;
+      expect(config.esDataEndpoint).to.equal('TestHost/TestIndexName/TestIndexType/');
+      expect(config.esIndex).to.equal('TestIndexName');
+      expect(config.esType).to.equal('TestIndexType');
+      expect(config.imageField).to.deep.equal(element._createImageFieldConfig());
+      expect(config.imageUrlPrefix).to.equal('TestClientConfigPrefix');
+      expect(config.imageUrlSuffix).to.equal('TestClientConfigSuffix');
+      expect(config.searchEndpoint).to.equal('/TestSandpaperUrl/search/coarse?project=TestDomain');
+      expect(config.showImagesInFacets).to.equal('TestShowImagesInFacets');
+      expect(config.showImagesInSearch).to.equal('TestShowImagesInSearch');
+      expect(config.webpageField).to.deep.equal(element._createWebpageFieldConfig({
+        resultIcon: 'TestIcon',
+        resultNamePlural: 'TestResults',
+        resultNameSingular: 'TestResult',
+        resultQueryField: 'TestQueryField'
+      }));
+    });
+
+    test('_initializeEsConfig with path prefix does return object with expected properties', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var config = element._initializeEsConfig('TestDomain', {
+        configuration: {
+          sandpaper_sample_url: '/TestSandpaperUrl'
+        },
+        index: {
+          sample: 'TestIndexName'
+        },
+        root_name: 'TestIndexType'
+      }, {
+        databaseType: 'sample',
+        downloadImageUrl: '/TestDownloadImageUrl',
+        esHost: {
+          host: 'TestHost'
+        },
+        pathPrefix: '/TestPrefix'
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(config.downloadImageUrl).to.equal('/TestPrefix/TestDownloadImageUrl');
+      expect(config.searchEndpoint).to.equal('/TestPrefix/TestSandpaperUrl/search/coarse?project=TestDomain');
+    });
+
+    test('_initializeEsConfig with sendSearchesDirectlyToES does return object with expected properties', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var config = element._initializeEsConfig('TestDomain', {
+        configuration: {
+          sandpaper_sample_url: '/TestSandpaperUrl'
+        },
+        index: {
+          sample: 'TestIndexName'
+        },
+        root_name: 'TestIndexType'
+      }, {
+        databaseType: 'sample',
+        esHost: {
+          host: 'TestHost'
+        },
+        sendSearchesDirectlyToES: true
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(config.enableNetworkExpansion).to.be.false;
+      expect(config.searchEndpoint).to.not.exist;
+    });
+
+    test('_initializeEsConfig with overrideSearchEndpoint does return object with expected properties', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var config1 = element._initializeEsConfig('TestDomain', {
+        configuration: {
+          sandpaper_sample_url: '/TestSandpaperUrl'
+        },
+        index: {
+          sample: 'TestIndexName'
+        },
+        root_name: 'TestIndexType'
+      }, {
+        databaseType: 'sample',
+        esHost: {
+          host: 'TestHost'
+        },
+        overrideSearchEndpoint: '/TestSearchEndpoint/'
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(config1.searchEndpoint).to.equal('/TestSearchEndpoint/');
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var config2 = element._initializeEsConfig('TestDomain', {
+        configuration: {
+          sandpaper_sample_url: '/TestSandpaperUrl'
+        },
+        index: {
+          sample: 'TestIndexName'
+        },
+        root_name: 'TestIndexType'
+      }, {
+        databaseType: 'sample',
+        esHost: {
+          host: 'TestHost'
+        },
+        overrideSearchEndpoint: {
+          TestDomain: '/TestSearchEndpoint/'
+        }
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(config2.searchEndpoint).to.equal('/TestSearchEndpoint/');
+    });
+
+    test('_initializeEsConfig with searchConfig does return object with expected properties', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var config1 = element._initializeEsConfig('TestDomain', {
+        configuration: {
+          sandpaper_sample_url: '/TestSandpaperUrl'
+        },
+        index: {
+          sample: 'TestIndexName'
+        },
+        root_name: 'TestIndexType'
+      }, {
+        databaseType: 'sample',
+        esHost: {
+          host: 'TestHost'
+        },
+        searchConfig: {
+          '/TestSandpaperUrl': '/TestSearchEndpoint/'
+        }
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(config1.searchEndpoint).to.equal('/TestSearchEndpoint/?project=TestDomain');
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var config2 = element._initializeEsConfig('TestDomain', {
+        configuration: {
+          sandpaper_sample_url: '/TestSandpaperUrl'
+        },
+        index: {
+          sample: 'TestIndexName'
+        },
+        root_name: 'TestIndexType'
+      }, {
+        databaseType: 'sample',
+        esHost: {
+          host: 'TestHost'
+        },
+        searchConfig: {
+          TestDomain: '/TestSearchEndpoint/'
+        }
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(config2.searchEndpoint).to.equal('/TestSearchEndpoint/?project=TestDomain');
+    });
+
     test('_initializeTransforms does return object with expected properties', function() {
       expect(element._initializeTransforms()).to.not.exist;
-      expect(element._initializeTransforms('domain')).to.not.exist;
-      expect(element._initializeTransforms('domain', {})).to.not.exist;
-      var transforms = element._initializeTransforms('domain', {}, {
-        pathPrefix: 'testPrefix'
+      expect(element._initializeTransforms('TestDomain')).to.not.exist;
+      expect(element._initializeTransforms('TestDomain', {})).to.not.exist;
+      var transforms = element._initializeTransforms('TestDomain', {}, {
+        pathPrefix: '/TestPrefix'
       });
       expect(transforms).to.be.an('Object');
       expect(transforms.config).to.be.an('Object');

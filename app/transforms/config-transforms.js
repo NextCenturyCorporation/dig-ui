@@ -440,7 +440,9 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       });
 
       // Add the image field to show in the facets.
-      searchFields.push(esConfig.imageField);
+      if(esConfig.showImagesInFacets) {
+        searchFields.push(esConfig.imageField);
+      }
 
       // Add the webpage field for the user settings dialog config.
       searchFields.push(esConfig.webpageField);
