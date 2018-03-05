@@ -144,6 +144,7 @@ module.exports = function(app) {
       resultQueryField: serverConfig.resultQueryField,
       searchConfig: serverConfig.searchConfig,
       sendSearchesDirectlyToES: serverConfig.sendSearchesDirectlyToES,
+      showEsData: serverConfig.showEsData,
       stateIndexName: serverConfig.stateIndexName,
       stateIndexType: serverConfig.stateIndexType,
       tagsEntityEndpoint: serverConfig.tagsEntityEndpoint,

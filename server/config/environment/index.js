@@ -63,6 +63,7 @@ module.exports = {
     searchConfig: process.env.SEARCH_CONFIG ? JSON.parse(process.env.SEARCH_CONFIG) : undefined,
     secret: process.env.SECRET || 'dig memex',
     sendSearchesDirectlyToES: process.env.SEND_SEARCHES_DIRECTLY_TO_ES || false,
+    showEsData: process.env.SHOW_ES_DATA || false,
     stateIndexName: process.env.STATE_INDEX_NAME || 'dig-states',
     stateIndexType: process.env.STATE_INDEX_TYPE || 'state',
     tagsEntityEndpoint: process.env.TAGS_ENTITY_ENDPOINT,

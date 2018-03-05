@@ -2291,6 +2291,18 @@ limitations under the License.
         resultNameSingular: 'TestResult',
         resultQueryField: 'TestQueryField'
       };
+      expect(transformFunctions.esConfig.esDataEndpoint).to.not.exist;
+      transformFunctions.serverConfig = {
+        databaseType: 'sample',
+        esHost: {
+          host: 'TestHost'
+        },
+        resultIcon: 'TestIcon',
+        resultNamePlural: 'TestResults',
+        resultNameSingular: 'TestResult',
+        resultQueryField: 'TestQueryField',
+        showEsData: true
+      };
       expect(transformFunctions.esConfig.esDataEndpoint).to.equal('TestHost/TestIndexName/TestIndexType/');
 
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
