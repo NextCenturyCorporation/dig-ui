@@ -17,6 +17,7 @@ The project configuration can be set in one of two ways:
   configuration: {
     sandpaper_<databaseType>_url: <searchEndpoint>
   },
+  fields: { ... },
   image_prefix: <string>,
   image_suffix: <string>,
   index: {
@@ -26,7 +27,7 @@ The project configuration can be set in one of two ways:
 }
 ```
 
-Here, `<databaseType>` is the `DATABASE_TYPE` you set in the Server Configuration.
+Here, `<databaseType>` is the `DATABASE_TYPE` you set in the Server Configuration.  The `image_prefix` and `image_suffix` properties are optional.
 
 ### Fields Config Options
 
