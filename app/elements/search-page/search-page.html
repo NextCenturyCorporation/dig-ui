@@ -283,8 +283,8 @@ limitations under the License.
     <json-combine
       data-in1="[[searchFields]]"
       data-in2="{}"
-      data-out="{{titleAndDescriptionSearchFields}}"
-      combine-function="[[transforms.config.titleAndDescriptionSearchFields]]">
+      data-out="{{freeTextSearchFields}}"
+      combine-function="[[transforms.config.freeTextSearchFields]]">
     </json-combine>
 
     <json-combine
@@ -551,7 +551,7 @@ limitations under the License.
             class="layout vertical center flex"
             style="margin-left: 10px;"
             date-config="[[datePropertiesToKeys]]"
-            free-text-search-fields="[[titleAndDescriptionSearchFields]]"
+            free-text-search-fields="[[freeTextSearchFields]]"
             hide-images="[[!esConfig.showImagesInSearch]]"
             image-upload-url="[[findDigUrl(serverConfig.pathPrefix, '/uploadImage')]]"
             image-url-prefix="[[esConfig.imageUrlPrefix]]"
@@ -940,6 +940,10 @@ limitations under the License.
           type: Object
         },
 
+        freeTextSearchFields: {
+          type: Array
+        },
+
         hasHistory: {
           type: Boolean
         },
@@ -1139,10 +1143,6 @@ limitations under the License.
 
         tagManager: {
           type: Object
-        },
-
-        titleAndDescriptionSearchFields: {
-          type: Array
         },
 
         transforms: {

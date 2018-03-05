@@ -299,6 +299,18 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
+     * Returns the list of free text search fields.
+     *
+     * @param {Array} searchFields
+     * @return {Array}
+     */
+    freeTextSearchFields: function(searchFields) {
+      return searchFields.filter(function(searchFieldsObject) {
+        return searchFieldsObject.freeText;
+      });
+    },
+
+    /**
      * Returns the image source for the image with the given ID using the given config.
      *
      * @param {String} id
@@ -386,6 +398,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           field: fields[id].field || 'knowledge_graph.' + id + '.key',
           // The field order within a group.
           fieldOrder: fields[id].field_order,
+          // Whether to search on the field with the keywords in the free text search (the input field in the search page navigation bar).
+          freeText: fields[id].free_text_search || false,
           // The group for the facets, searchFieldsDialogConfig, and entity pages.
           group: fields[id].group_name,
           // The group order.
@@ -630,18 +644,6 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     sortSearchFieldsAlphabetically: function(searchFields) {
       return _.cloneDeep(searchFields).sort(function(a, b) {
         return a.title < b.title ? -1 : (a.title > b.title ? 1 : 0);
-      });
-    },
-
-    /**
-     * Returns the list of title and description search fields.
-     *
-     * @param {Array} searchFields
-     * @return {Array}
-     */
-    titleAndDescriptionSearchFields: function(searchFields) {
-      return searchFields.filter(function(searchFieldsObject) {
-        return searchFieldsObject.result === 'description' || searchFieldsObject.result === 'title';
       });
     }
   };
