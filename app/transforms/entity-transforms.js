@@ -75,7 +75,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     }
 
     if(config.type === 'image') {
-      extraction.downloadSource = (esConfig ? '/' + esConfig.downloadImageUrl || '' : '') + '/' + encodeURIComponent(item.key);
+      extraction.downloadSource = (esConfig ? esConfig.downloadImageUrl : '/') + (esConfig.downloadImageUrl === '/' ? '' : '/') + encodeURIComponent(item.key);
       extraction.source = commonTransforms.getImageUrl(item.key, esConfig);
     }
 

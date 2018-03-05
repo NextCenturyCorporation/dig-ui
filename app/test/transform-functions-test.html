@@ -110,7 +110,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: '/TestSandpaperUrl'
+          sandpaper_sample_url: 'TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -142,7 +142,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_full_url: '/TestSandpaperUrl'
+          sandpaper_full_url: 'TestSandpaperUrl'
         },
         index: {
           full: 'TestIndexName'
@@ -154,7 +154,7 @@ limitations under the License.
         root_name: 'TestIndexType'
       }, {
         databaseType: 'full',
-        downloadImageUrl: '/TestDownloadImageUrl',
+        downloadImageUrl: 'TestDownloadImageUrl',
         esHost: {
           host: 'TestHost'
         },
@@ -191,7 +191,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: '/TestSandpaperUrl'
+          sandpaper_sample_url: 'TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -199,11 +199,11 @@ limitations under the License.
         root_name: 'TestIndexType'
       }, {
         databaseType: 'sample',
-        downloadImageUrl: '/TestDownloadImageUrl',
+        downloadImageUrl: 'TestDownloadImageUrl',
         esHost: {
           host: 'TestHost'
         },
-        pathPrefix: '/TestPrefix'
+        pathPrefix: '/TestPrefix/'
       });
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
@@ -215,7 +215,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: '/TestSandpaperUrl'
+          sandpaper_sample_url: 'TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -238,7 +238,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config1 = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: '/TestSandpaperUrl'
+          sandpaper_sample_url: 'TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -258,7 +258,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config2 = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: '/TestSandpaperUrl'
+          sandpaper_sample_url: 'TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -282,7 +282,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config1 = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: '/TestSandpaperUrl'
+          sandpaper_sample_url: 'TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -294,7 +294,7 @@ limitations under the License.
           host: 'TestHost'
         },
         searchConfig: {
-          '/TestSandpaperUrl': '/TestSearchEndpoint/'
+          'TestSandpaperUrl': '/TestSearchEndpoint/'
         }
       });
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
@@ -304,7 +304,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config2 = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: '/TestSandpaperUrl'
+          sandpaper_sample_url: 'TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -329,7 +329,7 @@ limitations under the License.
       expect(element._initializeTransforms('TestDomain')).to.not.exist;
       expect(element._initializeTransforms('TestDomain', {})).to.not.exist;
       var transforms = element._initializeTransforms('TestDomain', {}, {
-        pathPrefix: '/TestPrefix'
+        pathPrefix: '/TestPrefix/'
       });
       expect(transforms).to.be.an('Object');
       expect(transforms.config).to.be.an('Object');

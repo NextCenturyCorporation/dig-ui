@@ -33,7 +33,13 @@ var upload = multer({
 
 var clientConfig = {};
 var serverConfig = require('./config/environment');
-var serverPath = serverConfig.pathPrefix ? '/' + serverConfig.pathPrefix : '';
+var serverPath = serverConfig.pathPrefix ? serverConfig.pathPrefix : '/';
+if(serverPath.indexOf('/') !== 0) {
+  serverPath = '/' + serverPath;
+}
+if(serverPath.lastIndexOf('/') !== (serverPath.length - 1)) {
+  serverPath += '/';
+}
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -55,7 +61,7 @@ module.exports = function(app) {
     // If the user is unauthorized (and is not already redirected to the login page), redirect to the login page.
     if(!req.query.access_token && !req.session.token && !req.session.login) {
       req.session.login = true;
-      res.redirect(serverPath + '/login' + req.originalUrl);
+      res.redirect(serverPath + 'login' + req.originalUrl);
       return;
     }
 
@@ -71,7 +77,7 @@ module.exports = function(app) {
       if(data.error) {
         console.log('Token Error', data.error);
         req.session.token = undefined;
-        res.redirect(serverPath + '/login' + url);
+        res.redirect(serverPath + 'login' + url);
         return;
       }
       // If the token is in the URL, save the token and redirect to the URL without the query token.
@@ -87,17 +93,17 @@ module.exports = function(app) {
     });
   });
 
-  app.get(serverPath + '/login/*', function(req, res) {
+  app.get(serverPath + 'login/*', function(req, res) {
     var redirectBackTo = req.protocol + '://' + req.get('host') + req.originalUrl.substring(('/login').length);
     req.session.login = false;
     res.redirect(serverConfig.authLoginUrl + encodeURIComponent(redirectBackTo));
   });
 
-  app.get(serverPath + '/file/:file', function(req, res) {
+  app.get(serverPath + 'file/:file', function(req, res) {
     res.download(req.params.file);
   });
 
-  app.get(serverPath + '/downloadImage/:id', function(req, res) {
+  app.get(serverPath + 'downloadImage/:id', function(req, res) {
     // Image URL used in testing.  Image URL used in development is set by DOWNLOAD_IMAGE_URL.
     var link = 'https://content.tellfinder.com/image/' + decodeURIComponent(req.params.id) + '.jpg';
     req.pipe(request(link)).pipe(res);
@@ -153,7 +159,7 @@ module.exports = function(app) {
     });
   });
 
-  app.post(serverPath + '/export', function(req, res) {
+  app.post(serverPath + 'export', function(req, res) {
     if(req.body && req.body.length > 1) {
       var filename = req.body[0] + '.csv';
       var header = req.body[1];
@@ -169,7 +175,7 @@ module.exports = function(app) {
           // Unset done so the response is not sent twice.
           done = false;
           writer.end();
-          res.status(200).set('Cache-Control', 'no-cache').send(serverPath + '/file/' + filename);
+          res.status(200).set('Cache-Control', 'no-cache').send(serverPath + 'file/' + filename);
         }
       });
       for(var i = 2; i < req.body.length; ++i) {
@@ -183,40 +189,40 @@ module.exports = function(app) {
     }
   });
 
-  app.post(serverPath + '/upload', upload.array('file'), function(req, res) {
+  app.post(serverPath + 'upload', upload.array('file'), function(req, res) {
     res.status(200).send(req.files[0].buffer.toString());
   });
 
-  app.post(serverPath + '/uploadImage', upload.array('file'), function(req, res) {
+  app.post(serverPath + 'uploadImage', upload.array('file'), function(req, res) {
       res.status(200).send({mimeType: req.files[0].mimetype, base64: req.files[0].buffer.toString('base64')});
   });
 
   // Deprecated
-  app.get(serverPath + '/document.html', function(req, res) {
+  app.get(serverPath + 'document.html', function(req, res) {
     res.sendFile(path.resolve(app.get('appPath') + '/result.html'));
   });
 
-  app.get(serverPath + '/cached.html', function(req, res) {
+  app.get(serverPath + 'cached.html', function(req, res) {
     res.sendFile(path.resolve(app.get('appPath') + '/cached.html'));
   });
 
-  app.get(serverPath + '/entity.html', function(req, res) {
+  app.get(serverPath + 'entity.html', function(req, res) {
     res.sendFile(path.resolve(app.get('appPath') + '/entity.html'));
   });
 
-  app.get(serverPath + '/help.html', function(req, res) {
+  app.get(serverPath + 'help.html', function(req, res) {
     res.sendFile(path.resolve(app.get('appPath') + '/help.html'));
   });
 
-  app.get(serverPath + '/result.html', function(req, res) {
+  app.get(serverPath + 'result.html', function(req, res) {
     res.sendFile(path.resolve(app.get('appPath') + '/result.html'));
   });
 
-  app.get(serverPath + '/search.html', function(req, res) {
+  app.get(serverPath + 'search.html', function(req, res) {
     res.sendFile(path.resolve(app.get('appPath') + '/search.html'));
   });
 
   app.get('/*', function(req, res) {
-    res.redirect(serverPath + '/search.html');
+    res.redirect(serverPath + 'search.html');
   });
 };

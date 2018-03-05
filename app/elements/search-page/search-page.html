@@ -461,7 +461,7 @@ limitations under the License.
       id="bulkSearchDialog"
       search-fields="[[sortedSearchFields]]"
       parameter-key="[[searchFields.0.key]]"
-      upload-endpoint="[[findDigUrl(serverConfig.pathPrefix, '/upload')]]"
+      upload-endpoint="[[findDigUrl(serverConfig.pathPrefix, 'upload')]]"
       search-parameters="{{searchParameters}}"
       process-request="{{processRequest}}"
       build-search-state="[[buildSearchState]]">
@@ -543,7 +543,7 @@ limitations under the License.
     <paper-header-panel class="flex" mode="waterfall">
       <paper-toolbar slot="header" id="pageNavbar">
         <div slot="top" class="layout horizontal flex">
-          <a id="logoLink" href="/" target="_blank" title="Open a DIG Search Page in a New Tab">
+          <a id="logoLink" href="[[serverConfig.pathPrefix]]" target="_blank" title="Open a DIG Search Page in a New Tab">
             <img id="logo" src="/dig-ui/dig-logo.png" alt="">
           </a>
 
@@ -553,7 +553,7 @@ limitations under the License.
             date-config="[[datePropertiesToKeys]]"
             free-text-search-fields="[[freeTextSearchFields]]"
             hide-images="[[!esConfig.showImagesInSearch]]"
-            image-upload-url="[[findDigUrl(serverConfig.pathPrefix, '/uploadImage')]]"
+            image-upload-url="[[findDigUrl(serverConfig.pathPrefix, 'uploadImage')]]"
             image-url-prefix="[[esConfig.imageUrlPrefix]]"
             image-url-suffix="[[esConfig.imageUrlSuffix]]"
             images="{{imagesUploaded}}"
@@ -752,7 +752,7 @@ limitations under the License.
                 <export-button
                   client="[[esClient]]"
                   data="[[searchResultsShown]]"
-                  export-endpoint="[[findDigUrl(serverConfig.pathPrefix, '/export')]]"
+                  export-endpoint="[[findDigUrl(serverConfig.pathPrefix, 'export')]]"
                   index-name="[[esConfig.esIndex]]"
                   index-types="[[esConfig.esType]]"
                   search-fields="[[searchFields]]"
