@@ -49,7 +49,6 @@ limitations under the License.
 <link rel="import" href="../../elements/behaviors.html">
 <link rel="import" href="../../elements/copy-button/copy-button.html">
 <link rel="import" href="../../elements/dual-column/dual-column.html">
-<link rel="import" href="../../elements/info-aggregations/info-aggregations.html">
 <link rel="import" href="../../elements/section-wrapper/section-wrapper.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
 <link rel="import" href="../../styles/entity-page-styles.html">
@@ -662,8 +661,6 @@ limitations under the License.
                   </terms-transformer>
 
                   <copy-button slot="title" data="[[item.aggregatedDataResults]]" name="[[item.entity.titlePlural]]" text-function="[[createCopyTextFunction(item.entity.isLocation)]]"></copy-button>
-
-                  <info-aggregations slot="title" entity="[[isEntity(item.entity)]]" page="[[pageName]]" type="[[item.entity.title]]"></info-aggregations>
                 </template>
 
                 <div class="layout horizontal center fields-menu bottom-margin">

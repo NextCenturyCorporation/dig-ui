@@ -41,8 +41,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/user-settings-dialog/user-settings-dialog.html">
 <link rel="import" href="../../elements/behaviors.html">
 <link rel="import" href="../../elements/copy-button/copy-button.html">
-<link rel="import" href="../../elements/info-revisions/info-revisions.html">
-<link rel="import" href="../../elements/info-similar-results/info-similar-results.html">
 <link rel="import" href="../../elements/section-wrapper/section-wrapper.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
 <link rel="import" href="../../styles/entity-page-styles.html">
@@ -521,10 +519,6 @@ limitations under the License.
               <div class="results-error">[[revisionErrorMessage]]</div>
             </template>
 
-            <template is="dom-if" if="[[revisionTotal]]">
-              <info-revisions></info-revisions>
-            </template>
-
             <result-list
               text-property="title"
               query-results="[[revisionResults]]"
@@ -572,10 +566,6 @@ limitations under the License.
             <template is="dom-if" if="[[moreLikeThisError]]">
               <elastic-error error="[[moreLikeThisError]]" message="{{moreLikeThisErrorMessage}}"></elastic-error>
               <div class="results-error">[[moreLikeThisErrorMessage]]</div>
-            </template>
-
-            <template is="dom-if" if="[[moreLikeThisTotal]]">
-              <info-similar-results></info-similar-results>
             </template>
 
             <result-list
