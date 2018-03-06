@@ -98,13 +98,14 @@ limitations under the License.
 
         /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
         var esConfig = {
-          downloadImageUrl: (serverConfig.pathPrefix || '/') + (serverConfig.downloadImageUrl || ''),
+          downloadImageUrl: serverConfig.downloadImageUrl ? ((serverConfig.pathPrefix || '/') + serverConfig.downloadImageUrl) : '',
           enableNetworkExpansion: !serverConfig.sendSearchesDirectlyToES,
           esIndex: (clientConfig.index && serverConfig.databaseType ? clientConfig.index[serverConfig.databaseType] : undefined),
           esType: clientConfig.root_name,
           imageField: this._createImageFieldConfig(),
           imageUrlPrefix: clientConfig.image_prefix || serverConfig.imageUrlPrefix || '',
           imageUrlSuffix: clientConfig.image_suffix || serverConfig.imageUrlSuffix || '',
+          newlineTag: clientConfig.newline_type === 'newline' ? '\n' : '<br/>',
           showImagesInFacets: clientConfig.show_images_in_facets || false,
           showImagesInSearch: clientConfig.show_images_in_search || false,
           webpageField: this._createWebpageFieldConfig(serverConfig)
@@ -131,8 +132,8 @@ limitations under the License.
             }
           }
 
-          if(esConfig.searchEndpoint && esConfig.searchEndpoint.indexOf('/') === 0 && serverConfig.pathPrefix) {
-            esConfig.searchEndpoint = serverConfig.pathPrefix + esConfig.searchEndpoint;
+          if(esConfig.searchEndpoint && esConfig.searchEndpoint.indexOf('/') === 0) {
+            esConfig.searchEndpoint = (serverConfig.pathPrefix || '/') + esConfig.searchEndpoint.slice(1);
           }
         }
 

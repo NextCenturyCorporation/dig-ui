@@ -110,7 +110,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: 'TestSandpaperUrl'
+          sandpaper_sample_url: '/TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -132,6 +132,7 @@ limitations under the License.
       expect(config.imageField).to.deep.equal(element._createImageFieldConfig());
       expect(config.imageUrlPrefix).to.equal('');
       expect(config.imageUrlSuffix).to.equal('');
+      expect(config.newlineTag).to.equal('<br/>');
       expect(config.searchEndpoint).to.equal('/TestSandpaperUrl/search/coarse?project=TestDomain');
       expect(config.showImagesInFacets).to.be.false;
       expect(config.showImagesInSearch).to.be.false;
@@ -142,13 +143,14 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_full_url: 'TestSandpaperUrl'
+          sandpaper_full_url: '/TestSandpaperUrl'
         },
         index: {
           full: 'TestIndexName'
         },
         image_prefix: 'TestClientConfigPrefix',
         image_suffix: 'TestClientConfigSuffix',
+        newline_type: 'newline',
         show_images_in_facets: 'TestShowImagesInFacets',
         show_images_in_search: 'TestShowImagesInSearch',
         root_name: 'TestIndexType'
@@ -176,6 +178,7 @@ limitations under the License.
       expect(config.imageField).to.deep.equal(element._createImageFieldConfig());
       expect(config.imageUrlPrefix).to.equal('TestClientConfigPrefix');
       expect(config.imageUrlSuffix).to.equal('TestClientConfigSuffix');
+      expect(config.newlineTag).to.equal('\n');
       expect(config.searchEndpoint).to.equal('/TestSandpaperUrl/search/coarse?project=TestDomain');
       expect(config.showImagesInFacets).to.equal('TestShowImagesInFacets');
       expect(config.showImagesInSearch).to.equal('TestShowImagesInSearch');
@@ -191,7 +194,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: 'TestSandpaperUrl'
+          sandpaper_sample_url: '/TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -215,7 +218,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: 'TestSandpaperUrl'
+          sandpaper_sample_url: '/TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -238,7 +241,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config1 = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: 'TestSandpaperUrl'
+          sandpaper_sample_url: '/TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -258,7 +261,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config2 = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: 'TestSandpaperUrl'
+          sandpaper_sample_url: '/TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -282,7 +285,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config1 = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: 'TestSandpaperUrl'
+          sandpaper_sample_url: '/TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
@@ -294,7 +297,7 @@ limitations under the License.
           host: 'TestHost'
         },
         searchConfig: {
-          'TestSandpaperUrl': '/TestSearchEndpoint/'
+          '/TestSandpaperUrl': '/TestSearchEndpoint/'
         }
       });
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
@@ -304,7 +307,7 @@ limitations under the License.
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var config2 = element._initializeEsConfig('TestDomain', {
         configuration: {
-          sandpaper_sample_url: 'TestSandpaperUrl'
+          sandpaper_sample_url: '/TestSandpaperUrl'
         },
         index: {
           sample: 'TestIndexName'
