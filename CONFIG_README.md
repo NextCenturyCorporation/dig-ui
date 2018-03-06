@@ -38,7 +38,7 @@ The optional project configuration properties are:
   image_suffix: <string>,
   newline_tag: <'newline'|'break'>,
   show_images_in_facets: <boolean>,
-  show_images_in_search: <boolean>
+  show_images_in_search_form: <boolean>
 }
 ```
 
