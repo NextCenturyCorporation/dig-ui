@@ -153,6 +153,7 @@ module.exports = function(app) {
       showEsData: serverConfig.showEsData,
       stateIndexName: serverConfig.stateIndexName,
       stateIndexType: serverConfig.stateIndexType,
+      supportEmail: serverConfig.supportEmail,
       tagsEntityEndpoint: serverConfig.tagsEntityEndpoint,
       tagsExtractionEndpoint: serverConfig.tagsExtractionEndpoint,
       tagsListEndpoint: serverConfig.tagsListEndpoint

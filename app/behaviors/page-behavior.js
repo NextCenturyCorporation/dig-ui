@@ -175,7 +175,9 @@ DigBehaviors.PageBehavior = {
   },
 
   sendSupportEmail: function() {
-    window.open('mailto:support@memex.software');
+    if(this.serverConfig.supportEmail) {
+      window.open('mailto:' + this.serverConfig.supportEmail);
+    }
   },
 
   toggleMenu: function() {

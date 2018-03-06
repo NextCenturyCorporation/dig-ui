@@ -66,6 +66,7 @@ module.exports = {
     showEsData: process.env.SHOW_ES_DATA || false,
     stateIndexName: process.env.STATE_INDEX_NAME || 'dig-states',
     stateIndexType: process.env.STATE_INDEX_TYPE || 'state',
+    supportEmail: process.env.SUPPORT_EMAIL || 'support@memex.software',
     tagsEntityEndpoint: process.env.TAGS_ENTITY_ENDPOINT,
     tagsExtractionEndpoint: process.env.TAGS_EXTRACTION_ENDPOINT,
     tagsListEndpoint: process.env.TAGS_LIST_ENDPOINT
