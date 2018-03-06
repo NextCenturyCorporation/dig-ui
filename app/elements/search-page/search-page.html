@@ -517,18 +517,20 @@ limitations under the License.
       on-response="handleImageFaceSearchResults">
     </iron-ajax>
 
-    <styled-dialog fill header="Database Details" opened="{{openedDatabaseDetail}}">
-      <database-details
-        client="[[esClient]]"
-        index-name="[[esConfig.esIndex]]"
-        index-types="[[esConfig.esType]]"
-        pretty-domain="[[prettyDomain]]"
-        result-type="[[serverConfig.resultNameSingular]]"
-        show="[[openedDatabaseDetail]]"
-        timeline-function="[[transforms.entity.timelines]]"
-        timestamp-field="timestamp_crawl">
-      </database-details>
-    </styled-dialog>
+    <template is="dom-if" if="[[!serverConfig.hideDatabaseInfo]]">
+      <styled-dialog fill header="Database Details" opened="{{openedDatabaseDetail}}">
+        <database-details
+          client="[[esClient]]"
+          index-name="[[esConfig.esIndex]]"
+          index-types="[[esConfig.esType]]"
+          pretty-domain="[[prettyDomain]]"
+          result-type="[[serverConfig.resultNameSingular]]"
+          show="[[openedDatabaseDetail]]"
+          timeline-function="[[transforms.entity.timelines]]"
+          timestamp-field="timestamp_crawl">
+        </database-details>
+      </styled-dialog>
+    </template>
 
     <styled-dialog fill header="Image Gallery of [[serverConfig.resultNamePlural]]" opened="{{openedSearchImageGallery}}">
       <image-gallery
@@ -566,29 +568,31 @@ limitations under the License.
             search-parameters="{{searchParameters}}">
           </search-fields-dialog>
 
-          <user-settings-dialog
-            enable-email-address
-            enable-search
-            build-popup-data-function="[[transforms.config.searchTerms]]"
-            build-state-data-function="[[transforms.config.searchState]]"
-            data-config="[[searchFieldsCollection]]"
-            function-config="[[searchFields]]"
-            profile-manager="[[profileManager]]"
-            reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
-            result-link-function="[[transforms.config.resultLink]]"
-            user-id="[[userId]]"
-            user-loading="[[userLoading]]"
-            username="[[serverConfig.username]]"
-            blur-images="{{blurImages}}"
-            cases="{{cases}}"
-            email-address="{{emailAddress}}"
-            network-expansion-parameters="{{networkExpansionParameters}}"
-            notifications="{{notifications}}"
-            notification-date="{{notificationDate}}"
-            notification-interval="{{notificationInterval}}"
-            process-request="{{processRequest}}"
-            search-parameters="{{searchParameters}}">
-          </user-settings-dialog>
+          <template is="dom-if" if="[[serverConfig.username]]">
+            <user-settings-dialog
+              enable-email-address
+              enable-search
+              build-popup-data-function="[[transforms.config.searchTerms]]"
+              build-state-data-function="[[transforms.config.searchState]]"
+              data-config="[[searchFieldsCollection]]"
+              function-config="[[searchFields]]"
+              profile-manager="[[profileManager]]"
+              reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
+              result-link-function="[[transforms.config.resultLink]]"
+              user-id="[[userId]]"
+              user-loading="[[userLoading]]"
+              username="[[serverConfig.username]]"
+              blur-images="{{blurImages}}"
+              cases="{{cases}}"
+              email-address="{{emailAddress}}"
+              network-expansion-parameters="{{networkExpansionParameters}}"
+              notifications="{{notifications}}"
+              notification-date="{{notificationDate}}"
+              notification-interval="{{notificationInterval}}"
+              process-request="{{processRequest}}"
+              search-parameters="{{searchParameters}}">
+            </user-settings-dialog>
+          </template>
 
           <paper-icon-button id="menuButton" icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
         </div>
@@ -596,15 +600,31 @@ limitations under the License.
 
       <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="50">
         <div slot="dropdown-content">
-          <paper-icon-item disabled="[[searchParametersDisabled(searchParameters, searchParameters.*)]]" title="Save Search to Case..." on-tap="openSaveDialog">
-            <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
-            Save Search to Case...
-          </paper-icon-item>
+          <template is="dom-if" if="[[serverConfig.username]]">
+            <paper-icon-item disabled="[[searchParametersDisabled(searchParameters, searchParameters.*)]]" title="Save Search to Case..." on-tap="openSaveDialog">
+              <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
+              Save Search to Case...
+            </paper-icon-item>
+          </template>
 
           <paper-icon-item disabled="[[!hasHistory]]" title="View Your Search History" on-tap="openStateHistoryDialog">
             <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
             View Your Search History
           </paper-icon-item>
+
+          <template is="dom-if" if="[[!serverConfig.hideBulkSearch]]">
+            <paper-icon-item title="Upload a File with Search Terms or Copy & Paste Text" on-tap="openBulkSearchDialog">
+              <iron-icon slot="item-icon" icon="fa:upload" item-icon></iron-icon>
+              Bulk Search from Uploaded File or Text
+            </paper-icon-item>
+          </template>
+
+          <template is="dom-if" if="[[esConfig.showImagesInFacets]]">
+            <paper-icon-item disabled="[[!imagesFromResults.length]]" title="View the [[serverConfig.resultNamePlural]] in an Image Gallery" on-tap="openSearchImageGallery">
+              <iron-icon slot="item-icon" icon="image:photo" item-icon></iron-icon>
+              View [[serverConfig.resultNamePlural]] in Image Gallery
+            </paper-icon-item>
+          </template>
 
           <template is="dom-if" if="[[serverConfig.tagsListEndpoint]]">
             <paper-icon-item title="View DIG Data Training Options" on-tap="openTagsDialog">
@@ -613,20 +633,12 @@ limitations under the License.
             </paper-icon-item>
           </template>
 
-          <paper-icon-item title="Upload a File with Search Terms or Copy & Paste Text" on-tap="openBulkSearchDialog">
-            <iron-icon slot="item-icon" icon="fa:upload" item-icon></iron-icon>
-            Bulk Search from Uploaded File or Text
-          </paper-icon-item>
-
-          <paper-icon-item disabled="[[!imagesFromResults.length]]" title="View the [[serverConfig.resultNamePlural]] in an Image Gallery" on-tap="openSearchImageGallery">
-            <iron-icon slot="item-icon" icon="image:photo" item-icon></iron-icon>
-            View [[serverConfig.resultNamePlural]] in Image Gallery
-          </paper-icon-item>
-
-          <paper-icon-item title="View the DIG Database Details" on-tap="openDatabaseDetail">
-            <iron-icon slot="item-icon" icon="fa:info-circle" item-icon></iron-icon>
-            View DIG Database Details
-          </paper-icon-item>
+          <template is="dom-if" if="[[!serverConfig.hideDatabaseInfo]]">
+            <paper-icon-item title="View the DIG Database Details" on-tap="openDatabaseDetail">
+              <iron-icon slot="item-icon" icon="fa:info-circle" item-icon></iron-icon>
+              View DIG Database Details
+            </paper-icon-item>
+          </template>
 
           <paper-icon-item title="Open a DIG Search Page in a New Tab" on-tap="openNewTab">
             <iron-icon slot="item-icon" icon="fa:external-link-square" item-icon></iron-icon>
@@ -809,17 +821,19 @@ limitations under the License.
               </paper-material>
             </template>
 
-            <template is="dom-if" if="[[!pageWasNotJustOpened]]">
-              <database-details
-                client="[[esClient]]"
-                index-name="[[esConfig.esIndex]]"
-                index-types="[[esConfig.esType]]"
-                pretty-domain="[[prettyDomain]]"
-                result-type="[[serverConfig.resultNameSingular]]"
-                show="[[!pageWasNotJustOpened]]"
-                timeline-function="[[transforms.entity.timelines]]"
-                timestamp-field="timestamp_crawl">
-              </database-details>
+            <template is="dom-if" if="[[!serverConfig.hideDatabaseInfo]]">
+              <template is="dom-if" if="[[!pageWasNotJustOpened]]">
+                <database-details
+                  client="[[esClient]]"
+                  index-name="[[esConfig.esIndex]]"
+                  index-types="[[esConfig.esType]]"
+                  pretty-domain="[[prettyDomain]]"
+                  result-type="[[serverConfig.resultNameSingular]]"
+                  show="[[!pageWasNotJustOpened]]"
+                  timeline-function="[[transforms.entity.timelines]]"
+                  timestamp-field="timestamp_crawl">
+                </database-details>
+              </template>
             </template>
 
             <result-list

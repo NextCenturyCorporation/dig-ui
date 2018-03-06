@@ -125,7 +125,7 @@ module.exports = function(app) {
 
     res.status(200).send({
       appVersion: serverConfig.appVersion,
-      username: req.session.username ? req.session.username : 'username',
+      username: req.session.username || '',
       configEndpoint: serverConfig.configEndpoint,
       configPassword: serverConfig.configPassword,
       configUsername: serverConfig.configUsername,
@@ -133,6 +133,8 @@ module.exports = function(app) {
       defaultProject: serverConfig.defaultProject,
       downloadImageUrl: serverConfig.downloadImageUrl,
       esHost: serverConfig.esHost,
+      hideBulkSearch: serverConfig.hideBulkSearch,
+      hideDatabaseInfo: serverConfig.hideDatabaseInfo,
       imageServiceConfig: serverConfig.imageServiceConfig,
       imageUrlPrefix: serverConfig.imageUrlPrefix,
       imageUrlSuffix: serverConfig.imageUrlSuffix,

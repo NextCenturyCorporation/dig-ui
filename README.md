@@ -54,6 +54,8 @@ DEFAULT_PROJECT | The default project. | undefined
 DOWNLOAD_IMAGE_URL | The download endpoint to get the image data for the image URLs for the PDF export. | 'downloadImage'
 ES_HOST | The stringified object containing the location of the elasticsearch instance.  Supports all configuration options for the elasticsearch.js v12 client. | '{"apiVersion":"2.4","host": "http://localhost:9200"}'
 ES_HOST_STRING | The string location of the elasticsearch instance with username and password authorization (if needed).  Used for the curl commands run by the node/express server.  Formatted 'http(s)://(username:password@)host:port'. | ''
+HIDE_BULK_SEARCH | Whether to hide the bulk search in the option menu. | false
+HIDE_DATABASE_INFO | Whether to hide the database info/timeline on the search page and in the option menu. | false
 IMAGE_SERVICE_CONFIG | The stringified object containing the username and password authorization, hostnames, and endpoints for the similar image REST service.  Syntax:  { auth: { user: username, password: password }, host: { face: hostname, similarity: hostname }, endpoint: { data: endpoint, link: endpoint } } | '{"auth": {}, "endpoint": {}, "host": {}}'
 IMAGE_URL_PREFIX | The prefix added to the start of the image URLs (if not specified in the project config). | ''
 IMAGE_URL_SUFFIX | The suffix added to the end of the image URLs (if not specified in the project config). | ''
@@ -74,7 +76,7 @@ SHOW_ES_DATA | Whether to show a link to the elasticsearch data page of search r
 SUPPORT_EMAIL | The support email for the 'Contact Us' menu option. | 'support@memex.software'
 STATE_INDEX | The elasticsearch state index name. | 'dig-states'
 STATE_TYPE | The elasticsearch state index type. | 'state'
-TAG_ENTITY_ENDPOINT | The entity endpoint for the MyDIG tag REST service. | undefined
+TAG_ENTITY_ENDPOINT | The entity endpoint for the MyDIG tag REST service.  If defined, shows the View DIG Data Training Options in the option menu. | undefined
 TAG_EXTRACTION_ENDPOINT | The extraction endpoint for the MyDIG tag REST service. | undefined
 TAG_LIST_ENDPOINT | The tag list endpoint for the MyDIG tag REST service. | undefined
 

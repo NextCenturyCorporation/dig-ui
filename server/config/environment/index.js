@@ -45,6 +45,8 @@ module.exports = {
     downloadImageUrl: process.env.DOWNLOAD_IMAGE_URL || 'downloadImage',
     esHost: JSON.parse(process.env.ES_HOST || '{"apiVersion":"2.4","host":"http://localhost:9200"}'),
     esHostString: process.env.ES_HOST_STRING || '',
+    hideBulkSearch: process.env.HIDE_BULK_SEARCH || false,
+    hideDatabaseInfo: process.env.HIDE_DATABASE_INFO || false,
     imageServiceConfig: JSON.parse(process.env.IMAGE_SERVICE_CONFIG || '{"auth":{},"endpoint":{},"host":{}}'),
     imageUrlPrefix: process.env.IMAGE_URL_PREFIX || '',
     imageUrlSuffix: process.env.IMAGE_URL_SUFFIX || '',

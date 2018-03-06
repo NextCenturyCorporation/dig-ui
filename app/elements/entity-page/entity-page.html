@@ -446,35 +446,39 @@ limitations under the License.
         </template>
       </div>
 
-      <user-settings-dialog
-        enable-email-address
-        build-popup-data-function="[[transforms.config.searchTerms]]"
-        build-state-data-function="[[transforms.config.searchState]]"
-        data-config="[[searchFieldsCollection]]"
-        function-config="[[searchFields]]"
-        profile-manager="[[profileManager]]"
-        reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
-        result-link-function="[[transforms.config.resultLink]]"
-        user-id="[[userId]]"
-        user-loading="[[userLoading]]"
-        username="[[serverConfig.username]]"
-        blur-images="{{blurImages}}"
-        cases="{{cases}}"
-        email-address="{{emailAddress}}"
-        notifications="{{notifications}}"
-        notification-date="{{notificationDate}}"
-        notification-interval="{{notificationInterval}}"
-        process-request="{{processRequest}}">
-      </user-settings-dialog>
+      <template is="dom-if" if="[[serverConfig.username]]">
+        <user-settings-dialog
+          enable-email-address
+          build-popup-data-function="[[transforms.config.searchTerms]]"
+          build-state-data-function="[[transforms.config.searchState]]"
+          data-config="[[searchFieldsCollection]]"
+          function-config="[[searchFields]]"
+          profile-manager="[[profileManager]]"
+          reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
+          result-link-function="[[transforms.config.resultLink]]"
+          user-id="[[userId]]"
+          user-loading="[[userLoading]]"
+          username="[[serverConfig.username]]"
+          blur-images="{{blurImages}}"
+          cases="{{cases}}"
+          email-address="{{emailAddress}}"
+          notifications="{{notifications}}"
+          notification-date="{{notificationDate}}"
+          notification-interval="{{notificationInterval}}"
+          process-request="{{processRequest}}">
+        </user-settings-dialog>
+      </template>
 
       <paper-icon-button id="menuButton" icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
       <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="50">
         <div slot="dropdown-content">
-          <paper-icon-item disabled="[[!pageConfig]]" title="Save This [[pageConfig.title]] to Case..." on-tap="openSaveDialog">
-            <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
-            Save This [[pageConfig.title]] to Case...
-          </paper-icon-item>
+          <template is="dom-if" if="[[serverConfig.username]]">
+            <paper-icon-item disabled="[[!pageConfig]]" title="Save This [[pageConfig.title]] to Case..." on-tap="openSaveDialog">
+              <iron-icon slot="item-icon" icon="fa:floppy-o" item-icon></iron-icon>
+              Save This [[pageConfig.title]] to Case...
+            </paper-icon-item>
+          </template>
 
           <paper-icon-item disabled="[[!hasHistory]]" disabled="[[!pageConfig]]" title="View This Page's Filter History" on-tap="openStateHistoryDialog">
             <iron-icon slot="item-icon" icon="fa:history" item-icon></iron-icon>
