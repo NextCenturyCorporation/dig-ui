@@ -465,30 +465,32 @@ limitations under the License.
       build-search-state="[[buildSearchState]]">
     </bulk-search>
 
-    <elastic-client-aggregation-builder
-      name="[[createSparklineAggregationName(dateFieldsToProperties, dateMenu.selected)]]"
-      type="date_histogram"
-      count="0"
-      field="[[dateMenu.selected]]"
-      interval="week"
-      filters="[]"
-      ejs-aggregation="{{dateAggregation}}">
-    </elastic-client-aggregation-builder>
+    <template is="dom-if" if="[[!esConfig.hideTimelines]]">
+      <elastic-client-aggregation-builder
+        name="[[createSparklineAggregationName(dateFieldsToProperties, dateMenu.selected)]]"
+        type="date_histogram"
+        count="0"
+        field="[[dateMenu.selected]]"
+        interval="week"
+        filters="[]"
+        ejs-aggregation="{{dateAggregation}}">
+      </elastic-client-aggregation-builder>
 
-    <template is="dom-if" if="[[dateAggregation]]">
-      <build-and-run-query
-        query="[[esQuery]]"
-        client="[[esClient]]"
-        index-name="[[esConfig.esIndex]]"
-        index-types="[[esConfig.esType]]"
-        aggregations="[[buildArray(dateAggregation)]]"
-        page-size="0"
-        transform-config="[[createSparklineAggregationConfig(dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
-        transform-function="[[transforms.entity.searchPageTimeline]]"
-        error="{{timelineError}}"
-        loading="{{timelineLoading}}"
-        results="{{timelineResults}}">
-      </build-and-run-query>
+      <template is="dom-if" if="[[dateAggregation]]">
+        <build-and-run-query
+          query="[[esQuery]]"
+          client="[[esClient]]"
+          index-name="[[esConfig.esIndex]]"
+          index-types="[[esConfig.esType]]"
+          aggregations="[[buildArray(dateAggregation)]]"
+          page-size="0"
+          transform-config="[[createSparklineAggregationConfig(dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
+          transform-function="[[transforms.entity.searchPageTimeline]]"
+          error="{{timelineError}}"
+          loading="{{timelineLoading}}"
+          results="{{timelineResults}}">
+        </build-and-run-query>
+      </template>
     </template>
 
     <iron-ajax
@@ -772,47 +774,49 @@ limitations under the License.
               </paper-material>
             </template>
 
-            <template is="dom-if" if="[[searchResultsShown.length]]">
-              <paper-material slot="header" id="searchTimeline" class="layout vertical">
-                <div class="layout horizontal center fields-menu">
+            <template is="dom-if" if="[[!esConfig.hideTimelines]]">
+              <template is="dom-if" if="[[searchResultsShown.length]]">
+                <paper-material slot="header" id="searchTimeline" class="layout vertical">
+                  <div class="layout horizontal center fields-menu">
+                    <template is="dom-if" if="[[!timelineLoading]]">
+                      <template is="dom-if" if="[[timelineResults.sparklines.length]]">
+                        <div class="layout flex timeline-info-text">Timeline of [[serverConfig.resultNamePlural]]</div>
+                      </template>
+                      <template is="dom-if" if="[[!timelineResults.sparklines.length]]">
+                        <div class="layout flex timeline-info-text">Timeline of [[serverConfig.resultNamePlural]] Not Available</div>
+                      </template>
+                    </template>
+
+                    <dropdown-menu
+                      data="[[dateMenu.fields]]"
+                      label="Date"
+                      no-label-float
+                      selected="{{dateMenu.selected}}"
+                      value-property="field">
+                    </dropdown-menu>
+                  </div>
+
+                  <template is="dom-if" if="[[timelineLoading]]">
+                    <loading-spinner show type="Timeline"></loading-spinner>
+                  </template>
+
                   <template is="dom-if" if="[[!timelineLoading]]">
                     <template is="dom-if" if="[[timelineResults.sparklines.length]]">
-                      <div class="layout flex timeline-info-text">Timeline of [[serverConfig.resultNamePlural]]</div>
-                    </template>
-                    <template is="dom-if" if="[[!timelineResults.sparklines.length]]">
-                      <div class="layout flex timeline-info-text">Timeline of [[serverConfig.resultNamePlural]] Not Available</div>
+                      <sparkline-list time-interval="week" hide-name data="[[timelineResults.sparklines]]"></sparkline-list>
+
+                      <div class="layout horizontal timeline-info-text">
+                        <template is="dom-if" if="[[timelineResults.begin]]">
+                          <div>[[timelineResults.begin]]</div>
+                        </template>
+                        <div class="flex"></div>
+                        <template is="dom-if" if="[[timelineResults.end]]">
+                          <div>[[timelineResults.end]]</div>
+                        </template>
+                      </div>
                     </template>
                   </template>
-
-                  <dropdown-menu
-                    data="[[dateMenu.fields]]"
-                    label="Date"
-                    no-label-float
-                    selected="{{dateMenu.selected}}"
-                    value-property="field">
-                  </dropdown-menu>
-                </div>
-
-                <template is="dom-if" if="[[timelineLoading]]">
-                  <loading-spinner show type="Timeline"></loading-spinner>
-                </template>
-
-                <template is="dom-if" if="[[!timelineLoading]]">
-                  <template is="dom-if" if="[[timelineResults.sparklines.length]]">
-                    <sparkline-list time-interval="week" hide-name data="[[timelineResults.sparklines]]"></sparkline-list>
-
-                    <div class="layout horizontal timeline-info-text">
-                      <template is="dom-if" if="[[timelineResults.begin]]">
-                        <div>[[timelineResults.begin]]</div>
-                      </template>
-                      <div class="flex"></div>
-                      <template is="dom-if" if="[[timelineResults.end]]">
-                        <div>[[timelineResults.end]]</div>
-                      </template>
-                    </div>
-                  </template>
-                </template>
-              </paper-material>
+                </paper-material>
+              </template>
             </template>
 
             <template is="dom-if" if="[[!serverConfig.hideDatabaseInfo]]">

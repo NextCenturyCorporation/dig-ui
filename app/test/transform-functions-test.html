@@ -129,6 +129,7 @@ limitations under the License.
       expect(config.esDataEndpoint).to.not.exist;
       expect(config.esIndex).to.equal('TestIndexName');
       expect(config.esType).to.equal('TestIndexType');
+      expect(config.hideTimelines).to.be.false;
       expect(config.imageField).to.deep.equal(element._createImageFieldConfig());
       expect(config.imageUrlPrefix).to.equal('');
       expect(config.imageUrlSuffix).to.equal('');
@@ -148,6 +149,7 @@ limitations under the License.
         index: {
           full: 'TestIndexName'
         },
+        hide_timelines: true,
         image_prefix: 'TestClientConfigPrefix',
         image_suffix: 'TestClientConfigSuffix',
         newline_type: 'newline',
@@ -175,6 +177,7 @@ limitations under the License.
       expect(config.esDataEndpoint).to.equal('TestHost/TestIndexName/TestIndexType/');
       expect(config.esIndex).to.equal('TestIndexName');
       expect(config.esType).to.equal('TestIndexType');
+      expect(config.hideTimelines).to.be.true;
       expect(config.imageField).to.deep.equal(element._createImageFieldConfig());
       expect(config.imageUrlPrefix).to.equal('TestClientConfigPrefix');
       expect(config.imageUrlSuffix).to.equal('TestClientConfigSuffix');

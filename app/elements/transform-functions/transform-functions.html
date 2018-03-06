@@ -102,6 +102,7 @@ limitations under the License.
           enableNetworkExpansion: !serverConfig.sendSearchesDirectlyToES,
           esIndex: (clientConfig.index && serverConfig.databaseType ? clientConfig.index[serverConfig.databaseType] : undefined),
           esType: clientConfig.root_name,
+          hideTimelines: clientConfig.hide_timelines || false,
           imageField: this._createImageFieldConfig(),
           imageUrlPrefix: clientConfig.image_prefix || serverConfig.imageUrlPrefix || '',
           imageUrlSuffix: clientConfig.image_suffix || serverConfig.imageUrlSuffix || '',

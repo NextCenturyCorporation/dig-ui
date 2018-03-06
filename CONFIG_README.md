@@ -33,6 +33,7 @@ The optional project configuration properties are:
 
 ```
 {
+  hide_timelines: <boolean>,
   image_prefix: <string>,
   image_suffix: <string>,
   newline_tag: <'newline'|'break'>,
