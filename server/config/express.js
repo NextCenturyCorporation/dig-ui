@@ -32,6 +32,12 @@ var errorHandler = require('errorhandler');
 var path = require('path');
 var serverConfig = require('./environment');
 var serverPath = serverConfig.pathPrefix ? serverConfig.pathPrefix : '/';
+if(serverPath.indexOf('/') !== 0) {
+  serverPath = '/' + serverPath;
+}
+if(serverPath.lastIndexOf('/') !== (serverPath.length - 1)) {
+  serverPath += '/';
+}
 
 module.exports = function(app) {
   var env = app.get('env');
