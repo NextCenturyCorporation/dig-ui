@@ -706,7 +706,9 @@ limitations under the License.
 
                 <template is="dom-if" if="[[!item.timelineLoading]]">
                   <template is="dom-if" if="[[item.timelineResults.sparklines.length]]">
-                    <sparkline-list hide-sparkline-chart="[[!item.loadData]]" data="[[item.timelineResults.sparklines]]"></sparkline-list>
+                    <template is="dom-if" if="[[!esConfig.hideTimelines]]">
+                      <sparkline-list hide-sparkline-chart="[[!item.loadData]]" data="[[item.timelineResults.sparklines]]"></sparkline-list>
+                    </template>
 
                     <div class="layout horizontal center bottom-margin">
                       <button-action icon="timeline" text="[[createBarChartButtonText(item.showBarChart)]]" click-listener="[[createToggleBarChartListener(index)]]"></button-action>
