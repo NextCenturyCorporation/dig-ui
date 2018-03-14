@@ -404,7 +404,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     resultObject.details.push({
       name: 'Cached Page',
       link: commonTransforms.getLink(id, 'cached'),
-      text: 'Open in New Tab (Danger:  Unsafe)'
+      text: 'Open in New Tab (Runs External Code)'
     });
 
     // The images should be undefined by default.

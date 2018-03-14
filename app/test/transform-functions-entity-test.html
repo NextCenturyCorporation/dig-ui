@@ -826,7 +826,7 @@ limitations under the License.
       }, {
         name: 'Cached Page',
         link: '/cached.html?domain=TestDomain&id=ABC123',
-        text: 'Open in New Tab (Danger:  Unsafe)'
+        text: 'Open in New Tab (Runs External Code)'
       }]);
 
       expect(output.DEF456.id).to.equal('DEF456');
@@ -929,7 +929,7 @@ limitations under the License.
       }, {
         name: 'Cached Page',
         link: '/cached.html?domain=TestDomain&id=DEF456',
-        text: 'Open in New Tab (Danger:  Unsafe)'
+        text: 'Open in New Tab (Runs External Code)'
       }]);
     });
 
@@ -1240,7 +1240,7 @@ limitations under the License.
 
       expect(output.ABC123.details[2].name).to.equal('Cached Page');
       expect(output.ABC123.details[2].link).to.equal('/cached.html?domain=TestDomain&id=ABC123');
-      expect(output.ABC123.details[2].text).to.equal('Open in New Tab (Danger:  Unsafe)');
+      expect(output.ABC123.details[2].text).to.equal('Open in New Tab (Runs External Code)');
 
       expect(output.DEF456.id).to.equal('DEF456');
       expect(output.DEF456.description).to.equal('This is description 3');
@@ -1442,7 +1442,7 @@ limitations under the License.
 
       expect(output.DEF456.details[2].name).to.equal('Cached Page');
       expect(output.DEF456.details[2].link).to.equal('/cached.html?domain=TestDomain&id=DEF456');
-      expect(output.DEF456.details[2].text).to.equal('Open in New Tab (Danger:  Unsafe)');
+      expect(output.DEF456.details[2].text).to.equal('Open in New Tab (Runs External Code)');
     });
 
     test('nestedResults given images does return expected object', function() {
@@ -1656,7 +1656,7 @@ limitations under the License.
       }, {
         name: 'Cached Page',
         link: '/cached.html?domain=TestDomain&id=ABC123',
-        text: 'Open in New Tab (Danger:  Unsafe)'
+        text: 'Open in New Tab (Runs External Code)'
       }]);
     });
 
@@ -1964,7 +1964,7 @@ limitations under the License.
 
       expect(output.details[2].name).to.equal('Cached Page');
       expect(output.details[2].link).to.equal('/cached.html?domain=TestDomain&id=ABC123');
-      expect(output.details[2].text).to.equal('Open in New Tab (Danger:  Unsafe)');
+      expect(output.details[2].text).to.equal('Open in New Tab (Runs External Code)');
     });
 
     test('result given confidences does return expected object', function() {
@@ -2237,7 +2237,7 @@ limitations under the License.
 
       expect(output.details[3].name).to.equal('Cached Page');
       expect(output.details[3].link).to.equal('/cached.html?domain=TestDomain&id=ABC123');
-      expect(output.details[3].text).to.equal('Open in New Tab (Danger:  Unsafe)');
+      expect(output.details[3].text).to.equal('Open in New Tab (Runs External Code)');
 
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       output = transformFunctions.transforms.entity.result({
@@ -2269,7 +2269,7 @@ limitations under the License.
 
       expect(output.details[3].name).to.equal('Cached Page');
       expect(output.details[3].link).to.equal('/cached.html?domain=TestDomain&id=ABC123');
-      expect(output.details[3].text).to.equal('Open in New Tab (Danger:  Unsafe)');
+      expect(output.details[3].text).to.equal('Open in New Tab (Runs External Code)');
     });
 
     test('result given elasticsearch data enpoint does return expected object', function() {
@@ -2334,7 +2334,7 @@ limitations under the License.
 
       expect(output.details[3].name).to.equal('Cached Page');
       expect(output.details[3].link).to.equal('/cached.html?domain=TestDomain&id=ABC123');
-      expect(output.details[3].text).to.equal('Open in New Tab (Danger:  Unsafe)');
+      expect(output.details[3].text).to.equal('Open in New Tab (Runs External Code)');
     });
 
     test('results given incomplete data does return empty object', function() {
@@ -2487,7 +2487,7 @@ limitations under the License.
       }, {
         name: 'Cached Page',
         link: '/cached.html?domain=TestDomain&id=ABC123',
-        text: 'Open in New Tab (Danger:  Unsafe)'
+        text: 'Open in New Tab (Runs External Code)'
       }]);
 
       expect(output[1].id).to.equal('DEF456');
@@ -2590,7 +2590,7 @@ limitations under the License.
       }, {
         name: 'Cached Page',
         link: '/cached.html?domain=TestDomain&id=DEF456',
-        text: 'Open in New Tab (Danger:  Unsafe)'
+        text: 'Open in New Tab (Runs External Code)'
       }]);
     });
 
@@ -2900,7 +2900,7 @@ limitations under the License.
 
       expect(output[0].details[2].name).to.equal('Cached Page');
       expect(output[0].details[2].link).to.equal('/cached.html?domain=TestDomain&id=ABC123');
-      expect(output[0].details[2].text).to.equal('Open in New Tab (Danger:  Unsafe)');
+      expect(output[0].details[2].text).to.equal('Open in New Tab (Runs External Code)');
 
       expect(output[1].id).to.equal('DEF456');
       expect(output[1].description).to.equal('This is description 3');
@@ -3102,7 +3102,7 @@ limitations under the License.
 
       expect(output[1].details[2].name).to.equal('Cached Page');
       expect(output[1].details[2].link).to.equal('/cached.html?domain=TestDomain&id=DEF456');
-      expect(output[1].details[2].text).to.equal('Open in New Tab (Danger:  Unsafe)');
+      expect(output[1].details[2].text).to.equal('Open in New Tab (Runs External Code)');
     });
 
     test('results given images does return expected object', function() {
