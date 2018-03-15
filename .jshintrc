@@ -16,5 +16,6 @@
     "Platform": true,
     "page": true,
     "app": true
-  }
+  },
+  "esversion": 6
 }

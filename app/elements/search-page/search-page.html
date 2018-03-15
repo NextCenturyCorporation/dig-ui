@@ -54,6 +54,10 @@ limitations under the License.
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
 <link rel="import" href="../../styles/page-styles.html">
 
+<!-- TX -->
+<link rel="import" href="../../elements/search-box/search-box.html">
+<!-- TX -->
+
 <dom-module id="search-page">
   <template>
     <style include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning"></style>
@@ -158,6 +162,13 @@ limitations under the License.
       #searchResultList {
         --result-list-max-height: none;
       }
+
+      /* TX */
+      /* #pageNavbar {
+        height: 30%;
+      } */
+      /* TX */
+      
     </style>
 
     <iron-ajax
@@ -731,6 +742,15 @@ limitations under the License.
           <a id="logoLink" href="[[serverConfig.pathPrefix]]" target="_blank" title="Open a DIG Search Page in a New Tab">
             <img id="logo" src="/dig-ui/dig-logo.png" alt="">
           </a>
+          
+          <!-- TX -->
+          <!-- <search-box 
+            network-expansion-parameters="{{networkExpansionParameters}}"
+            search-fields-config="[[searchFieldsDialogConfig]]"
+            process-request="{{processRequest}}" 
+            search-parameters="{{searchParameters}}">
+          </search-box> -->
+          <!-- TX -->
 
           <search-fields-button
             class="layout vertical center flex"
@@ -1499,6 +1519,10 @@ limitations under the License.
         this.assignWindowProperties(this);
       },
 
+      ready() {
+        console.log("server config", this.serverConfig);
+      },
+
       /************* PAGE *************/
       buildSearchState: function(config, oldConfig) {
         var state = {};
@@ -1934,7 +1958,7 @@ limitations under the License.
 
       validateImageServiceConfig: function(config) {
         return !!(config && config.auth && config.auth.user && config.auth.password && config.endpoint && config.endpoint.data && config.endpoint.link && config.host && config.host.face && config.host.similarity);
-      }
+      },
     });
   })();
   </script>

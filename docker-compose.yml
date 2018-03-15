@@ -1,0 +1,23 @@
+digui:
+  image: digmemex/digui:0.0.56
+  ports:
+    - "8080"
+  volumes:
+    - ./logs/digui:/var/log
+  environment:
+    NODE_ENV: 'production'
+    ES_HOST: '{"host": "http://localhost:1234/elasticsearch/"}'
+    DATABASE_TYPE: 'full'
+    CONFIG_ENDPOINT: 'http://localhost:1234/projects/'
+
+nginxdigui:
+  image: nginx
+  links:
+    - digui:digui
+  ports:
+    - "1234:80"
+  volumes:
+    - ./conf/.htpasswd:/etc/nginx/.htpasswd
+    - ./conf/dig-nginx-config:/etc/nginx/conf.d/default.conf
+    - ./logs/nginx:/var/log/nginx
+    - ./logs/digui:/var/log/diglogs

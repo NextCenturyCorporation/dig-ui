@@ -1,0 +1,93 @@
+<!-- <link rel="import" href="../../bower_components/polymer/polymer-element.html"> -->
+<!-- <link rel="import" href="/bower_components/polymer/lib/elements/dom-repeat.html"> -->
+
+<!-- <link rel="import" href="../../bower_components/paper-button/paper-button.html"> -->
+<!-- <link rel="import" href="../../bower_components/paper-input/paper-textarea.html"> -->
+<!-- <link rel="import" href="../../bower_components/iron-icons/iron-icons.html"> -->
+<!-- <link rel="import" href="../../bower_components/iron-icons/communication-icons.html"> -->
+
+<!-- define the component in polymer -->
+<dom-module id="search-strategy">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      #search_strategy span{
+        text-transform: capitalize;
+      }
+    </style>
+
+    <div id="search_strategy">
+      <template is="dom-repeat" id="categoryList" items="{{categories}}">
+        <span on-click="_selection" id$="category_[[item]]">{{item}} </span>
+      </template>
+
+      <array-selector 
+        id="selector" 
+        items="{{categories}}" 
+        selected="{{selectedField}}"
+        toggle>
+      </array-selector>
+      
+      <!-- <template is="dom-if" if="{{selected}}"></template> -->
+        <!-- <div>selected: <span>{{selectedField}}</span></div> -->
+      <!-- </template> -->
+      
+    </div>
+  </template>
+
+  <script>
+    class SearchStrategy extends Polymer.Element {
+      // constructor
+      constructor() {
+        super();
+      }
+
+      // returns the name of the component
+      static get is() { return 'search-strategy'; }
+
+      // defines the component's properties
+      static get properties() {
+        return {
+          searchFields: {
+            type: Array
+          },
+          selectedField: {
+            type: Object,
+            notify: true,
+            reflectToAttribute: true,
+          },
+          categories: {
+            type: Array,
+            computed: '_generateCategories()',
+          },
+        };
+      }
+
+      // Called before the element is attached to the page
+      ready() {
+        super.ready();
+      }
+
+      _selection(e) {
+        let item = e.model.item;
+        this.$.selector.select(item);
+      }
+
+      _generateCategories() {
+        let categories = [];
+        this.searchFields
+          .filter(entry => entry['name'] !== 'Date' && entry['name'] !== 'Image')
+          .map(entry => {categories = categories.concat(entry['data']);})
+        let result = categories.map(entry => {return entry['title']});
+        console.log("===", result);
+        return result;
+      }
+
+    }
+
+    window.customElements.define(SearchStrategy.is, SearchStrategy);
+  </script>
+</dom-module>

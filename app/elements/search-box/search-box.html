@@ -1,0 +1,534 @@
+<!-- <link rel="import" href="../../bower_components/polymer/polymer-element.html"> -->
+<!-- <link rel="import" href="../../bower_components/polymer/lib/utils/async.html">
+
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/iron-icons/communication-icons.html"> -->
+
+
+<script src="../../bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+
+<link rel="import" href="../editable-button/editable-button.html">
+<link rel="import" href="../search-strategy/search-strategy.html">
+
+<dom-module id="search-box">
+  <template>
+    <style>
+      :host {
+        box-sizing: border-box;
+        display: inline-block;
+        margin: 0;
+        padding: 0;
+        width: 80%;
+      }
+
+      /* paper-input {
+        --paper-input-container-underline: {
+          display: none;
+        };
+        --paper-input-container-underline-focus: {
+          display: none;
+        };
+        --paper-input-container-underline-disabled: {
+          display: none;
+        };
+      } */
+
+      #searchBoxHost {
+        display: flex;
+        margin: 0 0.1em;
+        align-items: center;
+        z-index: 1;
+      }
+
+      #searchBox {
+        display: flex;
+        /* line-height: 1.5em; */
+        padding: 0;
+        border: 1px solid black;
+        align-items: baseline;
+        justify-content: space-between;
+        flex-basis: 100%;
+        width: 100%;
+        overflow: auto;
+      }
+
+      #searchIpt {
+        display: flex;
+        flex-basis: auto;
+        width: 100%;
+        height: 100%;
+        vertical-align: middle;
+      }
+
+      #searchEditButton {
+        display: flex;
+        flex-basis: auto;
+        /* height: 100%; */
+        max-width: 70%;
+        /* display: inline-block; */
+        /* vertical-align: middle; */
+        /* margin-block-end: 0; */
+      }
+      
+      #searchBtn, #searchClearBtn {
+        display: flex;
+        /* height: auto; */
+        text-transform: capitalize;
+        font-size: 1em;
+        flex-basis: auto;
+        /* background: white;
+        color: black; */
+      }
+
+      paper-input {
+        --paper-input-container-underline: {
+          display: none;
+        };
+        --paper-input-container-underline-focus: {
+          display: none;
+        };
+        --paper-input-container-underline-disabled: {
+          display: none;
+        };
+        --paper-input-container: {
+          width: 100%;
+          height: 100%;
+        };
+        --paper-input-container-input: {
+          color: white;
+        };
+      }
+
+      paper-button {
+        background: white;
+        color: black;
+      }
+
+      paper-button iron-icon {
+        display: inline-block;
+        --iron-icon-height: 1em;
+        --iron-icon-width: 1em;
+      }
+
+      .margin-small {
+        margin: 10px 0px;
+      }
+
+    </style>
+    <div id="searchBoxHost">
+      <div id="searchBox">
+        <paper-input id="searchIpt" no-label-float value={{content::input}} placeholder="Enter Search">
+          <iron-icon icon="search" slot="prefix"></iron-icon>
+        </paper-input>
+        <div id="searchEditButton">
+        </div>
+      </div>
+      <paper-button id="searchBtn" raised>search</paper-button>
+      <paper-button id="searchClearBtn" raised>Clear</paper-button>
+    </div>
+    
+
+    <template is="dom-if" if="[[showSearchStrategy]]">
+      <search-strategy search-fields="{{searchFields}}" selected-field="{{selectedField}}"></search-strategy>
+    </template>
+
+    <!-- <div class="margin-small">The input content is [[content]]</div> -->
+    <!-- <div class="margin-small">The search fields is </div>
+    <template is="dom-repeat" items="{{_toArray(searchParameters)}}">
+      <div>{{item.key}} : {{item.value}}</div>
+    </template> -->
+  </template>
+
+  <script>
+    // /**
+    //  * `search-box`
+    //  * The search box component
+    //  *
+    //  * @customElement
+    //  * @polymer
+    //  * @demo demo/index.html
+    //  * search-parameters="{{searchParameters}}"
+    //  */
+    class SearchBox extends Polymer.Element {
+
+      // returns the name of the component
+      static get is() { return 'search-box'; }
+
+      // defines the component's properties
+      static get properties() {
+        return {
+          // prop1: {
+          //   type: String,
+          //   value: 'search-box'
+          // },
+          searchFields: {
+            computed: '_createSearchFields(searchFieldsConfig, dataProperty, nameProperty, typeProperty, dataIconProperty, dataKeyProperty, dataStyleClassProperty, dataTitleProperty)',
+            type: Array
+          },
+          // _searchFields: {
+          //   type: Array,
+          //   value: [
+          //     {'address': 'communication:location-on'},
+          //     {'city': 'social:location-city'},
+          //     {'country': 'communication:location-on'},
+          //     {'description': 'icons:description'},
+          //     {'email': 'communication:email'},
+          //     {'name': 'social:person'},
+          //     {'phone': 'communication:phone'},
+          //     {'state': 'communication:location-on'},
+          //     {'title': 'editor:title'},
+          //     // {'text': null}
+          //   ]
+          // },
+          searchFieldsConfig: {
+            type: Array
+          },
+          selectedField: {
+            type: Object,
+            value: null,
+            notify: true,
+            reflectToAttribute: true,
+            observer: '_userChoseSelectedField'
+          },
+          buttonID: {
+            type: Number,
+            value: 0
+          },
+          content: {
+            type: String,
+            value: '',
+          },
+          dataProperty: {
+            type: String,
+            value: 'data'
+          },
+          dataIconProperty: {
+            type: String,
+            value: 'icon'
+          },
+          dataKeyProperty: {
+            type: String,
+            value: 'key'
+          },
+          dataStyleClassProperty: {
+            type: String,
+            value: 'styleClass'
+          },
+          dataTitleProperty: {
+            type: String,
+            value: 'title'
+          },
+          nameProperty: {
+            type: String,
+            value: 'name'
+          },
+          networkExpansionParameters: {
+            type: Object,
+            notify: true,
+            observer: '_networkExpansionParametersObserver'
+          },
+          _isNetworkExpansionViable: {
+            type: Boolean,
+            value: false
+          },
+          processRequest: {
+            notify: true,
+            type: Boolean,
+            value: false
+          },
+          showSearchStrategy: {
+            type: Boolean,
+          },
+          searchParameters: {
+            type: Object,
+            value: function() {return this._initSearchParameters();},
+            notify: true,
+            reflectToAttribute: true,
+            observer: '_searchParametersObserver'
+          },
+          timeoutReference: {
+            // observer: '_showSearchStrategy()'
+          },
+          typeProperty: {
+            type: String,
+            value: 'type'
+          },
+        };
+      }
+
+      ready() {
+        super.ready();
+
+        var searchIpt = this.$.searchIpt;
+        var searchBtn = this.$.searchBtn;
+        var searchClearBtn = this.$.searchClearBtn;
+
+        searchBtn.addEventListener('click', e => {
+          this._createEditBtn();
+        });
+
+        searchClearBtn.addEventListener('click', e => {
+          this._clearSearch();
+        });
+
+        searchIpt.addEventListener('keypress', e => {
+          if(e.keyCode === 13) {
+            this._createEditBtn();
+          } else {
+            // console.log(this.timeoutReference);
+            if(this.timeoutReference) {
+              // console.log("cancel", this.timeoutReference);
+              Polymer.Async.timeOut.cancel(this.timeoutReference);
+            }
+            this.timeoutReference = Polymer.Async.timeOut.run(() => this._showSearchStrategy(), 1500);
+            // console.log("set", this.timeoutReference);
+          }
+        });
+
+      }
+
+      _createEditBtn() {
+        this.processRequest = false;
+        let selectedField = this.selectedField;
+        let tempElement = document.createElement('editable-button');
+        tempElement.content = this.content;
+        console.log('selectedField', selectedField);
+        if(selectedField == null) {
+          // console.log("selectedfieldisnull");
+          tempElement.fieldIcon = 'editor:format-align-left';
+          tempElement.fieldName = 'description';
+        } else {
+          console.log('searchfields', this.searchFields);
+          let categories = [];
+          this.searchFields.filter(entry => entry['name'] !== 'Date' && entry['name'] !== 'Image')
+            .map(entry => {categories = categories.concat(entry['data']);})
+          let field = categories.filter(searchFieldsObject => {
+            return searchFieldsObject['title'] === selectedField;
+          });
+          tempElement.fieldIcon = field[0]['icon'];
+          tempElement.fieldName = field[0]['key'];
+        }
+        tempElement.buttonID = this.buttonID;
+
+        this.$.searchEditButton.appendChild(tempElement);
+
+        tempElement.$.textinput.addEventListener('input', e => {
+          this._updateNetworkExpansion();
+          this._handleSearch();
+          this._updateSearchParameters(tempElement.buttonID, tempElement.fieldName, tempElement.content);
+        });
+
+        tempElement.$.removebtn.addEventListener('click', e => {
+          console.log('delete tempElement content', tempElement.content);
+          this._deleteContentInSearchParameters(tempElement.buttonID, tempElement.fieldName, tempElement.content);
+        });
+        
+        this._updateNetworkExpansion();
+        this._handleSearch();
+        this._updateSearchParameters(this.buttonID, tempElement.fieldName, this.content);
+        this._clearContent();
+        this._clearSelectedField();
+        this.showSearchStrategy = false;
+        // this.currentSelectedButton = this.buttonID;
+        this.buttonID++;
+        Polymer.Async.timeOut.cancel(this.timeoutReference);
+        this.processRequest = true;
+      }
+
+      _clearContent() {
+        this.content = '';
+      }
+
+      _clearSearch() {
+        let btnList = this.$.searchBox.querySelectorAll('editable-button');
+        btnList.forEach(element => {
+          element.remove();
+        });
+        this._clearContent();
+        this.searchParameters = this._initSearchParameters();
+      }
+
+      _clearSelectedField() {
+        this.selectedField = null;
+        // console.log("th")
+      }
+
+      _deleteContentInSearchParameters(buttonID, fieldName, content) {
+        this.processRequest = false;
+        delete this.searchParameters[fieldName][content];
+        console.log('searchParameters', this.searchParameters);
+        this.notifyPath(['searchParameters', fieldName], this.searchParameters[fieldName]);
+        this.processRequest = true;
+      }
+      
+      _handleSearch() {
+        this._uploadedFiles = [];
+        this.searchFields.forEach(function(dialogConfig) {
+          dialogConfig.data.forEach(function(searchConfig) {
+            searchConfig.activateNetworkExpansionPrevious = searchConfig.activateNetworkExpansion;
+            searchConfig.requireOnePrevious = searchConfig.requireOne;
+          });
+        });
+
+        // this._updateSearchParametersFromFields();
+        // console.log("search-fields-dialog searchParameters", this.searchParameters);
+        // console.log("search-fields-dialog searchFields", this._searchFields);
+        // if(this.areSearchParametersDisabled(this.searchParameters)) {
+        //   this.removeAllSearchTerms();
+        //   return;
+        // }
+      }
+
+      _initSearchParameters() {
+        if(this.searchFields) {
+          return this.searchFields.reduce((searchParameters, searchFieldsObject) => {
+            // console.log(searchFieldsObject);
+            searchParameters[Object.keys(searchFieldsObject)] = {};
+            return searchParameters;
+          }, {});
+        }
+        
+      }
+
+      _createSearchFields(config, dataProperty, nameProperty, typeProperty, dataIconProperty, dataKeyProperty, dataStyleClassProperty, dataTitleProperty) {
+        console.log("***searchfieldsconfig", config);
+        console.log("***dataproperty", dataProperty);
+        var self = this;
+        var fields = (config || []).map(function(dialogConfig) {
+          var isDate = dialogConfig[typeProperty] === 'date';
+          var isImage = dialogConfig[typeProperty] === 'image';
+          console.log("***searchfieldsdialogconfig", dialogConfig);
+          return {
+            data: dialogConfig[dataProperty].map(function(searchConfig) {
+              var item = {
+                icon: searchConfig[dataIconProperty],
+                key: searchConfig[dataKeyProperty],
+                styleClass: searchConfig[dataStyleClassProperty],
+                title: searchConfig[dataTitleProperty]
+              };
+              if(!isImage) {
+                item.value = isDate ? {} : '';
+              }
+              if(!isImage && !isDate) {
+                item.activateNetworkExpansion = false;
+                item.activateNetworkExpansionPrevious = false;
+                item.enableNetworkExpansion = (searchConfig.enableNetworkExpansion || false);
+                item.requireOne = true;
+                item.requireOnePrevious = true;
+              }
+              if(isImage) {
+                item.excluded = [];
+                item.images = [];
+                item.required = [];
+                item.selected = [];
+                item.union = [];
+              }
+              return item;
+            }),
+            isDate: isDate,
+            isImage: isImage,
+            name: dialogConfig[nameProperty]
+          };
+        });
+        console.log("***searchfields", fields);
+        // let categories = [];
+        // fields.filter(entry => entry['name'] !== 'Date' && entry['name'] !== 'Image')
+        //   .map(entry => {categories = categories.concat(entry['data']);})
+        return fields;
+      }
+
+      _searchParametersObserver() {
+        console.log('observer searchParameters', this.searchParameters);
+      }
+
+      _showSearchStrategy() {
+        this.timeoutReference = false;
+        this.showSearchStrategy = true;
+        // console.log("inshowsearch", this.timeoutReference);
+      }
+
+      _updateSearchParameters(buttonID, fieldName, newContent) {
+        console.log('searchPara', this.searchParameters);
+        this.processRequest = false;
+        var deleteElement = Object.entries(this.searchParameters[fieldName]).filter(e => {
+          return e[1].key === buttonID;
+        });
+        if(deleteElement.length !== 0) {
+          delete this.searchParameters[fieldName][deleteElement[0][0]];
+        }
+
+        this.searchParameters[fieldName][newContent] = {
+          category: fieldName[0].toUpperCase() + fieldName.substr(1),
+          data: null,
+          enabled: true,
+          key: buttonID,
+          search: 'union',
+          text: newContent
+        }
+        
+        // !!!!!!!
+        this.searchFields.forEach((dialogConfig) => {
+          dialogConfig.data.forEach((searchConfig) => {
+            // let temp = searchConfig.filter(entry => entry['title'] === fieldName);
+            console.log(searchConfig['key'] === fieldName);
+            if(searchConfig['key'] === fieldName) {
+              searchConfig['value'] = newContent;
+              console.log("temp", searchConfig);
+              this.notifyPath(['searchParameters', searchConfig.key], this.searchParameters[searchConfig.key]);
+            }
+          })
+        })
+
+        this.processRequest = true;
+        // this.searchParameters[fieldName][buttonID] = newContent;
+        console.log('searchParameters', this.searchParameters);
+        console.log('processRequest', this.processRequest);
+      }
+
+      _userChoseSelectedField() {
+        // console.log("_userChoseSelectedField", this.selectedField);
+        if(this.selectedField !== null) {
+          this._createEditBtn();
+        }
+      }
+
+      _updateNetworkExpansion() {
+        // Find all fields for which network expansion is active.
+        var fields = this.searchFields.reduce(function(fields, dialogConfig) {
+          return fields.concat(dialogConfig.data.filter(function(searchConfig) {
+            return searchConfig.activateNetworkExpansion;
+          }).map(function(searchConfig) {
+            return searchConfig.title;
+          }));
+        }, []);
+
+        // Find all values (search terms) in fields with the network expansion option.
+        var values = this.searchFields.reduce(function(values, dialogConfig) {
+          return values.concat(dialogConfig.data.filter(function(searchConfig) {
+            return searchConfig.enableNetworkExpansion && !!(searchConfig.value.trim());
+          }).map(function(searchConfig) {
+            return searchConfig.value.trim();
+          }));
+        }, []).reduce(function(values, value) {
+          // Split values into individual search terms.
+          return values.concat(value.split(',').map(function(term) {
+            return term.trim();
+          }).filter(function(term) {
+            return term && term !== '+' && term !== '-';
+          }));
+        }, []);
+
+        this._isNetworkExpansionViable = (fields.length && values.length);
+      }
+
+      _networkExpansionParametersObserver() {
+        console.log("_networkExpansionParametersObserver", this.networkExpansionParameters);
+      }
+    }
+
+    window.customElements.define(SearchBox.is, SearchBox);
+  </script>
+</dom-module>
