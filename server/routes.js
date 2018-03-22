@@ -134,6 +134,7 @@ module.exports = function(app) {
       downloadImageUrl: serverConfig.downloadImageUrl,
       esHost: serverConfig.esHost,
       hideBulkSearch: serverConfig.hideBulkSearch,
+      hideCachedPage: serverConfig.hideCachedPage,
       hideDatabaseInfo: serverConfig.hideDatabaseInfo,
       imageServiceConfig: serverConfig.imageServiceConfig,
       imageUrlPrefix: serverConfig.imageUrlPrefix,
@@ -153,12 +154,16 @@ module.exports = function(app) {
       searchConfig: serverConfig.searchConfig,
       sendSearchesDirectlyToES: serverConfig.sendSearchesDirectlyToES,
       showEsData: serverConfig.showEsData,
+      showMultipleDescriptions: serverConfig.showMultipleDescriptions,
+      showMultipleTitles: serverConfig.showMultipleTitles,
       stateIndexName: serverConfig.stateIndexName,
       stateIndexType: serverConfig.stateIndexType,
       supportEmail: serverConfig.supportEmail,
       tagsEntityEndpoint: serverConfig.tagsEntityEndpoint,
       tagsExtractionEndpoint: serverConfig.tagsExtractionEndpoint,
-      tagsListEndpoint: serverConfig.tagsListEndpoint
+      tagsListEndpoint: serverConfig.tagsListEndpoint,
+      timestampField: serverConfig.timestampField,
+      uidField: serverConfig.uidField
     });
   });
 

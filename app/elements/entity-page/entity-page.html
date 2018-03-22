@@ -99,10 +99,6 @@ limitations under the License.
         --image-query-and-display-max-height: none;
       }
 
-      selected-facets-display {
-        --selected-facet-icon-hover-color: #fff;
-      }
-
       status-text {
         margin-right: 5px;
       }
@@ -192,6 +188,13 @@ limitations under the License.
       data-in2="{}"
       data-out="{{aggregationFields}}"
       combine-function="[[transforms.config.aggregationFields]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{colorMap}}"
+      combine-function="[[transforms.config.colorMap]]">
     </json-combine>
 
     <json-combine
@@ -312,7 +315,7 @@ limitations under the License.
       page-size="10"
       properties-ready="{{processRequest}}"
       sort-field="[[dateMenu.selected]]"
-      source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
+      source-include="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.results]]"
       error="{{searchError}}"
@@ -322,9 +325,9 @@ limitations under the License.
     </build-and-run-query>
 
     <query-builder
+      type="term"
       callback="[[builderCallbacks]]"
       config="[[buildersConfig]]"
-      type="terms"
       data="[[filterCollection]]"
       query="{{thisPageFilterQuery}}">
     </query-builder>
@@ -570,7 +573,7 @@ limitations under the License.
                         aggregations="[[buildArray(item.dateAggregation)]]"
                         page-size="0"
                         properties-ready="{{processRequest}}"
-                        source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
+                        source-include="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
                         transform-config="[[createTimelineConfig(item.dateCollection, item.dateSelected, item.entity, pageConfig, pageId)]]"
                         transform-function="[[transforms.entity.timelines]]"
                         error="{{item.timelineError}}"
@@ -615,7 +618,7 @@ limitations under the License.
                     header-data-name="[[item.entity.titlePlural]]"
                     header-counts-name="[[serverConfig.resultNamePlural]]"
                     header-entity-name="[[pageName]]"
-                    limit="0"
+                    limit="50"
                     loading="{{item.aggregatedDataLoading}}"
                     show-checkboxes
                     show-double-bar-chart="[[isEntity(item.entity)]]">
@@ -642,7 +645,7 @@ limitations under the License.
                     large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
                     error-message="{{item.aggregatedDataError}}"
                     images="{{item.aggregatedDataResults}}"
-                    limit="0"
+                    limit="50"
                     loaded-images="{{item.aggregatedSubset}}"
                     loading="{{item.aggregatedDataLoading}}"
                     selected-property="[[item.entity.key]]"
@@ -799,6 +802,7 @@ limitations under the License.
 
             <template is="dom-repeat" items="[[searchFields]]">
               <selected-facets-display
+                color-map="[[colorMap]]"
                 facets="{{entityFilters}}"
                 facet-key="[[item.key]]"
                 hide-remove-button="[[item.isDate]]">
@@ -854,12 +858,13 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
+              source-include-nested-data="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"
               large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
               newline-tag="[[esConfig.newlineTag]]"
+              hide-cached-page="[[serverConfig.hideCachedPage]]"
               hide-confidences
               tag-manager="[[tagManager]]">
             </result-list>
@@ -898,7 +903,9 @@ limitations under the License.
                 return items;
               },
               terms: function(items) {
-                return items;
+                return {
+                  must: items
+                };
               }
             };
           }
@@ -926,6 +933,10 @@ limitations under the License.
 
         clientConfigLoading: {
           type: Boolean
+        },
+
+        colorMap: {
+          type: Object
         },
 
         configHeader: {

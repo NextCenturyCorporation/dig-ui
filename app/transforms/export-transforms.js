@@ -40,6 +40,10 @@ var exportTransforms = (function(_, esConfig) {
     },
 
     createExportDataForCsv: function(searchData, searchFields) {
+      if(!searchData || !searchFields) {
+        return [];
+      }
+
       var linkPrefix = window.location.hostname + ':' + window.location.port;
       var exportData = [];
       var exportDataHeader = [esConfig.webpageField.title, 'DIG URL', 'Title'];
@@ -97,6 +101,10 @@ var exportTransforms = (function(_, esConfig) {
     },
 
     createExportDataForPdf: function(searchData, searchFields) {
+      if(!searchData || !searchFields) {
+        return [];
+      }
+
       var linkPrefix = window.location.hostname + ':' + window.location.port;
       var exportData = [];
       var nextId = 1;

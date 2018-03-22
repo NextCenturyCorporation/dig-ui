@@ -102,6 +102,7 @@ limitations under the License.
           enableNetworkExpansion: !serverConfig.sendSearchesDirectlyToES,
           esIndex: (clientConfig.index && serverConfig.databaseType ? clientConfig.index[serverConfig.databaseType] : undefined),
           esType: clientConfig.root_name,
+          hideCachedPage: serverConfig.hideCachedPage || false,
           hideTimelines: clientConfig.hide_timelines || false,
           imageField: this._createImageFieldConfig(),
           imageUrlPrefix: clientConfig.image_prefix || serverConfig.imageUrlPrefix || '',
@@ -109,6 +110,10 @@ limitations under the License.
           newlineTag: clientConfig.newline_type === 'newline' ? '\n' : '<br/>',
           showImagesInFacets: clientConfig.show_images_in_facets || false,
           showImagesInSearch: clientConfig.show_images_in_search_form || false,
+          showMultipleDescriptions: serverConfig.showMultipleDescriptions || false,
+          showMultipleTitles: serverConfig.showMultipleTitles || false,
+          timestamp: serverConfig.timestampField,
+          uid: serverConfig.uidField,
           webpageField: this._createWebpageFieldConfig(serverConfig)
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
@@ -160,7 +165,7 @@ limitations under the License.
         transforms.config = configTransforms(_, util, esConfig);
         transforms.entity = entityTransforms(_, util, esConfig);
         transforms.export = exportTransforms(_, esConfig);
-        transforms.search = searchTransforms(_);
+        transforms.search = searchTransforms(_, esConfig);
 
         return transforms;
       }

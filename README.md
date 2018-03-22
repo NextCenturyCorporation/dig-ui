@@ -55,6 +55,7 @@ DOWNLOAD_IMAGE_URL | The download endpoint to get the image data for the image U
 ES_HOST | The stringified object containing the location of the elasticsearch instance.  Supports all configuration options for the elasticsearch.js v12 client. | '{"apiVersion":"2.4","host": "http://localhost:9200"}'
 ES_HOST_STRING | The string location of the elasticsearch instance with username and password authorization (if needed).  Used for the curl commands run by the node/express server.  Formatted 'http(s)://(username:password@)host:port'. | ''
 HIDE_BULK_SEARCH | Whether to hide the bulk search in the option menu. | false
+HIDE_CACHED_PAGE | Whether to hide the cached page links in the search results. | false
 HIDE_DATABASE_INFO | Whether to hide the database info/timeline on the search page and in the option menu. | false
 IMAGE_SERVICE_CONFIG | The stringified object containing the username and password authorization, hostnames, and endpoints for the similar image REST service.  Syntax:  { auth: { user: username, password: password }, host: { face: hostname, similarity: hostname }, endpoint: { data: endpoint, link: endpoint } } | '{"auth": {}, "endpoint": {}, "host": {}}'
 IMAGE_URL_PREFIX | The prefix added to the start of the image URLs (if not specified in the project config). | ''
@@ -73,12 +74,16 @@ RESULT_QUERY_FIELD | The query field for the unique identifier used for the sear
 SEARCH_CONFIG | The stringified object containing project names and/or locations for the Sandpaper search REST service (from project configs) mapped to replacement locations. | undefined
 SEND_SEARCHES_DIRECTLY_TO_ES | Whether to ignore any Sandpaper settings and send searches directly to elasticsearch. | false
 SHOW_ES_DATA | Whether to show a link to the elasticsearch data page of search results. | false
+SHOW_MULTIPLE_TITLES | Whether to show multiple titles, if present, in each search result.  If false, shows only the first found. | false
+SHOW_MULTIPLE_DESCRIPTIONS | Whether to show multiple descriptions, if present, in each search result.  If false, shows only the first found. | false
 SUPPORT_EMAIL | The support email for the 'Contact Us' menu option. | 'support@memex.software'
 STATE_INDEX | The elasticsearch state index name. | 'dig-states'
 STATE_TYPE | The elasticsearch state index type. | 'state'
 TAG_ENTITY_ENDPOINT | The entity endpoint for the MyDIG tag REST service.  If defined, shows the View DIG Data Training Options in the option menu. | undefined
 TAG_EXTRACTION_ENDPOINT | The extraction endpoint for the MyDIG tag REST service. | undefined
 TAG_LIST_ENDPOINT | The tag list endpoint for the MyDIG tag REST service. | undefined
+TIMESTAMP_FIELD | The timestamp field in the `_source` object of each elasticsearch document. | 'timestamp_crawl'
+UID_FIELD | The unique ID field in the `_source` object of each elasticsearch document. | 'doc_id'
 
 ## Server Configuration (Docker)
 Running the DIG UI with Docker does **NOT** use the server configuration file (`server/config/local.env.js`).  You may set the server configuration options using environment variables.  We recommend using [docker-compose](https://docs.docker.com/compose/).  You can see an example docker-compose configuration file [here](https://github.com/NextCenturyCorporation/dig-ui/blob/master/docker-sample-config/docker-compose.sample.yml).

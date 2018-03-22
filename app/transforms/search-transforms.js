@@ -17,7 +17,7 @@
 /* exported searchTransforms */
 /* jshint camelcase:false */
 
-var searchTransforms = (function(_) {
+var searchTransforms = (function(_, esConfig) {
   function getTemplateFromSearchParameters(searchParameters, dateConfig, networkExpansionParameters) {
     var template = {
       clauses: !networkExpansionParameters ? [] : [{
@@ -306,10 +306,10 @@ var searchTransforms = (function(_) {
             dateFields[dateConfig[property]] = true;
             return dateFields;
           }, {});
-          if(dateFields[config.sortKey]) {
+          if(dateFields[config.sortKey] && esConfig.timestamp) {
             orderBy.values.push({
               order: config.sortOrder,
-              variable: '?timestamp_crawl_sort'
+              variable: '?' + esConfig.timestamp + '_sort'
             });
             orderBy.values.push({
               order: config.sortOrder,
@@ -317,8 +317,8 @@ var searchTransforms = (function(_) {
             });
             template.clauses.push({
               isOptional: false,
-              predicate: 'timestamp_crawl',
-              variable: '?timestamp_crawl_sort'
+              predicate: esConfig.timestamp,
+              variable: '?' + esConfig.timestamp + '_sort'
             });
             template.clauses.push({
               isOptional: false,

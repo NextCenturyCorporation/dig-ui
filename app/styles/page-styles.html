@@ -21,24 +21,15 @@ limitations under the License.
     <style include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning"></style>
 
     <style>
-      /*
-       Polymer includes a shim for CSS Custom Properties that we can use for application theming.
-       Below, you'll find the default palette for the Polymer Starter Kit layout. Feel free to play
-       with changing the colors used or generate your own palette of colours at MaterialPalette.com.
-
-       See https://www.polymer-project.org/1.0/docs/devguide/styling.html#xscope-styling-details
-       for further information on custom CSS properties.
-       */
-
       /* Application theme */
-
       :root {
         --primary-color: #757575; /* paper-grey-600 */
-        --primary-background-color: #e0e0e0; /* paper-grey-200 */
-        --primary-text-color: #424242; /* paper-grey-800 */
+        --primary-background-color: #f5f5f5; /* paper-grey-100 */
+        --primary-text-color: #212121; /* paper-grey-900 */
         --secondary-text-color: #757575; /* paper-grey-600 */
-        --disabled-text-color: #bdbdbd; /* paper-grey-400 */
-        --navbar-color: #424242; /* paper-grey-800 */
+        --disabled-text-color: #e0e0e0; /* paper-grey-300 */
+        --divider-color: #e0e0e0; /* paper-grey-300 */
+        --navbar-color: #212121; /* paper-grey-900 */
       }
 
       body {
@@ -71,6 +62,10 @@ limitations under the License.
         margin-left: 10px;
         min-width: 30px;
         padding: 0;
+      }
+
+      #menuButton:hover {
+        color: greenyellow;
       }
 
       #toggleDrawerButton {
@@ -108,7 +103,7 @@ limitations under the License.
       }
 
       export-button {
-        margin-left: 5px;
+        margin-left: 10px;
       }
 
       .fields-menu > div {

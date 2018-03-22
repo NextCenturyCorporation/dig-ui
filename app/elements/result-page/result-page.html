@@ -190,7 +190,7 @@ limitations under the License.
     <!-- Result Query -->
 
     <build-and-run-query
-      fields='"doc_id"'
+      fields="[[esConfig.uid]]"
       values="[[parameters.id]]"
       client="[[esClient]]"
       index-name="[[esConfig.esIndex]]"
@@ -199,7 +199,7 @@ limitations under the License.
       filters="[]"
       page-size="1"
       properties-ready="{{processRequest}}"
-      source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
+      source-include="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
       transform-config="[[searchFields]]"
       transform-function="[[transforms.entity.result]]"
       error="{{resultError}}"
@@ -209,7 +209,7 @@ limitations under the License.
 
     <elastic-client-query-builder
       type="term"
-      fields="doc_id"
+      fields="[[esConfig.uid]]"
       values="[[result.id]]"
       ejs-query="{{thisResultQuery}}">
     </elastic-client-query-builder>
@@ -247,7 +247,7 @@ limitations under the License.
       page-size="10"
       sort-field="[[dateMenu.selected]]"
       sort-order="desc"
-      source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
+      source-include="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
       loading="{{revisionLoading}}"
       last-error="{{revisionError}}"
       results="{{revisionQueryResults}}"
@@ -286,7 +286,7 @@ limitations under the License.
       aggregations="[]"
       page="{{moreLikeThisPage}}"
       page-size="10"
-      source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
+      source-include="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
       loading="{{moreLikeThisLoading}}"
       last-error="{{moreLikeThisError}}"
       results="{{moreLikeThisQueryResults}}"
@@ -477,12 +477,13 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
+              source-include-nested-data="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"
               large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
               newline-tag="[[esConfig.newlineTag]]"
+              hide-cached-page="[[serverConfig.hideCachedPage]]"
               hide-confidences
               tag-manager="[[tagManager]]">
             </result-list>
@@ -536,12 +537,13 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
+              source-include-nested-data="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"
               large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
               newline-tag="[[esConfig.newlineTag]]"
+              hide-cached-page="[[serverConfig.hideCachedPage]]"
               hide-confidences
               tag-manager="[[tagManager]]">
             </result-list>
@@ -585,12 +587,13 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
+              source-include-nested-data="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"
               large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
               newline-tag="[[esConfig.newlineTag]]"
+              hide-cached-page="[[serverConfig.hideCachedPage]]"
               hide-confidences
               tag-manager="[[tagManager]]">
             </result-list>

@@ -20,6 +20,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
 <link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
 <link rel="import" href="../../bower_components/export-button/export-button.html">
+<link rel="import" href="../../bower_components/export-button/export-dialog.html">
 <link rel="import" href="../../bower_components/facet-panel/facet-panel.html">
 <link rel="import" href="../../bower_components/image-gallery/image-gallery.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
@@ -42,6 +43,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/query-transformer/query-transformer.html">
 <link rel="import" href="../../bower_components/result-list/result-list.html">
 <link rel="import" href="../../bower_components/save-case-dialog/save-case-dialog.html">
+<link rel="import" href="../../bower_components/search-fields-dialog/search-fields-button.html">
 <link rel="import" href="../../bower_components/search-fields-dialog/search-fields-dialog.html">
 <link rel="import" href="../../bower_components/sparkline-list/sparkline-list.html">
 <link rel="import" href="../../bower_components/state-manager/state-manager.html">
@@ -66,8 +68,8 @@ limitations under the License.
       #pageDrawer {
         height: 100%;
         --paper-drawer-panel-left-drawer-container: {
-          background-color: var(--primary-background-color);
-          border-right: 1px solid rgba(0,0,0,var(--dark-divider-opacity));
+          background-color: var(--paper-grey-100);
+          border-right: 1px solid var(--paper-grey-300);
         };
       }
 
@@ -80,12 +82,15 @@ limitations under the License.
         --paper-toolbar-content: {
           padding: 0;
         };
+        /* Add shadow. */
+        position: relative;
+        z-index: 5;
         @apply --shadow-elevation-4dp;
       }
 
       #searchTermList {
-        background-color: var(--primary-background-color);
-        color: var(--primary-text-color);
+        background-color: var(--paper-grey-100);
+        color: var(--paper-grey-900);
         max-height: 200px;
         min-height: 45px;
         overflow-y: auto;
@@ -95,14 +100,10 @@ limitations under the License.
         --paper-toolbar-content: {
           padding: 0;
         };
+        /* Add shadow. */
+        position: relative;
+        z-index: 4;
         @apply --shadow-elevation-4dp;
-      }
-
-      selected-facets-display {
-        --selected-facet-bg-color: var(--paper-grey-400);
-        --selected-facet-icon-color: var(--primary-text-color);
-        --selected-facet-icon-hover-color: white;
-        --selected-facet-text-color: var(--primary-text-color);
       }
 
       #pageSearch {
@@ -113,8 +114,16 @@ limitations under the License.
 
       #searchHeader,
       #searchTimeline {
+        background-color: var(--paper-grey-100);
         padding: 10px;
-        @apply --shadow-elevation-4dp;
+        /* Fix box-shadow. */
+        position: relative;
+        z-index: 3;
+      }
+
+      #searchTimeline {
+        /* Fix box-shadow. */
+        z-index: 2;
       }
 
       .search-header-text {
@@ -133,14 +142,14 @@ limitations under the License.
       }
 
       .no-facets-text {
-        color: var(--primary-text-color);
+        color: var(--paper-grey-900);
         font-size: 16px;
         font-weight: 500;
         line-height: 30px;
       }
 
       .timeline-info-text {
-        color: var(--primary-text-color);
+        color: var(--paper-grey-900);
         font-size: 14px;
         font-weight: 500;
         line-height: 24px;
@@ -213,6 +222,13 @@ limitations under the License.
       data-in2="{}"
       data-out="{{searchFields}}"
       combine-function="[[transforms.config.searchFields]]">
+    </json-combine>
+
+    <json-combine
+      data-in1="[[searchFields]]"
+      data-in2="{}"
+      data-out="{{colorMap}}"
+      combine-function="[[transforms.config.colorMap]]">
     </json-combine>
 
     <json-combine
@@ -336,6 +352,7 @@ limitations under the License.
       config="[[searchFieldsCollection]]"
       data="[[searchParameters]]"
       date-fields="[[dateFieldsToProperties]]"
+      stop="[[!processRequest]]"
       query="{{esQuery}}">
     </query-builder>
 
@@ -349,7 +366,6 @@ limitations under the License.
         page="{{searchPage}}"
         page-size="10"
         properties-ready="[[processRequest]]"
-        source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
         transform-config="[[searchFields]]"
         transform-function="[[transforms.entity.results]]"
         error="{{searchError}}"
@@ -518,7 +534,7 @@ limitations under the License.
     </iron-ajax>
 
     <template is="dom-if" if="[[!serverConfig.hideDatabaseInfo]]">
-      <styled-dialog fill header="Database Details" opened="{{openedDatabaseDetail}}">
+      <styled-dialog id="databaseDetailDialog" fill header="Database Details" opened="{{openedDatabaseDetail}}">
         <database-details
           client="[[esClient]]"
           index-name="[[esConfig.esIndex]]"
@@ -527,12 +543,12 @@ limitations under the License.
           result-type="[[serverConfig.resultNameSingular]]"
           show="[[openedDatabaseDetail]]"
           timeline-function="[[transforms.entity.timelines]]"
-          timestamp-field="timestamp_crawl">
+          timestamp-field="[[esConfig.timestamp]]">
         </database-details>
       </styled-dialog>
     </template>
 
-    <styled-dialog fill header="Image Gallery of [[serverConfig.resultNamePlural]]" opened="{{openedSearchImageGallery}}">
+    <styled-dialog id="searchImageGalleryDialog" fill header="Image Gallery of [[serverConfig.resultNamePlural]]">
       <image-gallery
         id="searchImageGallery"
         images="[[imagesFromResults]]"
@@ -542,56 +558,83 @@ limitations under the License.
       </image-gallery>
     </styled-dialog>
 
-    <paper-header-panel class="flex" mode="waterfall">
+    <search-fields-dialog
+      button-callbacks="{{searchFieldsDialogCallbacks}}"
+      date-config="[[datePropertiesToKeys]]"
+      hide-images="[[!esConfig.showImagesInSearch]]"
+      image-upload-url="[[findDigUrl(serverConfig.pathPrefix, 'uploadImage')]]"
+      image-url-prefix="[[esConfig.imageUrlPrefix]]"
+      image-url-suffix="[[esConfig.imageUrlSuffix]]"
+      images="{{imagesUploaded}}"
+      images-processing="[[imagesProcessing]]"
+      large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
+      search-fields-config="[[searchFieldsDialogConfig]]"
+      small-image-style-class="[[findBlurStyleClass(blurImages)]]"
+      network-expansion-parameters="{{networkExpansionParameters}}"
+      process-request="{{processRequest}}"
+      search-parameters="{{searchParameters}}">
+    </search-fields-dialog>
+
+    <template is="dom-if" if="[[serverConfig.username]]">
+      <user-settings-dialog
+        button-callbacks="{{userSettingsDialogCallbacks}}"
+        enable-email-address
+        enable-search
+        build-popup-data-function="[[transforms.config.searchTerms]]"
+        build-state-data-function="[[transforms.config.searchState]]"
+        data-config="[[searchFieldsCollection]]"
+        function-config="[[searchFields]]"
+        profile-manager="[[profileManager]]"
+        reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
+        result-link-function="[[transforms.config.resultLink]]"
+        user-id="[[userId]]"
+        user-loading="[[userLoading]]"
+        username="[[serverConfig.username]]"
+        blur-images="{{blurImages}}"
+        cases="{{cases}}"
+        email-address="{{emailAddress}}"
+        network-expansion-parameters="{{networkExpansionParameters}}"
+        notifications="{{notifications}}"
+        notification-date="{{notificationDate}}"
+        notification-interval="{{notificationInterval}}"
+        process-request="{{processRequest}}"
+        search-parameters="{{searchParameters}}">
+      </user-settings-dialog>
+    </template>
+
+    <export-dialog
+      button-callbacks="{{exportDialogCallbacks}}"
+      client="[[esClient]]"
+      data="[[searchResultsShown]]"
+      export-endpoint="[[findDigUrl(serverConfig.pathPrefix, 'export')]]"
+      index-name="[[esConfig.esIndex]]"
+      index-types="[[esConfig.esType]]"
+      search-fields="[[searchFields]]"
+      search-parameters="[[searchParameters]]"
+      source-include="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
+      transform-csv-function="[[transforms.export.createExportDataForCsv]]"
+      transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
+      transform-search-input-function="[[transforms.export.createBulkSearchData]]"
+      transform-search-results-function="[[transforms.entity.results]]">
+    </export-dialog>
+
+    <paper-header-panel class="flex" mode="seamed">
       <paper-toolbar slot="header" id="pageNavbar">
         <div slot="top" class="layout horizontal flex">
           <a id="logoLink" href="[[serverConfig.pathPrefix]]" target="_blank" title="Open a DIG Search Page in a New Tab">
             <img id="logo" src="/dig-ui/dig-logo.png" alt="">
           </a>
 
-          <search-fields-dialog
+          <search-fields-button
             class="layout vertical center flex"
             style="margin-left: 10px;"
-            date-config="[[datePropertiesToKeys]]"
-            free-text-search-fields="[[freeTextSearchFields]]"
-            hide-images="[[!esConfig.showImagesInSearch]]"
-            image-upload-url="[[findDigUrl(serverConfig.pathPrefix, 'uploadImage')]]"
-            image-url-prefix="[[esConfig.imageUrlPrefix]]"
-            image-url-suffix="[[esConfig.imageUrlSuffix]]"
-            images="{{imagesUploaded}}"
-            images-processing="[[imagesProcessing]]"
-            large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
-            search-fields-config="[[searchFieldsDialogConfig]]"
-            small-image-style-class="[[findBlurStyleClass(blurImages)]]"
-            network-expansion-parameters="{{networkExpansionParameters}}"
-            process-request="{{processRequest}}"
-            search-parameters="{{searchParameters}}">
-          </search-fields-dialog>
+            toggle-dialog-callback="[[searchFieldsDialogCallbacks.toggleDialog]]"
+            handle-search-callback="[[searchFieldsDialogCallbacks.handleSearch]]"
+            free-text-search-fields="[[freeTextSearchFields]]">
+          </search-fields-button>
 
           <template is="dom-if" if="[[serverConfig.username]]">
-            <user-settings-dialog
-              enable-email-address
-              enable-search
-              build-popup-data-function="[[transforms.config.searchTerms]]"
-              build-state-data-function="[[transforms.config.searchState]]"
-              data-config="[[searchFieldsCollection]]"
-              function-config="[[searchFields]]"
-              profile-manager="[[profileManager]]"
-              reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
-              result-link-function="[[transforms.config.resultLink]]"
-              user-id="[[userId]]"
-              user-loading="[[userLoading]]"
-              username="[[serverConfig.username]]"
-              blur-images="{{blurImages}}"
-              cases="{{cases}}"
-              email-address="{{emailAddress}}"
-              network-expansion-parameters="{{networkExpansionParameters}}"
-              notifications="{{notifications}}"
-              notification-date="{{notificationDate}}"
-              notification-interval="{{notificationInterval}}"
-              process-request="{{processRequest}}"
-              search-parameters="{{searchParameters}}">
-            </user-settings-dialog>
+            <user-settings-button notifications="[[notifications]]" open-callback="[[userSettingsDialogCallbacks.openSettingsDialog]]"></user-settings-button>
           </template>
 
           <paper-icon-button id="menuButton" icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
@@ -674,7 +717,7 @@ limitations under the License.
               <breadbox-item icon="fa:arrows-alt" icon-text="Network Expansion Active" text="[[item]]"></breadbox-item>
             </template>
             <template is="dom-repeat" items="[[searchKeys]]">
-              <selected-facets-display facet-key="[[item]]" facets="{{searchParameters}}"></selected-facets-display>
+              <selected-facets-display color-map="[[colorMap]]" facet-key="[[item]]" facets="{{searchParameters}}"></selected-facets-display>
             </template>
           </div>
         </div>
@@ -709,6 +752,7 @@ limitations under the License.
               image-style-class="[[findBlurStyleClass(blurImages)]]"
               index-name="[[esConfig.esIndex]]"
               index-types="[[esConfig.esType]]"
+              network-expansion-parameters="{}"
               process-request="{{processRequest}}"
               query-builder-config="[[searchFieldsCollection]]"
               search-keys="[[searchKeys]]"
@@ -718,14 +762,14 @@ limitations under the License.
           </template>
         </div>
 
-        <paper-header-panel slot="main" id="pageSearch">
+        <paper-header-panel slot="main" id="pageSearch" mode="seamed">
           <template is="dom-if" if="[[clientConfigLoading]]">
             <loading-spinner class="layout horizontal" show type="Configuration"></loading-spinner>
           </template>
 
           <template is="dom-if" if="[[esConfig]]">
             <template is="dom-if" if="[[pageWasNotJustOpened]]">
-              <paper-material slot="header" id="searchHeader" class="layout horizontal center">
+              <paper-material slot="header" id="searchHeader" class="layout horizontal center" elevation="2">
                 <div class="search-header-text flex">
                   <template is="dom-if" if="[[!searchError]]">
                     [[searchTitle]]
@@ -757,26 +801,13 @@ limitations under the License.
                   </aggregation-sort>
                 </div>
 
-                <export-button
-                  client="[[esClient]]"
-                  data="[[searchResultsShown]]"
-                  export-endpoint="[[findDigUrl(serverConfig.pathPrefix, 'export')]]"
-                  index-name="[[esConfig.esIndex]]"
-                  index-types="[[esConfig.esType]]"
-                  search-fields="[[searchFields]]"
-                  search-parameters="[[searchParameters]]"
-                  source-include='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
-                  transform-csv-function="[[transforms.export.createExportDataForCsv]]"
-                  transform-pdf-function="[[transforms.export.createExportDataForPdf]]"
-                  transform-search-input-function="[[transforms.export.createBulkSearchData]]"
-                  transform-search-results-function="[[transforms.entity.results]]">
-                </export-button>
+                <export-button enable="[[searchResultsShown.length]]" open-callback="[[exportDialogCallbacks.openExportDialog]]"></export-button>
               </paper-material>
             </template>
 
             <template is="dom-if" if="[[!esConfig.hideTimelines]]">
               <template is="dom-if" if="[[searchResultsShown.length]]">
-                <paper-material slot="header" id="searchTimeline" class="layout vertical">
+                <paper-material slot="header" id="searchTimeline" class="layout vertical" elevation="2">
                   <div class="layout horizontal center fields-menu">
                     <template is="dom-if" if="[[!timelineLoading]]">
                       <template is="dom-if" if="[[timelineResults.sparklines.length]]">
@@ -829,7 +860,7 @@ limitations under the License.
                   result-type="[[serverConfig.resultNameSingular]]"
                   show="[[!pageWasNotJustOpened]]"
                   timeline-function="[[transforms.entity.timelines]]"
-                  timestamp-field="timestamp_crawl">
+                  timestamp-field="[[esConfig.timestamp]]">
                 </database-details>
               </template>
             </template>
@@ -853,12 +884,13 @@ limitations under the License.
               id-field="_id"
               search-fields="[[searchFields]]"
               source-include-cached-page='["raw_content"]'
-              source-include-nested-data='["doc_id", "knowledge_graph", "objects", "tld", "url"]'
+              source-include-nested-data="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"
               large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
               newline-tag="[[esConfig.newlineTag]]"
+              hide-cached-page="[[serverConfig.hideCachedPage]]"
               hide-confidences
               tag-manager="[[tagManager]]">
             </result-list>
@@ -905,6 +937,10 @@ limitations under the License.
           type: Boolean
         },
 
+        colorMap: {
+          type: Object
+        },
+
         configHeader: {
           computed: 'createAuthHeader(serverConfig)',
           type: Object
@@ -946,6 +982,10 @@ limitations under the License.
         },
 
         esConfig: {
+          type: Object
+        },
+
+        exportDialogCallbacks: {
           type: Object
         },
 
@@ -1046,10 +1086,6 @@ limitations under the License.
           type: Boolean
         },
 
-        openedSearchImageGallery: {
-          type: Boolean
-        },
-
         pageWasNotJustOpened: {
           computed: 'computePageWasNotJustOpened(searchParameters, searchParameters.*)',
           type: Boolean,
@@ -1085,6 +1121,10 @@ limitations under the License.
 
         searchFields: {
           type: Array
+        },
+
+        searchFieldsDialogCallbacks: {
+          type: Object
         },
 
         searchFieldsDialogConfig: {
@@ -1168,6 +1208,10 @@ limitations under the License.
 
         userLoading: {
           type: Boolean
+        },
+
+        userSettingsDialogCallbacks: {
+          type: Object
         }
       },
 
@@ -1391,11 +1435,13 @@ limitations under the License.
       },
 
       openDatabaseDetail: function() {
-        this.openedDatabaseDetail = true;
+        this.$$('#menuDropdown').close();
+        this.$$('#databaseDetailDialog').open();
       },
 
       openSearchImageGallery: function() {
-        this.openedSearchImageGallery = true;
+        this.$$('#menuDropdown').close();
+        this.$$('#searchImageGalleryDialog').open();
       },
 
       runBothImageSearches: function() {

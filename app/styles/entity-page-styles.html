@@ -25,12 +25,15 @@ limitations under the License.
         @apply --layout-horizontal;
         @apply --layout-center;
         @apply --layout-flex;
-        @apply --shadow-elevation-2dp;
         background-color: var(--navbar-color);
         color: #fff;
         min-height: 30px;
         padding: 10px;
         transition: height 0.2s;
+        /* Add shadow. */
+        position: relative;
+        z-index: 2;
+        @apply --shadow-elevation-4dp;
       }
 
       .page-head .page-data {

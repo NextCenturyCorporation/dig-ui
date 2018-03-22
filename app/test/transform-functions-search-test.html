@@ -43,7 +43,9 @@ limitations under the License.
       transformFunctions = fixture('transform-functions-fixture');
       transformFunctions.domain = 'domain';
       transformFunctions.clientConfig = {};
-      transformFunctions.serverConfig = {};
+      transformFunctions.serverConfig = {
+        timestampField: 'timestamp_crawl'
+      };
     });
 
     test('does define transforms object', function() {

@@ -135,6 +135,10 @@ DigBehaviors.PageBehavior = {
     return (serverConfig && serverConfig.prettyDomain ? serverConfig.prettyDomain[domain] : domain) || domain;
   },
 
+  getSourceIncludes: function(ignore, timestamp, uid) {
+    return ignore ? [] : ['knowledge_graph', 'objects', 'tld', 'url', timestamp, uid];
+  },
+
   getUrlParameters: function() {
     return DigBehaviors.PageBehavior.getUrlParametersHelper(window.location.search);
   },

@@ -46,6 +46,7 @@ module.exports = {
     esHost: JSON.parse(process.env.ES_HOST || '{"apiVersion":"2.4","host":"http://localhost:9200"}'),
     esHostString: process.env.ES_HOST_STRING || '',
     hideBulkSearch: process.env.HIDE_BULK_SEARCH || false,
+    hideCachedPage: process.env.HIDE_CACHED_PAGE || false,
     hideDatabaseInfo: process.env.HIDE_DATABASE_INFO || false,
     imageServiceConfig: JSON.parse(process.env.IMAGE_SERVICE_CONFIG || '{"auth":{},"endpoint":{},"host":{}}'),
     imageUrlPrefix: process.env.IMAGE_URL_PREFIX || '',
@@ -66,10 +67,14 @@ module.exports = {
     secret: process.env.SECRET || 'dig memex',
     sendSearchesDirectlyToES: process.env.SEND_SEARCHES_DIRECTLY_TO_ES || false,
     showEsData: process.env.SHOW_ES_DATA || false,
+    showMultipleDescriptions: process.env.SHOW_MULTIPLE_DESCRIPTIONS || false,
+    showMultipleTitles: process.env.SHOW_MULTIPLE_TITLES || false,
     stateIndexName: process.env.STATE_INDEX_NAME || 'dig-states',
     stateIndexType: process.env.STATE_INDEX_TYPE || 'state',
     supportEmail: process.env.SUPPORT_EMAIL || 'support@memex.software',
     tagsEntityEndpoint: process.env.TAGS_ENTITY_ENDPOINT,
     tagsExtractionEndpoint: process.env.TAGS_EXTRACTION_ENDPOINT,
-    tagsListEndpoint: process.env.TAGS_LIST_ENDPOINT
+    tagsListEndpoint: process.env.TAGS_LIST_ENDPOINT,
+    timestampField: process.env.TIMESTAMP_FIELD || 'timestamp_crawl',
+    uidField: process.env.UID_FIELD || 'doc_id'
 };

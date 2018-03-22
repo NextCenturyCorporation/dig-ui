@@ -198,6 +198,9 @@ var commonTransforms = (function(_, moment, domain, pathPrefix) {
       // Return just the city rather than the complete formatted location key.
       return getLocationDataFromKey(key).city;
     }
+    if(type === 'number') {
+      return key;
+    }
     if(type === 'username') {
       // Formatted <website> <username>
       var id = ('' + key).toLowerCase();
@@ -227,6 +230,9 @@ var commonTransforms = (function(_, moment, domain, pathPrefix) {
     }
     if(type === 'location') {
       return getLocationDataFromKey(key).text;
+    }
+    if(type === 'number') {
+      return key;
     }
     if(type === 'phone') {
       return getFormattedPhone(key);

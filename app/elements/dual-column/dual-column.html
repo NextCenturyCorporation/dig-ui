@@ -32,11 +32,15 @@ limitations under the License.
       .top {
         height: calc(50% - 5px);
         overflow-y: auto;
-        @apply --shadow-elevation-2dp;
+        /* Add shadow. */
+        position: relative;
+        z-index: 2;
+        @apply --shadow-elevation-4dp;
       }
 
       .bottom {
         margin-top: 5px;
+        z-index: 1;
       }
 
       .top {

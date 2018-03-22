@@ -40,7 +40,10 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
   function findAggregationsInResponse(response, property, isNetworkExpansion) {
     // If no search endpoint is defined, the response was sent directly from ES.
     if(!esConfig.searchEndpoint) {
-      return (response && response.aggregations && response.aggregations[property] && response.aggregations[property][property] ? response.aggregations[property][property].buckets : []) || [];
+      if(response && response.aggregations && response.aggregations[property]) {
+        return (response.aggregations[property][property] ? response.aggregations[property][property].buckets : response.aggregations[property].buckets) || [];
+      }
+      return [];
     }
 
     if(isNetworkExpansion) {
@@ -56,7 +59,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
     return [];
   }
 
-  function createFacetTransform(linkType, fieldType, fieldId) {
+  function createFacetTransform(linkType, fieldType, fieldId, fieldStyleClass) {
     return function(response, config) {
       var aggregations = findAggregationsInResponse(response, config.name, config.isNetworkExpansion);
       return aggregations.reduce(function(data, bucket) {
@@ -69,6 +72,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
             count: count,
             id: id,
             link: commonTransforms.getLink(bucket.key, linkType, fieldType, fieldId),
+            styleClass: fieldStyleClass,
             source: (fieldType === 'image' ? commonTransforms.getImageUrl(bucket.key, esConfig) : undefined),
             text: commonTransforms.getFacetsDataText(bucket.key, fieldType)
           });
@@ -122,6 +126,19 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         });
       }
       return [];
+    },
+
+    /**
+     * Returns the color map for the search fields.
+     *
+     * @param {Array} searchFields
+     * @return {Object}
+     */
+    colorMap: function(searchFields) {
+      return searchFields.reduce(function(colorMap, searchFieldsObject) {
+        colorMap[searchFieldsObject.key] = searchFieldsObject.styleClass;
+        return colorMap;
+      }, {});
     },
 
     /**
@@ -391,7 +408,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           // Material design color.
           color: fields[id].color || 'grey',
           // The extraction field.
-          extractionField: fields[id].field || 'knowledge_graph.' + id,
+          extractionField: (fields[id].field ? ((fields[id].non_source ? '' : '_source.') + fields[id].field) : '') || '_source.knowledge_graph.' + id,
           // Whether to show in the facets.
           facets: fields[id].show_in_facets || false,
           // The aggregation field.
@@ -406,7 +423,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           groupOrder: fields[id].group_order,
           // A polymer or fontawesome icon.
           icon: fields[id].icon || 'icons:text-format',
-          // Either entity, text, or undefined.
+          // Either entity, text (web URL), or undefined.
           link: fields[id].show_as_link !== 'no' ? fields[id].show_as_link : undefined,
           // The query field.
           queryField: fields[id].field || 'knowledge_graph.' + id + '.value',
@@ -418,7 +435,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           title: fields[id].screen_label || 'Extraction',
           // The plural pretty name to show.
           titlePlural: fields[id].screen_label_plural || 'Extractions',
-          // Either date, email, hyphenated, image, location, phone, string, or username.
+          // Either date, email, hyphenated, image, location, number, phone, string, or username.
           type: fields[id].type,
           // The width (number) to set for the extractions, if any.
           width: fields[id].width
@@ -470,10 +487,10 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         searchFieldsObject.isLocation = (searchFieldsObject.type === 'location');
         searchFieldsObject.isUrl = (searchFieldsObject.type === 'tld' || searchFieldsObject.type === 'url');
 
-        // The facet aggregation transform function.
-        searchFieldsObject.facetTransform = createFacetTransform(searchFieldsObject.link, searchFieldsObject.type, searchFieldsObject.key);
         // Add style class (e.g. 'entity-grey').
         searchFieldsObject.styleClass = commonTransforms.getStyleClass(searchFieldsObject.color);
+        // The facet aggregation transform function.
+        searchFieldsObject.facetTransform = createFacetTransform(searchFieldsObject.link, searchFieldsObject.type, searchFieldsObject.key, searchFieldsObject.styleClass);
         // Properties for the date facets.
         searchFieldsObject.dateProperties = searchFieldsObject.isDate ? createDateProperties(searchFieldsObject) : {};
       });
@@ -496,6 +513,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           icon: searchFieldsObject.icon,
           link: commonTransforms.getLinkFunction(searchFieldsObject.link, searchFieldsObject.type, searchFieldsObject.key),
           name: searchFieldsObject.title,
+          searchType: searchFieldsObject.freeText ? 'contains' : 'term',
           styleClass: searchFieldsObject.styleClass,
           type: searchFieldsObject.type
         };

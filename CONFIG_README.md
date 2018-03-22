@@ -47,9 +47,10 @@ The optional project configuration properties are:
 Option | Effect | Default Value
 ------ | ------ | -------------
 key | The unique ID for the item. | **REQUIRED**
-type | The type of item.  Values are `'date'` (in ISO format), `'email'`, `'hyphenated'` (see [hyphenated format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#hyphenated-format)), `'image'` (in SHA1 format), `'location'` (see [location format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#location-format)), `'phone'`, `'string'`, or `'username'` (see [username format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#username-format)). | **REQUIRED**
+type | The type of item.  Values are `'date'` (in ISO format), `'email'`, `'hyphenated'` (see [hyphenated format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#hyphenated-format)), `'image'` (in SHA1 format), `'location'` (see [location format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#location-format)), `'number'`, `'phone'`, `'string'`, or `'username'` (see [username format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#username-format)). | **REQUIRED**
 color | The color for the item from the list of [colors](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#colors). | `'grey'`
-field | The actual field in the data. | Aggregation Field:  `'knowledge_graph.' + key + '.key'`, <br> Query Field:  `'knowledge_graph.' + key + '.value'`
+extraction_field | The extraction field in each elasticsearch document.  Overrides `field`. | See `field`.
+field | The actual field in the `_source` object of each elasticsearch document. | Aggregation Field:  `'knowledge_graph.' + key + '.key'`, <br> Query Field:  `'knowledge_graph.' + key + '.value'`
 field_order | A number representing the order of the item inside its `group` as shown in the Search Window and the Facets.  Lower numbers are shown first. | Alphabetical after all items with a `field_order`
 free_text_search | Whether to search on the field with the keywords in the free text search (the input field in the search page navigation bar).  Values are boolean.  If `free_text_search` is false for all fields, the free text search is hidden. | false
 group_name | The name of the group containing the item.  Determines the position of the item in the Search Window and the Facets. | None

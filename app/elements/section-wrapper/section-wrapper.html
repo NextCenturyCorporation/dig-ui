@@ -37,7 +37,7 @@ limitations under the License.
 
       paper-material.selected,
       paper-material.tappable:hover {
-        background-color: rgba(0,0,0,0.1);
+        background-color: var(--paper-grey-100);
       }
 
       paper-spinner {
@@ -170,7 +170,7 @@ limitations under the License.
       }
     </style>
 
-    <paper-material class$="[[_isSelected(selected)]] [[_isTappable(error, loading, noData, tappable)]]">
+    <paper-material class$="[[_isSelected(selected)]] [[_isTappable(error, loading, noData, tappable)]]" elevation="2">
       <template is="dom-if" if="[[!hideSectionTitle]]">
         <div class="section-title layout horizontal start center" on-tap="_updateTapped">
           <iron-icon class$="header-icon [[styleClass]]" icon="[[icon]]"></iron-icon>

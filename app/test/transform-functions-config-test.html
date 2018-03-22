@@ -249,6 +249,23 @@ limitations under the License.
       }]);
     });
 
+    test('colorMap given no search fields does return empty object', function() {
+      expect(transformFunctions.transforms.config.colorMap([])).to.deep.equal({});
+    });
+
+    test('colorMap given search fields does return expected object', function() {
+      expect(transformFunctions.transforms.config.colorMap([{
+        key: 'key1',
+        styleClass: 'color1'
+      }, {
+        key: 'key2',
+        styleClass: 'color2'
+      }])).to.deep.equal({
+        key1: 'color1',
+        key2: 'color2'
+      });
+    });
+
     test('dateMenu does return expected object', function() {
       expect(transformFunctions.transforms.config.dateMenu([])).to.deep.equal({
         fields: [],

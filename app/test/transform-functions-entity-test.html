@@ -41,7 +41,7 @@ limitations under the License.
 
     var SEARCH_FIELDS = [{
       key: 'city',
-      extractionField: 'extractions.cityField',
+      extractionField: '_source.extractions.cityField',
       icon: 'cityIcon',
       isDate: false,
       isHidden: false,
@@ -55,7 +55,7 @@ limitations under the License.
       type: 'location'
     }, {
       key: 'comment',
-      extractionField: 'extractions.commentField',
+      extractionField: '_source.extractions.commentField',
       icon: 'commentIcon',
       isDate: false,
       isHidden: false,
@@ -69,7 +69,7 @@ limitations under the License.
       type: 'kg_id'
     }, {
       key: 'date',
-      extractionField: 'extractions.dateField',
+      extractionField: '_source.extractions.dateField',
       icon: 'dateIcon',
       isDate: true,
       isHidden: false,
@@ -83,7 +83,7 @@ limitations under the License.
       type: 'date'
     }, {
       key: 'description',
-      extractionField: 'extractions.descriptionField',
+      extractionField: '_source.extractions.descriptionField',
       icon: 'descriptionIcon',
       isDate: false,
       isHidden: false,
@@ -97,7 +97,7 @@ limitations under the License.
       type: 'string'
     }, {
       key: 'email',
-      extractionField: 'extractions.emailField',
+      extractionField: '_source.extractions.emailField',
       icon: 'emailIcon',
       isDate: false,
       isHidden: false,
@@ -111,7 +111,7 @@ limitations under the License.
       type: 'email'
     }, {
       key: 'label',
-      extractionField: 'extractions.labelField',
+      extractionField: '_source.extractions.labelField',
       icon: 'labelIcon',
       isDate: false,
       isHidden: false,
@@ -124,8 +124,22 @@ limitations under the License.
       titlePlural: 'Labels',
       type: 'string'
     }, {
+      key: 'number',
+      extractionField: '_source.extractions.numberField',
+      icon: 'numberIcon',
+      isDate: false,
+      isHidden: false,
+      isLocation: false,
+      isUrl: false,
+      link: undefined,
+      result: 'detail',
+      styleClass: 'numberStyle',
+      title: 'Number',
+      titlePlural: 'Numbers',
+      type: 'number'
+    }, {
       key: 'phone',
-      extractionField: 'extractions.phoneField',
+      extractionField: '_source.extractions.phoneField',
       icon: 'phoneIcon',
       isDate: false,
       isHidden: false,
@@ -139,7 +153,7 @@ limitations under the License.
       type: 'phone'
     }, {
       key: 'price',
-      extractionField: 'extractions.priceField',
+      extractionField: '_source.extractions.priceField',
       icon: 'priceIcon',
       isDate: false,
       isHidden: false,
@@ -153,21 +167,35 @@ limitations under the License.
       type: 'hyphenated'
     }, {
       key: 'title',
-      extractionField: 'extractions.titleField',
+      extractionField: '_source.extractions.titleField',
       icon: 'titleIcon',
       isDate: false,
       isHidden: false,
       isLocation: false,
       isUrl: false,
-      link: undefined,
+      link: 'result',
       result: 'title',
       styleClass: 'titleStyle',
       title: 'Title',
       titlePlural: 'Titles',
       type: 'string'
     }, {
+      key: 'unnested',
+      extractionField: '_source.extractions.unnestedField',
+      icon: 'unnestedIcon',
+      isDate: false,
+      isHidden: false,
+      isLocation: false,
+      isUrl: false,
+      link: undefined,
+      result: 'detail',
+      styleClass: 'unnestedStyle',
+      title: 'Unnested Item',
+      titlePlural: 'Unnested Items',
+      type: 'string'
+    }, {
       key: 'user',
-      extractionField: 'extractions.userField',
+      extractionField: '_source.extractions.userField',
       icon: 'userIcon',
       isDate: false,
       isHidden: false,
@@ -181,7 +209,7 @@ limitations under the License.
       type: 'username'
     }, {
       key: 'website',
-      extractionField: 'extractions.websiteField',
+      extractionField: '_source.extractions.websiteField',
       icon: 'websiteIcon',
       isDate: false,
       isHidden: false,
@@ -195,7 +223,7 @@ limitations under the License.
       type: 'url'
     }, {
       key: 'x',
-      extractionField: 'extractions.xField',
+      extractionField: '_source.extractions.xField',
       icon: 'xIcon',
       isDate: false,
       isHidden: false,
@@ -252,6 +280,13 @@ limitations under the License.
             key: 'label2',
             value: 'Label2'
           }],
+          numberField: [{
+            key: 321,
+            value: 321
+          }, {
+            key: 654,
+            value: 654
+          }],
           phoneField: [{
             key: '1112223333',
             value: '1112223333'
@@ -271,6 +306,7 @@ limitations under the License.
           }, {
             value: 'Title 2'
           }],
+          unnestedField: ['unnested1', 'unnested2'],
           userField: [{
             key: 'type1 user1',
             value: 'User1'
@@ -325,6 +361,10 @@ limitations under the License.
             key: 'label3',
             value: 'Label3'
           }],
+          numberField: [{
+            key: 987,
+            value: 987
+          }],
           phoneField: [{
             key: '7778889999',
             value: '+x-7778889999'
@@ -336,6 +376,7 @@ limitations under the License.
           titleField: [{
             value: 'Title 3'
           }],
+          unnestedField: ['unnested3'],
           userField: [{
             key: 'type3 user3',
             value: 'User3'
@@ -362,7 +403,9 @@ limitations under the License.
         resultIcon: 'TestIcon',
         resultNamePlural: 'TestResults',
         resultNameSingular: 'TestResult',
-        resultQueryField: 'TestQueryField'
+        resultQueryField: 'TestQueryField',
+        timestampField: 'timestamp_crawl',
+        uidField: 'doc_id'
       };
     });
 
@@ -452,7 +495,7 @@ limitations under the License.
       expect(output[0].confidence).to.not.exist;
       expect(output[0].count).to.equal(1111);
       expect(output[0].id).to.equal('city1:state1:country1:1:11');
-      expect(output[0].icon).to.equal('cityIcon');
+      expect(output[0].icon).to.not.exist;
       expect(output[0].link).to.equal('/entity.html?domain=TestDomain&id=city1%3Astate1%3Acountry1%3A1%3A11&type=city');
       expect(output[0].provenances).to.deep.equal([]);
       expect(output[0].styleClass).to.equal('cityStyle');
@@ -463,7 +506,7 @@ limitations under the License.
       expect(output[1].confidence).to.not.exist;
       expect(output[1].count).to.equal(222);
       expect(output[1].id).to.equal('city2:state2:country2:2:22');
-      expect(output[1].icon).to.equal('cityIcon');
+      expect(output[1].icon).to.not.exist;
       expect(output[1].link).to.equal('/entity.html?domain=TestDomain&id=city2%3Astate2%3Acountry2%3A2%3A22&type=city');
       expect(output[1].provenances).to.deep.equal([]);
       expect(output[1].styleClass).to.equal('cityStyle');
@@ -474,7 +517,7 @@ limitations under the License.
       expect(output[2].confidence).to.not.exist;
       expect(output[2].count).to.equal(33);
       expect(output[2].id).to.equal('city3:state3:country3:3:33');
-      expect(output[2].icon).to.equal('cityIcon');
+      expect(output[2].icon).to.not.exist;
       expect(output[2].link).to.equal('/entity.html?domain=TestDomain&id=city3%3Astate3%3Acountry3%3A3%3A33&type=city');
       expect(output[2].provenances).to.deep.equal([]);
       expect(output[2].styleClass).to.equal('cityStyle');
@@ -512,7 +555,7 @@ limitations under the License.
       expect(output[0].confidence).to.not.exist;
       expect(output[0].count).to.equal(1111);
       expect(output[0].id).to.equal('label1');
-      expect(output[0].icon).to.equal('labelIcon');
+      expect(output[0].icon).to.not.exist;
       expect(output[0].link).to.not.exist;
       expect(output[0].provenances).to.deep.equal([]);
       expect(output[0].styleClass).to.equal('labelStyle');
@@ -523,7 +566,7 @@ limitations under the License.
       expect(output[1].confidence).to.not.exist;
       expect(output[1].count).to.equal(222);
       expect(output[1].id).to.equal('label2');
-      expect(output[1].icon).to.equal('labelIcon');
+      expect(output[1].icon).to.not.exist;
       expect(output[1].link).to.not.exist;
       expect(output[1].provenances).to.deep.equal([]);
       expect(output[1].styleClass).to.equal('labelStyle');
@@ -534,7 +577,7 @@ limitations under the License.
       expect(output[2].confidence).to.not.exist;
       expect(output[2].count).to.equal(33);
       expect(output[2].id).to.equal('label3');
-      expect(output[2].icon).to.equal('labelIcon');
+      expect(output[2].icon).to.not.exist;
       expect(output[2].link).to.not.exist;
       expect(output[2].provenances).to.deep.equal([]);
       expect(output[2].styleClass).to.equal('labelStyle');
@@ -574,7 +617,7 @@ limitations under the License.
       expect(output[0].confidence).to.not.exist;
       expect(output[0].count).to.equal(1111);
       expect(output[0].id).to.equal('label1');
-      expect(output[0].icon).to.equal('labelIcon');
+      expect(output[0].icon).to.not.exist;
       expect(output[0].link).to.not.exist;
       expect(output[0].provenances).to.deep.equal([]);
       expect(output[0].styleClass).to.equal('labelStyle');
@@ -585,7 +628,7 @@ limitations under the License.
       expect(output[1].confidence).to.not.exist;
       expect(output[1].count).to.equal(33);
       expect(output[1].id).to.equal('label3');
-      expect(output[1].icon).to.equal('labelIcon');
+      expect(output[1].icon).to.not.exist;
       expect(output[1].link).to.not.exist;
       expect(output[1].provenances).to.deep.equal([]);
       expect(output[1].styleClass).to.equal('labelStyle');
@@ -624,7 +667,7 @@ limitations under the License.
       }, SEARCH_FIELDS)).to.deep.equal([{
         config: {
           key: 'city',
-          extractionField: 'extractions.cityField',
+          extractionField: '_source.extractions.cityField',
           icon: 'cityIcon',
           isDate: false,
           isHidden: false,
@@ -641,7 +684,7 @@ limitations under the License.
       }, {
         config: {
           key: 'city',
-          extractionField: 'extractions.cityField',
+          extractionField: '_source.extractions.cityField',
           icon: 'cityIcon',
           isDate: false,
           isHidden: false,
@@ -738,81 +781,128 @@ limitations under the License.
       expect(output.ABC123.type).to.equal('comment');
       expect(output.ABC123.url).to.equal('testUrl1');
 
-      expect(output.ABC123.crawlTimestamp).to.not.exist;
+      expect(output.ABC123.timestamp).to.not.exist;
       expect(output.ABC123.esData).to.not.exist;
       expect(output.ABC123.images).to.not.exist;
 
       expect(output.ABC123.headerExtractions).to.deep.equal([{
         data: [],
+        icon: 'websiteIcon',
         isDate: false,
         isUrl: true,
         key: 'website',
         name: 'Websites',
+        styleClass: 'websiteStyle',
         type: 'url',
+        width: undefined,
         index: 3
       }, {
         data: [],
+        icon: 'dateIcon',
         isDate: true,
         isUrl: false,
         key: 'date',
         name: 'Dates',
+        styleClass: 'dateStyle',
         type: 'date',
+        width: undefined,
         index: 1
       }, {
         data: [],
+        icon: 'cityIcon',
         isDate: false,
         isUrl: false,
         key: 'city',
         name: 'Cities',
+        styleClass: 'cityStyle',
         type: 'location',
+        width: undefined,
         index: 0
       }, {
         data: [],
+        icon: 'labelIcon',
         isDate: false,
         isUrl: false,
         key: 'label',
         name: 'Labels',
+        styleClass: 'labelStyle',
         type: 'string',
+        width: undefined,
         index: 2
       }]);
 
       expect(output.ABC123.detailExtractions).to.deep.equal([{
         data: [],
+        icon: 'emailIcon',
         isDate: false,
         isUrl: false,
         key: 'email',
         name: 'Emails',
-        type: 'email'
+        styleClass: 'emailStyle',
+        type: 'email',
+        width: undefined
       }, {
         data: [],
+        icon: 'numberIcon',
+        isDate: false,
+        isUrl: false,
+        key: 'number',
+        name: 'Numbers',
+        styleClass: 'numberStyle',
+        type: 'number',
+        width: undefined
+      }, {
+        data: [],
+        icon: 'phoneIcon',
         isDate: false,
         isUrl: false,
         key: 'phone',
         name: 'Phones',
-        type: 'phone'
+        styleClass: 'phoneStyle',
+        type: 'phone',
+        width: undefined
       }, {
         data: [],
+        icon: 'priceIcon',
         isDate: false,
         isUrl: false,
         key: 'price',
         name: 'Prices',
-        type: 'hyphenated'
+        styleClass: 'priceStyle',
+        type: 'hyphenated',
+        width: undefined
       }, {
         data: [],
+        icon: 'unnestedIcon',
+        isDate: false,
+        isUrl: false,
+        key: 'unnested',
+        name: 'Unnested Items',
+        styleClass: 'unnestedStyle',
+        type: 'string',
+        width: undefined
+      }, {
+        data: [],
+        icon: 'userIcon',
         isDate: false,
         isUrl: false,
         key: 'user',
         name: 'Users',
-        type: 'username'
+        styleClass: 'userStyle',
+        type: 'username',
+        width: undefined
       }]);
 
       expect(output.ABC123.nestedExtractions).to.deep.equal([{
         data: [],
+        icon: 'commentIcon',
         isDate: false,
         isUrl: false,
         key: 'comment',
         name: 'Comments',
-        type: 'kg_id'
+        styleClass: 'commentStyle',
+        type: 'kg_id',
+        width: undefined
       }]);
 
       expect(output.ABC123.details).to.deep.equal([{
@@ -841,81 +931,128 @@ limitations under the License.
       expect(output.DEF456.type).to.equal('comment');
       expect(output.DEF456.url).to.equal('testUrl2');
 
-      expect(output.DEF456.crawlTimestamp).to.not.exist;
+      expect(output.DEF456.timestamp).to.not.exist;
       expect(output.DEF456.esData).to.not.exist;
       expect(output.DEF456.images).to.not.exist;
 
       expect(output.DEF456.headerExtractions).to.deep.equal([{
         data: [],
+        icon: 'websiteIcon',
         isDate: false,
         isUrl: true,
         key: 'website',
         name: 'Websites',
+        styleClass: 'websiteStyle',
         type: 'url',
+        width: undefined,
         index: 3
       }, {
         data: [],
+        icon: 'dateIcon',
         isDate: true,
         isUrl: false,
         key: 'date',
         name: 'Dates',
+        styleClass: 'dateStyle',
         type: 'date',
+        width: undefined,
         index: 1
       }, {
         data: [],
+        icon: 'cityIcon',
         isDate: false,
         isUrl: false,
         key: 'city',
         name: 'Cities',
+        styleClass: 'cityStyle',
         type: 'location',
+        width: undefined,
         index: 0
       }, {
         data: [],
+        icon: 'labelIcon',
         isDate: false,
         isUrl: false,
         key: 'label',
         name: 'Labels',
+        styleClass: 'labelStyle',
         type: 'string',
+        width: undefined,
         index: 2
       }]);
 
       expect(output.DEF456.detailExtractions).to.deep.equal([{
         data: [],
+        icon: 'emailIcon',
         isDate: false,
         isUrl: false,
         key: 'email',
         name: 'Emails',
-        type: 'email'
+        styleClass: 'emailStyle',
+        type: 'email',
+        width: undefined
       }, {
         data: [],
+        icon: 'numberIcon',
+        isDate: false,
+        isUrl: false,
+        key: 'number',
+        name: 'Numbers',
+        styleClass: 'numberStyle',
+        type: 'number',
+        width: undefined
+      }, {
+        data: [],
+        icon: 'phoneIcon',
         isDate: false,
         isUrl: false,
         key: 'phone',
         name: 'Phones',
-        type: 'phone'
+        styleClass: 'phoneStyle',
+        type: 'phone',
+        width: undefined
       }, {
         data: [],
+        icon: 'priceIcon',
         isDate: false,
         isUrl: false,
         key: 'price',
         name: 'Prices',
-        type: 'hyphenated'
+        styleClass: 'priceStyle',
+        type: 'hyphenated',
+        width: undefined
       }, {
         data: [],
+        icon: 'unnestedIcon',
+        isDate: false,
+        isUrl: false,
+        key: 'unnested',
+        name: 'Unnested Items',
+        styleClass: 'unnestedStyle',
+        type: 'string',
+        width: undefined
+      }, {
+        data: [],
+        icon: 'userIcon',
         isDate: false,
         isUrl: false,
         key: 'user',
         name: 'Users',
-        type: 'username'
+        styleClass: 'userStyle',
+        type: 'username',
+        width: undefined
       }]);
 
       expect(output.DEF456.nestedExtractions).to.deep.equal([{
         data: [],
+        icon: 'commentIcon',
         isDate: false,
         isUrl: false,
         key: 'comment',
         name: 'Comments',
-        type: 'kg_id'
+        styleClass: 'commentStyle',
+        type: 'kg_id',
+        width: undefined
       }]);
 
       expect(output.DEF456.details).to.deep.equal([{
@@ -946,22 +1083,22 @@ limitations under the License.
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
       expect(output.ABC123.id).to.equal('ABC123');
-      expect(output.ABC123.description).to.equal('This is description 1 This is description 2');
-      expect(output.ABC123.highlightedText).to.equal('Title 1 Title 2');
+      expect(output.ABC123.description).to.equal('This is description 1');
+      expect(output.ABC123.highlightedText).to.equal('Title 1');
       expect(output.ABC123.icon).to.equal('commentIcon');
       expect(output.ABC123.link).to.equal('/result.html?domain=TestDomain&id=ABC123');
       expect(output.ABC123.name).to.equal('Comment');
       expect(output.ABC123.styleClass).to.equal('commentStyle');
       expect(output.ABC123.tags).to.deep.equal({});
-      expect(output.ABC123.title).to.equal('Title 1 Title 2');
+      expect(output.ABC123.title).to.equal('Title 1');
       expect(output.ABC123.type).to.equal('comment');
       expect(output.ABC123.url).to.equal('testUrl1');
 
-      expect(output.ABC123.crawlTimestamp).to.not.exist;
+      expect(output.ABC123.timestamp).to.not.exist;
       expect(output.ABC123.esData).to.not.exist;
       expect(output.ABC123.images).to.not.exist;
       expect(output.ABC123.headerExtractions.length).to.equal(4);
-      expect(output.ABC123.detailExtractions.length).to.equal(4);
+      expect(output.ABC123.detailExtractions.length).to.equal(6);
       expect(output.ABC123.nestedExtractions.length).to.equal(1);
       expect(output.ABC123.details.length).to.equal(3);
 
@@ -1110,96 +1247,158 @@ limitations under the License.
 
       expect(output.ABC123.detailExtractions[1].isDate).to.be.false;
       expect(output.ABC123.detailExtractions[1].isUrl).to.be.false;
-      expect(output.ABC123.detailExtractions[1].key).to.equal('phone');
-      expect(output.ABC123.detailExtractions[1].name).to.equal('Phones');
-      expect(output.ABC123.detailExtractions[1].type).to.equal('phone');
+      expect(output.ABC123.detailExtractions[1].key).to.equal('number');
+      expect(output.ABC123.detailExtractions[1].name).to.equal('Numbers');
+      expect(output.ABC123.detailExtractions[1].type).to.equal('number');
       expect(output.ABC123.detailExtractions[1].data.length).to.equal(2);
 
       expect(output.ABC123.detailExtractions[1].data[0].confidence).to.not.exist;
       expect(output.ABC123.detailExtractions[1].data[0].count).to.not.exist;
       expect(output.ABC123.detailExtractions[1].data[0].highlight).to.not.exist;
-      expect(output.ABC123.detailExtractions[1].data[0].id).to.equal('1112223333');
-      expect(output.ABC123.detailExtractions[1].data[0].icon).to.equal('phoneIcon');
-      expect(output.ABC123.detailExtractions[1].data[0].link).to.equal('/entity.html?domain=TestDomain&id=1112223333&type=phone');
+      expect(output.ABC123.detailExtractions[1].data[0].id).to.equal(321);
+      expect(output.ABC123.detailExtractions[1].data[0].icon).to.equal('numberIcon');
+      expect(output.ABC123.detailExtractions[1].data[0].link).to.not.exist;
       expect(output.ABC123.detailExtractions[1].data[0].provenances.length).to.equal(0);
-      expect(output.ABC123.detailExtractions[1].data[0].styleClass).to.equal('phoneStyle');
-      expect(output.ABC123.detailExtractions[1].data[0].text).to.equal('111-222-3333');
-      expect(output.ABC123.detailExtractions[1].data[0].type).to.equal('phone');
+      expect(output.ABC123.detailExtractions[1].data[0].styleClass).to.equal('numberStyle');
+      expect(output.ABC123.detailExtractions[1].data[0].text).to.equal(321);
+      expect(output.ABC123.detailExtractions[1].data[0].type).to.equal('number');
       expect(output.ABC123.detailExtractions[1].data[0].width).to.not.exist;
 
       expect(output.ABC123.detailExtractions[1].data[1].confidence).to.not.exist;
       expect(output.ABC123.detailExtractions[1].data[1].count).to.not.exist;
       expect(output.ABC123.detailExtractions[1].data[1].highlight).to.not.exist;
-      expect(output.ABC123.detailExtractions[1].data[1].id).to.equal('4445556666');
-      expect(output.ABC123.detailExtractions[1].data[1].icon).to.equal('phoneIcon');
-      expect(output.ABC123.detailExtractions[1].data[1].link).to.equal('/entity.html?domain=TestDomain&id=4445556666&type=phone');
+      expect(output.ABC123.detailExtractions[1].data[1].id).to.equal(654);
+      expect(output.ABC123.detailExtractions[1].data[1].icon).to.equal('numberIcon');
+      expect(output.ABC123.detailExtractions[1].data[1].link).to.not.exist;
       expect(output.ABC123.detailExtractions[1].data[1].provenances.length).to.equal(0);
-      expect(output.ABC123.detailExtractions[1].data[1].styleClass).to.equal('phoneStyle');
-      expect(output.ABC123.detailExtractions[1].data[1].text).to.equal('444-555-6666');
-      expect(output.ABC123.detailExtractions[1].data[1].type).to.equal('phone');
+      expect(output.ABC123.detailExtractions[1].data[1].styleClass).to.equal('numberStyle');
+      expect(output.ABC123.detailExtractions[1].data[1].text).to.equal(654);
+      expect(output.ABC123.detailExtractions[1].data[1].type).to.equal('number');
       expect(output.ABC123.detailExtractions[1].data[1].width).to.not.exist;
 
       expect(output.ABC123.detailExtractions[2].isDate).to.be.false;
       expect(output.ABC123.detailExtractions[2].isUrl).to.be.false;
-      expect(output.ABC123.detailExtractions[2].key).to.equal('price');
-      expect(output.ABC123.detailExtractions[2].name).to.equal('Prices');
-      expect(output.ABC123.detailExtractions[2].type).to.equal('hyphenated');
+      expect(output.ABC123.detailExtractions[2].key).to.equal('phone');
+      expect(output.ABC123.detailExtractions[2].name).to.equal('Phones');
+      expect(output.ABC123.detailExtractions[2].type).to.equal('phone');
       expect(output.ABC123.detailExtractions[2].data.length).to.equal(2);
 
       expect(output.ABC123.detailExtractions[2].data[0].confidence).to.not.exist;
       expect(output.ABC123.detailExtractions[2].data[0].count).to.not.exist;
       expect(output.ABC123.detailExtractions[2].data[0].highlight).to.not.exist;
-      expect(output.ABC123.detailExtractions[2].data[0].id).to.equal('price1-currency:currency1-time_unit:time1');
-      expect(output.ABC123.detailExtractions[2].data[0].icon).to.equal('priceIcon');
-      expect(output.ABC123.detailExtractions[2].data[0].link).to.not.exist;
+      expect(output.ABC123.detailExtractions[2].data[0].id).to.equal('1112223333');
+      expect(output.ABC123.detailExtractions[2].data[0].icon).to.equal('phoneIcon');
+      expect(output.ABC123.detailExtractions[2].data[0].link).to.equal('/entity.html?domain=TestDomain&id=1112223333&type=phone');
       expect(output.ABC123.detailExtractions[2].data[0].provenances.length).to.equal(0);
-      expect(output.ABC123.detailExtractions[2].data[0].styleClass).to.equal('priceStyle');
-      expect(output.ABC123.detailExtractions[2].data[0].text).to.equal('price1 currency1 per time1 minutes');
-      expect(output.ABC123.detailExtractions[2].data[0].type).to.equal('price');
+      expect(output.ABC123.detailExtractions[2].data[0].styleClass).to.equal('phoneStyle');
+      expect(output.ABC123.detailExtractions[2].data[0].text).to.equal('111-222-3333');
+      expect(output.ABC123.detailExtractions[2].data[0].type).to.equal('phone');
       expect(output.ABC123.detailExtractions[2].data[0].width).to.not.exist;
 
       expect(output.ABC123.detailExtractions[2].data[1].confidence).to.not.exist;
       expect(output.ABC123.detailExtractions[2].data[1].count).to.not.exist;
       expect(output.ABC123.detailExtractions[2].data[1].highlight).to.not.exist;
-      expect(output.ABC123.detailExtractions[2].data[1].id).to.equal('price2-currency:currency2-time_unit:time2');
-      expect(output.ABC123.detailExtractions[2].data[1].icon).to.equal('priceIcon');
-      expect(output.ABC123.detailExtractions[2].data[1].link).to.not.exist;
+      expect(output.ABC123.detailExtractions[2].data[1].id).to.equal('4445556666');
+      expect(output.ABC123.detailExtractions[2].data[1].icon).to.equal('phoneIcon');
+      expect(output.ABC123.detailExtractions[2].data[1].link).to.equal('/entity.html?domain=TestDomain&id=4445556666&type=phone');
       expect(output.ABC123.detailExtractions[2].data[1].provenances.length).to.equal(0);
-      expect(output.ABC123.detailExtractions[2].data[1].styleClass).to.equal('priceStyle');
-      expect(output.ABC123.detailExtractions[2].data[1].text).to.equal('price2 currency2 per time2 minutes');
-      expect(output.ABC123.detailExtractions[2].data[1].type).to.equal('price');
+      expect(output.ABC123.detailExtractions[2].data[1].styleClass).to.equal('phoneStyle');
+      expect(output.ABC123.detailExtractions[2].data[1].text).to.equal('444-555-6666');
+      expect(output.ABC123.detailExtractions[2].data[1].type).to.equal('phone');
       expect(output.ABC123.detailExtractions[2].data[1].width).to.not.exist;
 
       expect(output.ABC123.detailExtractions[3].isDate).to.be.false;
       expect(output.ABC123.detailExtractions[3].isUrl).to.be.false;
-      expect(output.ABC123.detailExtractions[3].key).to.equal('user');
-      expect(output.ABC123.detailExtractions[3].name).to.equal('Users');
-      expect(output.ABC123.detailExtractions[3].type).to.equal('username');
+      expect(output.ABC123.detailExtractions[3].key).to.equal('price');
+      expect(output.ABC123.detailExtractions[3].name).to.equal('Prices');
+      expect(output.ABC123.detailExtractions[3].type).to.equal('hyphenated');
       expect(output.ABC123.detailExtractions[3].data.length).to.equal(2);
 
       expect(output.ABC123.detailExtractions[3].data[0].confidence).to.not.exist;
       expect(output.ABC123.detailExtractions[3].data[0].count).to.not.exist;
       expect(output.ABC123.detailExtractions[3].data[0].highlight).to.not.exist;
-      expect(output.ABC123.detailExtractions[3].data[0].id).to.equal('type1 user1');
-      expect(output.ABC123.detailExtractions[3].data[0].icon).to.equal('userIcon');
-      expect(output.ABC123.detailExtractions[3].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type1%20user1&type=user');
+      expect(output.ABC123.detailExtractions[3].data[0].id).to.equal('price1-currency:currency1-time_unit:time1');
+      expect(output.ABC123.detailExtractions[3].data[0].icon).to.equal('priceIcon');
+      expect(output.ABC123.detailExtractions[3].data[0].link).to.not.exist;
       expect(output.ABC123.detailExtractions[3].data[0].provenances.length).to.equal(0);
-      expect(output.ABC123.detailExtractions[3].data[0].styleClass).to.equal('userStyle');
-      expect(output.ABC123.detailExtractions[3].data[0].text).to.equal('User1');
-      expect(output.ABC123.detailExtractions[3].data[0].type).to.equal('user');
+      expect(output.ABC123.detailExtractions[3].data[0].styleClass).to.equal('priceStyle');
+      expect(output.ABC123.detailExtractions[3].data[0].text).to.equal('price1 currency1 per time1 minutes');
+      expect(output.ABC123.detailExtractions[3].data[0].type).to.equal('price');
       expect(output.ABC123.detailExtractions[3].data[0].width).to.not.exist;
 
       expect(output.ABC123.detailExtractions[3].data[1].confidence).to.not.exist;
       expect(output.ABC123.detailExtractions[3].data[1].count).to.not.exist;
       expect(output.ABC123.detailExtractions[3].data[1].highlight).to.not.exist;
-      expect(output.ABC123.detailExtractions[3].data[1].id).to.equal('type2 user2');
-      expect(output.ABC123.detailExtractions[3].data[1].icon).to.equal('userIcon');
-      expect(output.ABC123.detailExtractions[3].data[1].link).to.equal('/entity.html?domain=TestDomain&id=type2%20user2&type=user');
+      expect(output.ABC123.detailExtractions[3].data[1].id).to.equal('price2-currency:currency2-time_unit:time2');
+      expect(output.ABC123.detailExtractions[3].data[1].icon).to.equal('priceIcon');
+      expect(output.ABC123.detailExtractions[3].data[1].link).to.not.exist;
       expect(output.ABC123.detailExtractions[3].data[1].provenances.length).to.equal(0);
-      expect(output.ABC123.detailExtractions[3].data[1].styleClass).to.equal('userStyle');
-      expect(output.ABC123.detailExtractions[3].data[1].text).to.equal('User2');
-      expect(output.ABC123.detailExtractions[3].data[1].type).to.equal('user');
+      expect(output.ABC123.detailExtractions[3].data[1].styleClass).to.equal('priceStyle');
+      expect(output.ABC123.detailExtractions[3].data[1].text).to.equal('price2 currency2 per time2 minutes');
+      expect(output.ABC123.detailExtractions[3].data[1].type).to.equal('price');
       expect(output.ABC123.detailExtractions[3].data[1].width).to.not.exist;
+
+      expect(output.ABC123.detailExtractions[4].isDate).to.be.false;
+      expect(output.ABC123.detailExtractions[4].isUrl).to.be.false;
+      expect(output.ABC123.detailExtractions[4].key).to.equal('unnested');
+      expect(output.ABC123.detailExtractions[4].name).to.equal('Unnested Items');
+      expect(output.ABC123.detailExtractions[4].type).to.equal('string');
+      expect(output.ABC123.detailExtractions[4].data.length).to.equal(2);
+
+      expect(output.ABC123.detailExtractions[4].data[0].confidence).to.not.exist;
+      expect(output.ABC123.detailExtractions[4].data[0].count).to.not.exist;
+      expect(output.ABC123.detailExtractions[4].data[0].highlight).to.not.exist;
+      expect(output.ABC123.detailExtractions[4].data[0].id).to.equal('unnested1');
+      expect(output.ABC123.detailExtractions[4].data[0].icon).to.equal('unnestedIcon');
+      expect(output.ABC123.detailExtractions[4].data[0].link).to.not.exist;
+      expect(output.ABC123.detailExtractions[4].data[0].provenances.length).to.equal(0);
+      expect(output.ABC123.detailExtractions[4].data[0].styleClass).to.equal('unnestedStyle');
+      expect(output.ABC123.detailExtractions[4].data[0].text).to.equal('unnested1');
+      expect(output.ABC123.detailExtractions[4].data[0].type).to.equal('unnested');
+      expect(output.ABC123.detailExtractions[4].data[0].width).to.not.exist;
+
+      expect(output.ABC123.detailExtractions[4].data[1].confidence).to.not.exist;
+      expect(output.ABC123.detailExtractions[4].data[1].count).to.not.exist;
+      expect(output.ABC123.detailExtractions[4].data[1].highlight).to.not.exist;
+      expect(output.ABC123.detailExtractions[4].data[1].id).to.equal('unnested2');
+      expect(output.ABC123.detailExtractions[4].data[1].icon).to.equal('unnestedIcon');
+      expect(output.ABC123.detailExtractions[4].data[1].link).to.not.exist;
+      expect(output.ABC123.detailExtractions[4].data[1].provenances.length).to.equal(0);
+      expect(output.ABC123.detailExtractions[4].data[1].styleClass).to.equal('unnestedStyle');
+      expect(output.ABC123.detailExtractions[4].data[1].text).to.equal('unnested2');
+      expect(output.ABC123.detailExtractions[4].data[1].type).to.equal('unnested');
+      expect(output.ABC123.detailExtractions[4].data[1].width).to.not.exist;
+
+      expect(output.ABC123.detailExtractions[5].isDate).to.be.false;
+      expect(output.ABC123.detailExtractions[5].isUrl).to.be.false;
+      expect(output.ABC123.detailExtractions[5].key).to.equal('user');
+      expect(output.ABC123.detailExtractions[5].name).to.equal('Users');
+      expect(output.ABC123.detailExtractions[5].type).to.equal('username');
+      expect(output.ABC123.detailExtractions[5].data.length).to.equal(2);
+
+      expect(output.ABC123.detailExtractions[5].data[0].confidence).to.not.exist;
+      expect(output.ABC123.detailExtractions[5].data[0].count).to.not.exist;
+      expect(output.ABC123.detailExtractions[5].data[0].highlight).to.not.exist;
+      expect(output.ABC123.detailExtractions[5].data[0].id).to.equal('type1 user1');
+      expect(output.ABC123.detailExtractions[5].data[0].icon).to.equal('userIcon');
+      expect(output.ABC123.detailExtractions[5].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type1%20user1&type=user');
+      expect(output.ABC123.detailExtractions[5].data[0].provenances.length).to.equal(0);
+      expect(output.ABC123.detailExtractions[5].data[0].styleClass).to.equal('userStyle');
+      expect(output.ABC123.detailExtractions[5].data[0].text).to.equal('User1');
+      expect(output.ABC123.detailExtractions[5].data[0].type).to.equal('user');
+      expect(output.ABC123.detailExtractions[5].data[0].width).to.not.exist;
+
+      expect(output.ABC123.detailExtractions[5].data[1].confidence).to.not.exist;
+      expect(output.ABC123.detailExtractions[5].data[1].count).to.not.exist;
+      expect(output.ABC123.detailExtractions[5].data[1].highlight).to.not.exist;
+      expect(output.ABC123.detailExtractions[5].data[1].id).to.equal('type2 user2');
+      expect(output.ABC123.detailExtractions[5].data[1].icon).to.equal('userIcon');
+      expect(output.ABC123.detailExtractions[5].data[1].link).to.equal('/entity.html?domain=TestDomain&id=type2%20user2&type=user');
+      expect(output.ABC123.detailExtractions[5].data[1].provenances.length).to.equal(0);
+      expect(output.ABC123.detailExtractions[5].data[1].styleClass).to.equal('userStyle');
+      expect(output.ABC123.detailExtractions[5].data[1].text).to.equal('User2');
+      expect(output.ABC123.detailExtractions[5].data[1].type).to.equal('user');
+      expect(output.ABC123.detailExtractions[5].data[1].width).to.not.exist;
 
       expect(output.ABC123.nestedExtractions[0].isDate).to.be.false;
       expect(output.ABC123.nestedExtractions[0].isUrl).to.be.false;
@@ -1235,8 +1434,8 @@ limitations under the License.
       expect(output.ABC123.details[0].text).to.equal('testUrl1');
 
       expect(output.ABC123.details[1].name).to.equal('Description');
-      expect(output.ABC123.details[1].highlightedText).to.equal('This is description 1 This is description 2');
-      expect(output.ABC123.details[1].text).to.equal('This is description 1 This is description 2');
+      expect(output.ABC123.details[1].highlightedText).to.equal('This is description 1');
+      expect(output.ABC123.details[1].text).to.equal('This is description 1');
 
       expect(output.ABC123.details[2].name).to.equal('Cached Page');
       expect(output.ABC123.details[2].link).to.equal('/cached.html?domain=TestDomain&id=ABC123');
@@ -1254,11 +1453,11 @@ limitations under the License.
       expect(output.DEF456.type).to.equal('comment');
       expect(output.DEF456.url).to.equal('testUrl2');
 
-      expect(output.DEF456.crawlTimestamp).to.not.exist;
+      expect(output.DEF456.timestamp).to.not.exist;
       expect(output.DEF456.esData).to.not.exist;
       expect(output.DEF456.images).to.not.exist;
       expect(output.DEF456.headerExtractions.length).to.equal(4);
-      expect(output.DEF456.detailExtractions.length).to.equal(4);
+      expect(output.DEF456.detailExtractions.length).to.equal(6);
       expect(output.DEF456.nestedExtractions.length).to.equal(1);
       expect(output.DEF456.details.length).to.equal(3);
 
@@ -1359,60 +1558,98 @@ limitations under the License.
 
       expect(output.DEF456.detailExtractions[1].isDate).to.be.false;
       expect(output.DEF456.detailExtractions[1].isUrl).to.be.false;
-      expect(output.DEF456.detailExtractions[1].key).to.equal('phone');
-      expect(output.DEF456.detailExtractions[1].name).to.equal('Phone');
-      expect(output.DEF456.detailExtractions[1].type).to.equal('phone');
+      expect(output.DEF456.detailExtractions[1].key).to.equal('number');
+      expect(output.DEF456.detailExtractions[1].name).to.equal('Number');
+      expect(output.DEF456.detailExtractions[1].type).to.equal('number');
       expect(output.DEF456.detailExtractions[1].data.length).to.equal(1);
 
       expect(output.DEF456.detailExtractions[1].data[0].confidence).to.not.exist;
       expect(output.DEF456.detailExtractions[1].data[0].count).to.not.exist;
       expect(output.DEF456.detailExtractions[1].data[0].highlight).to.not.exist;
-      expect(output.DEF456.detailExtractions[1].data[0].id).to.equal('7778889999');
-      expect(output.DEF456.detailExtractions[1].data[0].icon).to.equal('phoneIcon');
-      expect(output.DEF456.detailExtractions[1].data[0].link).to.equal('/entity.html?domain=TestDomain&id=7778889999&type=phone');
+      expect(output.DEF456.detailExtractions[1].data[0].id).to.equal(987);
+      expect(output.DEF456.detailExtractions[1].data[0].icon).to.equal('numberIcon');
+      expect(output.DEF456.detailExtractions[1].data[0].link).to.not.exist;
       expect(output.DEF456.detailExtractions[1].data[0].provenances.length).to.equal(0);
-      expect(output.DEF456.detailExtractions[1].data[0].styleClass).to.equal('phoneStyle');
-      expect(output.DEF456.detailExtractions[1].data[0].text).to.equal('777-888-9999');
-      expect(output.DEF456.detailExtractions[1].data[0].type).to.equal('phone');
+      expect(output.DEF456.detailExtractions[1].data[0].styleClass).to.equal('numberStyle');
+      expect(output.DEF456.detailExtractions[1].data[0].text).to.equal(987);
+      expect(output.DEF456.detailExtractions[1].data[0].type).to.equal('number');
       expect(output.DEF456.detailExtractions[1].data[0].width).to.not.exist;
 
       expect(output.DEF456.detailExtractions[2].isDate).to.be.false;
       expect(output.DEF456.detailExtractions[2].isUrl).to.be.false;
-      expect(output.DEF456.detailExtractions[2].key).to.equal('price');
-      expect(output.DEF456.detailExtractions[2].name).to.equal('Price');
-      expect(output.DEF456.detailExtractions[2].type).to.equal('hyphenated');
+      expect(output.DEF456.detailExtractions[2].key).to.equal('phone');
+      expect(output.DEF456.detailExtractions[2].name).to.equal('Phone');
+      expect(output.DEF456.detailExtractions[2].type).to.equal('phone');
       expect(output.DEF456.detailExtractions[2].data.length).to.equal(1);
 
       expect(output.DEF456.detailExtractions[2].data[0].confidence).to.not.exist;
       expect(output.DEF456.detailExtractions[2].data[0].count).to.not.exist;
       expect(output.DEF456.detailExtractions[2].data[0].highlight).to.not.exist;
-      expect(output.DEF456.detailExtractions[2].data[0].id).to.equal('price3-currency:currency3-time_unit:time3');
-      expect(output.DEF456.detailExtractions[2].data[0].icon).to.equal('priceIcon');
-      expect(output.DEF456.detailExtractions[2].data[0].link).to.not.exist;
+      expect(output.DEF456.detailExtractions[2].data[0].id).to.equal('7778889999');
+      expect(output.DEF456.detailExtractions[2].data[0].icon).to.equal('phoneIcon');
+      expect(output.DEF456.detailExtractions[2].data[0].link).to.equal('/entity.html?domain=TestDomain&id=7778889999&type=phone');
       expect(output.DEF456.detailExtractions[2].data[0].provenances.length).to.equal(0);
-      expect(output.DEF456.detailExtractions[2].data[0].styleClass).to.equal('priceStyle');
-      expect(output.DEF456.detailExtractions[2].data[0].text).to.equal('price3 currency3 per time3 minutes');
-      expect(output.DEF456.detailExtractions[2].data[0].type).to.equal('price');
+      expect(output.DEF456.detailExtractions[2].data[0].styleClass).to.equal('phoneStyle');
+      expect(output.DEF456.detailExtractions[2].data[0].text).to.equal('777-888-9999');
+      expect(output.DEF456.detailExtractions[2].data[0].type).to.equal('phone');
       expect(output.DEF456.detailExtractions[2].data[0].width).to.not.exist;
 
       expect(output.DEF456.detailExtractions[3].isDate).to.be.false;
       expect(output.DEF456.detailExtractions[3].isUrl).to.be.false;
-      expect(output.DEF456.detailExtractions[3].key).to.equal('user');
-      expect(output.DEF456.detailExtractions[3].name).to.equal('User');
-      expect(output.DEF456.detailExtractions[3].type).to.equal('username');
+      expect(output.DEF456.detailExtractions[3].key).to.equal('price');
+      expect(output.DEF456.detailExtractions[3].name).to.equal('Price');
+      expect(output.DEF456.detailExtractions[3].type).to.equal('hyphenated');
       expect(output.DEF456.detailExtractions[3].data.length).to.equal(1);
 
       expect(output.DEF456.detailExtractions[3].data[0].confidence).to.not.exist;
       expect(output.DEF456.detailExtractions[3].data[0].count).to.not.exist;
       expect(output.DEF456.detailExtractions[3].data[0].highlight).to.not.exist;
-      expect(output.DEF456.detailExtractions[3].data[0].id).to.equal('type3 user3');
-      expect(output.DEF456.detailExtractions[3].data[0].icon).to.equal('userIcon');
-      expect(output.DEF456.detailExtractions[3].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type3%20user3&type=user');
+      expect(output.DEF456.detailExtractions[3].data[0].id).to.equal('price3-currency:currency3-time_unit:time3');
+      expect(output.DEF456.detailExtractions[3].data[0].icon).to.equal('priceIcon');
+      expect(output.DEF456.detailExtractions[3].data[0].link).to.not.exist;
       expect(output.DEF456.detailExtractions[3].data[0].provenances.length).to.equal(0);
-      expect(output.DEF456.detailExtractions[3].data[0].styleClass).to.equal('userStyle');
-      expect(output.DEF456.detailExtractions[3].data[0].text).to.equal('User3');
-      expect(output.DEF456.detailExtractions[3].data[0].type).to.equal('user');
+      expect(output.DEF456.detailExtractions[3].data[0].styleClass).to.equal('priceStyle');
+      expect(output.DEF456.detailExtractions[3].data[0].text).to.equal('price3 currency3 per time3 minutes');
+      expect(output.DEF456.detailExtractions[3].data[0].type).to.equal('price');
       expect(output.DEF456.detailExtractions[3].data[0].width).to.not.exist;
+
+      expect(output.DEF456.detailExtractions[4].isDate).to.be.false;
+      expect(output.DEF456.detailExtractions[4].isUrl).to.be.false;
+      expect(output.DEF456.detailExtractions[4].key).to.equal('unnested');
+      expect(output.DEF456.detailExtractions[4].name).to.equal('Unnested Item');
+      expect(output.DEF456.detailExtractions[4].type).to.equal('string');
+      expect(output.DEF456.detailExtractions[4].data.length).to.equal(1);
+
+      expect(output.DEF456.detailExtractions[4].data[0].confidence).to.not.exist;
+      expect(output.DEF456.detailExtractions[4].data[0].count).to.not.exist;
+      expect(output.DEF456.detailExtractions[4].data[0].highlight).to.not.exist;
+      expect(output.DEF456.detailExtractions[4].data[0].id).to.equal('unnested3');
+      expect(output.DEF456.detailExtractions[4].data[0].icon).to.equal('unnestedIcon');
+      expect(output.DEF456.detailExtractions[4].data[0].link).to.not.exist;
+      expect(output.DEF456.detailExtractions[4].data[0].provenances.length).to.equal(0);
+      expect(output.DEF456.detailExtractions[4].data[0].styleClass).to.equal('unnestedStyle');
+      expect(output.DEF456.detailExtractions[4].data[0].text).to.equal('unnested3');
+      expect(output.DEF456.detailExtractions[4].data[0].type).to.equal('unnested');
+      expect(output.DEF456.detailExtractions[4].data[0].width).to.not.exist;
+
+      expect(output.DEF456.detailExtractions[5].isDate).to.be.false;
+      expect(output.DEF456.detailExtractions[5].isUrl).to.be.false;
+      expect(output.DEF456.detailExtractions[5].key).to.equal('user');
+      expect(output.DEF456.detailExtractions[5].name).to.equal('User');
+      expect(output.DEF456.detailExtractions[5].type).to.equal('username');
+      expect(output.DEF456.detailExtractions[5].data.length).to.equal(1);
+
+      expect(output.DEF456.detailExtractions[5].data[0].confidence).to.not.exist;
+      expect(output.DEF456.detailExtractions[5].data[0].count).to.not.exist;
+      expect(output.DEF456.detailExtractions[5].data[0].highlight).to.not.exist;
+      expect(output.DEF456.detailExtractions[5].data[0].id).to.equal('type3 user3');
+      expect(output.DEF456.detailExtractions[5].data[0].icon).to.equal('userIcon');
+      expect(output.DEF456.detailExtractions[5].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type3%20user3&type=user');
+      expect(output.DEF456.detailExtractions[5].data[0].provenances.length).to.equal(0);
+      expect(output.DEF456.detailExtractions[5].data[0].styleClass).to.equal('userStyle');
+      expect(output.DEF456.detailExtractions[5].data[0].text).to.equal('User3');
+      expect(output.DEF456.detailExtractions[5].data[0].type).to.equal('user');
+      expect(output.DEF456.detailExtractions[5].data[0].width).to.not.exist;
 
       expect(output.DEF456.nestedExtractions[0].isDate).to.be.false;
       expect(output.DEF456.nestedExtractions[0].isUrl).to.be.false;
@@ -1567,82 +1804,129 @@ limitations under the License.
       expect(output.type).to.equal('webpage');
       expect(output.url).to.equal('testUrl1');
 
-      expect(output.crawlTimestamp).to.not.exist;
+      expect(output.timestamp).to.not.exist;
       expect(output.esData).to.not.exist;
       expect(output.images).to.not.exist;
       expect(output.styleClass).to.not.exist;
 
       expect(output.headerExtractions).to.deep.equal([{
         data: [],
+        icon: 'websiteIcon',
         isDate: false,
         isUrl: true,
         key: 'website',
         name: 'Websites',
+        styleClass: 'websiteStyle',
         type: 'url',
+        width: undefined,
         index: 3
       }, {
         data: [],
+        icon: 'dateIcon',
         isDate: true,
         isUrl: false,
         key: 'date',
         name: 'Dates',
+        styleClass: 'dateStyle',
         type: 'date',
+        width: undefined,
         index: 1
       }, {
         data: [],
+        icon: 'cityIcon',
         isDate: false,
         isUrl: false,
         key: 'city',
         name: 'Cities',
+        styleClass: 'cityStyle',
         type: 'location',
+        width: undefined,
         index: 0
       }, {
         data: [],
+        icon: 'labelIcon',
         isDate: false,
         isUrl: false,
         key: 'label',
         name: 'Labels',
+        styleClass: 'labelStyle',
         type: 'string',
+        width: undefined,
         index: 2
       }]);
 
       expect(output.detailExtractions).to.deep.equal([{
         data: [],
+        icon: 'emailIcon',
         isDate: false,
         isUrl: false,
         key: 'email',
         name: 'Emails',
-        type: 'email'
+        styleClass: 'emailStyle',
+        type: 'email',
+        width: undefined
       }, {
         data: [],
+        icon: 'numberIcon',
+        isDate: false,
+        isUrl: false,
+        key: 'number',
+        name: 'Numbers',
+        styleClass: 'numberStyle',
+        type: 'number',
+        width: undefined
+      }, {
+        data: [],
+        icon: 'phoneIcon',
         isDate: false,
         isUrl: false,
         key: 'phone',
         name: 'Phones',
-        type: 'phone'
+        styleClass: 'phoneStyle',
+        type: 'phone',
+        width: undefined
       }, {
         data: [],
+        icon: 'priceIcon',
         isDate: false,
         isUrl: false,
         key: 'price',
         name: 'Prices',
-        type: 'hyphenated'
+        styleClass: 'priceStyle',
+        type: 'hyphenated',
+        width: undefined
       }, {
         data: [],
+        icon: 'unnestedIcon',
+        isDate: false,
+        isUrl: false,
+        key: 'unnested',
+        name: 'Unnested Items',
+        styleClass: 'unnestedStyle',
+        type: 'string',
+        width: undefined
+      }, {
+        data: [],
+        icon: 'userIcon',
         isDate: false,
         isUrl: false,
         key: 'user',
         name: 'Users',
-        type: 'username'
+        styleClass: 'userStyle',
+        type: 'username',
+        width: undefined
       }]);
 
       expect(output.nestedExtractions).to.deep.equal([{
         data: [],
+        icon: 'commentIcon',
         isDate: false,
         isUrl: false,
         key: 'comment',
         name: 'Comments',
-        type: 'kg_id'
+        styleClass: 'commentStyle',
+        type: 'kg_id',
+        width: undefined
       }]);
 
       expect(output.details).to.deep.equal([{
@@ -1670,22 +1954,22 @@ limitations under the License.
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
       expect(output.id).to.equal('ABC123');
-      expect(output.description).to.equal('This is description 1 This is description 2');
-      expect(output.highlightedText).to.equal('Title 1 Title 2');
+      expect(output.description).to.equal('This is description 1');
+      expect(output.highlightedText).to.equal('Title 1');
       expect(output.icon).to.equal('TestIcon');
       expect(output.link).to.equal('/result.html?domain=TestDomain&id=ABC123');
       expect(output.name).to.equal('TestResult');
       expect(output.tags).to.deep.equal({});
-      expect(output.title).to.equal('Title 1 Title 2');
+      expect(output.title).to.equal('Title 1');
       expect(output.type).to.equal('webpage');
       expect(output.url).to.equal('testUrl1');
 
-      expect(output.crawlTimestamp).to.not.exist;
+      expect(output.timestamp).to.not.exist;
       expect(output.esData).to.not.exist;
       expect(output.images).to.not.exist;
       expect(output.styleClass).to.not.exist;
       expect(output.headerExtractions.length).to.equal(4);
-      expect(output.detailExtractions.length).to.equal(4);
+      expect(output.detailExtractions.length).to.equal(6);
       expect(output.nestedExtractions.length).to.equal(1);
       expect(output.details.length).to.equal(3);
 
@@ -1834,96 +2118,158 @@ limitations under the License.
 
       expect(output.detailExtractions[1].isDate).to.be.false;
       expect(output.detailExtractions[1].isUrl).to.be.false;
-      expect(output.detailExtractions[1].key).to.equal('phone');
-      expect(output.detailExtractions[1].name).to.equal('Phones');
-      expect(output.detailExtractions[1].type).to.equal('phone');
+      expect(output.detailExtractions[1].key).to.equal('number');
+      expect(output.detailExtractions[1].name).to.equal('Numbers');
+      expect(output.detailExtractions[1].type).to.equal('number');
       expect(output.detailExtractions[1].data.length).to.equal(2);
 
       expect(output.detailExtractions[1].data[0].confidence).to.not.exist;
       expect(output.detailExtractions[1].data[0].count).to.not.exist;
       expect(output.detailExtractions[1].data[0].highlight).to.not.exist;
-      expect(output.detailExtractions[1].data[0].id).to.equal('1112223333');
-      expect(output.detailExtractions[1].data[0].icon).to.equal('phoneIcon');
-      expect(output.detailExtractions[1].data[0].link).to.equal('/entity.html?domain=TestDomain&id=1112223333&type=phone');
+      expect(output.detailExtractions[1].data[0].id).to.equal(321);
+      expect(output.detailExtractions[1].data[0].icon).to.equal('numberIcon');
+      expect(output.detailExtractions[1].data[0].link).to.not.exist;
       expect(output.detailExtractions[1].data[0].provenances.length).to.equal(0);
-      expect(output.detailExtractions[1].data[0].styleClass).to.equal('phoneStyle');
-      expect(output.detailExtractions[1].data[0].text).to.equal('111-222-3333');
-      expect(output.detailExtractions[1].data[0].type).to.equal('phone');
+      expect(output.detailExtractions[1].data[0].styleClass).to.equal('numberStyle');
+      expect(output.detailExtractions[1].data[0].text).to.equal(321);
+      expect(output.detailExtractions[1].data[0].type).to.equal('number');
       expect(output.detailExtractions[1].data[0].width).to.not.exist;
 
       expect(output.detailExtractions[1].data[1].confidence).to.not.exist;
       expect(output.detailExtractions[1].data[1].count).to.not.exist;
       expect(output.detailExtractions[1].data[1].highlight).to.not.exist;
-      expect(output.detailExtractions[1].data[1].id).to.equal('4445556666');
-      expect(output.detailExtractions[1].data[1].icon).to.equal('phoneIcon');
-      expect(output.detailExtractions[1].data[1].link).to.equal('/entity.html?domain=TestDomain&id=4445556666&type=phone');
+      expect(output.detailExtractions[1].data[1].id).to.equal(654);
+      expect(output.detailExtractions[1].data[1].icon).to.equal('numberIcon');
+      expect(output.detailExtractions[1].data[1].link).to.not.exist;
       expect(output.detailExtractions[1].data[1].provenances.length).to.equal(0);
-      expect(output.detailExtractions[1].data[1].styleClass).to.equal('phoneStyle');
-      expect(output.detailExtractions[1].data[1].text).to.equal('444-555-6666');
-      expect(output.detailExtractions[1].data[1].type).to.equal('phone');
+      expect(output.detailExtractions[1].data[1].styleClass).to.equal('numberStyle');
+      expect(output.detailExtractions[1].data[1].text).to.equal(654);
+      expect(output.detailExtractions[1].data[1].type).to.equal('number');
       expect(output.detailExtractions[1].data[1].width).to.not.exist;
 
       expect(output.detailExtractions[2].isDate).to.be.false;
       expect(output.detailExtractions[2].isUrl).to.be.false;
-      expect(output.detailExtractions[2].key).to.equal('price');
-      expect(output.detailExtractions[2].name).to.equal('Prices');
-      expect(output.detailExtractions[2].type).to.equal('hyphenated');
+      expect(output.detailExtractions[2].key).to.equal('phone');
+      expect(output.detailExtractions[2].name).to.equal('Phones');
+      expect(output.detailExtractions[2].type).to.equal('phone');
       expect(output.detailExtractions[2].data.length).to.equal(2);
 
       expect(output.detailExtractions[2].data[0].confidence).to.not.exist;
       expect(output.detailExtractions[2].data[0].count).to.not.exist;
       expect(output.detailExtractions[2].data[0].highlight).to.not.exist;
-      expect(output.detailExtractions[2].data[0].id).to.equal('price1-currency:currency1-time_unit:time1');
-      expect(output.detailExtractions[2].data[0].icon).to.equal('priceIcon');
-      expect(output.detailExtractions[2].data[0].link).to.not.exist;
+      expect(output.detailExtractions[2].data[0].id).to.equal('1112223333');
+      expect(output.detailExtractions[2].data[0].icon).to.equal('phoneIcon');
+      expect(output.detailExtractions[2].data[0].link).to.equal('/entity.html?domain=TestDomain&id=1112223333&type=phone');
       expect(output.detailExtractions[2].data[0].provenances.length).to.equal(0);
-      expect(output.detailExtractions[2].data[0].styleClass).to.equal('priceStyle');
-      expect(output.detailExtractions[2].data[0].text).to.equal('price1 currency1 per time1 minutes');
-      expect(output.detailExtractions[2].data[0].type).to.equal('price');
+      expect(output.detailExtractions[2].data[0].styleClass).to.equal('phoneStyle');
+      expect(output.detailExtractions[2].data[0].text).to.equal('111-222-3333');
+      expect(output.detailExtractions[2].data[0].type).to.equal('phone');
       expect(output.detailExtractions[2].data[0].width).to.not.exist;
 
       expect(output.detailExtractions[2].data[1].confidence).to.not.exist;
       expect(output.detailExtractions[2].data[1].count).to.not.exist;
       expect(output.detailExtractions[2].data[1].highlight).to.not.exist;
-      expect(output.detailExtractions[2].data[1].id).to.equal('price2-currency:currency2-time_unit:time2');
-      expect(output.detailExtractions[2].data[1].icon).to.equal('priceIcon');
-      expect(output.detailExtractions[2].data[1].link).to.not.exist;
+      expect(output.detailExtractions[2].data[1].id).to.equal('4445556666');
+      expect(output.detailExtractions[2].data[1].icon).to.equal('phoneIcon');
+      expect(output.detailExtractions[2].data[1].link).to.equal('/entity.html?domain=TestDomain&id=4445556666&type=phone');
       expect(output.detailExtractions[2].data[1].provenances.length).to.equal(0);
-      expect(output.detailExtractions[2].data[1].styleClass).to.equal('priceStyle');
-      expect(output.detailExtractions[2].data[1].text).to.equal('price2 currency2 per time2 minutes');
-      expect(output.detailExtractions[2].data[1].type).to.equal('price');
+      expect(output.detailExtractions[2].data[1].styleClass).to.equal('phoneStyle');
+      expect(output.detailExtractions[2].data[1].text).to.equal('444-555-6666');
+      expect(output.detailExtractions[2].data[1].type).to.equal('phone');
       expect(output.detailExtractions[2].data[1].width).to.not.exist;
 
       expect(output.detailExtractions[3].isDate).to.be.false;
       expect(output.detailExtractions[3].isUrl).to.be.false;
-      expect(output.detailExtractions[3].key).to.equal('user');
-      expect(output.detailExtractions[3].name).to.equal('Users');
-      expect(output.detailExtractions[3].type).to.equal('username');
+      expect(output.detailExtractions[3].key).to.equal('price');
+      expect(output.detailExtractions[3].name).to.equal('Prices');
+      expect(output.detailExtractions[3].type).to.equal('hyphenated');
       expect(output.detailExtractions[3].data.length).to.equal(2);
 
       expect(output.detailExtractions[3].data[0].confidence).to.not.exist;
       expect(output.detailExtractions[3].data[0].count).to.not.exist;
       expect(output.detailExtractions[3].data[0].highlight).to.not.exist;
-      expect(output.detailExtractions[3].data[0].id).to.equal('type1 user1');
-      expect(output.detailExtractions[3].data[0].icon).to.equal('userIcon');
-      expect(output.detailExtractions[3].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type1%20user1&type=user');
+      expect(output.detailExtractions[3].data[0].id).to.equal('price1-currency:currency1-time_unit:time1');
+      expect(output.detailExtractions[3].data[0].icon).to.equal('priceIcon');
+      expect(output.detailExtractions[3].data[0].link).to.not.exist;
       expect(output.detailExtractions[3].data[0].provenances.length).to.equal(0);
-      expect(output.detailExtractions[3].data[0].styleClass).to.equal('userStyle');
-      expect(output.detailExtractions[3].data[0].text).to.equal('User1');
-      expect(output.detailExtractions[3].data[0].type).to.equal('user');
+      expect(output.detailExtractions[3].data[0].styleClass).to.equal('priceStyle');
+      expect(output.detailExtractions[3].data[0].text).to.equal('price1 currency1 per time1 minutes');
+      expect(output.detailExtractions[3].data[0].type).to.equal('price');
       expect(output.detailExtractions[3].data[0].width).to.not.exist;
 
       expect(output.detailExtractions[3].data[1].confidence).to.not.exist;
       expect(output.detailExtractions[3].data[1].count).to.not.exist;
       expect(output.detailExtractions[3].data[1].highlight).to.not.exist;
-      expect(output.detailExtractions[3].data[1].id).to.equal('type2 user2');
-      expect(output.detailExtractions[3].data[1].icon).to.equal('userIcon');
-      expect(output.detailExtractions[3].data[1].link).to.equal('/entity.html?domain=TestDomain&id=type2%20user2&type=user');
+      expect(output.detailExtractions[3].data[1].id).to.equal('price2-currency:currency2-time_unit:time2');
+      expect(output.detailExtractions[3].data[1].icon).to.equal('priceIcon');
+      expect(output.detailExtractions[3].data[1].link).to.not.exist;
       expect(output.detailExtractions[3].data[1].provenances.length).to.equal(0);
-      expect(output.detailExtractions[3].data[1].styleClass).to.equal('userStyle');
-      expect(output.detailExtractions[3].data[1].text).to.equal('User2');
-      expect(output.detailExtractions[3].data[1].type).to.equal('user');
+      expect(output.detailExtractions[3].data[1].styleClass).to.equal('priceStyle');
+      expect(output.detailExtractions[3].data[1].text).to.equal('price2 currency2 per time2 minutes');
+      expect(output.detailExtractions[3].data[1].type).to.equal('price');
       expect(output.detailExtractions[3].data[1].width).to.not.exist;
+
+      expect(output.detailExtractions[4].isDate).to.be.false;
+      expect(output.detailExtractions[4].isUrl).to.be.false;
+      expect(output.detailExtractions[4].key).to.equal('unnested');
+      expect(output.detailExtractions[4].name).to.equal('Unnested Items');
+      expect(output.detailExtractions[4].type).to.equal('string');
+      expect(output.detailExtractions[4].data.length).to.equal(2);
+
+      expect(output.detailExtractions[4].data[0].confidence).to.not.exist;
+      expect(output.detailExtractions[4].data[0].count).to.not.exist;
+      expect(output.detailExtractions[4].data[0].highlight).to.not.exist;
+      expect(output.detailExtractions[4].data[0].id).to.equal('unnested1');
+      expect(output.detailExtractions[4].data[0].icon).to.equal('unnestedIcon');
+      expect(output.detailExtractions[4].data[0].link).to.not.exist;
+      expect(output.detailExtractions[4].data[0].provenances.length).to.equal(0);
+      expect(output.detailExtractions[4].data[0].styleClass).to.equal('unnestedStyle');
+      expect(output.detailExtractions[4].data[0].text).to.equal('unnested1');
+      expect(output.detailExtractions[4].data[0].type).to.equal('unnested');
+      expect(output.detailExtractions[4].data[0].width).to.not.exist;
+
+      expect(output.detailExtractions[4].data[1].confidence).to.not.exist;
+      expect(output.detailExtractions[4].data[1].count).to.not.exist;
+      expect(output.detailExtractions[4].data[1].highlight).to.not.exist;
+      expect(output.detailExtractions[4].data[1].id).to.equal('unnested2');
+      expect(output.detailExtractions[4].data[1].icon).to.equal('unnestedIcon');
+      expect(output.detailExtractions[4].data[1].link).to.not.exist;
+      expect(output.detailExtractions[4].data[1].provenances.length).to.equal(0);
+      expect(output.detailExtractions[4].data[1].styleClass).to.equal('unnestedStyle');
+      expect(output.detailExtractions[4].data[1].text).to.equal('unnested2');
+      expect(output.detailExtractions[4].data[1].type).to.equal('unnested');
+      expect(output.detailExtractions[4].data[1].width).to.not.exist;
+
+      expect(output.detailExtractions[5].isDate).to.be.false;
+      expect(output.detailExtractions[5].isUrl).to.be.false;
+      expect(output.detailExtractions[5].key).to.equal('user');
+      expect(output.detailExtractions[5].name).to.equal('Users');
+      expect(output.detailExtractions[5].type).to.equal('username');
+      expect(output.detailExtractions[5].data.length).to.equal(2);
+
+      expect(output.detailExtractions[5].data[0].confidence).to.not.exist;
+      expect(output.detailExtractions[5].data[0].count).to.not.exist;
+      expect(output.detailExtractions[5].data[0].highlight).to.not.exist;
+      expect(output.detailExtractions[5].data[0].id).to.equal('type1 user1');
+      expect(output.detailExtractions[5].data[0].icon).to.equal('userIcon');
+      expect(output.detailExtractions[5].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type1%20user1&type=user');
+      expect(output.detailExtractions[5].data[0].provenances.length).to.equal(0);
+      expect(output.detailExtractions[5].data[0].styleClass).to.equal('userStyle');
+      expect(output.detailExtractions[5].data[0].text).to.equal('User1');
+      expect(output.detailExtractions[5].data[0].type).to.equal('user');
+      expect(output.detailExtractions[5].data[0].width).to.not.exist;
+
+      expect(output.detailExtractions[5].data[1].confidence).to.not.exist;
+      expect(output.detailExtractions[5].data[1].count).to.not.exist;
+      expect(output.detailExtractions[5].data[1].highlight).to.not.exist;
+      expect(output.detailExtractions[5].data[1].id).to.equal('type2 user2');
+      expect(output.detailExtractions[5].data[1].icon).to.equal('userIcon');
+      expect(output.detailExtractions[5].data[1].link).to.equal('/entity.html?domain=TestDomain&id=type2%20user2&type=user');
+      expect(output.detailExtractions[5].data[1].provenances.length).to.equal(0);
+      expect(output.detailExtractions[5].data[1].styleClass).to.equal('userStyle');
+      expect(output.detailExtractions[5].data[1].text).to.equal('User2');
+      expect(output.detailExtractions[5].data[1].type).to.equal('user');
+      expect(output.detailExtractions[5].data[1].width).to.not.exist;
 
       expect(output.nestedExtractions[0].isDate).to.be.false;
       expect(output.nestedExtractions[0].isUrl).to.be.false;
@@ -1959,12 +2305,124 @@ limitations under the License.
       expect(output.details[0].text).to.equal('testUrl1');
 
       expect(output.details[1].name).to.equal('Description');
-      expect(output.details[1].highlightedText).to.equal('This is description 1 This is description 2');
-      expect(output.details[1].text).to.equal('This is description 1 This is description 2');
+      expect(output.details[1].highlightedText).to.equal('This is description 1');
+      expect(output.details[1].text).to.equal('This is description 1');
 
       expect(output.details[2].name).to.equal('Cached Page');
       expect(output.details[2].link).to.equal('/cached.html?domain=TestDomain&id=ABC123');
       expect(output.details[2].text).to.equal('Open in New Tab (Runs External Code)');
+    });
+
+    test('result does return expected object if hideCachedPage is true', function() {
+      transformFunctions.serverConfig = {
+        hideCachedPage: true,
+        resultIcon: 'TestIcon',
+        resultNamePlural: 'TestResults',
+        resultNameSingular: 'TestResult',
+        resultQueryField: 'TestQueryField',
+        timestampField: 'timestamp_crawl',
+        uidField: 'doc_id'
+      };
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var output = transformFunctions.transforms.entity.result({
+        hits: {
+          hits: [RESULT_1]
+        }
+      }, SEARCH_FIELDS);
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(output.details).to.deep.equal([{
+        name: 'Url',
+        link: 'testUrl1',
+        text: 'testUrl1'
+      }, {
+        name: 'Description',
+        highlightedText: 'This is description 1',
+        text: 'This is description 1'
+      }]);
+    });
+
+    test('result does return expected object if link in title field config is undefined', function() {
+      // Set the link in the title field config to undefined.
+      SEARCH_FIELDS[9].link = undefined;
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var output = transformFunctions.transforms.entity.result({
+        hits: {
+          hits: [RESULT_1]
+        }
+      }, SEARCH_FIELDS);
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(output.highlightedText).to.equal('Title 1');
+      expect(output.link).to.not.exist;
+      expect(output.title).to.equal('Title 1');
+
+      // Reset the link in the title field config.
+      SEARCH_FIELDS[9].link = 'result';
+    });
+
+    test('result given many extractions does return expected object if showMultipleTitles is true', function() {
+      transformFunctions.serverConfig = {
+        resultIcon: 'TestIcon',
+        resultNamePlural: 'TestResults',
+        resultNameSingular: 'TestResult',
+        resultQueryField: 'TestQueryField',
+        showMultipleTitles: true,
+        timestampField: 'timestamp_crawl',
+        uidField: 'doc_id'
+      };
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var output = transformFunctions.transforms.entity.result({
+        hits: {
+          hits: [RESULT_1]
+        }
+      }, SEARCH_FIELDS);
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(output.title).to.equal('Title 1 Title 2');
+      expect(output.highlightedText).to.equal('Title 1 Title 2');
+    });
+
+    test('result given many extractions does return expected object if showMultipleDescriptions is true', function() {
+      transformFunctions.serverConfig = {
+        resultIcon: 'TestIcon',
+        resultNamePlural: 'TestResults',
+        resultNameSingular: 'TestResult',
+        resultQueryField: 'TestQueryField',
+        showMultipleDescriptions: true,
+        timestampField: 'timestamp_crawl',
+        uidField: 'doc_id'
+      };
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var output = transformFunctions.transforms.entity.result({
+        hits: {
+          hits: [RESULT_1]
+        }
+      }, SEARCH_FIELDS);
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(output.description).to.equal('This is description 1 This is description 2');
+      expect(output.details.length).to.equal(4);
+
+      expect(output.details[0].name).to.equal('Url');
+      expect(output.details[0].link).to.equal('testUrl1');
+      expect(output.details[0].text).to.equal('testUrl1');
+
+      expect(output.details[1].name).to.equal('Description');
+      expect(output.details[1].highlightedText).to.equal('This is description 1');
+      expect(output.details[1].text).to.equal('This is description 1');
+
+      expect(output.details[2].name).to.equal('Description');
+      expect(output.details[2].highlightedText).to.equal('This is description 2');
+      expect(output.details[2].text).to.equal('This is description 2');
+
+      expect(output.details[3].name).to.equal('Cached Page');
+      expect(output.details[3].link).to.equal('/cached.html?domain=TestDomain&id=ABC123');
+      expect(output.details[3].text).to.equal('Open in New Tab (Runs External Code)');
     });
 
     test('result given confidences does return expected object', function() {
@@ -2221,14 +2679,14 @@ limitations under the License.
       }, SEARCH_FIELDS);
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-      expect(output.crawlTimestamp).to.equal('Jan 1, 2018');
+      expect(output.timestamp).to.equal('Jan 1, 2018');
       expect(output.details.length).to.equal(4);
 
       expect(output.details[0].name).to.equal('Url');
       expect(output.details[0].link).to.equal('testUrl1');
       expect(output.details[0].text).to.equal('testUrl1');
 
-      expect(output.details[1].name).to.equal('Date Crawled');
+      expect(output.details[1].name).to.equal('Timestamp');
       expect(output.details[1].text).to.equal('Jan 1, 2018');
 
       expect(output.details[2].name).to.equal('Description');
@@ -2253,14 +2711,14 @@ limitations under the License.
       }, SEARCH_FIELDS);
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-      expect(output.crawlTimestamp).to.equal('Feb 2, 2018');
+      expect(output.timestamp).to.equal('Feb 2, 2018');
       expect(output.details.length).to.equal(4);
 
       expect(output.details[0].name).to.equal('Url');
       expect(output.details[0].link).to.equal('testUrl1');
       expect(output.details[0].text).to.equal('testUrl1');
 
-      expect(output.details[1].name).to.equal('Date Crawled');
+      expect(output.details[1].name).to.equal('Timestamp');
       expect(output.details[1].text).to.equal('Feb 2, 2018');
 
       expect(output.details[2].name).to.equal('Description');
@@ -2289,7 +2747,9 @@ limitations under the License.
         resultIcon: 'TestIcon',
         resultNamePlural: 'TestResults',
         resultNameSingular: 'TestResult',
-        resultQueryField: 'TestQueryField'
+        resultQueryField: 'TestQueryField',
+        timestampField: 'timestamp_crawl',
+        uidField: 'doc_id'
       };
       expect(transformFunctions.esConfig.esDataEndpoint).to.not.exist;
       transformFunctions.serverConfig = {
@@ -2301,7 +2761,9 @@ limitations under the License.
         resultNamePlural: 'TestResults',
         resultNameSingular: 'TestResult',
         resultQueryField: 'TestQueryField',
-        showEsData: true
+        showEsData: true,
+        timestampField: 'timestamp_crawl',
+        uidField: 'doc_id'
       };
       expect(transformFunctions.esConfig.esDataEndpoint).to.equal('TestHost/TestIndexName/TestIndexType/');
 
@@ -2398,82 +2860,129 @@ limitations under the License.
       expect(output[0].type).to.equal('webpage');
       expect(output[0].url).to.equal('testUrl1');
 
-      expect(output[0].crawlTimestamp).to.not.exist;
+      expect(output[0].timestamp).to.not.exist;
       expect(output[0].esData).to.not.exist;
       expect(output[0].images).to.not.exist;
       expect(output[0].styleClass).to.not.exist;
 
       expect(output[0].headerExtractions).to.deep.equal([{
         data: [],
+        icon: 'websiteIcon',
         isDate: false,
         isUrl: true,
         key: 'website',
         name: 'Websites',
+        styleClass: 'websiteStyle',
         type: 'url',
+        width: undefined,
         index: 3
       }, {
         data: [],
+        icon: 'dateIcon',
         isDate: true,
         isUrl: false,
         key: 'date',
         name: 'Dates',
+        styleClass: 'dateStyle',
         type: 'date',
+        width: undefined,
         index: 1
       }, {
         data: [],
+        icon: 'cityIcon',
         isDate: false,
         isUrl: false,
         key: 'city',
         name: 'Cities',
+        styleClass: 'cityStyle',
         type: 'location',
+        width: undefined,
         index: 0
       }, {
         data: [],
+        icon: 'labelIcon',
         isDate: false,
         isUrl: false,
         key: 'label',
         name: 'Labels',
+        styleClass: 'labelStyle',
         type: 'string',
+        width: undefined,
         index: 2
       }]);
 
       expect(output[0].detailExtractions).to.deep.equal([{
         data: [],
+        icon: 'emailIcon',
         isDate: false,
         isUrl: false,
         key: 'email',
         name: 'Emails',
-        type: 'email'
+        styleClass: 'emailStyle',
+        type: 'email',
+        width: undefined
       }, {
         data: [],
+        icon: 'numberIcon',
+        isDate: false,
+        isUrl: false,
+        key: 'number',
+        name: 'Numbers',
+        styleClass: 'numberStyle',
+        type: 'number',
+        width: undefined
+      }, {
+        data: [],
+        icon: 'phoneIcon',
         isDate: false,
         isUrl: false,
         key: 'phone',
         name: 'Phones',
-        type: 'phone'
+        styleClass: 'phoneStyle',
+        type: 'phone',
+        width: undefined
       }, {
         data: [],
+        icon: 'priceIcon',
         isDate: false,
         isUrl: false,
         key: 'price',
         name: 'Prices',
-        type: 'hyphenated'
+        styleClass: 'priceStyle',
+        type: 'hyphenated',
+        width: undefined
       }, {
         data: [],
+        icon: 'unnestedIcon',
+        isDate: false,
+        isUrl: false,
+        key: 'unnested',
+        name: 'Unnested Items',
+        styleClass: 'unnestedStyle',
+        type: 'string',
+        width: undefined
+      }, {
+        data: [],
+        icon: 'userIcon',
         isDate: false,
         isUrl: false,
         key: 'user',
         name: 'Users',
-        type: 'username'
+        styleClass: 'userStyle',
+        type: 'username',
+        width: undefined
       }]);
 
       expect(output[0].nestedExtractions).to.deep.equal([{
         data: [],
+        icon: 'commentIcon',
         isDate: false,
         isUrl: false,
         key: 'comment',
         name: 'Comments',
-        type: 'kg_id'
+        styleClass: 'commentStyle',
+        type: 'kg_id',
+        width: undefined
       }]);
 
       expect(output[0].details).to.deep.equal([{
@@ -2501,82 +3010,129 @@ limitations under the License.
       expect(output[1].type).to.equal('webpage');
       expect(output[1].url).to.equal('testUrl2');
 
-      expect(output[1].crawlTimestamp).to.not.exist;
+      expect(output[1].timestamp).to.not.exist;
       expect(output[1].esData).to.not.exist;
       expect(output[1].images).to.not.exist;
       expect(output[1].styleClass).to.not.exist;
 
       expect(output[1].headerExtractions).to.deep.equal([{
         data: [],
+        icon: 'websiteIcon',
         isDate: false,
         isUrl: true,
         key: 'website',
         name: 'Websites',
+        styleClass: 'websiteStyle',
         type: 'url',
+        width: undefined,
         index: 3
       }, {
         data: [],
+        icon: 'dateIcon',
         isDate: true,
         isUrl: false,
         key: 'date',
         name: 'Dates',
+        styleClass: 'dateStyle',
         type: 'date',
+        width: undefined,
         index: 1
       }, {
         data: [],
+        icon: 'cityIcon',
         isDate: false,
         isUrl: false,
         key: 'city',
         name: 'Cities',
+        styleClass: 'cityStyle',
         type: 'location',
+        width: undefined,
         index: 0
       }, {
         data: [],
+        icon: 'labelIcon',
         isDate: false,
         isUrl: false,
         key: 'label',
         name: 'Labels',
+        styleClass: 'labelStyle',
         type: 'string',
+        width: undefined,
         index: 2
       }]);
 
       expect(output[1].detailExtractions).to.deep.equal([{
         data: [],
+        icon: 'emailIcon',
         isDate: false,
         isUrl: false,
         key: 'email',
         name: 'Emails',
-        type: 'email'
+        styleClass: 'emailStyle',
+        type: 'email',
+        width: undefined
       }, {
         data: [],
+        icon: 'numberIcon',
+        isDate: false,
+        isUrl: false,
+        key: 'number',
+        name: 'Numbers',
+        styleClass: 'numberStyle',
+        type: 'number',
+        width: undefined
+      }, {
+        data: [],
+        icon: 'phoneIcon',
         isDate: false,
         isUrl: false,
         key: 'phone',
         name: 'Phones',
-        type: 'phone'
+        styleClass: 'phoneStyle',
+        type: 'phone',
+        width: undefined
       }, {
         data: [],
+        icon: 'priceIcon',
         isDate: false,
         isUrl: false,
         key: 'price',
         name: 'Prices',
-        type: 'hyphenated'
+        styleClass: 'priceStyle',
+        type: 'hyphenated',
+        width: undefined
       }, {
         data: [],
+        icon: 'unnestedIcon',
+        isDate: false,
+        isUrl: false,
+        key: 'unnested',
+        name: 'Unnested Items',
+        styleClass: 'unnestedStyle',
+        type: 'string',
+        width: undefined
+      }, {
+        data: [],
+        icon: 'userIcon',
         isDate: false,
         isUrl: false,
         key: 'user',
         name: 'Users',
-        type: 'username'
+        styleClass: 'userStyle',
+        type: 'username',
+        width: undefined
       }]);
 
       expect(output[1].nestedExtractions).to.deep.equal([{
         data: [],
+        icon: 'commentIcon',
         isDate: false,
         isUrl: false,
         key: 'comment',
         name: 'Comments',
-        type: 'kg_id'
+        styleClass: 'commentStyle',
+        type: 'kg_id',
+        width: undefined
       }]);
 
       expect(output[1].details).to.deep.equal([{
@@ -2606,22 +3162,22 @@ limitations under the License.
       expect(output.length).to.equal(2);
 
       expect(output[0].id).to.equal('ABC123');
-      expect(output[0].description).to.equal('This is description 1 This is description 2');
-      expect(output[0].highlightedText).to.equal('Title 1 Title 2');
+      expect(output[0].description).to.equal('This is description 1');
+      expect(output[0].highlightedText).to.equal('Title 1');
       expect(output[0].icon).to.equal('TestIcon');
       expect(output[0].link).to.equal('/result.html?domain=TestDomain&id=ABC123');
       expect(output[0].name).to.equal('TestResult');
       expect(output[0].tags).to.deep.equal({});
-      expect(output[0].title).to.equal('Title 1 Title 2');
+      expect(output[0].title).to.equal('Title 1');
       expect(output[0].type).to.equal('webpage');
       expect(output[0].url).to.equal('testUrl1');
 
-      expect(output[0].crawlTimestamp).to.not.exist;
+      expect(output[0].timestamp).to.not.exist;
       expect(output[0].esData).to.not.exist;
       expect(output[0].images).to.not.exist;
       expect(output[0].styleClass).to.not.exist;
       expect(output[0].headerExtractions.length).to.equal(4);
-      expect(output[0].detailExtractions.length).to.equal(4);
+      expect(output[0].detailExtractions.length).to.equal(6);
       expect(output[0].nestedExtractions.length).to.equal(1);
       expect(output[0].details.length).to.equal(3);
 
@@ -2770,96 +3326,158 @@ limitations under the License.
 
       expect(output[0].detailExtractions[1].isDate).to.be.false;
       expect(output[0].detailExtractions[1].isUrl).to.be.false;
-      expect(output[0].detailExtractions[1].key).to.equal('phone');
-      expect(output[0].detailExtractions[1].name).to.equal('Phones');
-      expect(output[0].detailExtractions[1].type).to.equal('phone');
+      expect(output[0].detailExtractions[1].key).to.equal('number');
+      expect(output[0].detailExtractions[1].name).to.equal('Numbers');
+      expect(output[0].detailExtractions[1].type).to.equal('number');
       expect(output[0].detailExtractions[1].data.length).to.equal(2);
 
       expect(output[0].detailExtractions[1].data[0].confidence).to.not.exist;
       expect(output[0].detailExtractions[1].data[0].count).to.not.exist;
       expect(output[0].detailExtractions[1].data[0].highlight).to.not.exist;
-      expect(output[0].detailExtractions[1].data[0].id).to.equal('1112223333');
-      expect(output[0].detailExtractions[1].data[0].icon).to.equal('phoneIcon');
-      expect(output[0].detailExtractions[1].data[0].link).to.equal('/entity.html?domain=TestDomain&id=1112223333&type=phone');
+      expect(output[0].detailExtractions[1].data[0].id).to.equal(321);
+      expect(output[0].detailExtractions[1].data[0].icon).to.equal('numberIcon');
+      expect(output[0].detailExtractions[1].data[0].link).to.not.exist;
       expect(output[0].detailExtractions[1].data[0].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[1].data[0].styleClass).to.equal('phoneStyle');
-      expect(output[0].detailExtractions[1].data[0].text).to.equal('111-222-3333');
-      expect(output[0].detailExtractions[1].data[0].type).to.equal('phone');
+      expect(output[0].detailExtractions[1].data[0].styleClass).to.equal('numberStyle');
+      expect(output[0].detailExtractions[1].data[0].text).to.equal(321);
+      expect(output[0].detailExtractions[1].data[0].type).to.equal('number');
       expect(output[0].detailExtractions[1].data[0].width).to.not.exist;
 
       expect(output[0].detailExtractions[1].data[1].confidence).to.not.exist;
       expect(output[0].detailExtractions[1].data[1].count).to.not.exist;
       expect(output[0].detailExtractions[1].data[1].highlight).to.not.exist;
-      expect(output[0].detailExtractions[1].data[1].id).to.equal('4445556666');
-      expect(output[0].detailExtractions[1].data[1].icon).to.equal('phoneIcon');
-      expect(output[0].detailExtractions[1].data[1].link).to.equal('/entity.html?domain=TestDomain&id=4445556666&type=phone');
+      expect(output[0].detailExtractions[1].data[1].id).to.equal(654);
+      expect(output[0].detailExtractions[1].data[1].icon).to.equal('numberIcon');
+      expect(output[0].detailExtractions[1].data[1].link).to.not.exist;
       expect(output[0].detailExtractions[1].data[1].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[1].data[1].styleClass).to.equal('phoneStyle');
-      expect(output[0].detailExtractions[1].data[1].text).to.equal('444-555-6666');
-      expect(output[0].detailExtractions[1].data[1].type).to.equal('phone');
+      expect(output[0].detailExtractions[1].data[1].styleClass).to.equal('numberStyle');
+      expect(output[0].detailExtractions[1].data[1].text).to.equal(654);
+      expect(output[0].detailExtractions[1].data[1].type).to.equal('number');
       expect(output[0].detailExtractions[1].data[1].width).to.not.exist;
 
       expect(output[0].detailExtractions[2].isDate).to.be.false;
       expect(output[0].detailExtractions[2].isUrl).to.be.false;
-      expect(output[0].detailExtractions[2].key).to.equal('price');
-      expect(output[0].detailExtractions[2].name).to.equal('Prices');
-      expect(output[0].detailExtractions[2].type).to.equal('hyphenated');
+      expect(output[0].detailExtractions[2].key).to.equal('phone');
+      expect(output[0].detailExtractions[2].name).to.equal('Phones');
+      expect(output[0].detailExtractions[2].type).to.equal('phone');
       expect(output[0].detailExtractions[2].data.length).to.equal(2);
 
       expect(output[0].detailExtractions[2].data[0].confidence).to.not.exist;
       expect(output[0].detailExtractions[2].data[0].count).to.not.exist;
       expect(output[0].detailExtractions[2].data[0].highlight).to.not.exist;
-      expect(output[0].detailExtractions[2].data[0].id).to.equal('price1-currency:currency1-time_unit:time1');
-      expect(output[0].detailExtractions[2].data[0].icon).to.equal('priceIcon');
-      expect(output[0].detailExtractions[2].data[0].link).to.not.exist;
+      expect(output[0].detailExtractions[2].data[0].id).to.equal('1112223333');
+      expect(output[0].detailExtractions[2].data[0].icon).to.equal('phoneIcon');
+      expect(output[0].detailExtractions[2].data[0].link).to.equal('/entity.html?domain=TestDomain&id=1112223333&type=phone');
       expect(output[0].detailExtractions[2].data[0].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[2].data[0].styleClass).to.equal('priceStyle');
-      expect(output[0].detailExtractions[2].data[0].text).to.equal('price1 currency1 per time1 minutes');
-      expect(output[0].detailExtractions[2].data[0].type).to.equal('price');
+      expect(output[0].detailExtractions[2].data[0].styleClass).to.equal('phoneStyle');
+      expect(output[0].detailExtractions[2].data[0].text).to.equal('111-222-3333');
+      expect(output[0].detailExtractions[2].data[0].type).to.equal('phone');
       expect(output[0].detailExtractions[2].data[0].width).to.not.exist;
 
       expect(output[0].detailExtractions[2].data[1].confidence).to.not.exist;
       expect(output[0].detailExtractions[2].data[1].count).to.not.exist;
       expect(output[0].detailExtractions[2].data[1].highlight).to.not.exist;
-      expect(output[0].detailExtractions[2].data[1].id).to.equal('price2-currency:currency2-time_unit:time2');
-      expect(output[0].detailExtractions[2].data[1].icon).to.equal('priceIcon');
-      expect(output[0].detailExtractions[2].data[1].link).to.not.exist;
+      expect(output[0].detailExtractions[2].data[1].id).to.equal('4445556666');
+      expect(output[0].detailExtractions[2].data[1].icon).to.equal('phoneIcon');
+      expect(output[0].detailExtractions[2].data[1].link).to.equal('/entity.html?domain=TestDomain&id=4445556666&type=phone');
       expect(output[0].detailExtractions[2].data[1].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[2].data[1].styleClass).to.equal('priceStyle');
-      expect(output[0].detailExtractions[2].data[1].text).to.equal('price2 currency2 per time2 minutes');
-      expect(output[0].detailExtractions[2].data[1].type).to.equal('price');
+      expect(output[0].detailExtractions[2].data[1].styleClass).to.equal('phoneStyle');
+      expect(output[0].detailExtractions[2].data[1].text).to.equal('444-555-6666');
+      expect(output[0].detailExtractions[2].data[1].type).to.equal('phone');
       expect(output[0].detailExtractions[2].data[1].width).to.not.exist;
 
       expect(output[0].detailExtractions[3].isDate).to.be.false;
       expect(output[0].detailExtractions[3].isUrl).to.be.false;
-      expect(output[0].detailExtractions[3].key).to.equal('user');
-      expect(output[0].detailExtractions[3].name).to.equal('Users');
-      expect(output[0].detailExtractions[3].type).to.equal('username');
+      expect(output[0].detailExtractions[3].key).to.equal('price');
+      expect(output[0].detailExtractions[3].name).to.equal('Prices');
+      expect(output[0].detailExtractions[3].type).to.equal('hyphenated');
       expect(output[0].detailExtractions[3].data.length).to.equal(2);
 
       expect(output[0].detailExtractions[3].data[0].confidence).to.not.exist;
       expect(output[0].detailExtractions[3].data[0].count).to.not.exist;
       expect(output[0].detailExtractions[3].data[0].highlight).to.not.exist;
-      expect(output[0].detailExtractions[3].data[0].id).to.equal('type1 user1');
-      expect(output[0].detailExtractions[3].data[0].icon).to.equal('userIcon');
-      expect(output[0].detailExtractions[3].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type1%20user1&type=user');
+      expect(output[0].detailExtractions[3].data[0].id).to.equal('price1-currency:currency1-time_unit:time1');
+      expect(output[0].detailExtractions[3].data[0].icon).to.equal('priceIcon');
+      expect(output[0].detailExtractions[3].data[0].link).to.not.exist;
       expect(output[0].detailExtractions[3].data[0].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[3].data[0].styleClass).to.equal('userStyle');
-      expect(output[0].detailExtractions[3].data[0].text).to.equal('User1');
-      expect(output[0].detailExtractions[3].data[0].type).to.equal('user');
+      expect(output[0].detailExtractions[3].data[0].styleClass).to.equal('priceStyle');
+      expect(output[0].detailExtractions[3].data[0].text).to.equal('price1 currency1 per time1 minutes');
+      expect(output[0].detailExtractions[3].data[0].type).to.equal('price');
       expect(output[0].detailExtractions[3].data[0].width).to.not.exist;
 
       expect(output[0].detailExtractions[3].data[1].confidence).to.not.exist;
       expect(output[0].detailExtractions[3].data[1].count).to.not.exist;
       expect(output[0].detailExtractions[3].data[1].highlight).to.not.exist;
-      expect(output[0].detailExtractions[3].data[1].id).to.equal('type2 user2');
-      expect(output[0].detailExtractions[3].data[1].icon).to.equal('userIcon');
-      expect(output[0].detailExtractions[3].data[1].link).to.equal('/entity.html?domain=TestDomain&id=type2%20user2&type=user');
+      expect(output[0].detailExtractions[3].data[1].id).to.equal('price2-currency:currency2-time_unit:time2');
+      expect(output[0].detailExtractions[3].data[1].icon).to.equal('priceIcon');
+      expect(output[0].detailExtractions[3].data[1].link).to.not.exist;
       expect(output[0].detailExtractions[3].data[1].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[3].data[1].styleClass).to.equal('userStyle');
-      expect(output[0].detailExtractions[3].data[1].text).to.equal('User2');
-      expect(output[0].detailExtractions[3].data[1].type).to.equal('user');
+      expect(output[0].detailExtractions[3].data[1].styleClass).to.equal('priceStyle');
+      expect(output[0].detailExtractions[3].data[1].text).to.equal('price2 currency2 per time2 minutes');
+      expect(output[0].detailExtractions[3].data[1].type).to.equal('price');
       expect(output[0].detailExtractions[3].data[1].width).to.not.exist;
+
+      expect(output[0].detailExtractions[4].isDate).to.be.false;
+      expect(output[0].detailExtractions[4].isUrl).to.be.false;
+      expect(output[0].detailExtractions[4].key).to.equal('unnested');
+      expect(output[0].detailExtractions[4].name).to.equal('Unnested Items');
+      expect(output[0].detailExtractions[4].type).to.equal('string');
+      expect(output[0].detailExtractions[4].data.length).to.equal(2);
+
+      expect(output[0].detailExtractions[4].data[0].confidence).to.not.exist;
+      expect(output[0].detailExtractions[4].data[0].count).to.not.exist;
+      expect(output[0].detailExtractions[4].data[0].highlight).to.not.exist;
+      expect(output[0].detailExtractions[4].data[0].id).to.equal('unnested1');
+      expect(output[0].detailExtractions[4].data[0].icon).to.equal('unnestedIcon');
+      expect(output[0].detailExtractions[4].data[0].link).to.not.exist;
+      expect(output[0].detailExtractions[4].data[0].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[4].data[0].styleClass).to.equal('unnestedStyle');
+      expect(output[0].detailExtractions[4].data[0].text).to.equal('unnested1');
+      expect(output[0].detailExtractions[4].data[0].type).to.equal('unnested');
+      expect(output[0].detailExtractions[4].data[0].width).to.not.exist;
+
+      expect(output[0].detailExtractions[4].data[1].confidence).to.not.exist;
+      expect(output[0].detailExtractions[4].data[1].count).to.not.exist;
+      expect(output[0].detailExtractions[4].data[1].highlight).to.not.exist;
+      expect(output[0].detailExtractions[4].data[1].id).to.equal('unnested2');
+      expect(output[0].detailExtractions[4].data[1].icon).to.equal('unnestedIcon');
+      expect(output[0].detailExtractions[4].data[1].link).to.not.exist;
+      expect(output[0].detailExtractions[4].data[1].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[4].data[1].styleClass).to.equal('unnestedStyle');
+      expect(output[0].detailExtractions[4].data[1].text).to.equal('unnested2');
+      expect(output[0].detailExtractions[4].data[1].type).to.equal('unnested');
+      expect(output[0].detailExtractions[4].data[1].width).to.not.exist;
+
+      expect(output[0].detailExtractions[5].isDate).to.be.false;
+      expect(output[0].detailExtractions[5].isUrl).to.be.false;
+      expect(output[0].detailExtractions[5].key).to.equal('user');
+      expect(output[0].detailExtractions[5].name).to.equal('Users');
+      expect(output[0].detailExtractions[5].type).to.equal('username');
+      expect(output[0].detailExtractions[5].data.length).to.equal(2);
+
+      expect(output[0].detailExtractions[5].data[0].confidence).to.not.exist;
+      expect(output[0].detailExtractions[5].data[0].count).to.not.exist;
+      expect(output[0].detailExtractions[5].data[0].highlight).to.not.exist;
+      expect(output[0].detailExtractions[5].data[0].id).to.equal('type1 user1');
+      expect(output[0].detailExtractions[5].data[0].icon).to.equal('userIcon');
+      expect(output[0].detailExtractions[5].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type1%20user1&type=user');
+      expect(output[0].detailExtractions[5].data[0].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[5].data[0].styleClass).to.equal('userStyle');
+      expect(output[0].detailExtractions[5].data[0].text).to.equal('User1');
+      expect(output[0].detailExtractions[5].data[0].type).to.equal('user');
+      expect(output[0].detailExtractions[5].data[0].width).to.not.exist;
+
+      expect(output[0].detailExtractions[5].data[1].confidence).to.not.exist;
+      expect(output[0].detailExtractions[5].data[1].count).to.not.exist;
+      expect(output[0].detailExtractions[5].data[1].highlight).to.not.exist;
+      expect(output[0].detailExtractions[5].data[1].id).to.equal('type2 user2');
+      expect(output[0].detailExtractions[5].data[1].icon).to.equal('userIcon');
+      expect(output[0].detailExtractions[5].data[1].link).to.equal('/entity.html?domain=TestDomain&id=type2%20user2&type=user');
+      expect(output[0].detailExtractions[5].data[1].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[5].data[1].styleClass).to.equal('userStyle');
+      expect(output[0].detailExtractions[5].data[1].text).to.equal('User2');
+      expect(output[0].detailExtractions[5].data[1].type).to.equal('user');
+      expect(output[0].detailExtractions[5].data[1].width).to.not.exist;
 
       expect(output[0].nestedExtractions[0].isDate).to.be.false;
       expect(output[0].nestedExtractions[0].isUrl).to.be.false;
@@ -2895,8 +3513,8 @@ limitations under the License.
       expect(output[0].details[0].text).to.equal('testUrl1');
 
       expect(output[0].details[1].name).to.equal('Description');
-      expect(output[0].details[1].highlightedText).to.equal('This is description 1 This is description 2');
-      expect(output[0].details[1].text).to.equal('This is description 1 This is description 2');
+      expect(output[0].details[1].highlightedText).to.equal('This is description 1');
+      expect(output[0].details[1].text).to.equal('This is description 1');
 
       expect(output[0].details[2].name).to.equal('Cached Page');
       expect(output[0].details[2].link).to.equal('/cached.html?domain=TestDomain&id=ABC123');
@@ -2913,12 +3531,12 @@ limitations under the License.
       expect(output[1].type).to.equal('webpage');
       expect(output[1].url).to.equal('testUrl2');
 
-      expect(output[1].crawlTimestamp).to.not.exist;
+      expect(output[1].timestamp).to.not.exist;
       expect(output[1].esData).to.not.exist;
       expect(output[1].images).to.not.exist;
       expect(output[1].styleClass).to.not.exist;
       expect(output[1].headerExtractions.length).to.equal(4);
-      expect(output[1].detailExtractions.length).to.equal(4);
+      expect(output[1].detailExtractions.length).to.equal(6);
       expect(output[1].nestedExtractions.length).to.equal(1);
       expect(output[1].details.length).to.equal(3);
 
@@ -3019,60 +3637,98 @@ limitations under the License.
 
       expect(output[1].detailExtractions[1].isDate).to.be.false;
       expect(output[1].detailExtractions[1].isUrl).to.be.false;
-      expect(output[1].detailExtractions[1].key).to.equal('phone');
-      expect(output[1].detailExtractions[1].name).to.equal('Phone');
-      expect(output[1].detailExtractions[1].type).to.equal('phone');
+      expect(output[1].detailExtractions[1].key).to.equal('number');
+      expect(output[1].detailExtractions[1].name).to.equal('Number');
+      expect(output[1].detailExtractions[1].type).to.equal('number');
       expect(output[1].detailExtractions[1].data.length).to.equal(1);
 
       expect(output[1].detailExtractions[1].data[0].confidence).to.not.exist;
       expect(output[1].detailExtractions[1].data[0].count).to.not.exist;
       expect(output[1].detailExtractions[1].data[0].highlight).to.not.exist;
-      expect(output[1].detailExtractions[1].data[0].id).to.equal('7778889999');
-      expect(output[1].detailExtractions[1].data[0].icon).to.equal('phoneIcon');
-      expect(output[1].detailExtractions[1].data[0].link).to.equal('/entity.html?domain=TestDomain&id=7778889999&type=phone');
+      expect(output[1].detailExtractions[1].data[0].id).to.equal(987);
+      expect(output[1].detailExtractions[1].data[0].icon).to.equal('numberIcon');
+      expect(output[1].detailExtractions[1].data[0].link).to.not.exist;
       expect(output[1].detailExtractions[1].data[0].provenances.length).to.equal(0);
-      expect(output[1].detailExtractions[1].data[0].styleClass).to.equal('phoneStyle');
-      expect(output[1].detailExtractions[1].data[0].text).to.equal('777-888-9999');
-      expect(output[1].detailExtractions[1].data[0].type).to.equal('phone');
+      expect(output[1].detailExtractions[1].data[0].styleClass).to.equal('numberStyle');
+      expect(output[1].detailExtractions[1].data[0].text).to.equal(987);
+      expect(output[1].detailExtractions[1].data[0].type).to.equal('number');
       expect(output[1].detailExtractions[1].data[0].width).to.not.exist;
 
       expect(output[1].detailExtractions[2].isDate).to.be.false;
       expect(output[1].detailExtractions[2].isUrl).to.be.false;
-      expect(output[1].detailExtractions[2].key).to.equal('price');
-      expect(output[1].detailExtractions[2].name).to.equal('Price');
-      expect(output[1].detailExtractions[2].type).to.equal('hyphenated');
+      expect(output[1].detailExtractions[2].key).to.equal('phone');
+      expect(output[1].detailExtractions[2].name).to.equal('Phone');
+      expect(output[1].detailExtractions[2].type).to.equal('phone');
       expect(output[1].detailExtractions[2].data.length).to.equal(1);
 
       expect(output[1].detailExtractions[2].data[0].confidence).to.not.exist;
       expect(output[1].detailExtractions[2].data[0].count).to.not.exist;
       expect(output[1].detailExtractions[2].data[0].highlight).to.not.exist;
-      expect(output[1].detailExtractions[2].data[0].id).to.equal('price3-currency:currency3-time_unit:time3');
-      expect(output[1].detailExtractions[2].data[0].icon).to.equal('priceIcon');
-      expect(output[1].detailExtractions[2].data[0].link).to.not.exist;
+      expect(output[1].detailExtractions[2].data[0].id).to.equal('7778889999');
+      expect(output[1].detailExtractions[2].data[0].icon).to.equal('phoneIcon');
+      expect(output[1].detailExtractions[2].data[0].link).to.equal('/entity.html?domain=TestDomain&id=7778889999&type=phone');
       expect(output[1].detailExtractions[2].data[0].provenances.length).to.equal(0);
-      expect(output[1].detailExtractions[2].data[0].styleClass).to.equal('priceStyle');
-      expect(output[1].detailExtractions[2].data[0].text).to.equal('price3 currency3 per time3 minutes');
-      expect(output[1].detailExtractions[2].data[0].type).to.equal('price');
+      expect(output[1].detailExtractions[2].data[0].styleClass).to.equal('phoneStyle');
+      expect(output[1].detailExtractions[2].data[0].text).to.equal('777-888-9999');
+      expect(output[1].detailExtractions[2].data[0].type).to.equal('phone');
       expect(output[1].detailExtractions[2].data[0].width).to.not.exist;
 
       expect(output[1].detailExtractions[3].isDate).to.be.false;
       expect(output[1].detailExtractions[3].isUrl).to.be.false;
-      expect(output[1].detailExtractions[3].key).to.equal('user');
-      expect(output[1].detailExtractions[3].name).to.equal('User');
-      expect(output[1].detailExtractions[3].type).to.equal('username');
+      expect(output[1].detailExtractions[3].key).to.equal('price');
+      expect(output[1].detailExtractions[3].name).to.equal('Price');
+      expect(output[1].detailExtractions[3].type).to.equal('hyphenated');
       expect(output[1].detailExtractions[3].data.length).to.equal(1);
 
       expect(output[1].detailExtractions[3].data[0].confidence).to.not.exist;
       expect(output[1].detailExtractions[3].data[0].count).to.not.exist;
       expect(output[1].detailExtractions[3].data[0].highlight).to.not.exist;
-      expect(output[1].detailExtractions[3].data[0].id).to.equal('type3 user3');
-      expect(output[1].detailExtractions[3].data[0].icon).to.equal('userIcon');
-      expect(output[1].detailExtractions[3].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type3%20user3&type=user');
+      expect(output[1].detailExtractions[3].data[0].id).to.equal('price3-currency:currency3-time_unit:time3');
+      expect(output[1].detailExtractions[3].data[0].icon).to.equal('priceIcon');
+      expect(output[1].detailExtractions[3].data[0].link).to.not.exist;
       expect(output[1].detailExtractions[3].data[0].provenances.length).to.equal(0);
-      expect(output[1].detailExtractions[3].data[0].styleClass).to.equal('userStyle');
-      expect(output[1].detailExtractions[3].data[0].text).to.equal('User3');
-      expect(output[1].detailExtractions[3].data[0].type).to.equal('user');
+      expect(output[1].detailExtractions[3].data[0].styleClass).to.equal('priceStyle');
+      expect(output[1].detailExtractions[3].data[0].text).to.equal('price3 currency3 per time3 minutes');
+      expect(output[1].detailExtractions[3].data[0].type).to.equal('price');
       expect(output[1].detailExtractions[3].data[0].width).to.not.exist;
+
+      expect(output[1].detailExtractions[4].isDate).to.be.false;
+      expect(output[1].detailExtractions[4].isUrl).to.be.false;
+      expect(output[1].detailExtractions[4].key).to.equal('unnested');
+      expect(output[1].detailExtractions[4].name).to.equal('Unnested Item');
+      expect(output[1].detailExtractions[4].type).to.equal('string');
+      expect(output[1].detailExtractions[4].data.length).to.equal(1);
+
+      expect(output[1].detailExtractions[4].data[0].confidence).to.not.exist;
+      expect(output[1].detailExtractions[4].data[0].count).to.not.exist;
+      expect(output[1].detailExtractions[4].data[0].highlight).to.not.exist;
+      expect(output[1].detailExtractions[4].data[0].id).to.equal('unnested3');
+      expect(output[1].detailExtractions[4].data[0].icon).to.equal('unnestedIcon');
+      expect(output[1].detailExtractions[4].data[0].link).to.not.exist;
+      expect(output[1].detailExtractions[4].data[0].provenances.length).to.equal(0);
+      expect(output[1].detailExtractions[4].data[0].styleClass).to.equal('unnestedStyle');
+      expect(output[1].detailExtractions[4].data[0].text).to.equal('unnested3');
+      expect(output[1].detailExtractions[4].data[0].type).to.equal('unnested');
+      expect(output[1].detailExtractions[4].data[0].width).to.not.exist;
+
+      expect(output[1].detailExtractions[5].isDate).to.be.false;
+      expect(output[1].detailExtractions[5].isUrl).to.be.false;
+      expect(output[1].detailExtractions[5].key).to.equal('user');
+      expect(output[1].detailExtractions[5].name).to.equal('User');
+      expect(output[1].detailExtractions[5].type).to.equal('username');
+      expect(output[1].detailExtractions[5].data.length).to.equal(1);
+
+      expect(output[1].detailExtractions[5].data[0].confidence).to.not.exist;
+      expect(output[1].detailExtractions[5].data[0].count).to.not.exist;
+      expect(output[1].detailExtractions[5].data[0].highlight).to.not.exist;
+      expect(output[1].detailExtractions[5].data[0].id).to.equal('type3 user3');
+      expect(output[1].detailExtractions[5].data[0].icon).to.equal('userIcon');
+      expect(output[1].detailExtractions[5].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type3%20user3&type=user');
+      expect(output[1].detailExtractions[5].data[0].provenances.length).to.equal(0);
+      expect(output[1].detailExtractions[5].data[0].styleClass).to.equal('userStyle');
+      expect(output[1].detailExtractions[5].data[0].text).to.equal('User3');
+      expect(output[1].detailExtractions[5].data[0].type).to.equal('user');
+      expect(output[1].detailExtractions[5].data[0].width).to.not.exist;
 
       expect(output[1].nestedExtractions[0].isDate).to.be.false;
       expect(output[1].nestedExtractions[0].isUrl).to.be.false;
@@ -3320,6 +3976,64 @@ limitations under the License.
       expect(output[0].detailExtractions[0].data[1].width).to.not.exist;
     });
 
+    test('results given number highlights does return expected object', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var result = {
+        highlight: {
+          path1: ['<em>321</em>'],
+          path2: ['<em>654</em>']
+        },
+        matched_queries: [
+          'highlight1:path1',
+          'highlight2:path2'
+        ],
+        _source: RESULT_1._source
+      };
+      var output = transformFunctions.transforms.entity.results({
+        highlights: {
+          number: {
+            321: 'highlight1',
+            654: 'highlight2'
+          }
+        },
+        hits: {
+          hits: [result]
+        },
+      }, SEARCH_FIELDS);
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+
+      expect(output[0].detailExtractions[1].isDate).to.be.false;
+      expect(output[0].detailExtractions[1].isUrl).to.be.false;
+      expect(output[0].detailExtractions[1].key).to.equal('number');
+      expect(output[0].detailExtractions[1].name).to.equal('Numbers');
+      expect(output[0].detailExtractions[1].type).to.equal('number');
+      expect(output[0].detailExtractions[1].data.length).to.equal(2);
+
+      expect(output[0].detailExtractions[1].data[0].confidence).to.not.exist;
+      expect(output[0].detailExtractions[1].data[0].count).to.not.exist;
+      expect(output[0].detailExtractions[1].data[0].highlight).to.be.true;
+      expect(output[0].detailExtractions[1].data[0].id).to.equal(321);
+      expect(output[0].detailExtractions[1].data[0].icon).to.equal('numberIcon');
+      expect(output[0].detailExtractions[1].data[0].link).to.not.exist;
+      expect(output[0].detailExtractions[1].data[0].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[1].data[0].styleClass).to.equal('numberStyle');
+      expect(output[0].detailExtractions[1].data[0].text).to.equal(321);
+      expect(output[0].detailExtractions[1].data[0].type).to.equal('number');
+      expect(output[0].detailExtractions[1].data[0].width).to.not.exist;
+
+      expect(output[0].detailExtractions[1].data[1].confidence).to.not.exist;
+      expect(output[0].detailExtractions[1].data[1].count).to.not.exist;
+      expect(output[0].detailExtractions[1].data[1].highlight).to.be.true;
+      expect(output[0].detailExtractions[1].data[1].id).to.equal(654);
+      expect(output[0].detailExtractions[1].data[1].icon).to.equal('numberIcon');
+      expect(output[0].detailExtractions[1].data[1].link).to.not.exist;
+      expect(output[0].detailExtractions[1].data[1].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[1].data[1].styleClass).to.equal('numberStyle');
+      expect(output[0].detailExtractions[1].data[1].text).to.equal(654);
+      expect(output[0].detailExtractions[1].data[1].type).to.equal('number');
+      expect(output[0].detailExtractions[1].data[1].width).to.not.exist;
+    });
+
     test('results given phone highlights does return expected object', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var result = {
@@ -3346,29 +4060,29 @@ limitations under the License.
       }, SEARCH_FIELDS);
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-      expect(output[0].detailExtractions[1].data[0].confidence).to.not.exist;
-      expect(output[0].detailExtractions[1].data[0].count).to.not.exist;
-      expect(output[0].detailExtractions[1].data[0].highlight).to.be.true;
-      expect(output[0].detailExtractions[1].data[0].id).to.equal('1112223333');
-      expect(output[0].detailExtractions[1].data[0].icon).to.equal('phoneIcon');
-      expect(output[0].detailExtractions[1].data[0].link).to.equal('/entity.html?domain=TestDomain&id=1112223333&type=phone');
-      expect(output[0].detailExtractions[1].data[0].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[1].data[0].styleClass).to.equal('phoneStyle');
-      expect(output[0].detailExtractions[1].data[0].text).to.equal('111-222-3333');
-      expect(output[0].detailExtractions[1].data[0].type).to.equal('phone');
-      expect(output[0].detailExtractions[1].data[0].width).to.not.exist;
+      expect(output[0].detailExtractions[2].data[0].confidence).to.not.exist;
+      expect(output[0].detailExtractions[2].data[0].count).to.not.exist;
+      expect(output[0].detailExtractions[2].data[0].highlight).to.be.true;
+      expect(output[0].detailExtractions[2].data[0].id).to.equal('1112223333');
+      expect(output[0].detailExtractions[2].data[0].icon).to.equal('phoneIcon');
+      expect(output[0].detailExtractions[2].data[0].link).to.equal('/entity.html?domain=TestDomain&id=1112223333&type=phone');
+      expect(output[0].detailExtractions[2].data[0].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[2].data[0].styleClass).to.equal('phoneStyle');
+      expect(output[0].detailExtractions[2].data[0].text).to.equal('111-222-3333');
+      expect(output[0].detailExtractions[2].data[0].type).to.equal('phone');
+      expect(output[0].detailExtractions[2].data[0].width).to.not.exist;
 
-      expect(output[0].detailExtractions[1].data[1].confidence).to.not.exist;
-      expect(output[0].detailExtractions[1].data[1].count).to.not.exist;
-      expect(output[0].detailExtractions[1].data[1].highlight).to.be.true;
-      expect(output[0].detailExtractions[1].data[1].id).to.equal('4445556666');
-      expect(output[0].detailExtractions[1].data[1].icon).to.equal('phoneIcon');
-      expect(output[0].detailExtractions[1].data[1].link).to.equal('/entity.html?domain=TestDomain&id=4445556666&type=phone');
-      expect(output[0].detailExtractions[1].data[1].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[1].data[1].styleClass).to.equal('phoneStyle');
-      expect(output[0].detailExtractions[1].data[1].text).to.equal('444-555-6666');
-      expect(output[0].detailExtractions[1].data[1].type).to.equal('phone');
-      expect(output[0].detailExtractions[1].data[1].width).to.not.exist;
+      expect(output[0].detailExtractions[2].data[1].confidence).to.not.exist;
+      expect(output[0].detailExtractions[2].data[1].count).to.not.exist;
+      expect(output[0].detailExtractions[2].data[1].highlight).to.be.true;
+      expect(output[0].detailExtractions[2].data[1].id).to.equal('4445556666');
+      expect(output[0].detailExtractions[2].data[1].icon).to.equal('phoneIcon');
+      expect(output[0].detailExtractions[2].data[1].link).to.equal('/entity.html?domain=TestDomain&id=4445556666&type=phone');
+      expect(output[0].detailExtractions[2].data[1].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[2].data[1].styleClass).to.equal('phoneStyle');
+      expect(output[0].detailExtractions[2].data[1].text).to.equal('444-555-6666');
+      expect(output[0].detailExtractions[2].data[1].type).to.equal('phone');
+      expect(output[0].detailExtractions[2].data[1].width).to.not.exist;
     });
 
     test('results given hyphenated highlights does return expected object', function() {
@@ -3397,29 +4111,33 @@ limitations under the License.
       }, SEARCH_FIELDS);
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-      expect(output[0].detailExtractions[2].data[0].confidence).to.not.exist;
-      expect(output[0].detailExtractions[2].data[0].count).to.not.exist;
-      expect(output[0].detailExtractions[2].data[0].highlight).to.be.true;
-      expect(output[0].detailExtractions[2].data[0].id).to.equal('price1-currency:currency1-time_unit:time1');
-      expect(output[0].detailExtractions[2].data[0].icon).to.equal('priceIcon');
-      expect(output[0].detailExtractions[2].data[0].link).to.not.exist;
-      expect(output[0].detailExtractions[2].data[0].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[2].data[0].styleClass).to.equal('priceStyle');
-      expect(output[0].detailExtractions[2].data[0].text).to.equal('price1 currency1 per time1 minutes');
-      expect(output[0].detailExtractions[2].data[0].type).to.equal('price');
-      expect(output[0].detailExtractions[2].data[0].width).to.not.exist;
+      expect(output[0].detailExtractions[3].data[0].confidence).to.not.exist;
+      expect(output[0].detailExtractions[3].data[0].count).to.not.exist;
+      expect(output[0].detailExtractions[3].data[0].highlight).to.be.true;
+      expect(output[0].detailExtractions[3].data[0].id).to.equal('price1-currency:currency1-time_unit:time1');
+      expect(output[0].detailExtractions[3].data[0].icon).to.equal('priceIcon');
+      expect(output[0].detailExtractions[3].data[0].link).to.not.exist;
+      expect(output[0].detailExtractions[3].data[0].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[3].data[0].styleClass).to.equal('priceStyle');
+      expect(output[0].detailExtractions[3].data[0].text).to.equal('price1 currency1 per time1 minutes');
+      expect(output[0].detailExtractions[3].data[0].type).to.equal('price');
+      expect(output[0].detailExtractions[3].data[0].width).to.not.exist;
 
-      expect(output[0].detailExtractions[2].data[1].confidence).to.not.exist;
-      expect(output[0].detailExtractions[2].data[1].count).to.not.exist;
-      expect(output[0].detailExtractions[2].data[1].highlight).to.be.true;
-      expect(output[0].detailExtractions[2].data[1].id).to.equal('price2-currency:currency2-time_unit:time2');
-      expect(output[0].detailExtractions[2].data[1].icon).to.equal('priceIcon');
-      expect(output[0].detailExtractions[2].data[1].link).to.not.exist;
-      expect(output[0].detailExtractions[2].data[1].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[2].data[1].styleClass).to.equal('priceStyle');
-      expect(output[0].detailExtractions[2].data[1].text).to.equal('price2 currency2 per time2 minutes');
-      expect(output[0].detailExtractions[2].data[1].type).to.equal('price');
-      expect(output[0].detailExtractions[2].data[1].width).to.not.exist;
+      expect(output[0].detailExtractions[3].data[1].confidence).to.not.exist;
+      expect(output[0].detailExtractions[3].data[1].count).to.not.exist;
+      expect(output[0].detailExtractions[3].data[1].highlight).to.be.true;
+      expect(output[0].detailExtractions[3].data[1].id).to.equal('price2-currency:currency2-time_unit:time2');
+      expect(output[0].detailExtractions[3].data[1].icon).to.equal('priceIcon');
+      expect(output[0].detailExtractions[3].data[1].link).to.not.exist;
+      expect(output[0].detailExtractions[3].data[1].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[3].data[1].styleClass).to.equal('priceStyle');
+      expect(output[0].detailExtractions[3].data[1].text).to.equal('price2 currency2 per time2 minutes');
+      expect(output[0].detailExtractions[3].data[1].type).to.equal('price');
+      expect(output[0].detailExtractions[3].data[1].width).to.not.exist;
+    });
+
+    test('results given unnested highlights does return expected object', function() {
+      // TODO
     });
 
     test('results given username highlights does return expected object', function() {
@@ -3448,29 +4166,29 @@ limitations under the License.
       }, SEARCH_FIELDS);
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-      expect(output[0].detailExtractions[3].data[0].confidence).to.not.exist;
-      expect(output[0].detailExtractions[3].data[0].count).to.not.exist;
-      expect(output[0].detailExtractions[3].data[0].highlight).to.be.true;
-      expect(output[0].detailExtractions[3].data[0].id).to.equal('type1 user1');
-      expect(output[0].detailExtractions[3].data[0].icon).to.equal('userIcon');
-      expect(output[0].detailExtractions[3].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type1%20user1&type=user');
-      expect(output[0].detailExtractions[3].data[0].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[3].data[0].styleClass).to.equal('userStyle');
-      expect(output[0].detailExtractions[3].data[0].text).to.equal('User1');
-      expect(output[0].detailExtractions[3].data[0].type).to.equal('user');
-      expect(output[0].detailExtractions[3].data[0].width).to.not.exist;
+      expect(output[0].detailExtractions[5].data[0].confidence).to.not.exist;
+      expect(output[0].detailExtractions[5].data[0].count).to.not.exist;
+      expect(output[0].detailExtractions[5].data[0].highlight).to.be.true;
+      expect(output[0].detailExtractions[5].data[0].id).to.equal('type1 user1');
+      expect(output[0].detailExtractions[5].data[0].icon).to.equal('userIcon');
+      expect(output[0].detailExtractions[5].data[0].link).to.equal('/entity.html?domain=TestDomain&id=type1%20user1&type=user');
+      expect(output[0].detailExtractions[5].data[0].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[5].data[0].styleClass).to.equal('userStyle');
+      expect(output[0].detailExtractions[5].data[0].text).to.equal('User1');
+      expect(output[0].detailExtractions[5].data[0].type).to.equal('user');
+      expect(output[0].detailExtractions[5].data[0].width).to.not.exist;
 
-      expect(output[0].detailExtractions[3].data[1].confidence).to.not.exist;
-      expect(output[0].detailExtractions[3].data[1].count).to.not.exist;
-      expect(output[0].detailExtractions[3].data[1].highlight).to.be.true;
-      expect(output[0].detailExtractions[3].data[1].id).to.equal('type2 user2');
-      expect(output[0].detailExtractions[3].data[1].icon).to.equal('userIcon');
-      expect(output[0].detailExtractions[3].data[1].link).to.equal('/entity.html?domain=TestDomain&id=type2%20user2&type=user');
-      expect(output[0].detailExtractions[3].data[1].provenances.length).to.equal(0);
-      expect(output[0].detailExtractions[3].data[1].styleClass).to.equal('userStyle');
-      expect(output[0].detailExtractions[3].data[1].text).to.equal('User2');
-      expect(output[0].detailExtractions[3].data[1].type).to.equal('user');
-      expect(output[0].detailExtractions[3].data[1].width).to.not.exist;
+      expect(output[0].detailExtractions[5].data[1].confidence).to.not.exist;
+      expect(output[0].detailExtractions[5].data[1].count).to.not.exist;
+      expect(output[0].detailExtractions[5].data[1].highlight).to.be.true;
+      expect(output[0].detailExtractions[5].data[1].id).to.equal('type2 user2');
+      expect(output[0].detailExtractions[5].data[1].icon).to.equal('userIcon');
+      expect(output[0].detailExtractions[5].data[1].link).to.equal('/entity.html?domain=TestDomain&id=type2%20user2&type=user');
+      expect(output[0].detailExtractions[5].data[1].provenances.length).to.equal(0);
+      expect(output[0].detailExtractions[5].data[1].styleClass).to.equal('userStyle');
+      expect(output[0].detailExtractions[5].data[1].text).to.equal('User2');
+      expect(output[0].detailExtractions[5].data[1].type).to.equal('user');
+      expect(output[0].detailExtractions[5].data[1].width).to.not.exist;
     });
 
     test('results given url highlights does return expected object', function() {
