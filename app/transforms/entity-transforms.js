@@ -310,16 +310,20 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
    * @return {Object}
    */
   function createResultObject(result, searchFields, icon, name, styleClass, type, highlights) {
-    var id = _.get(result, '_source.' + esConfig.uid);
+    var id = _.get(result, esConfig.uid ? ('_source.' + esConfig.uid) : '_id');
 
     if(!id) {
       return undefined;
     }
 
-    var timestamp = commonTransforms.getFormattedDate(_.get(result, '_source.' + esConfig.timestamp));
-    if(timestamp === 'None') {
-      timestamp = commonTransforms.getFormattedDate(_.get(result, '_source.timestamp'));
+    var timestamp;
+    if(esConfig.timestamp) {
+      timestamp = commonTransforms.getFormattedDate(_.get(result, '_source.' + esConfig.timestamp));
+      if(timestamp === 'None') {
+        timestamp = commonTransforms.getFormattedDate(_.get(result, '_source.timestamp'));
+      }
     }
+
     var esDataEndpoint = (esConfig && esConfig.esDataEndpoint ? (esConfig.esDataEndpoint + id) : undefined);
 
     var titles = getTitlesOrDescriptions('title', searchFields, result, highlights);
@@ -444,7 +448,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       });
     }
 
-    if(resultObject.timestamp && resultObject.timestamp !== 'Unknown') {
+    if(resultObject.timestamp) {
       resultObject.details.push({
         name: 'Timestamp',
         text: resultObject.timestamp

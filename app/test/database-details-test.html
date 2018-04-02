@@ -140,20 +140,20 @@ limitations under the License.
     test('_buildTransformFunctionToFindDate does return expected function', function() {
       var func = element._buildTransformFunctionToFindDate('testArgument');
       expect(func).to.be.a('Function');
-      expect(func({})).to.equal('None');
+      expect(func({})).to.equal('?');
       expect(func({
         hits: {}
-      })).to.equal('None');
+      })).to.equal('?');
       expect(func({
         hits: {
           hits: []
         }
-      })).to.equal('None');
+      })).to.equal('?');
       expect(func({
         hits: {
           hits: [{}]
         }
-      })).to.equal('None');
+      })).to.equal('?');
       expect(func({
         hits: {
           hits: [{

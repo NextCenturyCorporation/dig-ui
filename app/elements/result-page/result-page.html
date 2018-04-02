@@ -190,7 +190,7 @@ limitations under the License.
     <!-- Result Query -->
 
     <build-and-run-query
-      fields="[[esConfig.uid]]"
+      fields="[[findIdFieldAsArray(esConfig.uid)]]"
       values="[[parameters.id]]"
       client="[[esClient]]"
       index-name="[[esConfig.esIndex]]"
@@ -209,7 +209,7 @@ limitations under the License.
 
     <elastic-client-query-builder
       type="term"
-      fields="[[esConfig.uid]]"
+      fields="[[findIdFieldAsArray(esConfig.uid)]]"
       values="[[result.id]]"
       ejs-query="{{thisResultQuery}}">
     </elastic-client-query-builder>
@@ -850,6 +850,10 @@ limitations under the License.
       createSectionTitle: function(size, searchFieldsObject) {
         var sizeString = (size || 'No').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         return sizeString + ' ' + (size === 1 ? searchFieldsObject.title : searchFieldsObject.titlePlural);
+      },
+
+      findIdFieldAsArray: function(uidField) {
+        return [(uidField ? ('_source.' + uidField) : '_id')];
       },
 
       findPageName: function(result) {

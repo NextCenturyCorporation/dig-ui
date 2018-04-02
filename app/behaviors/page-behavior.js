@@ -136,7 +136,7 @@ DigBehaviors.PageBehavior = {
   },
 
   getSourceIncludes: function(ignore, timestamp, uid) {
-    return ignore ? [] : ['knowledge_graph', 'objects', 'tld', 'url', timestamp, uid];
+    return ignore ? [] : ['knowledge_graph', 'objects', 'tld', 'url'].concat(timestamp || []).concat(uid || []);
   },
 
   getUrlParameters: function() {
