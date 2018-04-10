@@ -44,7 +44,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/state-manager/state-manager.html">
 <link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
 <link rel="import" href="../../bower_components/terms-transformer/terms-transformer.html">
-<link rel="import" href="../../bower_components/user-settings-button/user-settings-button.html">
+<link rel="import" href="../../bower_components/user-settings-dialog/user-settings-button.html">
 <link rel="import" href="../../bower_components/user-settings-dialog/user-settings-dialog.html">
 <link rel="import" href="../../bower_components/zoomable-bar-chart/zoomable-bar-chart.html">
 <link rel="import" href="../../elements/behaviors.html">
@@ -76,12 +76,15 @@ limitations under the License.
         --section-wrapper-min-height: 100%;
       }
 
-      .bottom-margin,
+      .bottom-margin {
+        margin-bottom: 10px;
+      }
+
       aggregation-query-and-display,
       image-query-and-display,
-      sparkline-list,
-      status-text {
-        margin-bottom: 10px;
+      sparkline-list {
+        /* Use padding here because margin hides the Show More button shadow. */
+        padding-bottom: 10px;
       }
 
       aggregation-query-and-display {
@@ -101,6 +104,7 @@ limitations under the License.
       }
 
       status-text {
+        margin-bottom: 10px;
         margin-right: 5px;
       }
 
@@ -716,7 +720,11 @@ limitations under the License.
                 <template is="dom-if" if="[[!item.timelineLoading]]">
                   <template is="dom-if" if="[[item.timelineResults.sparklines.length]]">
                     <template is="dom-if" if="[[!esConfig.hideTimelines]]">
-                      <sparkline-list hide-sparkline-chart="[[!item.loadData]]" data="[[item.timelineResults.sparklines]]"></sparkline-list>
+                      <sparkline-list
+                        data="[[item.timelineResults.sparklines]]"
+                        hide-sparkline-chart="[[!item.loadData]]"
+                        limit="50">
+                      </sparkline-list>
                     </template>
 
                     <div class="layout horizontal center bottom-margin">

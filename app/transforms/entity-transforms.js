@@ -584,6 +584,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
                 icon: dataItem.icon,
                 id: dataItem.id,
                 link: dataItem.link,
+                maxCount: 0,
                 name: dataItem.text,
                 styleClass: dataItem.styleClass,
                 points: []
@@ -595,6 +596,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
               count: dataItem.count,
               date: date
             });
+
+            timelines[timelineIndex].maxCount = Math.max(timelines[timelineIndex].maxCount, dataItem.count);
 
             sum += dataItem.count;
           });
@@ -620,12 +623,17 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         }
       }
 
-      // Sort the other items alphabetically.
+      // Sort the other items by max count and then alphabetically.
+      if(a.maxCount !== b.maxCount) {
+        return a.maxCount > b.maxCount ? -1 : 1;
+      }
+
       if(a.name.localeCompare) {
         return a.name.localeCompare(b.name, undefined, {
           numeric: true
         });
       }
+
       return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
     });
 
@@ -638,7 +646,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         var time = new Date(item.date).getTime();
         return (timeBegin ? time >= timeBegin : true) && (timeEnd ? time <= timeEnd : true);
       }).sort(function(a, b) {
-        // Sort oldest first.
+        // Sort oldest points first.
         return new Date(a.date).getTime() - new Date(b.date).getTime();
       });
       return timelineItem;
