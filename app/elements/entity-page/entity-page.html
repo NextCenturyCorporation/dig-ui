@@ -45,6 +45,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/styled-dialog/styled-dialog.html">
 <link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
 <link rel="import" href="../../bower_components/terms-transformer/terms-transformer.html">
+<link rel="import" href="../../bower_components/user-settings-button/user-settings-button.html">
 <link rel="import" href="../../bower_components/user-settings-dialog/user-settings-dialog.html">
 <link rel="import" href="../../bower_components/zoomable-bar-chart/zoomable-bar-chart.html">
 <link rel="import" href="../../elements/behaviors.html">
@@ -119,7 +120,7 @@ limitations under the License.
 
       #logo4IQ {
         cursor: pointer;
-        margin-right: 10px;
+        margin-left: 10px;
         min-height: 30px;
         max-height: 30px;
         min-width: 60px;
@@ -437,6 +438,30 @@ limitations under the License.
       on-response="handleImageFaceSearchResults">
     </iron-ajax>
 
+    <template is="dom-if" if="[[serverConfig.username]]">
+      <user-settings-dialog
+        button-callbacks="{{userSettingsDialogCallbacks}}"
+        enable-email-address
+        build-popup-data-function="[[transforms.config.searchTerms]]"
+        build-state-data-function="[[transforms.config.searchState]]"
+        data-config="[[searchFieldsCollection]]"
+        function-config="[[searchFields]]"
+        profile-manager="[[profileManager]]"
+        reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
+        result-link-function="[[transforms.config.resultLink]]"
+        user-id="[[userId]]"
+        user-loading="[[userLoading]]"
+        username="[[serverConfig.username]]"
+        blur-images="{{blurImages}}"
+        cases="{{cases}}"
+        email-address="{{emailAddress}}"
+        notifications="{{notifications}}"
+        notification-date="{{notificationDate}}"
+        notification-interval="{{notificationInterval}}"
+        process-request="{{processRequest}}">
+      </user-settings-dialog>
+    </template>
+
     <styled-dialog id="dialog4IQ" header="4IQ Data on [[pageName]]" fill>
       <iframe src="http://nextcentury.com"></iframe>
     </styled-dialog>
@@ -472,26 +497,7 @@ limitations under the License.
       </div>
 
       <template is="dom-if" if="[[serverConfig.username]]">
-        <user-settings-dialog
-          enable-email-address
-          build-popup-data-function="[[transforms.config.searchTerms]]"
-          build-state-data-function="[[transforms.config.searchState]]"
-          data-config="[[searchFieldsCollection]]"
-          function-config="[[searchFields]]"
-          profile-manager="[[profileManager]]"
-          reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
-          result-link-function="[[transforms.config.resultLink]]"
-          user-id="[[userId]]"
-          user-loading="[[userLoading]]"
-          username="[[serverConfig.username]]"
-          blur-images="{{blurImages}}"
-          cases="{{cases}}"
-          email-address="{{emailAddress}}"
-          notifications="{{notifications}}"
-          notification-date="{{notificationDate}}"
-          notification-interval="{{notificationInterval}}"
-          process-request="{{processRequest}}">
-        </user-settings-dialog>
+        <user-settings-button notifications="[[notifications]]" open-callback="[[userSettingsDialogCallbacks.openSettingsDialog]]"></user-settings-button>
       </template>
 
       <img id="logo4IQ" src="/dig-ui/4IQ-logo.png" alt="4IQ" title="Open 4IQ Data on [[pageName]]" on-tap="openDialog4IQ"></img>
@@ -1159,6 +1165,10 @@ limitations under the License.
 
         userLoading: {
           type: Boolean
+        },
+
+        userSettingsDialogCallbacks: {
+          type: Object
         }
       },
 
@@ -1280,7 +1290,7 @@ limitations under the License.
           requestElement.body = {
             data: imageLink
           };
-          requestElement.body.options = '{"max_returned":1000,"near_dup":1,"near_dup_th":' + imageThreshold + '}';
+          requestElement.body.options = '{' + '"max_returned":1000,"near_dup":1,"near_dup_th":' + imageThreshold + '}';
           requestElement.url = host + endpoint;
           requestElement.headers = requestElement.headers || {};
           requestElement.headers.Authorization = auth;
