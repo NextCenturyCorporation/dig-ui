@@ -125,7 +125,7 @@ module.exports = function(app) {
 
     res.status(200).send({
       appVersion: serverConfig.appVersion,
-      username: req.session.username || '',
+      username: serverConfig.userOverride || req.session.username || req.headers.user || '',
       configEndpoint: serverConfig.configEndpoint,
       configPassword: serverConfig.configPassword,
       configUsername: serverConfig.configUsername,

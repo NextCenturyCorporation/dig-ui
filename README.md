@@ -84,6 +84,7 @@ TAG_EXTRACTION_ENDPOINT | The extraction endpoint for the MyDIG tag REST service
 TAG_LIST_ENDPOINT | The tag list endpoint for the MyDIG tag REST service. | undefined
 TIMESTAMP_FIELD | The timestamp field in the `_source` object of each elasticsearch document.  An empty string hides the timestamp. | 'timestamp_crawl'
 UID_FIELD | The unique ID field in the `_source` object of each elasticsearch document.  An empty string tells DIG to use the `_id` of each elasticsearch document. | 'doc_id'
+USER_OVERRIDE | The username for the UI.  Overrides any username saved in the request headers or session. | undefined
 
 ## Server Configuration (Docker)
 Running the DIG UI with Docker does **NOT** use the server configuration file (`server/config/local.env.js`).  You may set the server configuration options using environment variables.  We recommend using [docker-compose](https://docs.docker.com/compose/).  You can see an example docker-compose configuration file [here](https://github.com/NextCenturyCorporation/dig-ui/blob/master/docker-sample-config/docker-compose.sample.yml).

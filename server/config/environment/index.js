@@ -76,5 +76,6 @@ module.exports = {
     tagsExtractionEndpoint: process.env.TAGS_EXTRACTION_ENDPOINT,
     tagsListEndpoint: process.env.TAGS_LIST_ENDPOINT,
     timestampField: process.env.TIMESTAMP_FIELD === '' ? '' : (process.env.TIMESTAMP_FIELD || 'timestamp_crawl'),
-    uidField: process.env.UID_FIELD === '' ? '' : (process.env.UID_FIELD || 'doc_id')
+    uidField: process.env.UID_FIELD === '' ? '' : (process.env.UID_FIELD || 'doc_id'),
+    userOverride: process.env.USER_OVERRIDE
 };
