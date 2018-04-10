@@ -38,6 +38,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/single-result/single-result.html">
 <link rel="import" href="../../bower_components/tag-entity-buttons/tag-entity-buttons.html">
 <link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
+<link rel="import" href="../../bower_components/user-settings-button/user-settings-button.html">
 <link rel="import" href="../../bower_components/user-settings-dialog/user-settings-dialog.html">
 <link rel="import" href="../../elements/behaviors.html">
 <link rel="import" href="../../elements/copy-button/copy-button.html">
@@ -339,6 +340,30 @@ limitations under the License.
       user-id="[[userId]]">
     </save-case-dialog>
 
+    <template is="dom-if" if="[[serverConfig.username]]">
+      <user-settings-dialog
+        button-callbacks="{{userSettingsDialogCallbacks}}"
+        enable-email-address
+        build-popup-data-function="[[transforms.config.searchTerms]]"
+        build-state-data-function="[[transforms.config.searchState]]"
+        data-config="[[searchFieldsCollection]]"
+        function-config="[[searchFields]]"
+        profile-manager="[[profileManager]]"
+        reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
+        result-link-function="[[transforms.config.resultLink]]"
+        user-id="[[userId]]"
+        user-loading="[[userLoading]]"
+        username="[[serverConfig.username]]"
+        blur-images="{{blurImages}}"
+        cases="{{cases}}"
+        email-address="{{emailAddress}}"
+        notifications="{{notifications}}"
+        notification-date="{{notificationDate}}"
+        notification-interval="{{notificationInterval}}"
+        process-request="{{processRequest}}">
+      </user-settings-dialog>
+    </template>
+
     <div class="page-head">
       <a id="logoLink" href="[[serverConfig.pathPrefix]]" target="_blank" title="Open a DIG Search Page in a New Tab">
         <img id="logo" src="/dig-ui/dig-logo.png" alt="">
@@ -361,26 +386,7 @@ limitations under the License.
       </tag-entity-buttons>
 
       <template is="dom-if" if="[[serverConfig.username]]">
-        <user-settings-dialog
-          enable-email-address
-          build-popup-data-function="[[transforms.config.searchTerms]]"
-          build-state-data-function="[[transforms.config.searchState]]"
-          data-config="[[searchFieldsCollection]]"
-          function-config="[[searchFields]]"
-          profile-manager="[[profileManager]]"
-          reset-dates-data-function="[[createResetDatesFunction(searchFields)]]"
-          result-link-function="[[transforms.config.resultLink]]"
-          user-id="[[userId]]"
-          user-loading="[[userLoading]]"
-          username="[[serverConfig.username]]"
-          blur-images="{{blurImages}}"
-          cases="{{cases}}"
-          email-address="{{emailAddress}}"
-          notifications="{{notifications}}"
-          notification-date="{{notificationDate}}"
-          notification-interval="{{notificationInterval}}"
-          process-request="{{processRequest}}">
-        </user-settings-dialog>
+        <user-settings-button notifications="[[notifications]]" open-callback="[[userSettingsDialogCallbacks.openSettingsDialog]]"></user-settings-button>
       </template>
 
       <paper-icon-button id="menuButton" icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
@@ -836,6 +842,10 @@ limitations under the License.
 
         userLoading: {
           type: Boolean
+        },
+
+        userSettingsDialogCallbacks: {
+          type: Object
         }
       },
 
