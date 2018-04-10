@@ -54,8 +54,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
           text: provenance.source && provenance.source.context ? provenance.source.context.text : 'Not Available'
         };
       });
-      // Set the confidence to zero if it is undefined.
-      extraction.confidence = extraction.confidence || 0;
+      // Set the confidence to 100 if it is undefined.
+      extraction.confidence = _.isUndefined(extraction.confidence) ? 100 : extraction.confidence;
     }
 
     if(config.type !== 'url') {
@@ -499,7 +499,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return createResultObject(result, searchFields, searchFieldsObject.icon, searchFieldsObject.title, searchFieldsObject.styleClass, searchFieldsObject.key);
   }
 
-  function createHistogram(buckets, entityConfig, unidentifiedBucketName) {
+  function createHistogram(buckets, entityConfig, timeBegin, timeEnd, unidentifiedBucketName) {
     return buckets.reduce(function(timeline, dateBucket) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var count = dateBucket.doc_count;
@@ -540,7 +540,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       }
 
       return timeline;
-    }, []).sort(function(a, b) {
+    }, []).filter(function(item) {
+      var time = new Date(item.date).getTime();
+      return (timeBegin ? time >= timeBegin : true) && (timeEnd ? time <= timeEnd : true);
+    }).sort(function(a, b) {
       // Sort oldest first.
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
@@ -814,9 +817,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       var buckets = getAggregationBuckets(data, config.name);
       if(buckets.length > 1) {
         return {
-          begin: commonTransforms.getFormattedDate(buckets[0].key),
-          end: commonTransforms.getFormattedDate(buckets[buckets.length - 1].key),
-          histogram: createHistogram(buckets, config.entity, config.unidentified || '(Unidentified)'),
+          begin: commonTransforms.getFormattedDate(config.begin || buckets[0].key),
+          end: commonTransforms.getFormattedDate(config.end || buckets[buckets.length - 1].key),
+          histogram: createHistogram(buckets, config.entity, (config.begin ? new Date(config.begin).getTime() : null), (config.end ? new Date(config.end).getTime() : null),
+              config.unidentified || '(Unidentified)'),
           sparklines: createSparklines(buckets, false, null, null, config.entity, config.page, config.id)
         };
       }

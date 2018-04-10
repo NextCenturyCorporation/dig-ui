@@ -21,8 +21,13 @@ var commonTransforms = (function(_, moment, domain, pathPrefix) {
   /**
    * Returns the formatted string for the given date number/string in UTC format.
    */
-  function getFormattedDate(date) {
-    return date ? moment.utc(new Date(date)).format('MMM D, YYYY') : 'None';
+  function getFormattedDate(dateString) {
+    if(dateString) {
+      var dateObject = new Date(dateString);
+      dateObject.setUTCHours(0);
+      return moment.utc(dateObject).format('MMM D, YYYY');
+    }
+    return 'None';
   }
 
   /**
@@ -348,8 +353,8 @@ var commonTransforms = (function(_, moment, domain, pathPrefix) {
     /**
      * Returns the formatted string for the given date number/string in UTC format.
      */
-    getFormattedDate: function(date) {
-      return getFormattedDate(date);
+    getFormattedDate: function(dateString) {
+      return getFormattedDate(dateString);
     },
 
     /**

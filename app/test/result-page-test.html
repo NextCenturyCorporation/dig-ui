@@ -94,6 +94,11 @@ limitations under the License.
       })).to.equal('987,654,321 Items');
     });
 
+    test('findIdFieldAsArray does return expected array', function() {
+      expect(element.findIdFieldAsArray(null)).to.deep.equal(['_id']);
+      expect(element.findIdFieldAsArray('field')).to.deep.equal(['field']);
+    });
+
     test('findPageName does return expected string', function() {
       expect(element.findPageName({})).to.not.exist;
       expect(element.findPageName({

@@ -718,19 +718,20 @@ limitations under the License.
                     </div>
 
                     <zoomable-bar-chart
-                      load="[[item.showBarChart]]"
-                      timeline
-                      selected-property="[[getDateProperty(item.dateCollection, item.dateSelected, 'key')]]"
-                      selected="{{filterCollection}}"
                       bar-property="date"
-                      label-property="text"
-                      stack-property="data"
-                      interval="[[item.intervalSelected]]"
                       data="[[item.timelineResults.histogram]]"
                       default-label="Unidentified [[item.entity.titlePlural]]"
-                      source="[[serverConfig.resultNamePlural]]"
+                      display-filter-text
+                      height="300"
+                      interval="[[item.intervalSelected]]"
+                      label-property="text"
+                      load="[[item.showBarChart]]"
                       loading="[[item.timelineLoading]]"
-                      display-filter-text>
+                      selected="{{filterCollection}}"
+                      selected-property="[[getDateProperty(item.dateCollection, item.dateSelected, 'key')]]"
+                      source="[[serverConfig.resultNamePlural]]"
+                      stack-property="data"
+                      timeline>
                     </zoomable-bar-chart>
 
                     <terms-transformer

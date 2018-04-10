@@ -853,7 +853,7 @@ limitations under the License.
       },
 
       findIdFieldAsArray: function(uidField) {
-        return [(uidField ? ('_source.' + uidField) : '_id')];
+        return [(uidField || '_id')];
       },
 
       findPageName: function(result) {

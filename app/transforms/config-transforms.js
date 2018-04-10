@@ -513,7 +513,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           icon: searchFieldsObject.icon,
           link: commonTransforms.getLinkFunction(searchFieldsObject.link, searchFieldsObject.type, searchFieldsObject.key),
           name: searchFieldsObject.title,
-          searchType: searchFieldsObject.freeText ? 'contains' : 'term',
+          searchType: searchFieldsObject.freeText ? 'contains' : 'match',
           styleClass: searchFieldsObject.styleClass,
           type: searchFieldsObject.type
         };
