@@ -5031,18 +5031,18 @@ limitations under the License.
       expect(output.histogram[1].data[0].textAndCount).to.equal('(Unidentified) (10)');
     });
 
-    test('timelines does sort sparklines alphabetically', function() {
+    test('timelines does sort sparklines by max count then alphabetically', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var output = transformFunctions.transforms.entity.timelines({
         aggregations: {
           testProperty: {
             buckets: [{
-              doc_count: 30,
+              doc_count: 10,
               key: 1514764800000,
               key_as_string: '2018-01-01T00:00:00',
               testEntity: {
                 buckets: [{
-                  doc_count: 30,
+                  doc_count: 10,
                   key: 'entity3'
                 }]
               }
@@ -5112,12 +5112,12 @@ limitations under the License.
       expect(output.sparklines.length).to.equal(4);
 
       expect(output.sparklines[0].icon).to.equal('entityIcon');
-      expect(output.sparklines[0].name).to.equal('entity1');
+      expect(output.sparklines[0].name).to.equal('entity4');
       expect(output.sparklines[0].styleClass).to.equal('entityStyleClass');
       expect(output.sparklines[0].points.length).to.equal(2);
-      expect(output.sparklines[0].points[0].count).to.equal(10);
-      expect(output.sparklines[0].points[0].date).to.equal('Jan 2, 2018');
-      expect(output.sparklines[0].points[1].count).to.equal(1);
+      expect(output.sparklines[0].points[0].count).to.equal(40);
+      expect(output.sparklines[0].points[0].date).to.equal('Jan 3, 2018');
+      expect(output.sparklines[0].points[1].count).to.equal(4);
       expect(output.sparklines[0].points[1].date).to.equal('Jan 5, 2018');
 
       expect(output.sparklines[1].icon).to.equal('entityIcon');
@@ -5130,21 +5130,21 @@ limitations under the License.
       expect(output.sparklines[1].points[1].date).to.equal('Jan 5, 2018');
 
       expect(output.sparklines[2].icon).to.equal('entityIcon');
-      expect(output.sparklines[2].name).to.equal('entity3');
+      expect(output.sparklines[2].name).to.equal('entity1');
       expect(output.sparklines[2].styleClass).to.equal('entityStyleClass');
       expect(output.sparklines[2].points.length).to.equal(2);
-      expect(output.sparklines[2].points[0].count).to.equal(30);
-      expect(output.sparklines[2].points[0].date).to.equal('Jan 1, 2018');
-      expect(output.sparklines[2].points[1].count).to.equal(3);
+      expect(output.sparklines[2].points[0].count).to.equal(10);
+      expect(output.sparklines[2].points[0].date).to.equal('Jan 2, 2018');
+      expect(output.sparklines[2].points[1].count).to.equal(1);
       expect(output.sparklines[2].points[1].date).to.equal('Jan 5, 2018');
 
       expect(output.sparklines[3].icon).to.equal('entityIcon');
-      expect(output.sparklines[3].name).to.equal('entity4');
+      expect(output.sparklines[3].name).to.equal('entity3');
       expect(output.sparklines[3].styleClass).to.equal('entityStyleClass');
       expect(output.sparklines[3].points.length).to.equal(2);
-      expect(output.sparklines[3].points[0].count).to.equal(40);
-      expect(output.sparklines[3].points[0].date).to.equal('Jan 3, 2018');
-      expect(output.sparklines[3].points[1].count).to.equal(4);
+      expect(output.sparklines[3].points[0].count).to.equal(10);
+      expect(output.sparklines[3].points[0].date).to.equal('Jan 1, 2018');
+      expect(output.sparklines[3].points[1].count).to.equal(3);
       expect(output.sparklines[3].points[1].date).to.equal('Jan 5, 2018');
     });
 
@@ -5154,12 +5154,12 @@ limitations under the License.
         aggregations: {
           testProperty: {
             buckets: [{
-              doc_count: 30,
+              doc_count: 10,
               key: 1514764800000,
               key_as_string: '2018-01-01T00:00:00',
               testEntity: {
                 buckets: [{
-                  doc_count: 30,
+                  doc_count: 10,
                   key: 'entity3'
                 }]
               }
@@ -5222,7 +5222,7 @@ limitations under the License.
           styleClass: 'entityStyleClass',
           type: 'string'
         },
-        id: 'entity4',
+        id: 'entity1',
         name: 'testProperty',
         page: {
           key: 'testEntity'
@@ -5233,21 +5233,21 @@ limitations under the License.
       expect(output.sparklines.length).to.equal(4);
 
       expect(output.sparklines[0].icon).to.equal('entityIcon');
-      expect(output.sparklines[0].name).to.equal('entity4');
+      expect(output.sparklines[0].name).to.equal('entity1');
       expect(output.sparklines[0].styleClass).to.equal('entityStyleClass');
       expect(output.sparklines[0].points.length).to.equal(2);
-      expect(output.sparklines[0].points[0].count).to.equal(40);
-      expect(output.sparklines[0].points[0].date).to.equal('Jan 3, 2018');
-      expect(output.sparklines[0].points[1].count).to.equal(4);
+      expect(output.sparklines[0].points[0].count).to.equal(10);
+      expect(output.sparklines[0].points[0].date).to.equal('Jan 2, 2018');
+      expect(output.sparklines[0].points[1].count).to.equal(1);
       expect(output.sparklines[0].points[1].date).to.equal('Jan 5, 2018');
 
       expect(output.sparklines[1].icon).to.equal('entityIcon');
-      expect(output.sparklines[1].name).to.equal('entity1');
+      expect(output.sparklines[1].name).to.equal('entity4');
       expect(output.sparklines[1].styleClass).to.equal('entityStyleClass');
       expect(output.sparklines[1].points.length).to.equal(2);
-      expect(output.sparklines[1].points[0].count).to.equal(10);
-      expect(output.sparklines[1].points[0].date).to.equal('Jan 2, 2018');
-      expect(output.sparklines[1].points[1].count).to.equal(1);
+      expect(output.sparklines[1].points[0].count).to.equal(40);
+      expect(output.sparklines[1].points[0].date).to.equal('Jan 3, 2018');
+      expect(output.sparklines[1].points[1].count).to.equal(4);
       expect(output.sparklines[1].points[1].date).to.equal('Jan 5, 2018');
 
       expect(output.sparklines[2].icon).to.equal('entityIcon');
@@ -5263,7 +5263,7 @@ limitations under the License.
       expect(output.sparklines[3].name).to.equal('entity3');
       expect(output.sparklines[3].styleClass).to.equal('entityStyleClass');
       expect(output.sparklines[3].points.length).to.equal(2);
-      expect(output.sparklines[3].points[0].count).to.equal(30);
+      expect(output.sparklines[3].points[0].count).to.equal(10);
       expect(output.sparklines[3].points[0].date).to.equal('Jan 1, 2018');
       expect(output.sparklines[3].points[1].count).to.equal(3);
       expect(output.sparklines[3].points[1].date).to.equal('Jan 5, 2018');

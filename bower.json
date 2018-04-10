@@ -7,6 +7,7 @@
   "license": "Apache-2.0",
   "private": false,
   "dependencies": {
+    "aggregation-display": "DigElements/aggregation-display#2.4.5",
     "aggregation-query-and-display": "DigElements/aggregation-query-and-display#2.4.4",
     "build-and-run-query": "DigElements/build-and-run-query#2.5.1",
     "bulk-search": "DigElements/bulk-search#2.1.4",
@@ -57,7 +58,7 @@
     "save-case-dialog": "DigElements/save-case-dialog#2.1.4",
     "search-fields-dialog": "DigElements/search-fields-dialog#2.6.2",
     "selected-facets-display": "DigElements/selected-facets-display#2.0.9",
-    "sparkline-list": "DigElements/sparkline-list#2.3.0",
+    "sparkline-list": "DigElements/sparkline-list#2.4.0",
     "state-manager": "DigElements/state-manager#2.4.1",
     "status-text": "DigElements/status-text#2.1.1",
     "styled-dialog": "DigElements/styled-dialog#2.1.5",
