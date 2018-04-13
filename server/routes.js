@@ -151,6 +151,8 @@ module.exports = function(app) {
       resultNamePlural: serverConfig.resultNamePlural,
       resultNameSingular: serverConfig.resultNameSingular,
       resultQueryField: serverConfig.resultQueryField,
+      revisionsField: serverConfig.revisionsField,
+      revisionsLabel: serverConfig.revisionsLabel,
       searchConfig: serverConfig.searchConfig,
       sendSearchesDirectlyToES: serverConfig.sendSearchesDirectlyToES,
       showEsData: serverConfig.showEsData,

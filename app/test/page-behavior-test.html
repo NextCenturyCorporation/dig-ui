@@ -64,24 +64,71 @@ limitations under the License.
     });
 
     test('buildArray does return expected array if given non-array arguments', function() {
-      expect(element.buildArray('value1')).to.deep.equal(['value1']);
-      expect(element.buildArray('value1', 'value2')).to.deep.equal(['value1', 'value2']);
+      expect(element.buildArray('text')).to.deep.equal(['text']);
+      expect(element.buildArray(1234, 5678)).to.deep.equal([1234, 5678]);
+      expect(element.buildArray('text', 1234, true)).to.deep.equal(['text', 1234, true]);
+      expect(element.buildArray({
+        key: 'value'
+      }, {})).to.deep.equal([{
+        key: 'value'
+      }, {}]);
+    });
+
+    test('buildArray does return expected array if given falsey arguments', function() {
+      expect(element.buildArray(0)).to.deep.equal([0]);
+      expect(element.buildArray('')).to.deep.equal(['']);
+      expect(element.buildArray(null)).to.deep.equal([null]);
+      expect(element.buildArray(false)).to.deep.equal([false]);
     });
 
     test('buildArray does return expected array if given array arguments', function() {
-      expect(element.buildArray(['value1'])).to.deep.equal(['value1']);
-      expect(element.buildArray('value1', ['value2'])).to.deep.equal(['value1', 'value2']);
-      expect(element.buildArray(['value1'], ['value2'])).to.deep.equal(['value1', 'value2']);
-      expect(element.buildArray(['value1'], 'value2')).to.deep.equal(['value1', 'value2']);
+      expect(element.buildArray(['text'])).to.deep.equal(['text']);
+      expect(element.buildArray('text', [1234])).to.deep.equal(['text', 1234]);
+      expect(element.buildArray(['text'], [1234])).to.deep.equal(['text', 1234]);
+      expect(element.buildArray(['text'], [1234], true)).to.deep.equal(['text', 1234, true]);
     });
 
     test('buildArray does return expected array if given undefined or empty array arguments', function() {
       expect(element.buildArray()).to.deep.equal([]);
       expect(element.buildArray(undefined)).to.deep.equal([]);
-      expect(element.buildArray(undefined, 'value1')).to.deep.equal(['value1']);
+      expect(element.buildArray(undefined, 'text')).to.deep.equal(['text']);
       expect(element.buildArray([])).to.deep.equal([]);
-      expect(element.buildArray([], 'value1')).to.deep.equal(['value1']);
+      expect(element.buildArray([], 'text')).to.deep.equal(['text']);
       expect(element.buildArray([undefined])).to.deep.equal([]);
+    });
+
+    test('buildArrayIfAllExist does return expected array if given non-array arguments', function() {
+      expect(element.buildArrayIfAllExist('text')).to.deep.equal(['text']);
+      expect(element.buildArrayIfAllExist(1234, 5678)).to.deep.equal([1234, 5678]);
+      expect(element.buildArrayIfAllExist('text', 1234, true)).to.deep.equal(['text', 1234, true]);
+      expect(element.buildArrayIfAllExist({
+        key: 'value'
+      }, {})).to.deep.equal([{
+        key: 'value'
+      }, {}]);
+    });
+
+    test('buildArrayIfAllExist does return expected array if given falsey arguments', function() {
+      expect(element.buildArrayIfAllExist(0)).to.deep.equal([0]);
+      expect(element.buildArrayIfAllExist('')).to.deep.equal(['']);
+      expect(element.buildArrayIfAllExist(null)).to.deep.equal([null]);
+      expect(element.buildArrayIfAllExist(false)).to.deep.equal([false]);
+    });
+
+    test('buildArrayIfAllExist does return expected array if given array arguments', function() {
+      expect(element.buildArrayIfAllExist(['text'])).to.deep.equal(['text']);
+      expect(element.buildArrayIfAllExist('text', [1234])).to.deep.equal(['text', 1234]);
+      expect(element.buildArrayIfAllExist(['text'], [1234])).to.deep.equal(['text', 1234]);
+      expect(element.buildArrayIfAllExist(['text'], [1234], true)).to.deep.equal(['text', 1234, true]);
+    });
+
+    test('buildArrayIfAllExist does return expected array if given undefined or empty array arguments', function() {
+      expect(element.buildArrayIfAllExist()).to.deep.equal([]);
+      expect(element.buildArrayIfAllExist([])).to.deep.equal([]);
+      expect(element.buildArrayIfAllExist([], 'text')).to.deep.equal([]);
+      expect(element.buildArrayIfAllExist(undefined)).to.deep.equal([]);
+      expect(element.buildArrayIfAllExist(undefined, 'text')).to.deep.equal([]);
+      expect(element.buildArrayIfAllExist([undefined])).to.deep.equal([]);
     });
 
     test('concat does return expected string', function() {
@@ -503,6 +550,13 @@ limitations under the License.
       expect(element.exists(function() {})).to.be.true;
     });
 
+    test('findBlurStyleClass does return expected string', function() {
+      expect(element.findBlurStyleClass(false, false)).to.equal('');
+      expect(element.findBlurStyleClass(false, true)).to.equal('');
+      expect(element.findBlurStyleClass(true, false)).to.equal('small-blur');
+      expect(element.findBlurStyleClass(true, true)).to.equal('large-blur');
+    });
+
     test('findDigUrl does return expected string', function() {
       expect(element.findDigUrl('testPrefix', '/testLink')).to.equal('testPrefix/testLink');
     });
@@ -546,11 +600,30 @@ limitations under the License.
       })).to.equal('testOverride');
     });
 
-    test('findBlurStyleClass does return expected string', function() {
-      expect(element.findBlurStyleClass(false, false)).to.equal('');
-      expect(element.findBlurStyleClass(false, true)).to.equal('');
-      expect(element.findBlurStyleClass(true, false)).to.equal('small-blur');
-      expect(element.findBlurStyleClass(true, true)).to.equal('large-blur');
+    test('findPrettyDomain does return expected string', function() {
+      expect(element.findPrettyDomain('testDomain1', {})).to.equal('testDomain1');
+      expect(element.findPrettyDomain('testDomain1', {
+        prettyDomain: {
+          testDomain2: 'Test Domain 2'
+        }
+      })).to.equal('testDomain1');
+      expect(element.findPrettyDomain('testDomain1', {
+        prettyDomain: {
+          testDomain1: ''
+        }
+      })).to.equal('testDomain1');
+      expect(element.findPrettyDomain('testDomain1', {
+        prettyDomain: {
+          testDomain1: 'Test Domain 1'
+        }
+      })).to.equal('Test Domain 1');
+    });
+
+    test('getSourceIncludes does return expected array', function() {
+      expect(element.getSourceIncludes(true, 'testTimestamp', 'testUid')).to.deep.equal([]);
+      expect(element.getSourceIncludes(false, 'testTimestamp', 'testUid')).to.deep.equal(['knowledge_graph', 'objects', 'tld', 'url', 'testTimestamp', 'testUid']);
+      expect(element.getSourceIncludes(false, 'testTimestamp', '')).to.deep.equal(['knowledge_graph', 'objects', 'tld', 'url', 'testTimestamp']);
+      expect(element.getSourceIncludes(false, '', 'testUid')).to.deep.equal(['knowledge_graph', 'objects', 'tld', 'url', 'testUid']);
     });
 
     test('getUrlParametersHelper does return expected object', function() {

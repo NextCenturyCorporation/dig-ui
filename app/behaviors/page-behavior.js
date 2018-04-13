@@ -47,15 +47,43 @@ DigBehaviors.PageBehavior = {
     _.each(arguments, function(value) {
       if(_.isArray(value)) {
         value.forEach(function(innerValue) {
-          if(innerValue) {
+          if(!_.isUndefined(innerValue)) {
             array.push(innerValue);
           }
         });
-      } else if(value) {
+      } else if(!_.isUndefined(value)) {
         array.push(value);
       }
     });
     return array;
+  },
+
+  /**
+   * Builds and returns an array of all the arguments if all are non-null/non-undefined; otherwise returns an empty array.  Concatenates the array arguments.
+   *
+   * @param {Any} One or more arguments
+   * @return {Array}
+   */
+  buildArrayIfAllExist: function() {
+    var array = [];
+    var empty = false;
+    _.each(arguments, function(value) {
+      if(_.isArray(value)) {
+        if(!value.length) {
+          empty = true;
+        }
+        value.forEach(function(innerValue) {
+          if(!_.isUndefined(innerValue)) {
+            array.push(innerValue);
+          }
+        });
+      } else if(!_.isUndefined(value)) {
+        array.push(value);
+      } else {
+        empty = true;
+      }
+    });
+    return empty ? [] : array;
   },
 
   concat: function(one, two) {
@@ -113,12 +141,12 @@ DigBehaviors.PageBehavior = {
     return typeof object !== 'undefined';
   },
 
-  findDigUrl: function(prefix, link) {
-    return prefix + link;
-  },
-
   findBlurStyleClass: function(blur, large) {
     return (blur ? (large ? 'large-blur' : 'small-blur') : '');
+  },
+
+  findDigUrl: function(prefix, link) {
+    return prefix + link;
   },
 
   findDomain: function(parameters, serverConfig) {

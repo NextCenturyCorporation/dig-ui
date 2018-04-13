@@ -227,14 +227,14 @@ limitations under the License.
     <elastic-client-query-builder
       type="term"
       fields='"url.raw"'
-      values="[[result.url]]"
+      values="[[result.revisions]]"
       ejs-query="{{revisionQueryPart}}">
     </elastic-client-query-builder>
 
     <elastic-client-query-builder
       type="bool"
       bool-function="must"
-      ejs-bool-queries="[[buildArray(revisionQueryPart, notThisResultQuery)]]"
+      ejs-bool-queries="[[buildArrayIfAllExist(revisionQueryPart, notThisResultQuery)]]"
       ejs-query="{{revisionQueryFull}}">
     </elastic-client-query-builder>
 
@@ -275,7 +275,7 @@ limitations under the License.
     <elastic-client-query-builder
       type="bool"
       bool-function="must"
-      ejs-bool-queries="[[buildArray(moreLikeThisQueryPart, notThisResultQuery)]]"
+      ejs-bool-queries="[[buildArrayIfAllExist(moreLikeThisQueryPart, notThisResultQuery)]]"
       ejs-query="{{moreLikeThisQueryFull}}">
     </elastic-client-query-builder>
 
@@ -534,8 +534,8 @@ limitations under the License.
               page="{{revisionPage}}"
               page-size="10"
               loading="[[revisionLoading]]"
-              pretty-name="[[result.name]] Revisions"
-              pretty-name-singular="[[result.name]] Revision"
+              pretty-name="[[serverConfig.resultNamePlural]] w/ Identical [[serverConfig.revisionsLabel]]"
+              pretty-name-singular="[[serverConfig.resultNameSingular]] w/ Identical [[serverConfig.revisionsLabel]]"
               header="{{revisionTitle}}"
               client="[[esClient]]"
               id-field="_id"
@@ -584,8 +584,8 @@ limitations under the License.
               page="{{moreLikeThisPage}}"
               page-size="10"
               loading="[[moreLikeThisLoading]]"
-              pretty-name="Similar [[serverConfig.resultNamePlural]]"
-              pretty-name-singular="Similar [[serverConfig.resultNameSingular]]"
+              pretty-name="[[serverConfig.resultNamePlural]] w/ Similar Textual Content"
+              pretty-name-singular="[[serverConfig.resultNameSingular]] w/ Similar Textual Content"
               header="{{moreLikeThisTitle}}"
               client="[[esClient]]"
               id-field="_id"

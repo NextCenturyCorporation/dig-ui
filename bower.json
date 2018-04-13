@@ -56,9 +56,9 @@
     "query-transformer": "DigElements/query-transformer#2.2.1",
     "result-list": "DigElements/result-list#2.8.3",
     "save-case-dialog": "DigElements/save-case-dialog#2.1.4",
-    "search-fields-dialog": "DigElements/search-fields-dialog#2.6.2",
+    "search-fields-dialog": "DigElements/search-fields-dialog#2.6.3",
     "selected-facets-display": "DigElements/selected-facets-display#2.0.9",
-    "sparkline-list": "DigElements/sparkline-list#2.4.0",
+    "sparkline-list": "DigElements/sparkline-list#2.4.1",
     "state-manager": "DigElements/state-manager#2.4.1",
     "status-text": "DigElements/status-text#2.1.1",
     "styled-dialog": "DigElements/styled-dialog#2.1.5",
@@ -66,7 +66,7 @@
     "tag-manager": "DigElements/tag-manager#2.1.4",
     "terms-transformer": "DigElements/terms-transformer#2.1.0",
     "user-settings-dialog": "DigElements/user-settings-dialog#2.5.0",
-    "zoomable-bar-chart": "DigElements/zoomable-bar-chart#2.2.0"
+    "zoomable-bar-chart": "DigElements/zoomable-bar-chart#2.2.1"
   },
   "devDependencies": {
     "test-fixture": "PolymerElements/test-fixture#^3.0.0",
