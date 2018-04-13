@@ -61,7 +61,6 @@ DigBehaviors.PageBehavior = {
   /**
    * Builds and returns an array of all the arguments if all are non-null/non-undefined; otherwise returns an empty array.  Concatenates the array arguments.
    *
-   * @param {Any} One or more arguments
    * @return {Array}
    */
   buildArrayIfAllExist: function() {
