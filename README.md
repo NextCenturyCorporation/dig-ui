@@ -65,12 +65,15 @@ LOG_INDEX_TYPE | The elasticsearch log index type. | 'log'
 OVERRIDE_CONFIG | The stringified config object.  Overrides the domain/project and the config from the CONFIG_ENDPOINT. | undefined
 OVERRIDE_SEARCH_ENDPOINT | The stringified object containing the project names mapped to the endpoints for the search and facets REST services.  Overrides the endpoints from the project configs. | undefined
 PATH_PREFIX | The prefix for the web browser URL path. | '/'
+PRETTY_DOMAIN | The stringified object containing the project names mapped to pretty names. | undefined
 PROFILE_INDEX_NAME | The elasticsearch profile index name. | 'dig-profiles'
 PROFILE_INDEX_TYPE | The elasticsearch profile index type. | 'profile'
 RESULT_ICON | The icon used for the search results. | 'av:web-asset'
 RESULT_NAME_PLURAL | The plural name used for the search results. | 'Webpages'
 RESULT_NAME_SINGULAR | The singular name used for the search results. | 'Webpage'
 RESULT_QUERY_FIELD | The query field for the unique identifier used for the search results. | '_id'
+REVISIONS_FIELD | The revisions field in the `_source` object of each elasticsearch document to show revisions in result pages.  An empty string hides the revisions. | 'url'
+REVISIONS_LABEL | The pretty name for the revisions in result pages. | 'URL'
 SEARCH_CONFIG | The stringified object containing project names and/or locations for the Sandpaper search REST service (from project configs) mapped to replacement locations. | undefined
 SEND_SEARCHES_DIRECTLY_TO_ES | Whether to ignore any Sandpaper settings and send searches directly to elasticsearch. | false
 SHOW_ES_DATA | Whether to show a link to the elasticsearch data page of search results. | false

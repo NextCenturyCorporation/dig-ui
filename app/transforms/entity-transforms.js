@@ -343,6 +343,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     var resultObject = {
       id: id,
       url: _.get(result, '_source.url'),
+      revisions: esConfig.revisions ? _.get(result, '_source.' + esConfig.revisions) : undefined,
       timestamp: (timestamp === 'None' ? undefined : timestamp),
       type: type,
       icon: icon,

@@ -63,6 +63,8 @@ module.exports = {
     resultNamePlural: process.env.RESULT_NAME_PLURAL || 'Webpages',
     resultNameSingular: process.env.RESULT_NAME_SINGULAR || 'Webpage',
     resultQueryField: process.env.RESULT_QUERY_FIELD || '_id',
+    revisionsField: process.env.REVISIONS_FIELD === '' ? '' : (process.env.REVISIONS_FIELD || 'url'),
+    revisionsLabel: process.env.REVISIONS_LABEL || 'URL',
     searchConfig: process.env.SEARCH_CONFIG ? JSON.parse(process.env.SEARCH_CONFIG) : undefined,
     secret: process.env.SECRET || 'dig memex',
     sendSearchesDirectlyToES: process.env.SEND_SEARCHES_DIRECTLY_TO_ES || false,
