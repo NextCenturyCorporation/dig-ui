@@ -14,6 +14,7 @@
     "button-action": "DigElements/button-action#2.0.4",
     "clipboard": "^1.5.15",
     "dig-logger": "DigElements/dig-logger#2.1.1",
+    "dig-ui-search-box": "usc-isi-i2/dig-ui-search-box",
     "dropdown-menu": "DigElements/dropdown-menu#2.0.1",
     "elastic-client": "DigElements/elastic-client#2.1.0",
     "elastic-client-aggregation-builder": "DigElements/elastic-client-aggregation-builder#2.1.0",

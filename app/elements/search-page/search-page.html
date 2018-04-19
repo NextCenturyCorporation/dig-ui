@@ -11,12 +11,11 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
-limitations under the License.
+limitations under the License. 
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
-<link rel="import" href="../../bower_components/dropdown-menu/dropdown-menu.html">
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
 <link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
 <link rel="import" href="../../bower_components/export-button/export-button.html">
@@ -54,9 +53,10 @@ limitations under the License.
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
 <link rel="import" href="../../styles/page-styles.html">
 
-<!-- TX -->
-<link rel="import" href="../../elements/search-box/search-box.html">
-<!-- TX -->
+<link rel="import" href="../../bower_components/dig-ui-search-box/editable-button.html">
+<link rel="import" href="../../bower_components/dig-ui-search-box/search-box.html">
+<link rel="import" href="../../bower_components/dig-ui-search-box/search-strategy.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 
 <dom-module id="search-page">
   <template>
@@ -80,9 +80,11 @@ limitations under the License.
       #pageNavbar {
         background-color: var(--navbar-color);
         color: white;
-        padding: 0 10px;
-        --paper-toolbar-height: 50px;
-        --paper-toolbar-sm-height: 50px;
+        padding: 5px 10px;
+        --paper-toolbar-height: auto;
+        --paper-toolbar-sm-height: auto;
+        /* --paper-toolbar-height: 50px;
+        --paper-toolbar-sm-height: 50px; */
         --paper-toolbar-content: {
           padding: 0;
         };
@@ -163,12 +165,13 @@ limitations under the License.
         --result-list-max-height: none;
       }
 
-      /* TX */
-      /* #pageNavbar {
-        height: 30%;
-      } */
-      /* TX */
-      
+      #advancedSearch {
+        display: inline-flex;
+        height: 100%;
+        padding: 0px 5px;
+        margin: 0px 5px;
+      }
+
     </style>
 
     <iron-ajax
@@ -742,23 +745,36 @@ limitations under the License.
           <a id="logoLink" href="[[serverConfig.pathPrefix]]" target="_blank" title="Open a DIG Search Page in a New Tab">
             <img id="logo" src="/dig-ui/dig-logo.png" alt="">
           </a>
-          
-          <!-- TX -->
-          <!-- <search-box 
-            network-expansion-parameters="{{networkExpansionParameters}}"
-            search-fields-config="[[searchFieldsDialogConfig]]"
-            process-request="{{processRequest}}" 
-            search-parameters="{{searchParameters}}">
-          </search-box> -->
-          <!-- TX -->
 
-          <search-fields-button
-            class="layout vertical center flex"
-            style="margin-left: 10px;"
-            toggle-dialog-callback="[[searchFieldsDialogCallbacks.toggleDialog]]"
-            handle-search-callback="[[searchFieldsDialogCallbacks.handleSearch]]"
-            free-text-search-fields="[[freeTextSearchFields]]">
-          </search-fields-button>
+          <template is="dom-if" if="[[!esConfig.showOriginalSearch]]">
+            <search-box 
+              date-config="[[datePropertiesToKeys]]"
+              network-expansion-parameters="{{networkExpansionParameters}}"
+              search-fields-config="[[searchFieldsDialogConfig]]"
+              free-text-search-fields="[[freeTextSearchFields]]"
+              process-request="{{processRequest}}" 
+              search-parameters="{{searchParameters}}">
+            </search-box>
+          </template>
+
+          <template is="dom-if" if="[[esConfig.showOriginalSearch]]">
+            <search-fields-button
+              class="layout vertical center flex"
+              style="margin-left: 10px;"
+              toggle-dialog-callback="[[searchFieldsDialogCallbacks.toggleDialog]]"
+              handle-search-callback="[[searchFieldsDialogCallbacks.handleSearch]]"
+              free-text-search-fields="[[freeTextSearchFields]]">
+            </search-fields-button>  
+          </template>
+
+          <template is="dom-if" if="[[!esConfig.showOriginalSearch]]">
+            <paper-icon-button 
+              id="advancedSearch"
+              icon="fa:wrench" 
+              on-tap="_toggleDialog" 
+              title="Open Advanced Search">
+            </paper-icon-button>
+          </template>
 
           <template is="dom-if" if="[[serverConfig.username]]">
             <user-settings-button notifications="[[notifications]]" open-callback="[[userSettingsDialogCallbacks.openSettingsDialog]]"></user-settings-button>
@@ -827,6 +843,7 @@ limitations under the License.
         </div>
       </iron-dropdown>
 
+      <template is="dom-if" if="[[esConfig.showOriginalSearch]]">
       <paper-toolbar slot="header" id="searchTermList">
         <template is="dom-if" if="[[drawerNarrow]]">
           <paper-icon-button slot="top" id="toggleDrawerButton" icon="[[getDrawerToggleIcon(drawerOpened)]]" title$="[[getDrawerToggleText(drawerOpened)]]" on-tap="toggleDrawer"></paper-icon-button>
@@ -849,6 +866,7 @@ limitations under the License.
           </div>
         </div>
       </paper-toolbar>
+      </template>
 
       <!-- Use the display style rather than a dom-if template so the search parameters in the facet panel update. -->
       <paper-drawer-panel
@@ -1519,10 +1537,6 @@ limitations under the License.
         this.assignWindowProperties(this);
       },
 
-      ready() {
-        console.log("server config", this.serverConfig);
-      },
-
       /************* PAGE *************/
       buildSearchState: function(config, oldConfig) {
         var state = {};
@@ -1958,6 +1972,10 @@ limitations under the License.
 
       validateImageServiceConfig: function(config) {
         return !!(config && config.auth && config.auth.user && config.auth.password && config.endpoint && config.endpoint.data && config.endpoint.link && config.host && config.host.face && config.host.similarity);
+      },
+
+      _toggleDialog: function() {
+        this.searchFieldsDialogCallbacks.toggleDialog();
       },
     });
   })();
