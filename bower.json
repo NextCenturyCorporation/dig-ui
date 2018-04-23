@@ -75,6 +75,7 @@
   },
   "resolutions": {
     "loading-spinner": "2.0.1",
-    "lodash": "~4.17.2"
+    "lodash": "~4.17.2",
+    "polymer": "2.5.0"
   }
 }

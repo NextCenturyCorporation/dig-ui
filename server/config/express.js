@@ -73,6 +73,7 @@ module.exports = function(app) {
     app.use(serverPath + 'styles', express.static(path.join(serverConfig.root, 'dist/styles')));
     app.use(serverPath + 'transforms', express.static(path.join(serverConfig.root, 'dist/transforms')));
     app.use('/dig-ui/dig-logo.png', express.static(path.join(serverConfig.root, 'dist/dig-logo.png')));
+    app.use('/dig-ui/dig-logo-bigger.png', express.static(path.join(serverConfig.root, 'dist/dig-logo-bigger.png')));
     app.use(favicon(path.join(serverConfig.root, 'dist/favicon.ico')));
     // Set appPath for use by the router.
     app.set('appPath', path.join(serverConfig.root, 'dist'));
@@ -89,6 +90,7 @@ module.exports = function(app) {
     app.use(serverPath + 'styles', express.static(path.join(serverConfig.root, 'app/styles')));
     app.use(serverPath + 'transforms', express.static(path.join(serverConfig.root, 'app/transforms')));
     app.use('/dig-ui/dig-logo.png', express.static(path.join(serverConfig.root, 'app/dig-logo.png')));
+    app.use('/dig-ui/dig-logo-bigger.png', express.static(path.join(serverConfig.root, 'app/dig-logo-bigger.png')));
     app.use(favicon(path.join(serverConfig.root, 'app/favicon.ico')));
     // Set appPath for use by the router.
     app.set('appPath', path.join(serverConfig.root, 'app'));
