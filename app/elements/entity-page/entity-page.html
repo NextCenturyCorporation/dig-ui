@@ -466,8 +466,8 @@ limitations under the License.
       </user-settings-dialog>
     </template>
 
-    <styled-dialog id="dialog4IQ" header="4IQ Data on [[pageName]]" fill>
-      <iframe sandbox="allow-same-origin" src="https://ida.4iq.com/login#!/"></iframe>
+    <styled-dialog id="dialog4IQ" header="4IQ Login" fill>
+      <iframe sandbox="allow-scripts" src="https://ida.4iq.com/login#!/"></iframe>
     </styled-dialog>
 
     <div class="page-head">
@@ -504,7 +504,7 @@ limitations under the License.
         <user-settings-button notifications="[[notifications]]" open-callback="[[userSettingsDialogCallbacks.openSettingsDialog]]"></user-settings-button>
       </template>
 
-      <img id="logo4IQ" src="/dig-ui/4IQ-logo.png" alt="4IQ" title="Open 4IQ Data on [[pageName]]" on-tap="openDialog4IQ"></img>
+      <img id="logo4IQ" src="/dig-ui/4IQ-logo.png" alt="4IQ" title="Open 4IQ Login" on-tap="openDialog4IQ"></img>
 
       <paper-icon-button id="menuButton" icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
 
