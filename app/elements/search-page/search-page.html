@@ -22,6 +22,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/export-button/export-button.html">
 <link rel="import" href="../../bower_components/export-button/export-dialog.html">
 <link rel="import" href="../../bower_components/facet-panel/facet-panel.html">
+<link rel="import" href="../../bower_components/icon-button/icon-button.html">
 <link rel="import" href="../../bower_components/image-gallery/image-gallery.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/iron-dropdown/iron-dropdown.html">
@@ -34,7 +35,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nested-list/nested-list.html">
 <link rel="import" href="../../bower_components/paper-drawer-panel/paper-drawer-panel.html">
 <link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
-<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-styles/shadow.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
@@ -744,11 +744,11 @@ limitations under the License.
             <user-settings-button notifications="[[notifications]]" open-callback="[[userSettingsDialogCallbacks.openSettingsDialog]]"></user-settings-button>
           </template>
 
-          <paper-icon-button id="menuButton" icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+          <icon-button active="[[menuOpened]]" bigger id="menuButton" icon="fa:bars" slot="dropdown-trigger" title-tooltip="More Options" on-tap="toggleMenu"></icon-button>
         </div>
       </paper-toolbar>
 
-      <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="50">
+      <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="50" opened="{{menuOpened}}">
         <div slot="dropdown-content">
           <template is="dom-if" if="[[serverConfig.username]]">
             <paper-icon-item disabled="[[searchParametersDisabled(searchParameters, searchParameters.*)]]" title="Save Search to Case..." on-tap="openSaveDialog">
@@ -809,7 +809,17 @@ limitations under the License.
 
       <paper-toolbar slot="header" id="searchTermList">
         <template is="dom-if" if="[[drawerNarrow]]">
-          <paper-icon-button slot="top" id="toggleDrawerButton" icon="[[getDrawerToggleIcon(drawerOpened)]]" title$="[[getDrawerToggleText(drawerOpened)]]" on-tap="toggleDrawer"></paper-icon-button>
+          <!-- TODO FIXME
+          <icon-button
+            slot="top"
+            id="toggleDrawerButton"
+            active="[[drawerOpened]]"
+            bigger
+            icon="[[getDrawerToggleIcon(drawerOpened)]]"
+            title-tooltip="[[getDrawerToggleText(drawerOpened)]]"
+            on-tap="toggleDrawer">
+          </icon-button>
+          -->
         </template>
 
         <div slot="top" class="layout horizontal">
@@ -1248,6 +1258,10 @@ limitations under the License.
 
         logMessage: {
           type: Object
+        },
+
+        menuOpened: {
+          type: Boolean
         },
 
         networkExpansionParameters: {
@@ -1859,7 +1873,7 @@ limitations under the License.
         if(!results || !results.histogram.length) {
           return false;
         }
-        return results.histogram.length < 60;
+        return results.histogram.length <= 60;
       },
 
       /**

@@ -23,6 +23,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/elastic-client-search/elastic-client-search.html">
 <link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
 <link rel="import" href="../../bower_components/export-button/export-button.html">
+<link rel="import" href="../../bower_components/icon-button/icon-button.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/iron-dropdown/iron-dropdown.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
@@ -30,12 +31,12 @@ limitations under the License.
 <link rel="import" href="../../bower_components/json-combine/json-combine.html">
 <link rel="import" href="../../bower_components/loading-spinner/loading-spinner.html">
 <link rel="import" href="../../bower_components/log-creator/log-creator.html">
-<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/profile-manager/profile-manager.html">
 <link rel="import" href="../../bower_components/result-list/result-list.html">
 <link rel="import" href="../../bower_components/save-case-dialog/save-case-dialog.html">
 <link rel="import" href="../../bower_components/single-result/single-result.html">
+<link rel="import" href="../../bower_components/stylized-icon/stylized-icon.html">
 <link rel="import" href="../../bower_components/tag-entity-buttons/tag-entity-buttons.html">
 <link rel="import" href="../../bower_components/tag-manager/tag-manager.html">
 <link rel="import" href="../../bower_components/user-settings-dialog/user-settings-button.html">
@@ -45,7 +46,6 @@ limitations under the License.
 <link rel="import" href="../../elements/section-wrapper/section-wrapper.html">
 <link rel="import" href="../../elements/transform-functions/transform-functions.html">
 <link rel="import" href="../../styles/entity-page-styles.html">
-<link rel="import" href="../../styles/icon-styles.html">
 <link rel="import" href="../../styles/page-styles.html">
 
 <dom-module id="result-page">
@@ -53,7 +53,6 @@ limitations under the License.
     <style include="iron-flex iron-flex-reverse iron-flex-alignment iron-flex-factors iron-positioning"></style>
     <style include="page-styles"></style>
     <style include="entity-page-styles"></style>
-    <style include="icon-styles"></style>
 
     <style>
       :host {
@@ -371,7 +370,7 @@ limitations under the License.
 
       <div class="page-data">
         <template is="dom-if" if="[[result.id]]">
-          <iron-icon class$="page-icon [[result.styleClass]]" icon="[[result.icon]]"></iron-icon>
+          <stylized-icon bigger class="page-icon" icon="[[result.icon]]" style-class="[[result.styleClass]]"></stylized-icon>
 
           <div class="page-name" title$="[[result.title]]">[[result.title]]</div>
         </template>
@@ -389,9 +388,9 @@ limitations under the License.
         <user-settings-button notifications="[[notifications]]" open-callback="[[userSettingsDialogCallbacks.openSettingsDialog]]"></user-settings-button>
       </template>
 
-      <paper-icon-button id="menuButton" icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+      <icon-button active="[[menuOpened]]" bigger id="menuButton" icon="fa:bars" slot="dropdown-trigger" title-tooltip="More Options" on-tap="toggleMenu"></icon-button>
 
-      <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="50">
+      <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="50" opened="{{menuOpened}}">
         <div slot="dropdown-content">
           <template is="dom-if" if="[[serverConfig.username]]">
             <paper-icon-item disabled="[[!result.id]]" title$="Save This [[serverConfig.resultNameSingular]] to Case..." on-tap="openSaveDialog">
@@ -683,6 +682,10 @@ limitations under the License.
 
         maps: {
           type: Array
+        },
+
+        menuOpened: {
+          type: Boolean
         },
 
         moreLikeThisError: {
