@@ -28,8 +28,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         title: searchFieldsObject.title + ' Begin'
       },
       end: {
-        icon: searchFieldsObject.icon,
         field: searchFieldsObject.field,
+        icon: searchFieldsObject.icon,
         key: searchFieldsObject.key + '_end',
         styleClass: searchFieldsObject.styleClass,
         title: searchFieldsObject.title + ' End'
@@ -396,8 +396,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Object}
      */
     searchFields: function(fields) {
-      var maxField = 0;
       var maxGroup = 0;
+      var groups = {};
 
       var searchFields =  _.keys(fields || {}).filter(function(id) {
         return !!fields[id].type;
@@ -442,16 +442,34 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-        maxField = Math.max(maxField, searchFieldsObject.fieldOrder || 0);
-        maxGroup = Math.max(maxGroup, searchFieldsObject.groupOrder || 0);
+        maxGroup = searchFieldsObject.groupOrder >= 0 ? Math.max(maxGroup, searchFieldsObject.groupOrder + 1) : maxGroup;
+
+        if(searchFieldsObject.group) {
+          // Set the groupOrder of this field in this group.
+          if(groups[searchFieldsObject.group] >= 0) {
+            searchFieldsObject.groupOrder = groups[searchFieldsObject.group];
+          }
+          // Save the groupOrder of each field in this group.
+          else if(searchFieldsObject.groupOrder >= 0) {
+            groups[searchFieldsObject.group] = searchFieldsObject.groupOrder;
+          }
+        }
 
         return searchFieldsObject;
       }).map(function(searchFieldsObject) {
-        if(!searchFieldsObject.groupOrder && searchFieldsObject.groupOrder !== 0) {
-          searchFieldsObject.groupOrder = maxGroup + (searchFieldsObject.group ? 1 : 2);
+        if(searchFieldsObject.group && !searchFieldsObject.groupOrder && searchFieldsObject.groupOrder !== 0) {
+          // Assign the next free group order to this group.
+          if(!groups[searchFieldsObject.group] && groups[searchFieldsObject.group] !== 0) {
+            groups[searchFieldsObject.group] = maxGroup++;
+          }
+          searchFieldsObject.groupOrder = groups[searchFieldsObject.group];
         }
-        if(!searchFieldsObject.fieldOrder && searchFieldsObject.fieldOrder !== 0) {
-          searchFieldsObject.fieldOrder = maxField + 1;
+        return searchFieldsObject;
+      }).map(function(searchFieldsObject) {
+        console.log('key ' + searchFieldsObject.key + ' order ' + searchFieldsObject.groupOrder);
+        if(!searchFieldsObject.groupOrder && searchFieldsObject.groupOrder !== 0) {
+          searchFieldsObject.groupOrder = maxGroup;
+          console.log('set to ' + maxGroup);
         }
         return searchFieldsObject;
       }).sort(function(a, b) {
@@ -482,8 +500,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       searchFields.forEach(function(searchFieldsObject) {
         searchFieldsObject.isDate = (searchFieldsObject.type === 'date');
         searchFieldsObject.isEntity = (searchFieldsObject.link === 'entity');
+        searchFieldsObject.isHidden = !searchFieldsObject.facets && !searchFieldsObject.search && !(searchFieldsObject.link === 'entity' || searchFieldsObject.result === 'header' || searchFieldsObject.result === 'detail');
         searchFieldsObject.isImage = (searchFieldsObject.type === 'image');
-        searchFieldsObject.isHidden = !(searchFieldsObject.link === 'entity' || searchFieldsObject.result === 'header' || searchFieldsObject.result === 'detail');
         searchFieldsObject.isLocation = (searchFieldsObject.type === 'location');
         searchFieldsObject.isUrl = (searchFieldsObject.type === 'tld' || searchFieldsObject.type === 'url');
 
