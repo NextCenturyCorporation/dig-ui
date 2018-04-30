@@ -19,14 +19,94 @@
 
 var commonTransforms = (function(_, moment, domain, pathPrefix) {
   /**
+   * Returns the hex color for the given color.
+   */
+  function getHexColor(color) {
+    if(color === 'amber') {
+      return '#ffb300'; /* paper-amber-600 */
+    }
+    if(color === 'blue') {
+      return '#1e88e5'; /* paper-blue-600 */
+    }
+    if(color === 'blue-grey') {
+      return '#546e7a'; /* paper-blue-grey-600 */
+    }
+    if(color === 'brown') {
+      return '#6d4c41'; /* paper-brown-600 */
+    }
+    if(color === 'cyan') {
+      return '#00acc1'; /* paper-cyan-600 */
+    }
+    if(color === 'deep-orange') {
+      return '#f4511e'; /* paper-deep-orange-600 */
+    }
+    if(color === 'deep-purple') {
+      return '#5e35b1'; /* paper-deep-purple-600 */
+    }
+    if(color === 'green') {
+      return '#43a047'; /* paper-green-600 */
+    }
+    if(color === 'grey') {
+      return '#757575'; /*paper-grey-600 */
+    }
+    if(color === 'indigo') {
+      return '#3949ab'; /* paper-indigo-600 */
+    }
+    if(color === 'light-blue') {
+      return '#039be5';  /* paper-light-blue-600 */
+    }
+    if(color === 'light-green') {
+      return '#7cb342'; /* paper-light-green-600 */
+    }
+    if(color === 'lime') {
+      return '#c0ca33'; /* paper-lime-600 */
+    }
+    if(color === 'orange') {
+      return '#fb8c00'; /* paper-orange-600 */
+    }
+    if(color === 'pink') {
+      return '#d81b60'; /* paper-pink-600 */
+    }
+    if(color === 'purple') {
+      return '#8e24aa'; /* paper-purple-600 */
+    }
+    if(color === 'red') {
+      return '#e53935'; /* paper-red-600 */
+    }
+    if(color === 'teal') {
+      return '#00897b'; /* paper-teal-600 */
+    }
+    if(color === 'white') {
+      return '#ffffff';
+    }
+    if(color === 'yellow') {
+      return '#fdd835'; /* paper-yellow-600 */
+    }
+    return '#212121'; /*paper-grey-900 */
+  }
+
+  /**
    * Returns the formatted string for the given date number/string in UTC format.
    */
-  function getFormattedDate(dateString) {
+  function getFormattedDate(dateString, interval) {
     if(dateString) {
       var dateObject = new Date(dateString);
       dateObject.setUTCHours(0);
-      return moment.utc(dateObject).format('MMM D, YYYY');
+      var momentObject = moment.utc(dateObject);
+
+      if(interval === 'week') {
+        momentObject.isoWeekday(1);
+      }
+      if(interval === 'month') {
+        momentObject.date(1);
+      }
+      if(interval === 'year') {
+        momentObject.dayOfYear(1);
+      }
+
+      return momentObject.format('MMM D, YYYY');
     }
+
     return 'None';
   }
 
@@ -316,6 +396,13 @@ var commonTransforms = (function(_, moment, domain, pathPrefix) {
   */
   return {
     /**
+     * Returns the hex color for the given color.
+     */
+    getHexColor: function(color) {
+      return getHexColor(color);
+    },
+
+    /**
      * Returns the ID for the facets data with the given key and type.
      */
     getFacetsDataId: function(key, type) {
@@ -353,8 +440,8 @@ var commonTransforms = (function(_, moment, domain, pathPrefix) {
     /**
      * Returns the formatted string for the given date number/string in UTC format.
      */
-    getFormattedDate: function(dateString) {
-      return getFormattedDate(dateString);
+    getFormattedDate: function(dateString, interval) {
+      return getFormattedDate(dateString, interval);
     },
 
     /**

@@ -427,7 +427,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           link: fields[id].show_as_link !== 'no' ? fields[id].show_as_link : undefined,
           // The query field.
           queryField: fields[id].field || 'knowledge_graph.' + id + '.value',
-          // Either header, detail, nested, title, description, or undefined.
+          // Either header, detail, nested, series, title, description, or undefined.
           result: fields[id].show_in_result !== 'no' ? fields[id].show_in_result : undefined,
           // Whether to show in the search fields.  Must be shown in the search fields if shown in the facets.
           search: fields[id].show_in_search || fields[id].show_in_facets || false,
@@ -435,7 +435,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           title: fields[id].screen_label || 'Extraction',
           // The plural pretty name to show.
           titlePlural: fields[id].screen_label_plural || 'Extractions',
-          // Either date, email, hyphenated, image, location, number, phone, string, or username.
+          // Either date, email, hyphenated, image, kg_id, location, number, phone, string, type, or username.
           type: fields[id].type,
           // The width (number) to set for the extractions, if any.
           width: fields[id].width
@@ -466,10 +466,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         }
         return searchFieldsObject;
       }).map(function(searchFieldsObject) {
-        console.log('key ' + searchFieldsObject.key + ' order ' + searchFieldsObject.groupOrder);
         if(!searchFieldsObject.groupOrder && searchFieldsObject.groupOrder !== 0) {
           searchFieldsObject.groupOrder = maxGroup;
-          console.log('set to ' + maxGroup);
         }
         return searchFieldsObject;
       }).sort(function(a, b) {

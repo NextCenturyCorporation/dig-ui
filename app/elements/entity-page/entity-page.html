@@ -876,10 +876,14 @@ limitations under the License.
               index-name="[[esConfig.esIndex]]"
               index-types="[[esConfig.esType]]"
               search-fields="[[searchFields]]"
+              series-data-type="measurement"
               source-include-cached-page='["raw_content"]'
               source-include-nested-data="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
+              source-include-series='["knowledge_graph.event_date.key","knowledge_graph.value.key"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
+              transform-series-config='{"dateField":"_source.knowledge_graph.event_date","numberField":"_source.knowledge_graph.value"}'
+              transform-series-function="[[transforms.entity.series]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"
               large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
               newline-tag="[[esConfig.newlineTag]]"

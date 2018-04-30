@@ -2799,7 +2799,11 @@ limitations under the License.
       expect(output.details[3].text).to.equal('Open in New Tab (Runs External Code)');
     });
 
-    test('results given incomplete data does return empty object', function() {
+    test('result given time series data does return expected object', function() {
+      // TODO
+    });
+
+    test('results given incomplete data does return empty array', function() {
       expect(transformFunctions.transforms.entity.results({}, SEARCH_FIELDS)).to.deep.equal([]);
       expect(transformFunctions.transforms.entity.results({
         hits: {}
@@ -2828,7 +2832,7 @@ limitations under the License.
       }, SEARCH_FIELDS)).to.deep.equal([]);
     });
 
-    test('results given no extractions does return expected object', function() {
+    test('results given no extractions does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var output = transformFunctions.transforms.entity.results({
         hits: {
@@ -3150,7 +3154,7 @@ limitations under the License.
       }]);
     });
 
-    test('results given multiple results with many extractions does return expected object', function() {
+    test('results given multiple results with many extractions does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var output = transformFunctions.transforms.entity.results({
         hits: {
@@ -3761,7 +3765,7 @@ limitations under the License.
       expect(output[1].details[2].text).to.equal('Open in New Tab (Runs External Code)');
     });
 
-    test('results given images does return expected object', function() {
+    test('results given images does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var output = transformFunctions.transforms.entity.results({
         hits: {
@@ -3826,7 +3830,7 @@ limitations under the License.
       expect(output[1].images[0].width).to.not.exist;
     });
 
-    test('results given string highlights does return expected object', function() {
+    test('results given string highlights does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var result = {
         highlight: {
@@ -3874,7 +3878,7 @@ limitations under the License.
       expect(output[0].headerExtractions[3].data[1].width).to.not.exist;
     });
 
-    test('results given location highlights does return expected object', function() {
+    test('results given location highlights does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var result = {
         highlight: {
@@ -3925,7 +3929,7 @@ limitations under the License.
       expect(output[0].headerExtractions[2].data[1].width).to.not.exist;
     });
 
-    test('results given email highlights does return expected object', function() {
+    test('results given email highlights does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var result = {
         highlight: {
@@ -3976,7 +3980,7 @@ limitations under the License.
       expect(output[0].detailExtractions[0].data[1].width).to.not.exist;
     });
 
-    test('results given number highlights does return expected object', function() {
+    test('results given number highlights does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var result = {
         highlight: {
@@ -4034,7 +4038,7 @@ limitations under the License.
       expect(output[0].detailExtractions[1].data[1].width).to.not.exist;
     });
 
-    test('results given phone highlights does return expected object', function() {
+    test('results given phone highlights does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var result = {
         highlight: {
@@ -4085,7 +4089,7 @@ limitations under the License.
       expect(output[0].detailExtractions[2].data[1].width).to.not.exist;
     });
 
-    test('results given hyphenated highlights does return expected object', function() {
+    test('results given hyphenated highlights does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var result = {
         highlight: {
@@ -4136,11 +4140,11 @@ limitations under the License.
       expect(output[0].detailExtractions[3].data[1].width).to.not.exist;
     });
 
-    test('results given unnested highlights does return expected object', function() {
+    test('results given unnested highlights does return expected array', function() {
       // TODO
     });
 
-    test('results given username highlights does return expected object', function() {
+    test('results given username highlights does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var result = {
         highlight: {
@@ -4191,7 +4195,7 @@ limitations under the License.
       expect(output[0].detailExtractions[5].data[1].width).to.not.exist;
     });
 
-    test('results given url highlights does return expected object', function() {
+    test('results given url highlights does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var result = {
         highlight: {
@@ -4242,7 +4246,7 @@ limitations under the License.
       expect(output[0].headerExtractions[0].data[1].width).to.not.exist;
     });
 
-    test('results given incorrectly formatted highlights does return expected object', function() {
+    test('results given incorrectly formatted highlights does return expected array', function() {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var result = {
         highlight: {
@@ -4342,6 +4346,10 @@ limitations under the License.
       expect(output[0].details[1].name).to.equal('Description');
       expect(output[0].details[1].highlightedText).to.equal('This is <em>description</em> 1 <em>This is description 2</em>');
       expect(output[0].details[1].text).to.equal('This is description 1 This is description 2');
+    });
+
+    test('results given time series data does return expected array', function() {
+      // TODO
     });
 
     test('searchPageTimeline given incomplete data does return expected object with no sparklines', function() {
@@ -5267,6 +5275,22 @@ limitations under the License.
       expect(output.sparklines[3].points[0].date).to.equal('Jan 1, 2018');
       expect(output.sparklines[3].points[1].count).to.equal(3);
       expect(output.sparklines[3].points[1].date).to.equal('Jan 5, 2018');
+    });
+
+    test('series given incomplete data does return expected object with no histogram', function() {
+      // TODO
+    });
+
+    test('series given aggregations with single bucket does return expected object with no histogram', function() {
+      // TODO
+    });
+
+    test('series given aggregations with many buckets does return expected object with histogram', function() {
+      // TODO
+    });
+
+    test('series does join buckets as needed due to the interval', function() {
+      // TODO
     });
   });
 </script>
