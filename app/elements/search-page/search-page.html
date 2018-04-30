@@ -365,7 +365,8 @@ limitations under the License.
         transform-function="[[transforms.entity.results]]"
         error="{{searchError}}"
         loading="{{searchLoading}}"
-        results="{{searchResults}}">
+        results="{{searchResults}}"
+        total="{{searchTotal}}">
       </build-and-run-query>
     </template>
 
@@ -936,103 +937,103 @@ limitations under the License.
             </template>
 
             <template is="dom-if" if="[[!esConfig.hideTimelines]]">
-              <template is="dom-if" if="[[searchResultsShown.length]]">
+              <template is="dom-if" if="[[shouldShowBarChart(timelineByHourResults)]]">
                 <paper-material slot="header" id="searchTimeline" class="layout vertical" elevation="2">
-                  <template is="dom-if" if="[[logicalOr(timelineByHourLoading, timelineByDayLoading, timelineByWeekLoading, timelineByMonthLoading, timelineByYearLoading)]]">
-                    <loading-spinner show type="Timeline"></loading-spinner>
-                  </template>
+                  <zoomable-bar-chart
+                    bar-property="date"
+                    data="[[timelineByHourResults.histogram]]"
+                    default-color="#212121"
+                    default-label="[[serverConfig.resultNamePlural]]"
+                    height="85"
+                    hide-overview
+                    interval="hour"
+                    label-property="text"
+                    load
+                    loading="[[timelineByHourLoading]]"
+                    source="[[serverConfig.resultNamePlural]]"
+                    stack-property="data"
+                    timeline>
+                  </zoomable-bar-chart>
+                </paper-material>
+              </template>
 
-                  <template is="dom-if" if="[[!logicalOr(timelineByHourLoading, timelineByDayLoading, timelineByWeekLoading, timelineByMonthLoading, timelineByYearLoading)]]">
-                    <template is="dom-if" if="[[shouldShowBarChart(timelineByHourResults)]]">
-                      <zoomable-bar-chart
-                        bar-property="date"
-                        data="[[timelineByHourResults.histogram]]"
-                        default-color="greenyellow"
-                        default-label="[[serverConfig.resultNameSingular]]"
-                        height="85"
-                        hide-overview
-                        interval="hour"
-                        label-property="text"
-                        load
-                        loading="[[timelineByHourLoading]]"
-                        source="[[serverConfig.resultNamePlural]]"
-                        stack-property="data"
-                        timeline>
-                      </zoomable-bar-chart>
-                    </template>
+              <template is="dom-if" if="[[shouldShowBarChart(timelineByDayResults, timelineByHourResults)]]">
+                <paper-material slot="header" id="searchTimeline" class="layout vertical" elevation="2">
+                  <zoomable-bar-chart
+                    bar-property="date"
+                    data="[[timelineByDayResults.histogram]]"
+                    default-color="#212121"
+                    default-label="[[serverConfig.resultNamePlural]]"
+                    height="85"
+                    hide-overview
+                    interval="day"
+                    label-property="text"
+                    load
+                    loading="[[timelineByDayLoading]]"
+                    source="[[serverConfig.resultNamePlural]]"
+                    stack-property="data"
+                    timeline>
+                  </zoomable-bar-chart>
+                </paper-material>
+              </template>
 
-                    <template is="dom-if" if="[[shouldShowBarChart(timelineByDayResults, timelineByHourResults)]]">
-                      <zoomable-bar-chart
-                        bar-property="date"
-                        data="[[timelineByDayResults.histogram]]"
-                        default-color="greenyellow"
-                        default-label="[[serverConfig.resultNameSingular]]"
-                        height="85"
-                        hide-overview
-                        interval="day"
-                        label-property="text"
-                        load
-                        loading="[[timelineByDayLoading]]"
-                        source="[[serverConfig.resultNamePlural]]"
-                        stack-property="data"
-                        timeline>
-                      </zoomable-bar-chart>
-                    </template>
+              <template is="dom-if" if="[[shouldShowBarChart(timelineByWeekResults, timelineByDayResults)]]">
+                <paper-material slot="header" id="searchTimeline" class="layout vertical" elevation="2">
+                  <zoomable-bar-chart
+                    bar-property="date"
+                    data="[[timelineByWeekResults.histogram]]"
+                    default-color="#212121"
+                    default-label="[[serverConfig.resultNamePlural]]"
+                    height="85"
+                    hide-overview
+                    interval="week"
+                    label-property="text"
+                    load
+                    loading="[[timelineByWeekLoading]]"
+                    source="[[serverConfig.resultNamePlural]]"
+                    stack-property="data"
+                    timeline>
+                  </zoomable-bar-chart>
+                </paper-material>
+              </template>
 
-                    <template is="dom-if" if="[[shouldShowBarChart(timelineByWeekResults, timelineByDayResults)]]">
-                      <zoomable-bar-chart
-                        bar-property="date"
-                        data="[[timelineByWeekResults.histogram]]"
-                        default-color="greenyellow"
-                        default-label="[[serverConfig.resultNameSingular]]"
-                        height="85"
-                        hide-overview
-                        interval="week"
-                        label-property="text"
-                        load
-                        loading="[[timelineByWeekLoading]]"
-                        source="[[serverConfig.resultNamePlural]]"
-                        stack-property="data"
-                        timeline>
-                      </zoomable-bar-chart>
-                    </template>
+              <template is="dom-if" if="[[shouldShowBarChart(timelineByMonthResults, timelineByWeekResults)]]">
+                <paper-material slot="header" id="searchTimeline" class="layout vertical" elevation="2">
+                  <zoomable-bar-chart
+                    bar-property="date"
+                    data="[[timelineByMonthResults.histogram]]"
+                    default-color="#212121"
+                    default-label="[[serverConfig.resultNamePlural]]"
+                    height="85"
+                    hide-overview
+                    interval="month"
+                    label-property="text"
+                    load
+                    loading="[[timelineByMonthLoading]]"
+                    source="[[serverConfig.resultNamePlural]]"
+                    stack-property="data"
+                    timeline>
+                  </zoomable-bar-chart>
+                </paper-material>
+              </template>
 
-                    <template is="dom-if" if="[[shouldShowBarChart(timelineByMonthResults, timelineByWeekResults)]]">
-                      <zoomable-bar-chart
-                        bar-property="date"
-                        data="[[timelineByMonthResults.histogram]]"
-                        default-color="greenyellow"
-                        default-label="[[serverConfig.resultNameSingular]]"
-                        height="85"
-                        hide-overview
-                        interval="month"
-                        label-property="text"
-                        load
-                        loading="[[timelineByMonthLoading]]"
-                        source="[[serverConfig.resultNamePlural]]"
-                        stack-property="data"
-                        timeline>
-                      </zoomable-bar-chart>
-                    </template>
-
-                    <template is="dom-if" if="[[shouldShowBarChart(timelineByYearResults, timelineByMonthResults)]]">
-                      <zoomable-bar-chart
-                        bar-property="date"
-                        data="[[timelineByYearResults.histogram]]"
-                        default-color="greenyellow"
-                        default-label="[[serverConfig.resultNameSingular]]"
-                        height="85"
-                        hide-overview
-                        interval="year"
-                        label-property="text"
-                        load
-                        loading="[[timelineByYearLoading]]"
-                        source="[[serverConfig.resultNamePlural]]"
-                        stack-property="data"
-                        timeline>
-                      </zoomable-bar-chart>
-                    </template>
-                  </template>
+              <template is="dom-if" if="[[shouldShowBarChart(timelineByYearResults, timelineByMonthResults)]]">
+                <paper-material slot="header" id="searchTimeline" class="layout vertical" elevation="2">
+                  <zoomable-bar-chart
+                    bar-property="date"
+                    data="[[timelineByYearResults.histogram]]"
+                    default-color="#212121"
+                    default-label="[[serverConfig.resultNamePlural]]"
+                    height="85"
+                    hide-overview
+                    interval="year"
+                    label-property="text"
+                    load
+                    loading="[[timelineByYearLoading]]"
+                    source="[[serverConfig.resultNamePlural]]"
+                    stack-property="data"
+                    timeline>
+                  </zoomable-bar-chart>
                 </paper-material>
               </template>
             </template>
@@ -1887,7 +1888,7 @@ limitations under the License.
         if(!requiredResults || !requiredResults.histogram.length || (overrideResults && overrideResults.histogram.length)) {
           return false;
         }
-        return true;
+        return requiredResults.histogram.length > 1;
       },
 
       toggleDrawer: function() {
