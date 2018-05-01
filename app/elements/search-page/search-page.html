@@ -82,8 +82,8 @@ limitations under the License.
         background-color: var(--navbar-color);
         color: white;
         padding: 10px;
-        --paper-toolbar-height: 70px;
-        --paper-toolbar-sm-height: 70px;
+        --paper-toolbar-height: 50px;
+        --paper-toolbar-sm-height: 50px;
         --paper-toolbar-content: {
           padding: 0;
         };
@@ -91,6 +91,11 @@ limitations under the License.
         position: relative;
         z-index: 5;
         @apply --shadow-elevation-4dp;
+      }
+
+      #pageNavbar.bigger {
+        --paper-toolbar-height: 70px;
+        --paper-toolbar-sm-height: 70px;
       }
 
       #searchTermList {
@@ -162,19 +167,6 @@ limitations under the License.
 
       #searchResultList {
         --result-list-max-height: none;
-      }
-
-      #advancedSearch {
-        height: 30px;
-        width: 30px;
-        min-height: 30px;
-        min-width: 30px;
-        padding: 0;
-        margin-left: 5px;
-      }
-
-      #advancedSearch:hover {
-        color: greenyellow;
       }
     </style>
 
@@ -752,15 +744,13 @@ limitations under the License.
     </export-dialog>
 
     <paper-header-panel class="flex" mode="seamed">
-      <paper-toolbar slot="header" id="pageNavbar">
+      <paper-toolbar slot="header" id="pageNavbar" class$="[[getNavbarStyleClass(esConfig.showOriginalSearch)]]">
         <div slot="top" class="layout horizontal self-start flex">
-          <a id="logoLinkBigger" href="[[serverConfig.pathPrefix]]" target="_blank" title="Open a DIG Search Page in a New Tab">
-            <img id="logoBigger" src="/dig-ui/dig-logo-bigger.png" alt="">
-          </a>
-
-          <div class="flex"></div>
-
           <template is="dom-if" if="[[!esConfig.showOriginalSearch]]">
+            <a id="logoLinkBigger" href="[[serverConfig.pathPrefix]]" target="_blank" title="Open a DIG Search Page in a New Tab">
+              <img id="logoBigger" src="/dig-ui/dig-logo-bigger.png" alt="">
+            </a>
+
             <search-box 
               date-config="[[datePropertiesToKeys]]"
               network-expansion-parameters="{{networkExpansionParameters}}"
@@ -769,9 +759,15 @@ limitations under the License.
               process-request="{{processRequest}}" 
               search-parameters="{{searchParameters}}">
             </search-box>
+
+            <icon-button bigger id="advancedSearchButton" icon="fa:wrench" on-tap="_toggleSearchDialog" title="Open Advanced Search"></icon-button>
           </template>
 
           <template is="dom-if" if="[[esConfig.showOriginalSearch]]">
+            <a id="logoLink" href="[[serverConfig.pathPrefix]]" target="_blank" title="Open a DIG Search Page in a New Tab">
+              <img id="logo" src="/dig-ui/dig-logo.png" alt="">
+            </a>
+
             <search-fields-button
               class="layout vertical center flex"
               style="margin-left: 10px;"
@@ -781,24 +777,17 @@ limitations under the License.
             </search-fields-button>  
           </template>
 
-          <template is="dom-if" if="[[!esConfig.showOriginalSearch]]">
-            <paper-icon-button 
-              id="advancedSearch"
-              icon="fa:wrench" 
-              on-tap="_toggleSearchDialog"
-              title="Open Advanced Search">
-            </paper-icon-button>
-          </template>
-
           <template is="dom-if" if="[[serverConfig.username]]">
             <user-settings-button notifications="[[notifications]]" open-callback="[[userSettingsDialogCallbacks.openSettingsDialog]]"></user-settings-button>
           </template>
 
-          <icon-button active="[[menuOpened]]" bigger id="menuButton" icon="fa:bars" slot="dropdown-trigger" title-tooltip="More Options" on-tap="toggleMenu"></icon-button>
+          <template is="dom-if" if="[[esConfig]]">
+            <icon-button active="[[menuOpened]]" bigger id="menuButton" icon="fa:bars" slot="dropdown-trigger" title-tooltip="More Options" on-tap="toggleMenu"></icon-button>
+          </template>
         </div>
       </paper-toolbar>
 
-      <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="70" opened="{{menuOpened}}">
+      <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="[[getMenuVerticalOffset(esConfig.showOriginalSearch)]]" opened="{{menuOpened}}">
         <div slot="dropdown-content">
           <template is="dom-if" if="[[serverConfig.username]]">
             <paper-icon-item disabled="[[searchParametersDisabled(searchParameters, searchParameters.*)]]" title="Save Search to Case..." on-tap="openSaveDialog">
@@ -1614,6 +1603,14 @@ limitations under the License.
 
       getDrawerToggleText: function(drawerOpened) {
         return drawerOpened ? 'Showing Facets (Click to Close)' : 'Hiding Facets (Click to Open)';
+      },
+
+      getMenuVerticalOffset: function(notBig) {
+        return notBig ? 50 : 70;
+      },
+
+      getNavbarStyleClass: function(notBig) {
+        return notBig ? '' : 'bigger';
       },
 
       handleImageFaceSearchResults: function(event) {

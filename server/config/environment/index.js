@@ -53,6 +53,7 @@ module.exports = {
     imageUrlSuffix: process.env.IMAGE_URL_SUFFIX || '',
     logIndexName: process.env.LOG_INDEX_NAME || 'dig-logs',
     logIndexType: process.env.LOG_INDEX_TYPE || 'log',
+    masterOverride: process.env.MASTER_OVERRIDE || false,
     overrideConfig: process.env.OVERRIDE_CONFIG ? JSON.parse(process.env.OVERRIDE_CONFIG) : undefined,
     overrideSearchEndpoint: process.env.OVERRIDE_SEARCH_ENDPOINT ? JSON.parse(process.env.OVERRIDE_SEARCH_ENDPOINT) : undefined,
     pathPrefix: process.env.PATH_PREFIX || '/',

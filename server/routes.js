@@ -141,6 +141,7 @@ module.exports = function(app) {
       imageUrlSuffix: serverConfig.imageUrlSuffix,
       logIndexName: serverConfig.logIndexName,
       logIndexType: serverConfig.logIndexType,
+      masterOverride: serverConfig.masterOverride,
       overrideConfig: serverConfig.overrideConfig,
       overrideSearchEndpoint: serverConfig.overrideSearchEndpoint,
       pathPrefix: serverPath,

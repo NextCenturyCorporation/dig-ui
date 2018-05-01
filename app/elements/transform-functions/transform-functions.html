@@ -111,7 +111,7 @@ limitations under the License.
           revisions: serverConfig.revisionsField,
           showImagesInFacets: clientConfig.show_images_in_facets || false,
           showImagesInSearch: clientConfig.show_images_in_search_form || false,
-          showOriginalSearch: clientConfig.show_original_search === 'V1' || false,
+          showOriginalSearch: serverConfig.masterOverride || clientConfig.show_original_search === 'V1' || false,
           showMultipleDescriptions: serverConfig.showMultipleDescriptions || false,
           showMultipleTitles: serverConfig.showMultipleTitles || false,
           timestamp: serverConfig.timestampField,
