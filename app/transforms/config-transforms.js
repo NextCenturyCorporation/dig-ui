@@ -28,8 +28,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
         title: searchFieldsObject.title + ' Begin'
       },
       end: {
-        icon: searchFieldsObject.icon,
         field: searchFieldsObject.field,
+        icon: searchFieldsObject.icon,
         key: searchFieldsObject.key + '_end',
         styleClass: searchFieldsObject.styleClass,
         title: searchFieldsObject.title + ' End'
@@ -396,8 +396,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
      * @return {Object}
      */
     searchFields: function(fields) {
-      var maxField = 0;
       var maxGroup = 0;
+      var groups = {};
 
       var searchFields =  _.keys(fields || {}).filter(function(id) {
         return !!fields[id].type;
@@ -427,7 +427,7 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           link: fields[id].show_as_link !== 'no' ? fields[id].show_as_link : undefined,
           // The query field.
           queryField: fields[id].field || 'knowledge_graph.' + id + '.value',
-          // Either header, detail, nested, title, description, or undefined.
+          // Either header, detail, nested, series, title, description, or undefined.
           result: fields[id].show_in_result !== 'no' ? fields[id].show_in_result : undefined,
           // Whether to show in the search fields.  Must be shown in the search fields if shown in the facets.
           search: fields[id].show_in_search || fields[id].show_in_facets || false,
@@ -435,23 +435,39 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
           title: fields[id].screen_label || 'Extraction',
           // The plural pretty name to show.
           titlePlural: fields[id].screen_label_plural || 'Extractions',
-          // Either date, email, hyphenated, image, location, number, phone, string, or username.
+          // Either date, email, hyphenated, image, kg_id, location, number, phone, string, type, or username.
           type: fields[id].type,
           // The width (number) to set for the extractions, if any.
           width: fields[id].width
         };
         /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
-        maxField = Math.max(maxField, searchFieldsObject.fieldOrder || 0);
-        maxGroup = Math.max(maxGroup, searchFieldsObject.groupOrder || 0);
+        maxGroup = searchFieldsObject.groupOrder >= 0 ? Math.max(maxGroup, searchFieldsObject.groupOrder + 1) : maxGroup;
+
+        if(searchFieldsObject.group) {
+          // Set the groupOrder of this field in this group.
+          if(groups[searchFieldsObject.group] >= 0) {
+            searchFieldsObject.groupOrder = groups[searchFieldsObject.group];
+          }
+          // Save the groupOrder of each field in this group.
+          else if(searchFieldsObject.groupOrder >= 0) {
+            groups[searchFieldsObject.group] = searchFieldsObject.groupOrder;
+          }
+        }
 
         return searchFieldsObject;
       }).map(function(searchFieldsObject) {
-        if(!searchFieldsObject.groupOrder && searchFieldsObject.groupOrder !== 0) {
-          searchFieldsObject.groupOrder = maxGroup + (searchFieldsObject.group ? 1 : 2);
+        if(searchFieldsObject.group && !searchFieldsObject.groupOrder && searchFieldsObject.groupOrder !== 0) {
+          // Assign the next free group order to this group.
+          if(!groups[searchFieldsObject.group] && groups[searchFieldsObject.group] !== 0) {
+            groups[searchFieldsObject.group] = maxGroup++;
+          }
+          searchFieldsObject.groupOrder = groups[searchFieldsObject.group];
         }
-        if(!searchFieldsObject.fieldOrder && searchFieldsObject.fieldOrder !== 0) {
-          searchFieldsObject.fieldOrder = maxField + 1;
+        return searchFieldsObject;
+      }).map(function(searchFieldsObject) {
+        if(!searchFieldsObject.groupOrder && searchFieldsObject.groupOrder !== 0) {
+          searchFieldsObject.groupOrder = maxGroup;
         }
         return searchFieldsObject;
       }).sort(function(a, b) {
@@ -482,8 +498,8 @@ var configTransforms = (function(_, commonTransforms, esConfig) {
       searchFields.forEach(function(searchFieldsObject) {
         searchFieldsObject.isDate = (searchFieldsObject.type === 'date');
         searchFieldsObject.isEntity = (searchFieldsObject.link === 'entity');
+        searchFieldsObject.isHidden = !searchFieldsObject.facets && !searchFieldsObject.search && !(searchFieldsObject.link === 'entity' || searchFieldsObject.result === 'header' || searchFieldsObject.result === 'detail');
         searchFieldsObject.isImage = (searchFieldsObject.type === 'image');
-        searchFieldsObject.isHidden = !(searchFieldsObject.link === 'entity' || searchFieldsObject.result === 'header' || searchFieldsObject.result === 'detail');
         searchFieldsObject.isLocation = (searchFieldsObject.type === 'location');
         searchFieldsObject.isUrl = (searchFieldsObject.type === 'tld' || searchFieldsObject.type === 'url');
 

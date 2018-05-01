@@ -71,11 +71,11 @@ limitations under the License.
       })).to.equal(1234);
     });
 
-    test('does have paper-icon-button', function() {
-      expect(element.$$('paper-icon-button')).to.exist;
-      expect(element.$$('paper-icon-button').id).to.equal('clipboard');
-      expect(element.$$('paper-icon-button').icon).to.equal('content-copy');
-      expect(element.$$('paper-icon-button').title).to.equal('Copy TestName to Clipboard');
+    test('does have icon-button', function() {
+      expect(element.$$('icon-button')).to.exist;
+      expect(element.$$('icon-button').id).to.equal('clipboard');
+      expect(element.$$('icon-button').icon).to.equal('content-copy');
+      expect(element.$$('icon-button').titleTooltip).to.equal('Copy TestName to Clipboard');
     });
 
     test('_getClipboardText does return expected text', function() {

@@ -129,12 +129,13 @@ limitations under the License.
     });
 
     test('createHistogramAggregationConfig does return expected object', function() {
-      expect(element.createHistogramAggregationConfig({})).to.deep.equal({
+      expect(element.createHistogramAggregationConfig('interval1', {})).to.deep.equal({
+        interval: 'interval1',
         name: undefined,
         unidentified: undefined
       });
 
-      expect(element.createHistogramAggregationConfig({
+      expect(element.createHistogramAggregationConfig('interval2', {
         date1: {
           key: 'key1',
           start: 'start1',
@@ -152,11 +153,12 @@ limitations under the License.
       })).to.deep.equal({
         begin: 'time1',
         end: undefined,
+        interval: 'interval2',
         name: 'key1_timeline',
         unidentified: undefined
       });
 
-      expect(element.createHistogramAggregationConfig({
+      expect(element.createHistogramAggregationConfig('interval3', {
         date1: {
           key: 'key1',
           start: 'start1',
@@ -174,11 +176,12 @@ limitations under the License.
       })).to.deep.equal({
         begin: undefined,
         end: 'time2',
+        interval: 'interval3',
         name: 'key1_timeline',
         unidentified: undefined
       });
 
-      expect(element.createHistogramAggregationConfig({
+      expect(element.createHistogramAggregationConfig('interval4', {
         date1: {
           key: 'key1',
           start: 'start1',
@@ -196,11 +199,12 @@ limitations under the License.
       })).to.deep.equal({
         begin: 'time1',
         end: 'time2',
+        interval: 'interval4',
         name: 'key1_timeline',
         unidentified: undefined
       });
 
-      expect(element.createHistogramAggregationConfig({
+      expect(element.createHistogramAggregationConfig('interval5', {
         date1: {
           key: 'key1',
           start: 'start1',
@@ -231,11 +235,12 @@ limitations under the License.
       })).to.deep.equal({
         begin: 'time1',
         end: 'time2',
+        interval: 'interval5',
         name: 'key1_timeline',
         unidentified: undefined
       });
 
-      expect(element.createHistogramAggregationConfig({
+      expect(element.createHistogramAggregationConfig('interval6', {
         date1: {
           key: 'key1',
           start: 'start1',
@@ -266,6 +271,7 @@ limitations under the License.
       })).to.deep.equal({
         begin: 'time3',
         end: 'time4',
+        interval: 'interval6',
         name: 'key2_timeline',
         unidentified: undefined
       });
@@ -1189,24 +1195,32 @@ limitations under the License.
       expect(element.logicalOr(true, true)).to.be.true;
     });
 
-    test('nullifyTimelineResults does update timeline.*Results', function() {
-      element.timelineByWeekResults = [];
-      element.timelineByDayResults = [];
-      element.timelineByHourResults = [];
-      element.timelineByMonthResults = [];
-      element.timelineByYearResults = [];
-
-      element.nullifyTimelineResults();
-
-      expect(element.timelineByWeekResults).to.equal(null);
-      expect(element.timelineByDayResults).to.equal(null);
-      expect(element.timelineByHourResults).to.equal(null);
-      expect(element.timelineByMonthResults).to.equal(null);
-      expect(element.timelineByYearResults).to.equal(null);
-    });
-
     test('openBulkSearchDialog does exist', function() {
       expect(element.openBulkSearchDialog).to.be.a('Function');
+    });
+
+    test('openDatabaseDetail does exist', function() {
+      expect(element.openDatabaseDetail).to.be.a('Function');
+    });
+
+    test('openSearchImageGallery does exist', function() {
+      expect(element.openSearchImageGallery).to.be.a('Function');
+    });
+
+    test('resetTimelineResults does update timelineResults and esQueryWithoutDates', function() {
+      element.timelineResults = {
+        day: [],
+        hour: [],
+        month: [],
+        week: [],
+        year: []
+      };
+      element.esQueryWithoutDates = {};
+
+      element.resetTimelineResults();
+
+      expect(element.timelineResults).to.deep.equal({});
+      expect(element.esQueryWithoutDates).to.equal(null);
     });
 
     test('runBothImageSearches does work as expected if imagesUploaded is empty', function() {
@@ -1613,148 +1627,62 @@ limitations under the License.
       }]);
     });
 
-    test('shouldChangeInterval does return false if results are null or an empty array', function() {
-      expect(element.shouldChangeInterval(null, 'day', 'week')).to.be.false;
-      expect(element.shouldChangeInterval({
-        histogram: []
-      }, 'day', 'week')).to.be.false;
+    test('shouldReduceInterval does return false if results are null or an empty array or an array of more than 60 elements', function() {
+      expect(element.shouldReduceInterval(null)).to.be.false;
 
-      expect(element.shouldChangeInterval(null, 'week', 'month')).to.be.false;
-      expect(element.shouldChangeInterval({
+      expect(element.shouldReduceInterval({
         histogram: []
-      }, 'week', 'month')).to.be.false;
+      })).to.be.false;
 
-      expect(element.shouldChangeInterval(null, 'month', 'year')).to.be.false;
-      expect(element.shouldChangeInterval({
-        histogram: []
-      }, 'month', 'year')).to.be.false;
+      expect(element.shouldReduceInterval({
+        histogram: _.range(61)
+      })).to.be.false;
 
-      expect(element.shouldChangeInterval(null, 'month', 'week')).to.be.false;
-      expect(element.shouldChangeInterval({
-        histogram: []
-      }, 'month', 'week')).to.be.false;
-
-      expect(element.shouldChangeInterval(null, 'week', 'day')).to.be.false;
-      expect(element.shouldChangeInterval({
-        histogram: []
-      }, 'week', 'day')).to.be.false;
+      expect(element.shouldReduceInterval({
+        histogram: _.range(6000)
+      })).to.be.false;
     });
 
-    test('shouldChangeInterval does return true as expected', function() {
-      expect(element.shouldChangeInterval({
-        histogram: _.range(59)
-      }, 'day', 'hour')).to.be.true;
-      expect(element.shouldChangeInterval({
-        histogram: _.range(60)
-      }, 'day', 'hour')).to.be.false;
-
-      expect(element.shouldChangeInterval({
-        histogram: _.range(400)
-      }, 'day', 'week')).to.be.false;
-      expect(element.shouldChangeInterval({
-        histogram: _.range(401)
-      }, 'day', 'week')).to.be.true;
-
-      expect(element.shouldChangeInterval({
-        histogram: _.range(59)
-      }, 'week', 'day')).to.be.true;
-      expect(element.shouldChangeInterval({
-        histogram: _.range(60)
-      }, 'week', 'day')).to.be.false;
-
-      expect(element.shouldChangeInterval({
-        histogram: _.range(260)
-      }, 'week', 'month')).to.be.false;
-      expect(element.shouldChangeInterval({
-        histogram: _.range(261)
-      }, 'week', 'month')).to.be.true;
-
-      expect(element.shouldChangeInterval({
-        histogram: _.range(59)
-      }, 'month', 'week')).to.be.true;
-      expect(element.shouldChangeInterval({
-        histogram: _.range(60)
-      }, 'month', 'week')).to.be.false;
-
-      expect(element.shouldChangeInterval({
-        histogram: _.range(240)
-      }, 'month', 'year')).to.be.false;
-      expect(element.shouldChangeInterval({
-        histogram: _.range(241)
-      }, 'month', 'year')).to.be.true;
-    });
-
-    test('shouldShowBarChart does return false if results are null or an empty array', function() {
-      expect(element.shouldShowBarChart(null, 'hour')).to.be.false;
-      expect(element.shouldShowBarChart(null, 'day')).to.be.false;
-      expect(element.shouldShowBarChart(null, 'week')).to.be.false;
-      expect(element.shouldShowBarChart(null, 'month')).to.be.false;
-      expect(element.shouldShowBarChart(null, 'year')).to.be.false;
-
-      expect(element.shouldShowBarChart({
-        histogram: []
-      }, 'hour')).to.be.false;
-      expect(element.shouldShowBarChart({
-        histogram: []
-      }, 'day')).to.be.false;
-      expect(element.shouldShowBarChart({
-        histogram: []
-      }, 'week')).to.be.false;
-      expect(element.shouldShowBarChart({
-        histogram: []
-      }, 'month')).to.be.false;
-      expect(element.shouldShowBarChart({
-        histogram: []
-      }, 'year')).to.be.false;
-    });
-
-    test('shouldShowBarChart does return true as expected', function() {
-      expect(element.shouldShowBarChart({
-        histogram: _.range(1000)
-      }, 'hour')).to.be.true;
-
-      expect(element.shouldShowBarChart({
-        histogram: _.range(59)
-      }, 'day')).to.be.false;
-      expect(element.shouldShowBarChart({
-        histogram: _.range(60)
-      }, 'day')).to.be.true;
-      expect(element.shouldShowBarChart({
-        histogram: _.range(400)
-      }, 'day')).to.be.true;
-      expect(element.shouldShowBarChart({
-        histogram: _.range(401)
-      }, 'day')).to.be.false;
-
-      expect(element.shouldShowBarChart({
-        histogram: _.range(59)
-      }, 'week')).to.be.false;
-      expect(element.shouldShowBarChart({
-        histogram: _.range(60)
-      }, 'week')).to.be.true;
-      expect(element.shouldShowBarChart({
-        histogram: _.range(260)
-      }, 'week')).to.be.true;
-      expect(element.shouldShowBarChart({
-        histogram: _.range(261)
-      }, 'week')).to.be.false;
-
-      expect(element.shouldShowBarChart({
-        histogram: _.range(59)
-      }, 'month')).to.be.false;
-      expect(element.shouldShowBarChart({
-        histogram: _.range(60)
-      }, 'month')).to.be.true;
-      expect(element.shouldShowBarChart({
-        histogram: _.range(240)
-      }, 'month')).to.be.true;
-      expect(element.shouldShowBarChart({
-        histogram: _.range(241)
-      }, 'month')).to.be.false;
-
-      expect(element.shouldShowBarChart({
+    test('shouldReduceInterval does return true if results are an array of fewer than or equal to 60 elements', function() {
+      expect(element.shouldReduceInterval({
         histogram: _.range(1)
-      }, 'year')).to.be.true;
+      })).to.be.true;
+
+      expect(element.shouldReduceInterval({
+        histogram: _.range(60)
+      })).to.be.true;
+    });
+
+    test('shouldShowBarChart does return false if required results are null or an empty array or if override results are not empty', function() {
+      expect(element.shouldShowBarChart(null, null)).to.be.false;
+
+      expect(element.shouldShowBarChart(null, {
+        histogram: []
+      })).to.be.false;
+
+      expect(element.shouldShowBarChart({
+        histogram: []
+      }, {
+        histogram: []
+      })).to.be.false;
+
+      expect(element.shouldShowBarChart({
+        histogram: _.range(60)
+      }, {
+        histogram: _.range(60)
+      })).to.be.false;
+    });
+
+    test('shouldShowBarChart does return true if required results are not empty and override results are null or an empty array', function() {
+      expect(element.shouldShowBarChart({
+        histogram: _.range(60)
+      }, null)).to.be.true;
+
+      expect(element.shouldShowBarChart({
+        histogram: _.range(60)
+      }, {
+        histogram: []
+      })).to.be.true;
     });
 
     test('computePageWasNotJustOpened does return false if searchParameters are empty', function() {

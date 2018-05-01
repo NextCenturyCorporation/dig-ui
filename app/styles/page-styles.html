@@ -66,25 +66,17 @@ limitations under the License.
         max-width: 110px;
       }
 
-      #menuButton,
-      #searchImageGalleryButton {
-        height: 30px;
-        width: 30px;
+      #menuButton {
         margin-left: 10px;
-        min-width: 30px;
-        padding: 0;
-      }
-
-      #menuButton:hover {
-        color: greenyellow;
+        --icon-button-color: white;
+        --icon-button-active-color: greenyellow;
+        --icon-button-hovering-color: greenyellow;
       }
 
       #toggleDrawerButton {
-        height: 30px;
-        width: 30px;
         margin-right: 10px;
-        min-width: 30px;
-        padding: 0;
+        --icon-button-active-color: greenyellow;
+        --icon-button-hovering-color: greenyellow;
       }
 
       #menuDropdown div[slot="dropdown-content"] {
@@ -111,6 +103,11 @@ limitations under the License.
           min-width: 300px;
           /* Above is needed for IE */
         }
+        --paper-item-disabled-color: var(--paper-grey-500);
+      }
+
+      #menuDropdown div[slot="dropdown-content"] paper-icon-item:hover {
+        color: greenyellow;
       }
 
       export-button {

@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/icon-button/icon-button.html">
 <link rel="import" href="../clipboard.html">
 
 <dom-module id="copy-button">
@@ -26,15 +26,9 @@ limitations under the License.
       :host {
         display: block;
       }
-
-      paper-icon-button {
-        height: 20px;
-        width: 20px;
-        padding: 0;
-      }
     </style>
 
-    <paper-icon-button id="clipboard" icon="content-copy" title$="Copy [[name]] to Clipboard" data-clipboard-text$="[[_getClipboardText(data, textFunction)]]"></paper-icon-button>
+    <icon-button id="clipboard" icon="content-copy" title-tooltip$="Copy [[name]] to Clipboard" data-clipboard-text$="[[_getClipboardText(data, textFunction)]]"></icon-button>
   </template>
 
   <script>

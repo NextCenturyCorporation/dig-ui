@@ -744,6 +744,1025 @@ limitations under the License.
       expect(transformFunctions.transforms.config.resultLink('ABC123')).to.equal('/result.html?domain=TestDomain&id=ABC123');
     });
 
+    test('searchFields given empty array does return expected array', function() {
+      transformFunctions.serverConfig = {
+        resultQueryField: '_id',
+        resultIcon: 'av:web-asset',
+        resultNameSingular: 'Webpage',
+        resultNamePlural: 'Webpages'
+      };
+
+      var output = transformFunctions.transforms.config.searchFields([]);
+      expect(output.length).to.equal(1);
+
+      expect(output[0].key).to.equal('webpage');
+      expect(output[0].color).to.equal('black');
+      expect(output[0].extractionField).to.be.undefined;
+      expect(output[0].facets).to.be.false;
+      expect(output[0].field).to.equal('_id');
+      expect(output[0].fieldOrder).to.be.undefined;
+      expect(output[0].freeText).to.be.undefined;
+      expect(output[0].group).to.equal('');
+      expect(output[0].groupOrder).to.be.undefined;
+      expect(output[0].icon).to.equal('av:web-asset');
+      expect(output[0].link).to.be.undefined;
+      expect(output[0].queryField).to.be.undefined;
+      expect(output[0].result).to.equal('nested');
+      expect(output[0].search).to.be.false;
+      expect(output[0].styleClass).to.equal('black');
+      expect(output[0].title).to.equal('Webpage');
+      expect(output[0].titlePlural).to.equal('Webpages');
+      expect(output[0].type).to.equal('kg_id');
+      expect(output[0].width).to.be.undefined;
+      expect(output[0].isDate).to.be.false;
+      expect(output[0].isEntity).to.be.false;
+      expect(output[0].isHidden).to.be.true;
+      expect(output[0].isImage).to.be.false;
+      expect(output[0].isLocation).to.be.false;
+      expect(output[0].isUrl).to.be.false;
+      expect(output[0].dateProperties).to.deep.equal({});
+      expect(output[0].facetTransform).to.be.a('Function');
+    });
+
+    test('searchFields given non-empty array of one element with only type does return expected array', function() {
+      transformFunctions.serverConfig = {
+        resultQueryField: '_id',
+        resultIcon: 'av:web-asset',
+        resultNameSingular: 'Webpage',
+        resultNamePlural: 'Webpages'
+      };
+
+      var output = transformFunctions.transforms.config.searchFields({
+        id1: {
+          type: 'type1'
+        }
+      });
+      expect(output.length).to.equal(2);
+
+      expect(output[0].key).to.equal('id1');
+      expect(output[0].color).to.equal('grey');
+      expect(output[0].extractionField).to.equal('_source.knowledge_graph.id1');
+      expect(output[0].facets).to.be.false;
+      expect(output[0].field).to.equal('knowledge_graph.id1.key');
+      expect(output[0].fieldOrder).to.be.undefined;
+      expect(output[0].freeText).to.be.false;
+      expect(output[0].group).to.be.undefined;
+      expect(output[0].groupOrder).to.equal(0);
+      expect(output[0].icon).to.equal('icons:text-format');
+      expect(output[0].link).to.be.undefined;
+      expect(output[0].queryField).to.equal('knowledge_graph.id1.value');
+      expect(output[0].result).to.be.undefined;
+      expect(output[0].search).to.be.false;
+      expect(output[0].styleClass).to.equal('grey');
+      expect(output[0].title).to.equal('Extraction');
+      expect(output[0].titlePlural).to.equal('Extractions');
+      expect(output[0].type).to.equal('type1');
+      expect(output[0].width).to.be.undefined;
+      expect(output[0].isDate).to.be.false;
+      expect(output[0].isEntity).to.be.false;
+      expect(output[0].isHidden).to.be.true;
+      expect(output[0].isImage).to.be.false;
+      expect(output[0].isLocation).to.be.false;
+      expect(output[0].isUrl).to.be.false;
+      expect(output[0].dateProperties).to.deep.equal({});
+      expect(output[0].facetTransform).to.be.a('Function');
+
+      expect(output[1].key).to.equal('webpage');
+      expect(output[1].color).to.equal('black');
+      expect(output[1].extractionField).to.be.undefined;
+      expect(output[1].facets).to.be.false;
+      expect(output[1].field).to.equal('_id');
+      expect(output[1].fieldOrder).to.be.undefined;
+      expect(output[1].freeText).to.be.undefined;
+      expect(output[1].group).to.equal('');
+      expect(output[1].groupOrder).to.be.undefined;
+      expect(output[1].icon).to.equal('av:web-asset');
+      expect(output[1].link).to.be.undefined;
+      expect(output[1].queryField).to.be.undefined;
+      expect(output[1].result).to.equal('nested');
+      expect(output[1].search).to.be.false;
+      expect(output[1].styleClass).to.equal('black');
+      expect(output[1].title).to.equal('Webpage');
+      expect(output[1].titlePlural).to.equal('Webpages');
+      expect(output[1].type).to.equal('kg_id');
+      expect(output[1].width).to.be.undefined;
+      expect(output[1].isDate).to.be.false;
+      expect(output[1].isEntity).to.be.false;
+      expect(output[1].isHidden).to.be.true;
+      expect(output[1].isImage).to.be.false;
+      expect(output[1].isLocation).to.be.false;
+      expect(output[1].isUrl).to.be.false;
+      expect(output[1].dateProperties).to.deep.equal({});
+      expect(output[1].facetTransform).to.be.a('Function');
+    });
+
+    test('searchFields given empty array does return expected array with images', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      transformFunctions.clientConfig = {
+        show_images_in_facets: true
+      };
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      transformFunctions.serverConfig = {
+        resultQueryField: '_id',
+        resultIcon: 'av:web-asset',
+        resultNameSingular: 'Webpage',
+        resultNamePlural: 'Webpages'
+      };
+
+      var output = transformFunctions.transforms.config.searchFields([]);
+      expect(output.length).to.equal(2);
+
+      expect(output[0].key).to.equal('image');
+      expect(output[0].color).to.equal('black');
+      expect(output[0].extractionField).to.be.undefined;
+      expect(output[0].facets).to.be.true;
+      expect(output[0].field).to.equal('objects.img_sha1');
+      expect(output[0].fieldOrder).to.be.undefined;
+      expect(output[0].freeText).to.be.undefined;
+      expect(output[0].group).to.equal('Image');
+      expect(output[0].groupOrder).to.be.undefined;
+      expect(output[0].icon).to.equal('image:photo');
+      expect(output[0].link).to.equal('entity');
+      expect(output[0].queryField).to.be.undefined;
+      expect(output[0].result).to.equal('image');
+      expect(output[0].search).to.be.true;
+      expect(output[0].styleClass).to.equal('black');
+      expect(output[0].title).to.equal('Image');
+      expect(output[0].titlePlural).to.equal('Images');
+      expect(output[0].type).to.equal('image');
+      expect(output[0].width).to.be.undefined;
+      expect(output[0].isDate).to.be.false;
+      expect(output[0].isEntity).to.be.true;
+      expect(output[0].isHidden).to.be.false;
+      expect(output[0].isImage).to.be.true;
+      expect(output[0].isLocation).to.be.false;
+      expect(output[0].isUrl).to.be.false;
+      expect(output[0].dateProperties).to.deep.equal({});
+      expect(output[0].facetTransform).to.be.a('Function');
+
+      expect(output[1].key).to.equal('webpage');
+      expect(output[1].color).to.equal('black');
+      expect(output[1].extractionField).to.be.undefined;
+      expect(output[1].facets).to.be.false;
+      expect(output[1].field).to.equal('_id');
+      expect(output[1].fieldOrder).to.be.undefined;
+      expect(output[1].freeText).to.be.undefined;
+      expect(output[1].group).to.equal('');
+      expect(output[1].groupOrder).to.be.undefined;
+      expect(output[1].icon).to.equal('av:web-asset');
+      expect(output[1].link).to.be.undefined;
+      expect(output[1].queryField).to.be.undefined;
+      expect(output[1].result).to.equal('nested');
+      expect(output[1].search).to.be.false;
+      expect(output[1].styleClass).to.equal('black');
+      expect(output[1].title).to.equal('Webpage');
+      expect(output[1].titlePlural).to.equal('Webpages');
+      expect(output[1].type).to.equal('kg_id');
+      expect(output[1].width).to.be.undefined;
+      expect(output[1].isDate).to.be.false;
+      expect(output[1].isEntity).to.be.false;
+      expect(output[1].isHidden).to.be.true;
+      expect(output[1].isImage).to.be.false;
+      expect(output[1].isLocation).to.be.false;
+      expect(output[1].isUrl).to.be.false;
+      expect(output[1].dateProperties).to.deep.equal({});
+      expect(output[1].facetTransform).to.be.a('Function');
+    });
+
+    test('searchFields given non-empty array does return expected array with images', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      transformFunctions.clientConfig = {
+        show_images_in_facets: true
+      };
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      transformFunctions.serverConfig = {
+        resultQueryField: '_id',
+        resultIcon: 'av:web-asset',
+        resultNameSingular: 'Webpage',
+        resultNamePlural: 'Webpages'
+      };
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var output = transformFunctions.transforms.config.searchFields({
+        id1: {
+          color: 'color1',
+          field_order: 1,
+          free_text_search: true,
+          group_name: 'group1',
+          group_order: 1,
+          icon: 'icon1',
+          screen_label: 'label1',
+          screen_label_plural: 'labels1',
+          show_in_facets: true,
+          show_as_link: 'entity',
+          show_in_result: 'header',
+          show_in_search: true,
+          type: 'type1',
+          width: 'width1'
+        },
+        id2: {
+          color: 'color2',
+          field_order: 2,
+          free_text_search: false,
+          group_name: 'group2',
+          group_order: 2,
+          icon: 'icon2',
+          screen_label: 'label2',
+          screen_label_plural: 'labels2',
+          show_in_facets: false,
+          show_as_link: 'no',
+          show_in_result: 'no',
+          show_in_search: false,
+          type: 'type2',
+          width: 'width2'
+        },
+        id3: {
+          color: 'color3',
+          field: 'field3',
+          field_order: 3,
+          free_text_search: true,
+          group_name: 'group3',
+          group_order: 3,
+          icon: 'icon3',
+          screen_label: 'label3',
+          screen_label_plural: 'labels3',
+          show_in_facets: true,
+          show_as_link: 'entity',
+          show_in_result: 'header',
+          show_in_search: false,
+          type: 'type3',
+          width: 'width3'
+        },
+        id4: {
+          color: 'color4',
+          field: 'field4',
+          field_order: 4,
+          free_text_search: true,
+          group_name: 'group4',
+          group_order: 4,
+          icon: 'icon4',
+          non_source: true,
+          screen_label: 'label4',
+          screen_label_plural: 'labels4',
+          show_in_facets: true,
+          show_as_link: 'entity',
+          show_in_result: 'header',
+          show_in_search: false,
+          type: 'type4',
+          width: 'width4'
+        }
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      expect(output.length).to.equal(6);
+
+      expect(output[0].key).to.equal('id1');
+      expect(output[0].color).to.equal('color1');
+      expect(output[0].extractionField).to.equal('_source.knowledge_graph.id1');
+      expect(output[0].facets).to.be.true;
+      expect(output[0].field).to.equal('knowledge_graph.id1.key');
+      expect(output[0].fieldOrder).to.equal(1);
+      expect(output[0].freeText).to.be.true;
+      expect(output[0].group).to.equal('group1');
+      expect(output[0].groupOrder).to.equal(1);
+      expect(output[0].icon).to.equal('icon1');
+      expect(output[0].link).to.equal('entity');
+      expect(output[0].queryField).to.equal('knowledge_graph.id1.value');
+      expect(output[0].result).to.equal('header');
+      expect(output[0].search).to.be.true;
+      expect(output[0].styleClass).to.equal('color1');
+      expect(output[0].title).to.equal('label1');
+      expect(output[0].titlePlural).to.equal('labels1');
+      expect(output[0].type).to.equal('type1');
+      expect(output[0].width).to.equal('width1');
+      expect(output[0].isDate).to.be.false;
+      expect(output[0].isEntity).to.be.true;
+      expect(output[0].isHidden).to.be.false;
+      expect(output[0].isImage).to.be.false;
+      expect(output[0].isLocation).to.be.false;
+      expect(output[0].isUrl).to.be.false;
+      expect(output[0].dateProperties).to.deep.equal({});
+      expect(output[0].facetTransform).to.be.a('Function');
+
+      expect(output[1].key).to.equal('id2');
+      expect(output[1].color).to.equal('color2');
+      expect(output[1].extractionField).to.equal('_source.knowledge_graph.id2');
+      expect(output[1].facets).to.be.false;
+      expect(output[1].field).to.equal('knowledge_graph.id2.key');
+      expect(output[1].fieldOrder).to.equal(2);
+      expect(output[1].freeText).to.be.false;
+      expect(output[1].group).to.equal('group2');
+      expect(output[1].groupOrder).to.equal(2);
+      expect(output[1].icon).to.equal('icon2');
+      expect(output[1].link).to.be.undefined;
+      expect(output[1].queryField).to.equal('knowledge_graph.id2.value');
+      expect(output[1].result).to.be.undefined;
+      expect(output[1].search).to.be.false;
+      expect(output[1].styleClass).to.equal('color2');
+      expect(output[1].title).to.equal('label2');
+      expect(output[1].titlePlural).to.equal('labels2');
+      expect(output[1].type).to.equal('type2');
+      expect(output[1].width).to.equal('width2');
+      expect(output[1].isDate).to.be.false;
+      expect(output[1].isEntity).to.be.false;
+      expect(output[1].isHidden).to.be.true;
+      expect(output[1].isImage).to.be.false;
+      expect(output[1].isLocation).to.be.false;
+      expect(output[1].isUrl).to.be.false;
+      expect(output[1].dateProperties).to.deep.equal({});
+      expect(output[1].facetTransform).to.be.a('Function');
+
+      expect(output[2].key).to.equal('id3');
+      expect(output[2].color).to.equal('color3');
+      expect(output[2].extractionField).to.equal('_source.field3');
+      expect(output[2].facets).to.be.true;
+      expect(output[2].field).to.equal('field3');
+      expect(output[2].fieldOrder).to.equal(3);
+      expect(output[2].freeText).to.be.true;
+      expect(output[2].group).to.equal('group3');
+      expect(output[2].groupOrder).to.equal(3);
+      expect(output[2].icon).to.equal('icon3');
+      expect(output[2].link).to.equal('entity');
+      expect(output[2].queryField).to.equal('field3');
+      expect(output[2].result).to.equal('header');
+      // The search should be set to TRUE
+      expect(output[2].search).to.be.true;
+      expect(output[2].styleClass).to.equal('color3');
+      expect(output[2].title).to.equal('label3');
+      expect(output[2].titlePlural).to.equal('labels3');
+      expect(output[2].type).to.equal('type3');
+      expect(output[2].width).to.equal('width3');
+      expect(output[2].isDate).to.be.false;
+      expect(output[2].isEntity).to.be.true;
+      expect(output[2].isHidden).to.be.false;
+      expect(output[2].isImage).to.be.false;
+      expect(output[2].isLocation).to.be.false;
+      expect(output[2].isUrl).to.be.false;
+      expect(output[2].dateProperties).to.deep.equal({});
+      expect(output[2].facetTransform).to.be.a('Function');
+
+      expect(output[3].key).to.equal('id4');
+      expect(output[3].color).to.equal('color4');
+      expect(output[3].extractionField).to.equal('field4');
+      expect(output[3].facets).to.be.true;
+      expect(output[3].field).to.equal('field4');
+      expect(output[3].fieldOrder).to.equal(4);
+      expect(output[3].freeText).to.be.true;
+      expect(output[3].group).to.equal('group4');
+      expect(output[3].groupOrder).to.equal(4);
+      expect(output[3].icon).to.equal('icon4');
+      expect(output[3].link).to.equal('entity');
+      expect(output[3].queryField).to.equal('field4');
+      expect(output[3].result).to.equal('header');
+      expect(output[3].search).to.be.true;
+      expect(output[3].styleClass).to.equal('color4');
+      expect(output[3].title).to.equal('label4');
+      expect(output[3].titlePlural).to.equal('labels4');
+      expect(output[3].type).to.equal('type4');
+      expect(output[3].width).to.equal('width4');
+      expect(output[3].isDate).to.be.false;
+      expect(output[3].isEntity).to.be.true;
+      expect(output[3].isHidden).to.be.false;
+      expect(output[3].isImage).to.be.false;
+      expect(output[3].isLocation).to.be.false;
+      expect(output[3].isUrl).to.be.false;
+      expect(output[3].dateProperties).to.deep.equal({});
+      expect(output[3].facetTransform).to.be.a('Function');
+
+      expect(output[4].key).to.equal('image');
+      expect(output[4].color).to.equal('black');
+      expect(output[4].extractionField).to.be.undefined;
+      expect(output[4].facets).to.be.true;
+      expect(output[4].field).to.equal('objects.img_sha1');
+      expect(output[4].fieldOrder).to.be.undefined;
+      expect(output[4].freeText).to.be.undefined;
+      expect(output[4].group).to.equal('Image');
+      expect(output[4].groupOrder).to.be.undefined;
+      expect(output[4].icon).to.equal('image:photo');
+      expect(output[4].link).to.equal('entity');
+      expect(output[4].queryField).to.be.undefined;
+      expect(output[4].result).to.equal('image');
+      expect(output[4].search).to.be.true;
+      expect(output[4].styleClass).to.equal('black');
+      expect(output[4].title).to.equal('Image');
+      expect(output[4].titlePlural).to.equal('Images');
+      expect(output[4].type).to.equal('image');
+      expect(output[4].width).to.be.undefined;
+      expect(output[4].isDate).to.be.false;
+      expect(output[4].isEntity).to.be.true;
+      expect(output[4].isHidden).to.be.false;
+      expect(output[4].isImage).to.be.true;
+      expect(output[4].isLocation).to.be.false;
+      expect(output[4].isUrl).to.be.false;
+      expect(output[4].dateProperties).to.deep.equal({});
+      expect(output[4].facetTransform).to.be.a('Function');
+
+      expect(output[5].key).to.equal('webpage');
+      expect(output[5].color).to.equal('black');
+      expect(output[5].extractionField).to.be.undefined;
+      expect(output[5].facets).to.be.false;
+      expect(output[5].field).to.equal('_id');
+      expect(output[5].fieldOrder).to.be.undefined;
+      expect(output[5].freeText).to.be.undefined;
+      expect(output[5].group).to.equal('');
+      expect(output[5].groupOrder).to.be.undefined;
+      expect(output[5].icon).to.equal('av:web-asset');
+      expect(output[5].link).to.be.undefined;
+      expect(output[5].queryField).to.be.undefined;
+      expect(output[5].result).to.equal('nested');
+      expect(output[5].search).to.be.false;
+      expect(output[5].styleClass).to.equal('black');
+      expect(output[5].title).to.equal('Webpage');
+      expect(output[5].titlePlural).to.equal('Webpages');
+      expect(output[5].type).to.equal('kg_id');
+      expect(output[5].width).to.be.undefined;
+      expect(output[5].isDate).to.be.false;
+      expect(output[5].isEntity).to.be.false;
+      expect(output[5].isHidden).to.be.true;
+      expect(output[5].isImage).to.be.false;
+      expect(output[5].isLocation).to.be.false;
+      expect(output[5].isUrl).to.be.false;
+      expect(output[5].dateProperties).to.deep.equal({});
+      expect(output[5].facetTransform).to.be.a('Function');
+    });
+
+    test('searchFields given non-empty array does return expected array with many field types', function() {
+      transformFunctions.serverConfig = {
+        resultQueryField: '_id',
+        resultIcon: 'av:web-asset',
+        resultNameSingular: 'Webpage',
+        resultNamePlural: 'Webpages'
+      };
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var output = transformFunctions.transforms.config.searchFields({
+        id1: {
+          color: 'color1',
+          icon: 'icon1',
+          screen_label: 'label1',
+          type: 'date'
+        },
+        id2: {
+          screen_label: 'label2',
+          type: 'location'
+        },
+        id3: {
+          screen_label: 'label3',
+          type: 'tld'
+        },
+        id4: {
+          screen_label: 'label4',
+          type: 'url'
+        }
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      expect(output.length).to.equal(5);
+
+      expect(output[0].key).to.equal('id1');
+      expect(output[0].type).to.equal('date');
+      expect(output[0].isDate).to.be.true;
+      expect(output[0].dateProperties).to.deep.equal({
+        start: {
+          field: 'knowledge_graph.id1.key',
+          icon: 'icon1',
+          key: 'id1_start',
+          styleClass: 'color1',
+          title: 'label1 Begin'
+        },
+        end: {
+          field: 'knowledge_graph.id1.key',
+          icon: 'icon1',
+          key: 'id1_end',
+          styleClass: 'color1',
+          title: 'label1 End'
+        }
+      });
+
+      expect(output[1].key).to.equal('id2');
+      expect(output[1].type).to.equal('location');
+      expect(output[1].isLocation).to.be.true;
+
+      expect(output[2].key).to.equal('id3');
+      expect(output[2].type).to.equal('tld');
+      expect(output[2].isUrl).to.be.true;
+
+      expect(output[3].key).to.equal('id4');
+      expect(output[3].type).to.equal('url');
+      expect(output[3].isUrl).to.be.true;
+    });
+
+    test('searchFields given non-empty array does return expected array sorted by group and field', function() {
+      transformFunctions.serverConfig = {
+        resultQueryField: '_id',
+        resultIcon: 'av:web-asset',
+        resultNameSingular: 'Webpage',
+        resultNamePlural: 'Webpages'
+      };
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var output = transformFunctions.transforms.config.searchFields({
+        id1: {
+          group_name: 'groupA',
+          screen_label: 'label1',
+          type: 'type1'
+        },
+        id2: {
+          group_name: 'groupB',
+          group_order: 2,
+          field_order: 2,
+          screen_label: 'label2',
+          type: 'type2'
+        },
+        id3: {
+          group_name: 'groupC',
+          group_order: 0,
+          field_order: 0,
+          screen_label: 'label3',
+          type: 'type3'
+        },
+        id4: {
+          group_name: 'groupB',
+          group_order: 2,
+          field_order: 0,
+          screen_label: 'label4',
+          type: 'type4'
+        },
+        id5: {
+          screen_label: 'label5',
+          type: 'type5'
+        },
+        id6: {
+          group_name: 'groupB',
+          group_order: 2,
+          screen_label: 'label6',
+          type: 'type6'
+        }
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      expect(output.length).to.equal(7);
+
+      expect(output[0].key).to.equal('id3');
+      expect(output[0].group).to.equal('groupC');
+      expect(output[0].groupOrder).to.equal(0);
+      expect(output[0].fieldOrder).to.equal(0);
+
+      expect(output[1].key).to.equal('id4');
+      expect(output[1].group).to.equal('groupB');
+      expect(output[1].groupOrder).to.equal(2);
+      expect(output[1].fieldOrder).to.equal(0);
+
+      expect(output[2].key).to.equal('id2');
+      expect(output[2].group).to.equal('groupB');
+      expect(output[2].groupOrder).to.equal(2);
+      expect(output[2].fieldOrder).to.equal(2);
+
+      expect(output[3].key).to.equal('id6');
+      expect(output[3].group).to.equal('groupB');
+      expect(output[3].groupOrder).to.equal(2);
+      expect(output[3].fieldOrder).to.be.undefined;
+
+      expect(output[4].key).to.equal('id1');
+      expect(output[4].group).to.equal('groupA');
+      expect(output[4].groupOrder).to.equal(3);
+      expect(output[4].fieldOrder).to.be.undefined;
+
+      expect(output[5].key).to.equal('id5');
+      expect(output[5].group).to.be.undefined;
+      expect(output[5].groupOrder).to.equal(4);
+      expect(output[5].fieldOrder).to.be.undefined;
+    });
+
+    test('facetTransform does return expected array', function() {
+      transformFunctions.serverConfig = {
+        resultQueryField: '_id',
+        resultIcon: 'av:web-asset',
+        resultNameSingular: 'Webpage',
+        resultNamePlural: 'Webpages'
+      };
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var output = transformFunctions.transforms.config.searchFields({
+        id1: {
+          color: 'color1',
+          field_order: 1,
+          free_text_search: true,
+          group_name: 'group1',
+          group_order: 1,
+          icon: 'icon1',
+          screen_label: 'label1',
+          screen_label_plural: 'labels1',
+          show_in_facets: true,
+          show_as_link: 'entity',
+          show_in_result: 'header',
+          show_in_search: true,
+          type: 'type1',
+          width: 'width1'
+        }
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      expect(output.length).to.equal(2);
+
+      expect(output[0].key).to.equal('id1');
+      expect(output[0].link).to.equal('entity');
+      expect(output[0].styleClass).to.equal('color1');
+      expect(output[0].type).to.equal('type1');
+      expect(output[0].facetTransform).to.be.a('Function');
+
+      expect(output[0].facetTransform({}, {
+        name: 'testName'
+      })).to.deep.equal([]);
+
+      expect(output[0].facetTransform({
+        aggregations: {}
+      }, {
+        name: 'testName'
+      })).to.deep.equal([]);
+
+      expect(output[0].facetTransform({
+        aggregations: {
+          testName: {}
+        }
+      }, {
+        name: 'testName'
+      })).to.deep.equal([]);
+
+      expect(output[0].facetTransform({
+        aggregations: {
+          testName: {
+            buckets: []
+          }
+        }
+      }, {
+        name: 'testName'
+      })).to.deep.equal([]);
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      expect(output[0].facetTransform({
+        aggregations: {
+          testName: {
+            buckets: [{
+              key: 'A',
+              doc_count: 8
+            }, {
+              key: 'B',
+              doc_count: 4
+            }, {
+              key: 'C',
+              doc_count: 2
+            }, {
+              key: 'D',
+              doc_count: 1
+            }]
+          }
+        }
+      }, {
+        name: 'testName'
+      })).to.deep.equal([{
+        count: 8,
+        id: 'a',
+        link: '/entity.html?domain=TestDomain&id=A&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'a'
+      }, {
+        count: 4,
+        id: 'b',
+        link: '/entity.html?domain=TestDomain&id=B&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'b'
+      }, {
+        count: 2,
+        id: 'c',
+        link: '/entity.html?domain=TestDomain&id=C&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'c'
+      }, {
+        count: 1,
+        id: 'd',
+        link: '/entity.html?domain=TestDomain&id=D&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'd'
+      }]);
+
+      expect(output[0].facetTransform({
+        aggregations: {
+          testName: {
+            testName: {
+              buckets: [{
+                key: 'A',
+                doc_count: 8
+              }, {
+                key: 'B',
+                doc_count: 4
+              }, {
+                key: 'C',
+                doc_count: 2
+              }, {
+                key: 'D',
+                doc_count: 1
+              }]
+            }
+          }
+        }
+      }, {
+        name: 'testName'
+      })).to.deep.equal([{
+        count: 8,
+        id: 'a',
+        link: '/entity.html?domain=TestDomain&id=A&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'a'
+      }, {
+        count: 4,
+        id: 'b',
+        link: '/entity.html?domain=TestDomain&id=B&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'b'
+      }, {
+        count: 2,
+        id: 'c',
+        link: '/entity.html?domain=TestDomain&id=C&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'c'
+      }, {
+        count: 1,
+        id: 'd',
+        link: '/entity.html?domain=TestDomain&id=D&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'd'
+      }]);
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+    });
+
+    test('facetTransform with search endpoint does return expected array', function() {
+      transformFunctions.serverConfig = {
+        overrideSearchEndpoint: 'testSearchEndpoint',
+        resultQueryField: '_id',
+        resultIcon: 'av:web-asset',
+        resultNameSingular: 'Webpage',
+        resultNamePlural: 'Webpages'
+      };
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var output = transformFunctions.transforms.config.searchFields({
+        id1: {
+          color: 'color1',
+          field_order: 1,
+          free_text_search: true,
+          group_name: 'group1',
+          group_order: 1,
+          icon: 'icon1',
+          screen_label: 'label1',
+          screen_label_plural: 'labels1',
+          show_in_facets: true,
+          show_as_link: 'entity',
+          show_in_result: 'header',
+          show_in_search: true,
+          type: 'type1',
+          width: 'width1'
+        }
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      expect(output.length).to.equal(2);
+
+      expect(output[0].key).to.equal('id1');
+      expect(output[0].link).to.equal('entity');
+      expect(output[0].styleClass).to.equal('color1');
+      expect(output[0].type).to.equal('type1');
+      expect(output[0].facetTransform).to.be.a('Function');
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      expect(output[0].facetTransform([{
+        result: {
+          aggregations: {
+            '?testName': {
+              buckets: [{
+                key: 'A',
+                doc_count: 8
+              }, {
+                key: 'B',
+                doc_count: 4
+              }, {
+                key: 'C',
+                doc_count: 2
+              }, {
+                key: 'D',
+                doc_count: 1
+              }]
+            }
+          }
+        }
+      }], {
+        name: 'testName'
+      })).to.deep.equal([{
+        count: 8,
+        id: 'a',
+        link: '/entity.html?domain=TestDomain&id=A&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'a'
+      }, {
+        count: 4,
+        id: 'b',
+        link: '/entity.html?domain=TestDomain&id=B&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'b'
+      }, {
+        count: 2,
+        id: 'c',
+        link: '/entity.html?domain=TestDomain&id=C&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'c'
+      }, {
+        count: 1,
+        id: 'd',
+        link: '/entity.html?domain=TestDomain&id=D&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'd'
+      }]);
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+    });
+
+    test('facetTransform with search endpoint and network expansion does return expected array', function() {
+      transformFunctions.serverConfig = {
+        overrideSearchEndpoint: 'testSearchEndpoint',
+        resultQueryField: '_id',
+        resultIcon: 'av:web-asset',
+        resultNameSingular: 'Webpage',
+        resultNamePlural: 'Webpages'
+      };
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      var output = transformFunctions.transforms.config.searchFields({
+        id1: {
+          color: 'color1',
+          field_order: 1,
+          free_text_search: true,
+          group_name: 'group1',
+          group_order: 1,
+          icon: 'icon1',
+          screen_label: 'label1',
+          screen_label_plural: 'labels1',
+          show_in_facets: true,
+          show_as_link: 'entity',
+          show_in_result: 'header',
+          show_in_search: true,
+          type: 'type1',
+          width: 'width1'
+        }
+      });
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      expect(output.length).to.equal(2);
+
+      expect(output[0].key).to.equal('id1');
+      expect(output[0].link).to.equal('entity');
+      expect(output[0].styleClass).to.equal('color1');
+      expect(output[0].type).to.equal('type1');
+      expect(output[0].facetTransform).to.be.a('Function');
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      expect(output[0].facetTransform([{
+        result: [{}, {
+          aggregations: {
+            '?testName': {
+              buckets: [{
+                key: 'A',
+                doc_count: 8
+              }, {
+                key: 'B',
+                doc_count: 4
+              }, {
+                key: 'C',
+                doc_count: 2
+              }, {
+                key: 'D',
+                doc_count: 1
+              }]
+            }
+          }
+        }]
+      }], {
+        isNetworkExpansion: true,
+        name: 'testName'
+      })).to.deep.equal([{
+        count: 8,
+        id: 'a',
+        link: '/entity.html?domain=TestDomain&id=A&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'a'
+      }, {
+        count: 4,
+        id: 'b',
+        link: '/entity.html?domain=TestDomain&id=B&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'b'
+      }, {
+        count: 2,
+        id: 'c',
+        link: '/entity.html?domain=TestDomain&id=C&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'c'
+      }, {
+        count: 1,
+        id: 'd',
+        link: '/entity.html?domain=TestDomain&id=D&type=id1',
+        styleClass: 'color1',
+        source: undefined,
+        text: 'd'
+      }]);
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+    });
+
+    test('facetTransform of images does return expected array', function() {
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      transformFunctions.clientConfig = {
+        image_prefix: 'prefix/',
+        image_suffix: '.suffix',
+        show_images_in_facets: true
+      };
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+      transformFunctions.serverConfig = {
+        resultQueryField: '_id',
+        resultIcon: 'av:web-asset',
+        resultNameSingular: 'Webpage',
+        resultNamePlural: 'Webpages'
+      };
+
+      var output = transformFunctions.transforms.config.searchFields({});
+      expect(output.length).to.equal(2);
+
+      expect(output[0].key).to.equal('image');
+      expect(output[0].link).to.equal('entity');
+      expect(output[0].styleClass).to.equal('black');
+      expect(output[0].type).to.equal('image');
+      expect(output[0].isImage).to.be.true;
+      expect(output[0].facetTransform).to.be.a('Function');
+
+      /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+      expect(output[0].facetTransform({
+        aggregations: {
+          testName: {
+            buckets: [{
+              key: 'url/A',
+              doc_count: 8
+            }, {
+              key: 'url/B',
+              doc_count: 4
+            }, {
+              key: 'url/C',
+              doc_count: 2
+            }, {
+              key: 'url/D',
+              doc_count: 1
+            }]
+          }
+        }
+      }, {
+        name: 'testName'
+      })).to.deep.equal([{
+        count: 8,
+        id: 'url/A',
+        link: '/entity.html?domain=TestDomain&id=url%2FA&type=image',
+        styleClass: 'black',
+        source: 'prefix/URL/A.suffix',
+        text: 'A'
+      }, {
+        count: 4,
+        id: 'url/B',
+        link: '/entity.html?domain=TestDomain&id=url%2FB&type=image',
+        styleClass: 'black',
+        source: 'prefix/URL/B.suffix',
+        text: 'B'
+      }, {
+        count: 2,
+        id: 'url/C',
+        link: '/entity.html?domain=TestDomain&id=url%2FC&type=image',
+        styleClass: 'black',
+        source: 'prefix/URL/C.suffix',
+        text: 'C'
+      }, {
+        count: 1,
+        id: 'url/D',
+        link: '/entity.html?domain=TestDomain&id=url%2FD&type=image',
+        styleClass: 'black',
+        source: 'prefix/URL/D.suffix',
+        text: 'D'
+      }]);
+      /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+    });
+
     test('searchFieldsCollection does return expected object', function() {
       expect(transformFunctions.transforms.config.searchFieldsCollection([])).to.deep.equal({});
 

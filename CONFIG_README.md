@@ -47,7 +47,7 @@ The optional project configuration properties are:
 Option | Effect | Default Value
 ------ | ------ | -------------
 key | The unique ID for the item. | **REQUIRED**
-type | The type of item.  Values are `'date'` (in ISO format), `'email'`, `'hyphenated'` (see [hyphenated format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#hyphenated-format)), `'image'` (in SHA1 format), `'location'` (see [location format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#location-format)), `'number'`, `'phone'`, `'string'`, or `'username'` (see [username format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#username-format)). | **REQUIRED**
+type | The type of item.  Values are `'date'` (in ISO format), `'email'`, `'hyphenated'` (see [hyphenated format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#hyphenated-format)), `'image'` (in SHA1 format), `'kg_id'` (an elasticsearch `_id`), `'location'` (see [location format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#location-format)), `'number'`, `'phone'`, `'string'`, `'type'` (see [type_format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#type_format)), or `'username'` (see [username format](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#username-format)). | **REQUIRED**
 color | The color for the item from the list of [colors](https://github.com/NextCenturyCorporation/dig-ui/blob/master/CONFIG_README.md#colors). | `'grey'`
 extraction_field | The extraction field in each elasticsearch document.  Overrides `field`. | See `field`.
 field | The actual field in the `_source` object of each elasticsearch document. | Aggregation Field:  `'knowledge_graph.' + key + '.key'`, <br> Query Field:  `'knowledge_graph.' + key + '.value'`
@@ -59,7 +59,7 @@ icon | The polymer or fontawesome icon for the item from the list of [icons](htt
 screen_label | The singular label for the item. | `'Extraction'`
 screen_label_plural | The plural label for the item. | `'Extractions'`
 show_as_link | Whether to show the item as a link.  Values are `'entity'` (link to its own DIG Entity Page), `'text'` (the text itself is a link), or `'no'`. | `'no'`
-show_in_result | Whether to show the item in the result.  Values are `'title'` (the result title), `'description'` (the result description), `'header'` (an extraction in the result header), `'detail'` (an extraction in the result details), `'nested'` (a nested extraction), or `'no'`. | `'no'`
+show_in_result | Whether to show the item in the result.  Values are `'title'` (the result title), `'description'` (the result description), `'header'` (an extraction in the result header), `'detail'` (an extraction in the result details), `'nested'` (a nested extraction), `'series'` (a time series), or `'no'`. | `'no'`
 show_in_search | Whether to show the item in the Search Window.  Values are boolean. | `false`
 width | The numerical fixed width of extractions in the results. | None
 
@@ -77,6 +77,12 @@ The `location` field type supports a format containing the city, state, country,
 ```
 <city>:<state>:<country>:<longitude>:<latitude>
 ```
+
+### Type Format
+
+The `type` field type supports the following options:
+
+- `measure`
 
 ### Username Format
 

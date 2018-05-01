@@ -17,6 +17,7 @@ limitations under the License.
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../bower_components/stylized-icon/stylized-icon.html">
 
 <dom-module id="section-wrapper">
   <template>
@@ -61,14 +62,6 @@ limitations under the License.
         margin: 0 5px;
       }
 
-      .header-icon,
-      .status-icon {
-        /* Same height as section-title */
-        --iron-icon-height: 20px;
-        --iron-icon-width: 20px;
-        min-width: 20px;
-      }
-
       .header-text {
         font-size: 18px;
         font-weight: 500;
@@ -84,96 +77,12 @@ limitations under the License.
         -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
       }
-
-      iron-icon.amber {
-        color: var(--paper-amber-600);
-      }
-
-      iron-icon.black {
-        color: #111;
-      }
-
-      iron-icon.blue {
-        color: var(--paper-blue-600);
-      }
-
-      iron-icon.blue-grey {
-        color: var(--paper-blue-grey-600);
-      }
-
-      iron-icon.brown {
-        color: var(--paper-brown-600);
-      }
-
-      iron-icon.cyan {
-        color: var(--paper-cyan-600);
-      }
-
-      iron-icon.deep-orange {
-        color: var(--paper-deep-orange-600);
-      }
-
-      iron-icon.deep-purple {
-        color: var(--paper-deep-purple-600);
-      }
-
-      iron-icon.green {
-        color: var(--paper-green-600);
-      }
-
-      iron-icon.grey {
-        color: var(--paper-grey-600);
-      }
-
-      iron-icon.indigo {
-        color: var(--paper-indigo-600);
-      }
-
-      iron-icon.light-blue {
-        color: var(--paper-light-blue-600);
-      }
-
-      iron-icon.light-green {
-        color: var(--paper-light-green-600);
-      }
-
-      iron-icon.lime {
-        color: var(--paper-lime-600);
-      }
-
-      iron-icon.orange {
-        color: var(--paper-orange-600);
-      }
-
-      iron-icon.pink {
-        color: var(--paper-pink-600);
-      }
-
-      iron-icon.purple {
-        color: var(--paper-purple-600);
-      }
-
-      iron-icon.red {
-        color: var(--paper-red-600);
-      }
-
-      iron-icon.teal {
-        color: var(--paper-teal-600);
-      }
-
-      iron-icon.white {
-        color: #fff;
-      }
-
-      iron-icon.yellow {
-        color: var(--paper-yellow-600);
-      }
     </style>
 
     <paper-material class$="[[_isSelected(selected)]] [[_isTappable(error, loading, noData, tappable)]]" elevation="2">
       <template is="dom-if" if="[[!hideSectionTitle]]">
         <div class="section-title layout horizontal start center" on-tap="_updateTapped">
-          <iron-icon class$="header-icon [[styleClass]]" icon="[[icon]]"></iron-icon>
+          <stylized-icon class="header-icon" icon="[[icon]]" style-class="[[styleClass]]"></stylized-icon>
 
           <div class="header-text flex" title$="[[sectionTitle]]">[[sectionTitle]]</div>
 
@@ -186,14 +95,14 @@ limitations under the License.
           <template is="dom-if" if="[[showLoadIcon]]">
             <template is="dom-if" if="[[!loading]]">
               <template is="dom-if" if="[[!noData]]">
-                <iron-icon class="status-icon" icon="check-circle" title$="[[sectionTitle]]"></iron-icon>
+                <stylized-icon active class="status-icon" icon="check-circle" title-tooltip="[[sectionTitle]]"></stylized-icon>
               </template>
               <template is="dom-if" if="[[noData]]">
                 <template is="dom-if" if="[[error]]">
-                  <iron-icon class="status-icon" icon="error" title$="[[sectionTitle]]"></iron-icon>
+                  <stylized-icon active class="status-icon" icon="error" title-tooltip="[[sectionTitle]]"></stylized-icon>
                 </template>
                 <template is="dom-if" if="[[!error]]">
-                  <iron-icon class="status-icon" icon="block" title$="[[sectionTitle]]"></iron-icon>
+                  <stylized-icon active class="status-icon" icon="block" title-tooltip="[[sectionTitle]]"></stylized-icon>
                 </template>
               </template>
             </template>

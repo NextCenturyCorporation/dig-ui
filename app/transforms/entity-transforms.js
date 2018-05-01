@@ -357,7 +357,8 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       headerExtractions: [],
       detailExtractions: [],
       nestedExtractions: [],
-      details: []
+      details: [],
+      series: []
     };
 
     resultObject.highlightedText = !titles.length ? '' : (!esConfig.showMultipleTitles ? titles[0].highlight : titles.map(function(title) {
@@ -401,10 +402,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return extractionObject;
     };
 
-    resultObject.headerExtractions = searchFields.filter(function(object) {
-      return object.result === 'header';
-    }).map(function(object, index) {
-      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlights), index);
+    resultObject.headerExtractions = searchFields.filter(function(searchFieldsObject) {
+      return searchFieldsObject.result === 'header';
+    }).map(function(searchFieldsObject, index) {
+      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, searchFieldsObject, highlights), index);
     }).sort(function(a, b) {
       if(a.isUrl && !b.isUrl) {
         return -1;
@@ -421,17 +422,48 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
       return a.index - b.index;
     });
 
-    resultObject.detailExtractions = searchFields.filter(function(object) {
-      return object.result === 'detail';
-    }).map(function(object) {
-      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlights));
+    resultObject.detailExtractions = searchFields.filter(function(searchFieldsObject) {
+      return searchFieldsObject.result === 'detail';
+    }).map(function(searchFieldsObject) {
+      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, searchFieldsObject, highlights));
     });
 
-    resultObject.nestedExtractions = searchFields.filter(function(object) {
-      return object.result === 'nested';
-    }).map(function(object) {
-      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, object, highlights));
+    resultObject.nestedExtractions = searchFields.filter(function(searchFieldsObject) {
+      return searchFieldsObject.result === 'nested' && searchFieldsObject.type === 'kg_id';
+    }).map(function(searchFieldsObject) {
+      return finalizeExtractionFunction(getHighlightedExtractionObjectFromResult(result, searchFieldsObject, highlights));
     });
+
+    // For now, just get the first field of each type (series, series date, series number, type).
+    var seriesField = searchFields.find(function(searchFieldsObject) {
+      return searchFieldsObject.result === 'series' && searchFieldsObject.type === 'kg_id';
+    });
+    var seriesDateField = searchFields.find(function(searchFieldsObject) {
+      return searchFieldsObject.result === 'series' && searchFieldsObject.type === 'date';
+    });
+    var seriesNumberField = searchFields.find(function(searchFieldsObject) {
+      return searchFieldsObject.result === 'series' && searchFieldsObject.type === 'number';
+    });
+    var typeField = searchFields.find(function(searchFieldsObject) {
+      return searchFieldsObject.type === 'type';
+    });
+
+    if(seriesField && seriesDateField && seriesNumberField && typeField) {
+      var types = _.get(result, typeField.extractionField, []);
+      if(types.some(function(type) {
+        return type.key === 'measure';
+      })) {
+        resultObject.series = [{
+          color: commonTransforms.getHexColor(seriesField.color),
+          id: id,
+          dateField: seriesDateField.field,
+          idField: seriesField.field,
+          numberField: seriesNumberField.field,
+          title: seriesField.title,
+          typeField: typeField.field
+        }];
+      }
+    }
 
     if(esDataEndpoint) {
       resultObject.details.push({
@@ -500,44 +532,68 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return createResultObject(result, searchFields, searchFieldsObject.icon, searchFieldsObject.title, searchFieldsObject.styleClass, searchFieldsObject.key);
   }
 
-  function createHistogram(buckets, entityConfig, timeBegin, timeEnd, unidentifiedBucketName) {
-    return buckets.reduce(function(timeline, dateBucket) {
+  function createHistogram(buckets, entityConfig, interval, timeStringBegin, timeStringEnd, unidentifiedBucketName) {
+    var timeBegin = timeStringBegin ? commonTransforms.getDateForInterval(timeStringBegin, interval).getTime() : null;
+    var timeEnd = timeStringEnd ? commonTransforms.getDateForInterval(timeStringEnd, interval).getTime() : null;
+
+    var bucketDateToData = buckets.reduce(function(dateToData, dateBucket) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var count = dateBucket.doc_count;
       /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 
       if(count) {
-        var data = [];
-        if(entityConfig && dateBucket[entityConfig.key] && dateBucket[entityConfig.key].buckets) {
-          data = dateBucket[entityConfig.key].buckets.map(function(entityBucket, index) {
-            return getExtraction(entityBucket, entityConfig, index);
-          }).filter(commonTransforms.getExtractionFilterFunction(entityConfig.type));
+        var date = commonTransforms.getFormattedDate(dateBucket.key, interval);
+        var data = (entityConfig && dateBucket[entityConfig.key] && dateBucket[entityConfig.key].buckets) ? dateBucket[entityConfig.key].buckets : [];
+
+        if(!dateToData[date]) {
+          dateToData[date] = {
+            count: count,
+            data: data
+          };
+        } else {
+          dateToData[date].count += count;
+          dateToData[date].data = dateToData[date].data.concat(data.reduce(function(uniqueData, item) {
+            if(!dateToData[date].data.some(function(existingItem) {
+              return existingItem.key === item.key;
+            })) {
+              uniqueData.push(item);
+            }
+            return uniqueData;
+          }, []));
         }
+      }
 
-        var dateObject = {
-          date: commonTransforms.getFormattedDate(dateBucket.key),
-          data: data
-        };
+      return dateToData;
+    }, {});
 
-        var sum = dateObject.data.reduce(function(sum, entityObject) {
-          return sum + entityObject.count;
-        }, 0);
+    return _.keys(bucketDateToData).reduce(function(timeline, date) {
+      var data = bucketDateToData[date].data.map(function(entityBucket, index) {
+        return getExtraction(entityBucket, entityConfig, index);
+      }).filter(commonTransforms.getExtractionFilterFunction(entityConfig ? entityConfig.type : null));
 
-        if(sum < count) {
-          var countLabel = (count - sum).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-          dateObject.data.push({
-            count: count - sum,
-            icon: entityConfig ? entityConfig.icon : undefined,
-            styleClass: entityConfig ? entityConfig.styleClass : undefined,
-            text: unidentifiedBucketName,
-            textAndCount: unidentifiedBucketName + ' (' + (countLabel) + ')'
-          });
-        }
+      var dateObject = {
+        date: date,
+        data: data
+      };
 
-        // The data list may be empty if none match the ID for the entity page.
-        if(dateObject.data.length) {
-          timeline.push(dateObject);
-        }
+      var sum = dateObject.data.reduce(function(sum, entityObject) {
+        return sum + entityObject.count;
+      }, 0);
+
+      if(sum < bucketDateToData[date].count) {
+        var countLabel = (bucketDateToData[date].count - sum).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        dateObject.data.push({
+          count: bucketDateToData[date].count - sum,
+          icon: entityConfig ? entityConfig.icon : undefined,
+          styleClass: entityConfig ? entityConfig.styleClass : undefined,
+          text: unidentifiedBucketName,
+          textAndCount: unidentifiedBucketName ? (unidentifiedBucketName + ' (' + (countLabel) + ')') : undefined,
+        });
+      }
+
+      // The data list may be empty if none match the ID for the entity page.
+      if(dateObject.data.length) {
+        timeline.push(dateObject);
       }
 
       return timeline;
@@ -815,6 +871,35 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     },
 
     /**
+     * Returns the time series for the given query results to show in a bar chart.
+     *
+     * @param {Object} data
+     * @param {Object} config
+     * @return {Array}
+     */
+    series: function(data, config) {
+      if(data && data.hits && data.hits.hits && data.hits.hits.length) {
+        /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
+        var buckets = data.hits.hits.reduce(function(bucketsInLoop, result) {
+          var dates = _.get(result, config.dateField, []);
+          var numbers = _.get(result, config.numberField, []);
+          for(var i = 0; i < Math.min(dates.length, numbers.length); ++i) {
+            bucketsInLoop.push({
+              key: dates[i].key,
+              doc_count: parseFloat(numbers[i].key)
+            });
+          }
+          return bucketsInLoop;
+        }, []).filter(function(bucket) {
+          return bucket.key && bucket.doc_count;
+        });
+        /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
+        return createHistogram(buckets, {}, config.interval);
+      }
+      return [];
+    },
+
+    /**
      * Returns the timeline data for the given query results to show in a timeline bar chart (by date, then by item)
      * and a sparkline chart (by item, then by date) in an object with the "dates" and "items" properties.
      *
@@ -828,8 +913,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         return {
           begin: commonTransforms.getFormattedDate(config.begin || buckets[0].key),
           end: commonTransforms.getFormattedDate(config.end || buckets[buckets.length - 1].key),
-          histogram: createHistogram(buckets, config.entity, (config.begin ? new Date(config.begin).getTime() : null), (config.end ? new Date(config.end).getTime() : null),
-              config.unidentified || '(Unidentified)'),
+          histogram: createHistogram(buckets, config.entity, config.interval, config.begin, config.end, config.unidentified || '(Unidentified)'),
           sparklines: createSparklines(buckets, false, null, null, config.entity, config.page, config.id)
         };
       }

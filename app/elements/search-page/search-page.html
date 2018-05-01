@@ -16,11 +16,13 @@ limitations under the License.
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/dig-logger/dig-logger.html">
+<link rel="import" href="../../bower_components/dropdown-menu/dropdown-menu.html">
 <link rel="import" href="../../bower_components/elastic-client/elastic-client.html">
 <link rel="import" href="../../bower_components/elastic-error/elastic-error.html">
 <link rel="import" href="../../bower_components/export-button/export-button.html">
 <link rel="import" href="../../bower_components/export-button/export-dialog.html">
 <link rel="import" href="../../bower_components/facet-panel/facet-panel.html">
+<link rel="import" href="../../bower_components/icon-button/icon-button.html">
 <link rel="import" href="../../bower_components/image-gallery/image-gallery.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/iron-dropdown/iron-dropdown.html">
@@ -33,7 +35,6 @@ limitations under the License.
 <link rel="import" href="../../bower_components/nested-list/nested-list.html">
 <link rel="import" href="../../bower_components/paper-drawer-panel/paper-drawer-panel.html">
 <link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
-<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-styles/shadow.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
@@ -382,7 +383,8 @@ limitations under the License.
         transform-function="[[transforms.entity.results]]"
         error="{{searchError}}"
         loading="{{searchLoading}}"
-        results="{{searchResults}}">
+        results="{{searchResults}}"
+        total="{{searchTotal}}">
       </build-and-run-query>
     </template>
 
@@ -494,140 +496,147 @@ limitations under the License.
     </bulk-search>
 
     <template is="dom-if" if="[[!esConfig.hideTimelines]]">
+      <query-builder
+        config="[[searchFieldsCollection]]"
+        data="[[searchParameters]]"
+        stop="[[!processRequest]]"
+        query="{{esQueryWithoutDates}}">
+      </query-builder>
+
       <elastic-client-aggregation-builder
         name="[[createHistogramAggregationName(dateFieldsToProperties, dateMenu.selected)]]"
         type="date_histogram"
         count="0"
         field="[[dateMenu.selected]]"
-        interval="week"
+        interval="year"
         filters="[]"
-        ejs-aggregation="{{timelineByWeekAggregation}}">
+        ejs-aggregation="{{timelineAggregation.year}}">
       </elastic-client-aggregation-builder>
 
-      <template is="dom-if" if="[[timelineByWeekAggregation]]">
+      <template is="dom-if" if="[[timelineAggregation.year]]" restamp>
         <build-and-run-query
-          query="[[esQuery]]"
+          query="[[esQueryWithoutDates]]"
           client="[[esClient]]"
           index-name="[[esConfig.esIndex]]"
           index-types="[[esConfig.esType]]"
-          aggregations="[[buildArray(timelineByWeekAggregation)]]"
+          aggregations="[[buildArray(timelineAggregation.year)]]"
           page-size="0"
-          transform-config="[[createHistogramAggregationConfig(dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
+          transform-config="[[createHistogramAggregationConfig('year', dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
           transform-function="[[transforms.entity.timelines]]"
-          error="{{timelineByWeekError}}"
-          loading="{{timelineByWeekLoading}}"
-          results="{{timelineByWeekResults}}">
+          error="{{timelineError.year}}"
+          loading="{{timelineLoading.year}}"
+          results="{{timelineResults.year}}">
         </build-and-run-query>
-      </template>
 
-      <template is="dom-if" if="[[shouldChangeInterval(timelineByWeekResults, 'week', 'day')]]">
-        <elastic-client-aggregation-builder
-          name="[[createHistogramAggregationName(dateFieldsToProperties, dateMenu.selected)]]"
-          type="date_histogram"
-          count="0"
-          field="[[dateMenu.selected]]"
-          interval="day"
-          filters="[]"
-          ejs-aggregation="{{timelineByDayAggregation}}">
-        </elastic-client-aggregation-builder>
-
-        <template is="dom-if" if="[[timelineByDayAggregation]]">
-          <build-and-run-query
-            query="[[esQuery]]"
-            client="[[esClient]]"
-            index-name="[[esConfig.esIndex]]"
-            index-types="[[esConfig.esType]]"
-            aggregations="[[buildArray(timelineByDayAggregation)]]"
-            page-size="0"
-            transform-config="[[createHistogramAggregationConfig(dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
-            transform-function="[[transforms.entity.timelines]]"
-            error="{{timelineByDayError}}"
-            loading="{{timelineByDayLoading}}"
-            results="{{timelineByDayResults}}">
-          </build-and-run-query>
-        </template>
-
-        <template is="dom-if" if="[[shouldChangeInterval(timelineByDayResults, 'day', 'hour')]]">
+        <template is="dom-if" if="[[shouldReduceInterval(timelineResults.year)]]" restamp>
           <elastic-client-aggregation-builder
             name="[[createHistogramAggregationName(dateFieldsToProperties, dateMenu.selected)]]"
             type="date_histogram"
             count="0"
             field="[[dateMenu.selected]]"
-            interval="hour"
+            interval="month"
             filters="[]"
-            ejs-aggregation="{{timelineByHourAggregation}}">
+            ejs-aggregation="{{timelineAggregation.month}}">
           </elastic-client-aggregation-builder>
 
-          <template is="dom-if" if="[[timelineByHourAggregation]]">
+          <template is="dom-if" if="[[timelineAggregation.month]]" restamp>
             <build-and-run-query
-              query="[[esQuery]]"
+              query="[[esQueryWithoutDates]]"
               client="[[esClient]]"
               index-name="[[esConfig.esIndex]]"
               index-types="[[esConfig.esType]]"
-              aggregations="[[buildArray(timelineByHourAggregation)]]"
+              aggregations="[[buildArray(timelineAggregation.month)]]"
               page-size="0"
-              transform-config="[[createHistogramAggregationConfig(dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
+              transform-config="[[createHistogramAggregationConfig('month', dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
               transform-function="[[transforms.entity.timelines]]"
-              error="{{timelineByHourError}}"
-              loading="{{timelineByHourLoading}}"
-              results="{{timelineByHourResults}}">
+              error="{{timelineError.month}}"
+              loading="{{timelineLoading.month}}"
+              results="{{timelineResults.month}}">
             </build-and-run-query>
-          </template>
-        </template>
-      </template>
 
-      <template is="dom-if" if="[[shouldChangeInterval(timelineByWeekResults, 'week', 'month')]]">
-        <elastic-client-aggregation-builder
-          name="[[createHistogramAggregationName(dateFieldsToProperties, dateMenu.selected)]]"
-          type="date_histogram"
-          count="0"
-          field="[[dateMenu.selected]]"
-          interval="month"
-          filters="[]"
-          ejs-aggregation="{{timelineByMonthAggregation}}">
-        </elastic-client-aggregation-builder>
+            <template is="dom-if" if="[[shouldReduceInterval(timelineResults.month)]]" restamp>
+              <elastic-client-aggregation-builder
+                name="[[createHistogramAggregationName(dateFieldsToProperties, dateMenu.selected)]]"
+                type="date_histogram"
+                count="0"
+                field="[[dateMenu.selected]]"
+                interval="week"
+                filters="[]"
+                ejs-aggregation="{{timelineAggregation.week}}">
+              </elastic-client-aggregation-builder>
 
-        <template is="dom-if" if="[[timelineByMonthAggregation]]">
-          <build-and-run-query
-            query="[[esQuery]]"
-            client="[[esClient]]"
-            index-name="[[esConfig.esIndex]]"
-            index-types="[[esConfig.esType]]"
-            aggregations="[[buildArray(timelineByMonthAggregation)]]"
-            page-size="0"
-            transform-config="[[createHistogramAggregationConfig(dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
-            transform-function="[[transforms.entity.timelines]]"
-            error="{{timelineByMonthError}}"
-            loading="{{timelineByMonthLoading}}"
-            results="{{timelineByMonthResults}}">
-          </build-and-run-query>
-        </template>
+              <template is="dom-if" if="[[timelineAggregation.week]]" restamp>
+                <build-and-run-query
+                  query="[[esQueryWithoutDates]]"
+                  client="[[esClient]]"
+                  index-name="[[esConfig.esIndex]]"
+                  index-types="[[esConfig.esType]]"
+                  aggregations="[[buildArray(timelineAggregation.week)]]"
+                  page-size="0"
+                  transform-config="[[createHistogramAggregationConfig('week', dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
+                  transform-function="[[transforms.entity.timelines]]"
+                  error="{{timelineError.week}}"
+                  loading="{{timelineLoading.week}}"
+                  results="{{timelineResults.week}}">
+                </build-and-run-query>
 
-        <template is="dom-if" if="[[shouldChangeInterval(timelineByMonthResults, 'month', 'year')]]">
-          <elastic-client-aggregation-builder
-            name="[[createHistogramAggregationName(dateFieldsToProperties, dateMenu.selected)]]"
-            type="date_histogram"
-            count="0"
-            field="[[dateMenu.selected]]"
-            interval="year"
-            filters="[]"
-            ejs-aggregation="{{timelineByYearAggregation}}">
-          </elastic-client-aggregation-builder>
+                <template is="dom-if" if="[[shouldReduceInterval(timelineResults.week)]]" restamp>
+                  <elastic-client-aggregation-builder
+                    name="[[createHistogramAggregationName(dateFieldsToProperties, dateMenu.selected)]]"
+                    type="date_histogram"
+                    count="0"
+                    field="[[dateMenu.selected]]"
+                    interval="day"
+                    filters="[]"
+                    ejs-aggregation="{{timelineAggregation.day}}">
+                  </elastic-client-aggregation-builder>
 
-          <template is="dom-if" if="[[timelineByYearAggregation]]">
-            <build-and-run-query
-              query="[[esQuery]]"
-              client="[[esClient]]"
-              index-name="[[esConfig.esIndex]]"
-              index-types="[[esConfig.esType]]"
-              aggregations="[[buildArray(timelineByYearAggregation)]]"
-              page-size="0"
-              transform-config="[[createHistogramAggregationConfig(dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
-              transform-function="[[transforms.entity.timelines]]"
-              error="{{timelineByYearError}}"
-              loading="{{timelineByYearLoading}}"
-              results="{{timelineByYearResults}}">
-            </build-and-run-query>
+                  <template is="dom-if" if="[[timelineAggregation.day]]" restamp>
+                    <build-and-run-query
+                      query="[[esQueryWithoutDates]]"
+                      client="[[esClient]]"
+                      index-name="[[esConfig.esIndex]]"
+                      index-types="[[esConfig.esType]]"
+                      aggregations="[[buildArray(timelineAggregation.day)]]"
+                      page-size="0"
+                      transform-config="[[createHistogramAggregationConfig('day', dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
+                      transform-function="[[transforms.entity.timelines]]"
+                      error="{{timelineError.day}}"
+                      loading="{{timelineLoading.day}}"
+                      results="{{timelineResults.day}}">
+                    </build-and-run-query>
+
+                    <template is="dom-if" if="[[shouldReduceInterval(timelineResults.day)]]" restamp>
+                      <elastic-client-aggregation-builder
+                        name="[[createHistogramAggregationName(dateFieldsToProperties, dateMenu.selected)]]"
+                        type="date_histogram"
+                        count="0"
+                        field="[[dateMenu.selected]]"
+                        interval="hour"
+                        filters="[]"
+                        ejs-aggregation="{{timelineAggregation.hour}}">
+                      </elastic-client-aggregation-builder>
+
+                      <template is="dom-if" if="[[timelineAggregation.hour]]" restamp>
+                        <build-and-run-query
+                          query="[[esQueryWithoutDates]]"
+                          client="[[esClient]]"
+                          index-name="[[esConfig.esIndex]]"
+                          index-types="[[esConfig.esType]]"
+                          aggregations="[[buildArray(timelineAggregation.hour)]]"
+                          page-size="0"
+                          transform-config="[[createHistogramAggregationConfig('hour', dateFieldsToProperties, dateMenu.selected, searchParameters, searchParameters.*)]]"
+                          transform-function="[[transforms.entity.timelines]]"
+                          error="{{timelineError.hour}}"
+                          loading="{{timelineLoading.hour}}"
+                          results="{{timelineResults.hour}}">
+                        </build-and-run-query>
+                      </template>
+                    </template>
+                  </template>
+                </template>
+              </template>
+            </template>
           </template>
         </template>
       </template>
@@ -785,11 +794,11 @@ limitations under the License.
             <user-settings-button notifications="[[notifications]]" open-callback="[[userSettingsDialogCallbacks.openSettingsDialog]]"></user-settings-button>
           </template>
 
-          <paper-icon-button id="menuButton" icon="fa:bars" slot="dropdown-trigger" title="More Options" on-tap="toggleMenu"></paper-icon-button>
+          <icon-button active="[[menuOpened]]" bigger id="menuButton" icon="fa:bars" slot="dropdown-trigger" title-tooltip="More Options" on-tap="toggleMenu"></icon-button>
         </div>
       </paper-toolbar>
 
-      <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="70">
+      <iron-dropdown id="menuDropdown" horizontal-align="right" vertical-align="top" vertical-offset="70" opened="{{menuOpened}}">
         <div slot="dropdown-content">
           <template is="dom-if" if="[[serverConfig.username]]">
             <paper-icon-item disabled="[[searchParametersDisabled(searchParameters, searchParameters.*)]]" title="Save Search to Case..." on-tap="openSaveDialog">
@@ -850,9 +859,19 @@ limitations under the License.
 
       <template is="dom-if" if="[[esConfig.showOriginalSearch]]">
         <paper-toolbar slot="header" id="searchTermList">
+          <!-- TODO FIXME
           <template is="dom-if" if="[[drawerNarrow]]">
-            <paper-icon-button slot="top" id="toggleDrawerButton" icon="[[getDrawerToggleIcon(drawerOpened)]]" title$="[[getDrawerToggleText(drawerOpened)]]" on-tap="toggleDrawer"></paper-icon-button>
+            <icon-button
+              slot="top"
+              id="toggleDrawerButton"
+              active="[[drawerOpened]]"
+              bigger
+              icon="[[getDrawerToggleIcon(drawerOpened)]]"
+              title-tooltip="[[getDrawerToggleText(drawerOpened)]]"
+              on-tap="toggleDrawer">
+            </icon-button>
           </template>
+          -->
 
           <div slot="top" class="layout horizontal">
             <template is="dom-if" if="[[searchParametersDisabled(searchParameters, searchParameters.*)]]">
@@ -969,111 +988,103 @@ limitations under the License.
             </template>
 
             <template is="dom-if" if="[[!esConfig.hideTimelines]]">
-              <template is="dom-if" if="[[searchResultsShown.length]]">
+              <template is="dom-if" if="[[shouldShowBarChart(timelineResults.hour)]]">
                 <paper-material slot="header" id="searchTimeline" class="layout vertical" elevation="2">
-                  <template is="dom-if" if="[[logicalOr(timelineByHourLoading, timelineByDayLoading, timelineByWeekLoading, timelineByMonthLoading, timelineByYearLoading)]]">
-                    <loading-spinner show type="Timeline"></loading-spinner>
-                  </template>
+                  <zoomable-bar-chart
+                    bar-property="date"
+                    data="[[timelineResults.hour.histogram]]"
+                    default-color="#212121"
+                    default-label="[[serverConfig.resultNamePlural]]"
+                    height="85"
+                    hide-overview
+                    interval="hour"
+                    label-property="text"
+                    load
+                    loading="[[timelineLoading.hour]]"
+                    source="[[serverConfig.resultNamePlural]]"
+                    stack-property="data"
+                    timeline>
+                  </zoomable-bar-chart>
+                </paper-material>
+              </template>
 
-                  <template is="dom-if" if="[[!timelineByHourLoading]]">
-                    <template is="dom-if" if="[[shouldShowBarChart(timelineByHourResults, 'hour')]]">
-                      <zoomable-bar-chart
-                        bar-property="date"
-                        data="[[timelineByHourResults.histogram]]"
-                        default-color="greenyellow"
-                        default-label="[[serverConfig.resultNameSingular]]"
-                        height="85"
-                        hide-overview
-                        interval="hour"
-                        label-property="text"
-                        load
-                        loading="[[timelineByHourLoading]]"
-                        source="[[serverConfig.resultNamePlural]]"
-                        stack-property="data"
-                        timeline>
-                      </zoomable-bar-chart>
-                    </template>
-                  </template>
+              <template is="dom-if" if="[[shouldShowBarChart(timelineResults.day, timelineResults.hour)]]">
+                <paper-material slot="header" id="searchTimeline" class="layout vertical" elevation="2">
+                  <zoomable-bar-chart
+                    bar-property="date"
+                    data="[[timelineResults.day.histogram]]"
+                    default-color="#212121"
+                    default-label="[[serverConfig.resultNamePlural]]"
+                    height="85"
+                    hide-overview
+                    interval="day"
+                    label-property="text"
+                    load
+                    loading="[[timelineLoading.day]]"
+                    source="[[serverConfig.resultNamePlural]]"
+                    stack-property="data"
+                    timeline>
+                  </zoomable-bar-chart>
+                </paper-material>
+              </template>
 
-                  <template is="dom-if" if="[[!timelineByDayLoading]]">
-                    <template is="dom-if" if="[[shouldShowBarChart(timelineByDayResults, 'day')]]">
-                      <zoomable-bar-chart
-                        bar-property="date"
-                        data="[[timelineByDayResults.histogram]]"
-                        default-color="greenyellow"
-                        default-label="[[serverConfig.resultNameSingular]]"
-                        height="85"
-                        hide-overview
-                        interval="day"
-                        label-property="text"
-                        load
-                        loading="[[timelineByDayLoading]]"
-                        source="[[serverConfig.resultNamePlural]]"
-                        stack-property="data"
-                        timeline>
-                      </zoomable-bar-chart>
-                    </template>
-                  </template>
+              <template is="dom-if" if="[[shouldShowBarChart(timelineResults.week, timelineResults.day)]]">
+                <paper-material slot="header" id="searchTimeline" class="layout vertical" elevation="2">
+                  <zoomable-bar-chart
+                    bar-property="date"
+                    data="[[timelineResults.week.histogram]]"
+                    default-color="#212121"
+                    default-label="[[serverConfig.resultNamePlural]]"
+                    height="85"
+                    hide-overview
+                    interval="week"
+                    label-property="text"
+                    load
+                    loading="[[timelineLoading.week]]"
+                    source="[[serverConfig.resultNamePlural]]"
+                    stack-property="data"
+                    timeline>
+                  </zoomable-bar-chart>
+                </paper-material>
+              </template>
 
-                  <template is="dom-if" if="[[!timelineByWeekLoading]]">
-                    <template is="dom-if" if="[[shouldShowBarChart(timelineByWeekResults, 'week')]]">
-                      <zoomable-bar-chart
-                        bar-property="date"
-                        data="[[timelineByWeekResults.histogram]]"
-                        default-color="greenyellow"
-                        default-label="[[serverConfig.resultNameSingular]]"
-                        height="85"
-                        hide-overview
-                        interval="week"
-                        label-property="text"
-                        load
-                        loading="[[timelineByWeekLoading]]"
-                        source="[[serverConfig.resultNamePlural]]"
-                        stack-property="data"
-                        timeline>
-                      </zoomable-bar-chart>
-                    </template>
-                  </template>
+              <template is="dom-if" if="[[shouldShowBarChart(timelineResults.month, timelineResults.week)]]">
+                <paper-material slot="header" id="searchTimeline" class="layout vertical" elevation="2">
+                  <zoomable-bar-chart
+                    bar-property="date"
+                    data="[[timelineResults.month.histogram]]"
+                    default-color="#212121"
+                    default-label="[[serverConfig.resultNamePlural]]"
+                    height="85"
+                    hide-overview
+                    interval="month"
+                    label-property="text"
+                    load
+                    loading="[[timelineLoading.month]]"
+                    source="[[serverConfig.resultNamePlural]]"
+                    stack-property="data"
+                    timeline>
+                  </zoomable-bar-chart>
+                </paper-material>
+              </template>
 
-                  <template is="dom-if" if="[[!timelineByMonthLoading]]">
-                    <template is="dom-if" if="[[shouldShowBarChart(timelineByMonthResults, 'month')]]">
-                      <zoomable-bar-chart
-                        bar-property="date"
-                        data="[[timelineByMonthResults.histogram]]"
-                        default-color="greenyellow"
-                        default-label="[[serverConfig.resultNameSingular]]"
-                        height="85"
-                        hide-overview
-                        interval="month"
-                        label-property="text"
-                        load
-                        loading="[[timelineByMonthLoading]]"
-                        source="[[serverConfig.resultNamePlural]]"
-                        stack-property="data"
-                        timeline>
-                      </zoomable-bar-chart>
-                    </template>
-                  </template>
-
-                  <template is="dom-if" if="[[!timelineByYearLoading]]">
-                    <template is="dom-if" if="[[shouldShowBarChart(timelineByYearResults, 'year')]]">
-                      <zoomable-bar-chart
-                        bar-property="date"
-                        data="[[timelineByYearResults.histogram]]"
-                        default-color="greenyellow"
-                        default-label="[[serverConfig.resultNameSingular]]"
-                        height="85"
-                        hide-overview
-                        interval="year"
-                        label-property="text"
-                        load
-                        loading="[[timelineByYearLoading]]"
-                        source="[[serverConfig.resultNamePlural]]"
-                        stack-property="data"
-                        timeline>
-                      </zoomable-bar-chart>
-                    </template>
-                  </template>
+              <template is="dom-if" if="[[shouldShowBarChart(timelineResults.year, timelineResults.month)]]">
+                <paper-material slot="header" id="searchTimeline" class="layout vertical" elevation="2">
+                  <zoomable-bar-chart
+                    bar-property="date"
+                    data="[[timelineResults.year.histogram]]"
+                    default-color="#212121"
+                    default-label="[[serverConfig.resultNamePlural]]"
+                    height="85"
+                    hide-overview
+                    interval="year"
+                    label-property="text"
+                    load
+                    loading="[[timelineLoading.year]]"
+                    source="[[serverConfig.resultNamePlural]]"
+                    stack-property="data"
+                    timeline>
+                  </zoomable-bar-chart>
                 </paper-material>
               </template>
             </template>
@@ -1111,10 +1122,14 @@ limitations under the License.
               index-types="[[esConfig.esType]]"
               id-field="_id"
               search-fields="[[searchFields]]"
+              series-data-type="measurement"
               source-include-cached-page='["raw_content"]'
               source-include-nested-data="[[getSourceIncludes(serverConfig.sendSearchesDirectlyToES, esConfig.timestamp, esConfig.uid)]]"
+              source-include-series='["knowledge_graph.event_date.key","knowledge_graph.value.key"]'
               transform-cached-page="[[transforms.entity.cache]]"
               transform-nested-data="[[transforms.entity.nestedResults]]"
+              transform-series-config='{"dateField":"_source.knowledge_graph.event_date","numberField":"_source.knowledge_graph.value"}'
+              transform-series-function="[[transforms.entity.series]]"
               small-image-style-class="[[findBlurStyleClass(blurImages)]]"
               large-image-style-class="[[findBlurStyleClass(blurImages, 'large')]]"
               newline-tag="[[esConfig.newlineTag]]"
@@ -1214,6 +1229,14 @@ limitations under the License.
           type: Object
         },
 
+        esQuery: {
+          type: Object
+        },
+
+        esQueryWithoutDates: {
+          type: Object
+        },
+
         exportDialogCallbacks: {
           type: Object
         },
@@ -1299,6 +1322,10 @@ limitations under the License.
 
         logMessage: {
           type: Object
+        },
+
+        menuOpened: {
+          type: Boolean
         },
 
         networkExpansionParameters: {
@@ -1430,89 +1457,32 @@ limitations under the License.
           type: Object
         },
 
-        timelineByDayAggregation: {
-          type: Object
+        timelineAggregation: {
+          type: Object,
+          value: function() {
+            return {};
+          }
         },
 
-        timelineByDayError: {
-          type: Object
+        timelineError: {
+          type: Object,
+          value: function() {
+            return {};
+          }
         },
 
-        timelineByDayLoading: {
-          type: Boolean,
-          value: false
+        timelineLoading: {
+          type: Object,
+          value: function() {
+            return {};
+          }
         },
 
-        timelineByDayResults: {
-          type: Array
-        },
-
-        timelineByHourAggregation: {
-          type: Object
-        },
-
-        timelineByHourError: {
-          type: Object
-        },
-
-        timelineByHourLoading: {
-          type: Boolean,
-          value: false
-        },
-
-        timelineByHourResults: {
-          type: Array
-        },
-
-        timelineByMonthAggregation: {
-          type: Object
-        },
-
-        timelineByMonthError: {
-          type: Object
-        },
-
-        timelineByMonthLoading: {
-          type: Boolean,
-          value: false
-        },
-
-        timelineByMonthResults: {
-          type: Array
-        },
-
-        timelineByWeekAggregation: {
-          type: Object
-        },
-
-        timelineByWeekError: {
-          type: Object
-        },
-
-        timelineByWeekLoading: {
-          type: Boolean,
-          value: false
-        },
-
-        timelineByWeekResults: {
-          type: Array
-        },
-
-        timelineByYearAggregation: {
-          type: Object
-        },
-
-        timelineByYearError: {
-          type: Object
-        },
-
-        timelineByYearLoading: {
-          type: Boolean,
-          value: false
-        },
-
-        timelineByYearResults: {
-          type: Array
+        timelineResults: {
+          type: Object,
+          value: function() {
+            return {};
+          }
         },
 
         transforms: {
@@ -1534,7 +1504,7 @@ limitations under the License.
       },
 
       observers: [
-        'nullifyTimelineResults(searchParameters, searchParameters.*)',
+        'resetTimelineResults(searchParameters, searchParameters.*)',
         'runBothImageSearches(imagesUploaded)'
       ],
 
@@ -1563,8 +1533,9 @@ limitations under the License.
         };
       },
 
-      createHistogramAggregationConfig: function(dateFieldsToProperties, dateSelected, searchParameters) {
+      createHistogramAggregationConfig: function(interval, dateFieldsToProperties, dateSelected, searchParameters) {
         var config = {
+          interval: interval,
           name: this.createHistogramAggregationName(dateFieldsToProperties, dateSelected),
           unidentified: this.serverConfig.resultNamePlural
         };
@@ -1762,18 +1733,6 @@ limitations under the License.
         return !!result;
       },
 
-      /**
-       * Nullifies all the timeline results.
-       */
-      nullifyTimelineResults: function() {
-        // Order is vital!  Update week before everything, day before hour, and month before year.
-        this.set('timelineByWeekResults', null);
-        this.set('timelineByDayResults', null);
-        this.set('timelineByHourResults', null);
-        this.set('timelineByMonthResults', null);
-        this.set('timelineByYearResults', null);
-      },
-
       openBulkSearchDialog: function() {
         this.$$('#menuDropdown').close();
         this.$$('#bulkSearchDialog').open();
@@ -1787,6 +1746,16 @@ limitations under the License.
       openSearchImageGallery: function() {
         this.$$('#menuDropdown').close();
         this.$$('#searchImageGalleryDialog').open();
+      },
+
+      /**
+       * Resets all the timeline results.
+       */
+      resetTimelineResults: function() {
+        this.set('processRequest', false);
+        this.set('timelineResults', {});
+        this.set('esQueryWithoutDates', null);
+        this.set('processRequest', true);
       },
 
       runBothImageSearches: function() {
@@ -1901,73 +1870,30 @@ limitations under the License.
       },
 
       /**
-       * Returns based on the given results whether to change the interval.
+       * Returns whether to reduce the interval for the given results.
        *
-       * @param {Array} results
-       * @param {String} from
-       * @param {String} to
+       * @param {Object} results
        * @return {Boolean}
        */
-      shouldChangeInterval: function(results, from, to) {
+      shouldReduceInterval: function(results) {
         if(!results || !results.histogram.length) {
           return false;
         }
-
-        if(from === 'day') {
-          if(to === 'hour') {
-            return results.histogram.length < 60;
-          }
-          if(to === 'week') {
-            return results.histogram.length > 400;
-          }
-        }
-
-        if(from === 'week') {
-          if(to === 'day') {
-            return results.histogram.length < 60;
-          }
-          if(to === 'month') {
-            return results.histogram.length > 260;
-          }
-        }
-
-        if(from === 'month') {
-          if(to === 'week') {
-            return results.histogram.length < 60;
-          }
-          if(to === 'year') {
-            return results.histogram.length > 240;
-          }
-        }
-
-        return false;
+        return results.histogram.length <= 60;
       },
 
       /**
-       * Returns based on the given results whether to show the bar chart for the given interval.
+       * Returns whether to show the bar chart for the given results.
        *
-       * @param {Array} results
-       * @param {String} interval
+       * @param {Object} requiredResults
+       * @param {Object} overrideResults
        * @return {Boolean}
        */
-      shouldShowBarChart: function(results, interval) {
-        if(!results || !results.histogram.length) {
+      shouldShowBarChart: function(requiredResults, overrideResults) {
+        if(!requiredResults || !requiredResults.histogram.length || (overrideResults && overrideResults.histogram.length)) {
           return false;
         }
-
-        if(interval === 'day') {
-          return results.histogram.length >= 60 && results.histogram.length <= 400;
-        }
-
-        if(interval === 'week') {
-          return results.histogram.length >= 60 && results.histogram.length <= 260;
-        }
-
-        if(interval === 'month') {
-          return results.histogram.length >= 60 && results.histogram.length <= 240;
-        }
-
-        return (interval === 'hour' || interval === 'year');
+        return requiredResults.histogram.length > 1;
       },
 
       toggleDrawer: function() {
@@ -1981,7 +1907,7 @@ limitations under the License.
 
       _toggleSearchDialog: function() {
         this.searchFieldsDialogCallbacks.toggleDialog();
-      },
+      }
     });
   })();
   </script>
