@@ -532,7 +532,10 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
     return createResultObject(result, searchFields, searchFieldsObject.icon, searchFieldsObject.title, searchFieldsObject.styleClass, searchFieldsObject.key);
   }
 
-  function createHistogram(buckets, entityConfig, interval, timeBegin, timeEnd, unidentifiedBucketName) {
+  function createHistogram(buckets, entityConfig, interval, timeStringBegin, timeStringEnd, unidentifiedBucketName) {
+    var timeBegin = timeStringBegin ? commonTransforms.getDateForInterval(timeStringBegin, interval).getTime() : null;
+    var timeEnd = timeStringEnd ? commonTransforms.getDateForInterval(timeStringEnd, interval).getTime() : null;
+
     var bucketDateToData = buckets.reduce(function(dateToData, dateBucket) {
       /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
       var count = dateBucket.doc_count;
@@ -910,8 +913,7 @@ var entityTransforms = (function(_, commonTransforms, esConfig) {
         return {
           begin: commonTransforms.getFormattedDate(config.begin || buckets[0].key),
           end: commonTransforms.getFormattedDate(config.end || buckets[buckets.length - 1].key),
-          histogram: createHistogram(buckets, config.entity, null, (config.begin ? new Date(config.begin).getTime() : null), (config.end ? new Date(config.end).getTime() : null),
-              config.unidentified || '(Unidentified)'),
+          histogram: createHistogram(buckets, config.entity, config.interval, config.begin, config.end, config.unidentified || '(Unidentified)'),
           sparklines: createSparklines(buckets, false, null, null, config.entity, config.page, config.id)
         };
       }

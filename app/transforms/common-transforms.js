@@ -19,6 +19,30 @@
 
 var commonTransforms = (function(_, moment, domain, pathPrefix) {
   /**
+   * Returns the JS Date object for the given date string and the given date interval (hour/day/week/month/year).
+   */
+  function getDateForInterval(dateString, interval) {
+    if(dateString) {
+      var dateObject = new Date(dateString);
+      if(interval !== 'hour') {
+        dateObject.setUTCHours(0);
+      }
+      var momentObject = moment.utc(dateObject);
+      if(interval === 'week') {
+        momentObject.isoWeekday(1);
+      }
+      if(interval === 'month') {
+        momentObject.date(1);
+      }
+      if(interval === 'year') {
+        momentObject.dayOfYear(1);
+      }
+      return momentObject.toDate();
+    }
+    return null;
+  }
+
+  /**
    * Returns the hex color for the given color.
    */
   function getHexColor(color) {
@@ -90,23 +114,8 @@ var commonTransforms = (function(_, moment, domain, pathPrefix) {
    */
   function getFormattedDate(dateString, interval) {
     if(dateString) {
-      var dateObject = new Date(dateString);
-      dateObject.setUTCHours(0);
-      var momentObject = moment.utc(dateObject);
-
-      if(interval === 'week') {
-        momentObject.isoWeekday(1);
-      }
-      if(interval === 'month') {
-        momentObject.date(1);
-      }
-      if(interval === 'year') {
-        momentObject.dayOfYear(1);
-      }
-
-      return momentObject.format('MMM D, YYYY');
+      return moment.utc(getDateForInterval(dateString, interval)).format('MMM D, YYYY');
     }
-
     return 'None';
   }
 
@@ -395,6 +404,13 @@ var commonTransforms = (function(_, moment, domain, pathPrefix) {
   * to names preferred by the user.
   */
   return {
+    /**
+     * Returns the JS Date object for the given date string and the given date interval (hour/day/week/month/year).
+     */
+    getDateForInterval: function(dateString, interval) {
+      return getDateForInterval(dateString, interval);
+    },
+
     /**
      * Returns the hex color for the given color.
      */
